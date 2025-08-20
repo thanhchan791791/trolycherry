@@ -9,7 +9,7 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #ffe6f0, #e6f7ff);
       margin: 0;
-      height: 100vh;
+      height: 100dvh; /* dùng 100dvh để tránh bị thanh URL che */
       overflow: hidden;
       display: flex;
       justify-content: center;
@@ -21,11 +21,11 @@
       height: 100%;
       max-width: 480px; /* giới hạn max cho tablet */
       background: #fff;
-      border-radius: 0; /* bỏ bo góc để full màn hình */
       box-shadow: 0 5px 15px rgba(0,0,0,0.15);
       display: flex;
       flex-direction: column;
       position: relative;
+      padding-bottom: env(safe-area-inset-bottom); /* chừa khoảng an toàn cho iOS */
     }
 
     .chat-header {
@@ -255,6 +255,14 @@ Khách hỏi: "${message}"
   }
 
   window.sendMessage = sendMessage;
+
+  // fix scroll khi bàn phím mở
+  const input = document.getElementById("userInput");
+  input.addEventListener("focus", () => {
+    setTimeout(() => {
+      input.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+  });
 </script>
 
 </body>
