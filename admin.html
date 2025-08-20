@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý thông tin - CherryPet</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #ffe6f0, #e6f7ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .box {
+      background: #fff;
+      padding: 25px;
+      border-radius: 18px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #ff66a3;
+      text-align: center;
+    }
+    .input-row {
+      display: flex;
+      margin-bottom: 15px;
+    }
+    .input-row input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      outline: none;
+      font-size: 15px;
+    }
+    .input-row button {
+      margin-left: 10px;
+      background: #ff99cc;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .input-row button:hover {
+      background: #e68ab8;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #f9f9f9;
+      padding: 10px 15px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .delete-btn {
+      background: #ff4d4d;
+      border: none;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .delete-btn:hover {
+      background: #e60000;
+    }
+    .msg {
+      margin-top: 10px;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>📋 Quản lý thông tin CherryPet</h2>
+
+    <div class="input-row">
+      <input type="text" id="newInfo" placeholder="Nhập thông tin cần thêm...">
+      <button onclick="addInfo()">➕ Thêm</button>
+    </div>
+
+    <ul id="infoList"></ul>
+
+    <div id="status" class="msg"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBNB1acbPtKox8eTjth3FtWuDOLhueRIys",
+      authDomain: "dogs-be72b.firebaseapp.com",
+      databaseURL: "https://dogs-be72b-default-rtdb.firebaseio.com",
+      projectId: "dogs-be72b",
+      storageBucket: "dogs-be72b.appspot.com",
+      messagingSenderId: "1003873040746",
+      appId: "1:1003873040746:web:607f4ff587afc430d3cd13"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dataRef = ref(db, "infocherrypet/general/data");
+
+    const infoList = document.getElementById("infoList");
+    const status = document.getElementById("status");
+
+    // Hàm load dữ liệu
+    onValue(dataRef, (snapshot) => {
+      infoList.innerHTML = "";
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        Object.keys(data).forEach((key) => {
+          const li = document.createElement("li");
+          li.textContent = data[key];
+
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "❌ Xóa";
+          delBtn.className = "delete-btn";
+          delBtn.onclick = () => deleteInfo(key);
+
+          li.appendChild(delBtn);
+          infoList.appendChild(li);
+        });
+      } else {
+        infoList.innerHTML = "<li>Chưa có dữ liệu nào</li>";
+      }
+    });
+
+    // Hàm thêm dữ liệu
+    async function addInfo() {
+      const input = document.getElementById("newInfo");
+      const text = input.value.trim();
+      if (!text) {
+        status.style.color = "red";
+        status.textContent = "⚠️ Vui lòng nhập nội dung!";
+        return;
+      }
+      try {
+        await push(dataRef, text);
+        status.style.color = "green";
+        status.textContent = "✅ Đã thêm thành công!";
+        input.value = "";
+      } catch (err) {
+        console.error(err);
+        status.style.color = "red";
+        status.textContent = "❌ Có lỗi khi thêm dữ liệu!";
+      }
+    }
+
+    // Hàm xóa dữ liệu
+    async function deleteInfo(id) {
+      try {
+        await remove(ref(db, `infocherrypet/general/data/${id}`));
+        status.style.color = "green";
+        status.textContent = "🗑️ Đã xóa thành công!";
+      } catch (err) {
+        console.error(err);
+        status.style.color = "red";
+        status.textContent = "❌ Có lỗi khi xóa dữ liệu!";
+      }
+    }
+
+    // Để gọi được từ HTML
+    window.addInfo = addInfo;
+    window.deleteInfo = deleteInfo;
+  </script>
+</body>
+</html>

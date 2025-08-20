@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Trợ lý Cherry</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #ffe6f0, #e6f7ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .chat-container {
+      width: 420px;
+      height: 640px;
+      background: #fff;
+      border-radius: 25px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chat-header {
+      background: #ff99cc;
+      color: #fff;
+      text-align: center;
+      padding: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      border-bottom: 2px solid #f28fb4;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #fdfdfd;
+      scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      margin: 8px 0;
+      padding: 12px 15px;
+      border-radius: 18px;
+      max-width: 75%;
+      line-height: 1.4;
+      word-wrap: break-word;
+      font-size: 15px;
+      position: relative;
+      opacity: 0;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    /* User message (bên phải) */
+    .user {
+      background: #66b3ff;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 5px;
+      animation: slideInRight 0.4s ease forwards;
+    }
+
+    /* Bot message (bên trái) */
+    .bot {
+      background: #f1f0f0;
+      color: #333;
+      align-self: flex-start;
+      border-bottom-left-radius: 5px;
+      animation: slideInLeft 0.4s ease forwards;
+    }
+
+    /* Typing effect */
+    .typing {
+      font-style: italic;
+      color: #666;
+      background: #f1f0f0;
+      align-self: flex-start;
+    }
+
+    .input-box {
+      display: flex;
+      border-top: 1px solid #ddd;
+      background: #fafafa;
+      padding: 10px;
+    }
+
+    .input-box input {
+      flex: 1;
+      border: none;
+      padding: 12px 15px;
+      font-size: 15px;
+      border-radius: 20px;
+      outline: none;
+      background: #fff;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .input-box button {
+      border: none;
+      background: #ff99cc;
+      color: #fff;
+      padding: 0 20px;
+      margin-left: 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: 0.3s;
+    }
+
+    .input-box button:hover {
+      background: #e68ab8;
+    }
+
+    /* Hiệu ứng chung */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">🐾 Trợ lý Cherry</div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="input-box">
+      <input type="text" id="userInput" placeholder="Nhập tin nhắn...">
+      <button onclick="sendMessage()">Gửi</button>
+    </div>
+  </div>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBNB1acbPtKox8eTjth3FtWuDOLhueRIys",
+    authDomain: "dogs-be72b.firebaseapp.com",
+    databaseURL: "https://dogs-be72b-default-rtdb.firebaseio.com",
+    projectId: "dogs-be72b",
+    storageBucket: "dogs-be72b.appspot.com",
+    messagingSenderId: "1003873040746",
+    appId: "1:1003873040746:web:607f4ff587afc430d3cd13"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const API_KEY = "AIzaSyBux_uBYHJy0jiBnAu84UJ-tN0RqvQqHZ0"; // Gemini
+
+  async function sendMessage() {
+    const input = document.getElementById("userInput");
+    const message = input.value.trim();
+    if (!message) return;
+
+    const chatBox = document.getElementById("chatBox");
+
+    // Hiển thị tin nhắn người dùng
+    const userMsg = document.createElement("div");
+    userMsg.className = "message user";
+    userMsg.textContent = message;
+    chatBox.appendChild(userMsg);
+
+    input.value = "";
+
+    // 🔹 Hiển thị "Bot đang soạn..."
+    const typingMsg = document.createElement("div");
+    typingMsg.className = "message bot typing";
+    typingMsg.textContent = "Cherry đang soạn";
+    chatBox.appendChild(typingMsg);
+
+    // Hiệu ứng chấm "..."
+    let dots = 0;
+    const typingInterval = setInterval(() => {
+      dots = (dots + 1) % 4;
+      typingMsg.textContent = "Cherry đang soạn" + ".".repeat(dots);
+    }, 500);
+
+    // Lấy dữ liệu từ Firebase
+    let dataFromFirebase = [];
+    try {
+      const snapshot = await get(ref(db, "infocherrypet/general/data"));
+      if (snapshot.exists()) {
+        const val = snapshot.val();
+        if (Array.isArray(val)) {
+          dataFromFirebase = val;
+        } else if (typeof val === "object") {
+          dataFromFirebase = Object.values(val);
+        } else {
+          dataFromFirebase = [val];
+        }
+      }
+    } catch (e) {
+      console.error("Lỗi đọc Firebase:", e);
+    }
+
+    // Tạo context cho bot
+    let context = `
+Bạn là chatbot của quán CherryPet Coffee (212 Nguyễn Tri Phương, P.4, Quận 10, TP.HCM).
+Nhiệm vụ: trả lời khách hàng một cách thân thiện, ngắn gọn, đúng trọng tâm, lễ phép, dễ thương, tình cảm.
+Dữ liệu quán (từ Firebase):
+${dataFromFirebase.map(item => "- " + item).join("\n")}
+Khách đang hỏi: "${message}"
+`;
+
+    try {
+      const response = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + API_KEY,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: context }] }]
+          })
+        }
+      );
+
+      const data = await response.json();
+      console.log(data);
+
+      clearInterval(typingInterval);
+      typingMsg.remove(); // bỏ dòng "đang soạn..."
+
+      const botMsg = document.createElement("div");
+      botMsg.className = "message bot";
+
+      if (data.candidates && data.candidates.length > 0) {
+        botMsg.textContent = data.candidates[0].content.parts[0].text;
+      } else {
+        botMsg.textContent = "Xin lỗi, mình chưa có thông tin để trả lời 🐾.";
+      }
+
+      chatBox.appendChild(botMsg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } catch (error) {
+      console.error(error);
+      clearInterval(typingInterval);
+      typingMsg.remove();
+
+      const botMsg = document.createElement("div");
+      botMsg.className = "message bot";
+      botMsg.textContent = "❌ Oops, có lỗi khi gọi API!";
+      chatBox.appendChild(botMsg);
+    }
+  }
+
+  window.sendMessage = sendMessage;
+</script>
+
+</body>
+</html>
