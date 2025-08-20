@@ -2,27 +2,29 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Trợ lý Cherry</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #ffe6f0, #e6f7ff);
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
     }
 
     .chat-container {
-      width: 420px;
-      height: 640px;
+      width: 100%;
+      height: 100%;
+      max-width: 480px; /* giới hạn max cho tablet */
       background: #fff;
-      border-radius: 25px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      border-radius: 0; /* bỏ bo góc để full màn hình */
+      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
       position: relative;
     }
 
@@ -34,6 +36,7 @@
       font-size: 20px;
       font-weight: bold;
       border-bottom: 2px solid #f28fb4;
+      flex-shrink: 0;
     }
 
     .chat-box {
@@ -50,16 +53,15 @@
       margin: 8px 0;
       padding: 12px 15px;
       border-radius: 18px;
-      max-width: 75%;
+      max-width: 80%;
       line-height: 1.4;
       word-wrap: break-word;
-      font-size: 15px;
+      font-size: 16px;
       position: relative;
       opacity: 0;
       animation: fadeIn 0.4s ease forwards;
     }
 
-    /* User message (bên phải) */
     .user {
       background: #66b3ff;
       color: #fff;
@@ -68,7 +70,6 @@
       animation: slideInRight 0.4s ease forwards;
     }
 
-    /* Bot message (bên trái) */
     .bot {
       background: #f1f0f0;
       color: #333;
@@ -77,7 +78,6 @@
       animation: slideInLeft 0.4s ease forwards;
     }
 
-    /* Typing effect */
     .typing {
       font-style: italic;
       color: #666;
@@ -90,13 +90,14 @@
       border-top: 1px solid #ddd;
       background: #fafafa;
       padding: 10px;
+      flex-shrink: 0;
     }
 
     .input-box input {
       flex: 1;
       border: none;
       padding: 12px 15px;
-      font-size: 15px;
+      font-size: 16px;
       border-radius: 20px;
       outline: none;
       background: #fff;
@@ -111,7 +112,7 @@
       margin-left: 10px;
       border-radius: 20px;
       cursor: pointer;
-      font-size: 15px;
+      font-size: 16px;
       transition: 0.3s;
     }
 
@@ -119,7 +120,6 @@
       background: #e68ab8;
     }
 
-    /* Hiệu ứng chung */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -150,7 +150,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
   import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
 
-  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyBNB1acbPtKox8eTjth3FtWuDOLhueRIys",
     authDomain: "dogs-be72b.firebaseapp.com",
@@ -164,7 +163,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  const API_KEY = "AIzaSyBux_uBYHJy0jiBnAu84UJ-tN0RqvQqHZ0"; // Gemini
+  const API_KEY = "AIzaSyBux_uBYHJy0jiBnAu84UJ-tN0RqvQqHZ0";
 
   async function sendMessage() {
     const input = document.getElementById("userInput");
@@ -173,7 +172,6 @@
 
     const chatBox = document.getElementById("chatBox");
 
-    // Hiển thị tin nhắn người dùng
     const userMsg = document.createElement("div");
     userMsg.className = "message user";
     userMsg.textContent = message;
@@ -181,20 +179,17 @@
 
     input.value = "";
 
-    // 🔹 Hiển thị "Bot đang soạn..."
     const typingMsg = document.createElement("div");
     typingMsg.className = "message bot typing";
     typingMsg.textContent = "Cherry đang soạn";
     chatBox.appendChild(typingMsg);
 
-    // Hiệu ứng chấm "..."
     let dots = 0;
     const typingInterval = setInterval(() => {
       dots = (dots + 1) % 4;
       typingMsg.textContent = "Cherry đang soạn" + ".".repeat(dots);
     }, 500);
 
-    // Lấy dữ liệu từ Firebase
     let dataFromFirebase = [];
     try {
       const snapshot = await get(ref(db, "infocherrypet/general/data"));
@@ -212,13 +207,12 @@
       console.error("Lỗi đọc Firebase:", e);
     }
 
-    // Tạo context cho bot
     let context = `
 Bạn là chatbot của quán CherryPet Coffee (212 Nguyễn Tri Phương, P.4, Quận 10, TP.HCM).
-Nhiệm vụ: trả lời khách hàng một cách thân thiện, ngắn gọn, đúng trọng tâm, lễ phép, dễ thương, tình cảm.
-Dữ liệu quán (từ Firebase):
+Nhiệm vụ:bạn là 1 nữ nhân viên hỗ trợ trả lời khách hàng ngắn gọn, lễ phép, dễ thương.
+Dữ liệu quán:
 ${dataFromFirebase.map(item => "- " + item).join("\n")}
-Khách đang hỏi: "${message}"
+Khách hỏi: "${message}"
 `;
 
     try {
@@ -234,10 +228,8 @@ Khách đang hỏi: "${message}"
       );
 
       const data = await response.json();
-      console.log(data);
-
       clearInterval(typingInterval);
-      typingMsg.remove(); // bỏ dòng "đang soạn..."
+      typingMsg.remove();
 
       const botMsg = document.createElement("div");
       botMsg.className = "message bot";
