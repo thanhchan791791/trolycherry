@@ -9,10 +9,11 @@
             --primary-color: #5cb85c;
             --secondary-color: #f0ad4e;
             --danger-color: #d9534f;
+            --info-color: #5bc0de;
             --bg-color: #f0f2f5;
             --card-bg: #ffffff;
             --text-color: #333;
-            --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         body {
@@ -22,13 +23,13 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
-            overflow-x: hidden; /* Ngăn cuộn ngang */
+            overflow-x: hidden;
             opacity: 0;
-            animation: fadeIn 0.8s forwards;
+            animation: fadeIn 0.8s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -51,7 +52,18 @@
             border-radius: 12px;
             box-shadow: var(--shadow);
             margin-bottom: 20px;
+            border-left: 5px solid;
+            transition: transform 0.3s ease-out;
         }
+
+        .section:hover {
+            transform: translateY(-5px);
+        }
+
+        .section-management { border-left-color: var(--primary-color); }
+        .section-stock { border-left-color: var(--secondary-color); }
+        .section-list { border-left-color: var(--info-color); }
+        .section-log { border-left-color: var(--danger-color); }
 
         .form-group {
             margin-bottom: 15px;
@@ -87,7 +99,35 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: transform 0.2s, background-color 0.2s;
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:hover::after {
+            animation: ripple 1s ease-out forwards;
+        }
+        
+        @keyframes ripple {
+            to {
+                transform: scale(20, 20) translate(-50%);
+                opacity: 1;
+            }
         }
 
         .btn-full {
@@ -96,31 +136,20 @@
 
         .btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
         }
         
         .btn-primary { background-color: var(--primary-color); }
         .btn-secondary { background-color: var(--secondary-color); }
         .btn-danger { background-color: var(--danger-color); }
         
-        .btn-primary:active { background-color: #4cae4c; transform: translateY(0); }
-        .btn-secondary:active { background-color: #eea236; transform: translateY(0); }
-        .btn-danger:active { background-color: #c9302c; transform: translateY(0); }
-
-        .alert {
-            padding: 15px;
-            background-color: var(--danger-color);
-            color: white;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            opacity: 0;
-            transform: translateY(-20px);
-            animation: slideIn 0.5s forwards;
-        }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .btn-primary:active { background-color: #4cae4c; }
+        .btn-secondary:active { background-color: #eea236; }
+        .btn-danger:active { background-color: #c9302c; }
 
         #manager-section {
             display: none;
@@ -131,7 +160,7 @@
         }
 
         #manager-section.active {
-            max-height: 500px; /* Số lớn hơn chiều cao thực tế */
+            max-height: 500px;
             opacity: 1;
             display: block;
         }
@@ -151,11 +180,12 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         #ingredients-list li:hover {
             transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         #log-list li {
@@ -174,7 +204,7 @@
 <div class="container">
     <h1>Hệ Thống Quản Lý Nguyên Liệu</h1>
 
-    <div class="section">
+    <div class="section section-management">
         <button id="toggle-manager-btn" class="btn btn-full btn-primary" onclick="toggleManagerSection()">Hiển thị công cụ quản lý</button>
         <div id="manager-section">
             <h2>Dành cho Quản lý: Thêm Nguyên Liệu</h2>
@@ -190,7 +220,7 @@
         </div>
     </div>
 
-    <div class="section">
+    <div class="section section-stock">
         <h2>Dành cho Nhân viên: Nhập Tồn kho Hàng Ngày</h2>
         <div class="form-group">
             <label for="stock-ingredient-select">Chọn Nguyên Liệu:</label>
@@ -203,13 +233,13 @@
         <button class="btn btn-full btn-secondary" onclick="checkStock()">Kiểm tra & Gửi báo cáo</button>
     </div>
 
-    <div class="section">
+    <div class="section section-list">
         <h2>Danh Sách Nguyên Liệu</h2>
         <ul id="ingredients-list">
             </ul>
     </div>
 
-    <div class="section">
+    <div class="section section-log">
         <h2>Lịch sử Báo cáo</h2>
         <ul id="log-list">
             </ul>
@@ -306,7 +336,24 @@
 
         // Kiểm tra và gửi thông báo nếu thấp hơn mức tối thiểu
         if (dailyStock <= selectedIngredient.minQuantity) {
-            const message = `CẢNH BÁO TỒN KHO THẤP!\nNguyên liệu: ${selectedIngredient.name}\nTồn kho hôm nay: ${dailyStock} kg\nMức tối thiểu: ${selectedIngredient.minQuantity} kg\nVui lòng nhập thêm!`;
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('vi-VN');
+            const timeStr = now.toLocaleTimeString('vi-VN');
+
+            // Hàm escape ký tự đặc biệt cho MarkdownV2
+            const escapeMarkdown = (text) => {
+                const specialChars = /[\\`*_{}\[\]()#+\-.!]/g;
+                return text.replace(specialChars, '\\$&');
+            };
+
+            const message = `*CẢNH BÁO TỒN KHO THẤP\\!*
+            \n- *Ngày*: ${escapeMarkdown(dateStr)}
+            \n- *Thời gian*: ${escapeMarkdown(timeStr)}
+            \n- *Nguyên liệu*: ${escapeMarkdown(selectedIngredient.name)}
+            \n- *Tồn kho hiện tại*: ${dailyStock} kg
+            \n- *Mức tối thiểu*: ${selectedIngredient.minQuantity} kg
+            \n\nVui lòng nhập thêm\\.`;
+            
             sendTelegramNotification(message);
         }
 
@@ -327,7 +374,8 @@
         const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
         const data = {
             chat_id: TELEGRAM_CHAT_ID,
-            text: message
+            text: message,
+            parse_mode: 'MarkdownV2'
         };
 
         try {
