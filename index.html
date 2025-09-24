@@ -106,7 +106,7 @@
         /* Menu Toggle Button */
         .menu-toggle {
             position: fixed;
-            top: 20px;
+            top: 40px; /* Adjusted position */
             left: 20px;
             background: var(--card-bg);
             border: none;
@@ -135,7 +135,7 @@
             flex-direction: column;
             width: 100vw;
             height: 100vh;
-            padding-top: 80px; /* Space for the fixed menu button */
+            /* Removed padding-top here */
             box-sizing: border-box;
         }
         
@@ -180,11 +180,11 @@
                 max-width: 300px;
             }
             .menu-toggle {
-                top: calc(env(safe-area-inset-top) + 15px);
+                top: calc(env(safe-area-inset-top) + 40px); /* Adjusted position */
                 left: calc(env(safe-area-inset-left) + 15px);
             }
             .main-content {
-                padding-top: calc(env(safe-area-inset-top) + 80px);
+                padding-top: calc(env(safe-area-inset-top) + 10px);
                 padding-left: calc(env(safe-area-inset-left) + 10px);
                 padding-right: calc(env(safe-area-inset-right) + 10px);
             }
