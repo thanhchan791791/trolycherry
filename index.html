@@ -2,44 +2,44 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
     <title>Dashboard Nhà Hàng</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #5d5c61;
-            --secondary-color: #739f8f;
-            --highlight-color: #e5b13a;
-            --bg-color: #f5f5f5;
-            --sidebar-bg: #414044;
+            --primary-color: #2e3b4e; /* Dark Blue */
+            --secondary-color: #f7b731; /* Golden Yellow */
+            --accent-color: #e5b13a; /* Highlight Gold */
+            --bg-color-light: #f4f7f6; /* Light Gray */
+            --bg-color-dark: #3a4759; /* Deeper Blue */
             --card-bg: #ffffff;
-            --text-color-light: #f5f5f5;
+            --text-color-light: #f4f7f6;
             --text-color-dark: #333333;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--bg-color);
+            background-color: var(--bg-color-light);
             color: var(--text-color-dark);
             display: flex;
+            flex-direction: column;
             min-height: 100vh;
             overflow: hidden;
-            position: relative;
         }
 
         /* Sidebar Styling */
         .sidebar {
             width: 250px;
-            background-color: var(--sidebar-bg);
+            background-color: var(--primary-color);
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
@@ -48,7 +48,7 @@
             top: 0;
             height: 100%;
             transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             z-index: 100;
         }
         .sidebar.open {
@@ -58,25 +58,38 @@
             padding: 30px 20px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .logo h2 {
-            margin: 0;
             color: var(--text-color-light);
-            font-weight: 600;
-            letter-spacing: 1px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
         }
         .sidebar-menu {
             list-style: none;
             padding: 20px 0;
             margin: 0;
         }
+        .sidebar-menu li {
+            transform: translateX(-20px);
+            opacity: 0;
+            transition: transform 0.5s, opacity 0.5s;
+        }
+        .sidebar.open .sidebar-menu li {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        /* Staggered animation effect */
+        .sidebar.open .sidebar-menu li:nth-child(1) { transition-delay: 0.1s; }
+        .sidebar.open .sidebar-menu li:nth-child(2) { transition-delay: 0.2s; }
+        .sidebar.open .sidebar-menu li:nth-child(3) { transition-delay: 0.3s; }
+        .sidebar.open .sidebar-menu li:nth-child(4) { transition-delay: 0.4s; }
+
         .sidebar-menu li a {
             display: flex;
             align-items: center;
             padding: 15px 30px;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s, color 0.3s, padding-left 0.3s;
         }
         .sidebar-menu li a i {
             margin-right: 15px;
@@ -84,9 +97,9 @@
         }
         .sidebar-menu li.active a,
         .sidebar-menu li a:hover {
-            background-color: var(--secondary-color);
-            color: var(--text-color-light);
-            border-left: 5px solid var(--highlight-color);
+            background-color: var(--bg-color-dark);
+            color: var(--secondary-color);
+            border-left: 5px solid var(--secondary-color);
             padding-left: 25px;
         }
 
@@ -95,7 +108,7 @@
             position: fixed;
             top: 20px;
             left: 20px;
-            background: rgba(255, 255, 255, 0.8);
+            background: var(--card-bg);
             border: none;
             border-radius: 50%;
             width: 50px;
@@ -103,7 +116,7 @@
             font-size: 1.5em;
             cursor: pointer;
             color: var(--primary-color);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-light);
             z-index: 101;
             display: flex;
             justify-content: center;
@@ -112,16 +125,18 @@
         }
         .menu-toggle:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
 
-        /* Main Content Styling */
+        /* Main Content & Iframe Styling */
         .main-content {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             width: 100vw;
             height: 100vh;
+            padding-top: 80px; /* Space for the fixed menu button */
+            box-sizing: border-box;
         }
         
         .content-container {
@@ -131,16 +146,15 @@
             box-sizing: border-box;
         }
 
-        /* Iframe */
         .iframe-container {
             width: 100%;
             height: 100%;
             border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: var(--shadow-light);
         }
 
-        /* Overlay to close sidebar on click outside */
+        /* Overlay */
         .overlay {
             display: none;
             position: fixed;
@@ -148,20 +162,43 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
             z-index: 99;
+            transition: opacity 0.3s;
+            opacity: 0;
         }
         .sidebar.open + .overlay {
             display: block;
+            opacity: 1;
         }
 
+        /* Mobile specific adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 75%;
+                max-width: 300px;
+            }
+            .menu-toggle {
+                top: calc(env(safe-area-inset-top) + 15px);
+                left: calc(env(safe-area-inset-left) + 15px);
+            }
+            .main-content {
+                padding-top: calc(env(safe-area-inset-top) + 80px);
+                padding-left: calc(env(safe-area-inset-left) + 10px);
+                padding-right: calc(env(safe-area-inset-right) + 10px);
+            }
+            .content-container {
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <aside class="sidebar" id="sidebar">
         <div class="logo">
-            <h2>🍴 QUẢN LÝ</h2>
+            QUẢN LÝ NHÀ HÀNG
         </div>
         <ul class="sidebar-menu">
             <li class="active" data-url="banhang.html">
@@ -199,7 +236,7 @@
 
     <div class="main-content">
         <main class="content-container">
-            <iframe id="mainIframe" class="iframe-container" src="a.html"></iframe>
+            <iframe id="mainIframe" class="iframe-container" src="banhang.html"></iframe>
         </main>
     </div>
 
@@ -213,13 +250,13 @@
         // Toggle mobile menu and overlay
         menuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('open');
-            overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+            overlay.classList.toggle('active');
         });
 
         // Close sidebar when clicking outside
         overlay.addEventListener('click', () => {
             sidebar.classList.remove('open');
-            overlay.style.display = 'none';
+            overlay.classList.remove('active');
         });
 
         // Handle sidebar menu clicks
@@ -239,9 +276,14 @@
 
                 // Close sidebar after clicking
                 sidebar.classList.remove('open');
-                overlay.style.display = 'none';
+                overlay.classList.remove('active');
             });
         });
+
+        // Set initial iframe source to 'banhang.html'
+        window.onload = () => {
+            mainIframe.src = 'banhang.html';
+        };
     </script>
 </body>
 </html>
