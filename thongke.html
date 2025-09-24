@@ -1,1 +1,712 @@
 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện Thống kê Doanh thu & Món bán chạy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #f44336;
+            --info-color: #2196F3;
+            --success-color: #008000;
+            --warning-color: #FFC107;
+            --bg-color: #f0f2f5;
+            --card-bg: #fff;
+            --text-color: #333;
+            --border-color: #ddd;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: var(--box-shadow);
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        h2, h3 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.2em;
+        }
+        
+        .stat-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-box {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+        }
+        
+        .stat-box h4 {
+            margin-top: 0;
+            color: var(--info-color);
+            font-size: 0.9em;
+        }
+        
+        .stat-box p {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--success-color);
+            margin: 5px 0 0;
+        }
+
+        .chart-container {
+            margin-top: 15px;
+        }
+        
+        .chart-container canvas {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        .date-filter {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .date-filter input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .date-filter button {
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .date-filter button:hover {
+            background-color: #3e8e41;
+        }
+
+        .top-selling-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .top-selling-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 8px 0;
+            border-bottom: 1px dotted #ccc;
+        }
+        
+        .top-selling-list li span:first-child {
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .top-selling-list li span:last-child {
+            color: var(--info-color);
+            font-size: 0.9em;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .order-history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .order-history-table th, .order-history-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+            font-size: 0.85em;
+        }
+        
+        .order-history-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .order-history-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .order-history-table tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .view-details-btn {
+            background-color: var(--info-color);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 0.8em;
+        }
+        
+        .view-details-btn:hover {
+            background-color: #1a73e8;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 10% auto;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .close-button:hover, .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .modal-items-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .modal-items-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-items-list li:last-child {
+            border-bottom: none;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+            }
+
+            .card h2, .card h3 {
+                font-size: 1.5em;
+            }
+
+            .stat-summary {
+                flex-direction: row;
+            }
+
+            .stat-box {
+                flex: 1;
+            }
+
+            .date-filter {
+                flex-direction: row;
+            }
+
+            .order-history-table {
+                display: table;
+                overflow-x: visible;
+                white-space: normal;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Thống kê Doanh thu & Món bán chạy</h1>
+        </div>
+        
+        <div class="card">
+            <h2>Tổng quan Doanh thu</h2>
+            <div class="stat-summary">
+                <div class="stat-box">
+                    <h4>Doanh thu hôm nay</h4>
+                    <p id="dailyRevenue">0₫</p>
+                </div>
+                <div class="stat-box">
+                    <h4>Doanh thu tuần này</h4>
+                    <p id="weeklyRevenue">0₫</p>
+                </div>
+                <div class="stat-box">
+                    <h4>Doanh thu tháng này</h4>
+                    <p id="monthlyRevenue">0₫</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="date-filter">
+                <label for="startDate">Từ ngày:</label>
+                <input type="date" id="startDate">
+                <label for="endDate">Đến ngày:</label>
+                <input type="date" id="endDate">
+                <button id="filterStatsButton">Xem thống kê</button>
+            </div>
+            <div class="stat-box" id="filteredRevenueBox" style="display: none;">
+                <h4>Doanh thu theo khoảng thời gian</h4>
+                <p id="filteredRevenue">0₫</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="chart-container">
+                <h3>Biểu đồ Doanh thu 30 ngày gần nhất</h3>
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Thống kê món ăn bán chạy</h3>
+            <ul id="topSellingFoodsList" class="top-selling-list">
+                <li>Không có dữ liệu</li>
+            </ul>
+            <h3>Thống kê đồ uống bán chạy</h3>
+            <ul id="topSellingDrinksList" class="top-selling-list">
+                <li>Không có dữ liệu</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>Lịch sử Đơn hàng</h3>
+            <table class="order-history-table">
+                <thead>
+                    <tr>
+                        <th>Mã Hóa đơn</th>
+                        <th>Ngày</th>
+                        <th>Tổng tiền</th>
+                        <th>Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody id="orderHistoryTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h4>Chi tiết Hóa đơn</h4>
+            <div id="modalContentDetails">
+                <p><strong>Mã HĐ:</strong> <span id="modalBillId"></span></p>
+                <p><strong>Ngày:</strong> <span id="modalDate"></span></p>
+                <p><strong>Tổng tiền:</strong> <span id="modalTotal"></span></p>
+                <p><strong>Các món đã mua:</strong></p>
+                <ul id="modalItemsList" class="modal-items-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cấu hình Firebase của bạn
+        // Vui lòng thay thế bằng thông tin Firebase của bạn
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQyO5y10",
+            authDomain: "chitieu-7263e.firebaseapp.com",
+            databaseURL: "https://chitieu-7263e-default-rtdb.firebaseio.com",
+            projectId: "chitieu-7263e",
+            storageBucket: "chitieu-7263e.firebasestorage.app",
+            messagingSenderId: "83833140682",
+            appId: "1:83833140682:web:f9254b418ace3a659fcb33",
+            measurementId: "G-523X74K18N"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // DOM elements
+        const dailyRevenueEl = document.getElementById('dailyRevenue');
+        const weeklyRevenueEl = document.getElementById('weeklyRevenue');
+        const monthlyRevenueEl = document.getElementById('monthlyRevenue');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const filterStatsButton = document.getElementById('filterStatsButton');
+        const filteredRevenueBox = document.getElementById('filteredRevenueBox');
+        const filteredRevenueEl = document.getElementById('filteredRevenue');
+        const revenueChartCanvas = document.getElementById('revenueChart');
+        const topSellingFoodsListEl = document.getElementById('topSellingFoodsList');
+        const topSellingDrinksListEl = document.getElementById('topSellingDrinksList');
+        const orderHistoryTableBody = document.getElementById('orderHistoryTableBody');
+        const orderModal = document.getElementById('orderModal');
+        const modalContentDetails = document.getElementById('modalContentDetails');
+        const closeButton = document.querySelector('.close-button');
+        const modalBillIdEl = document.getElementById('modalBillId');
+        const modalDateEl = document.getElementById('modalDate');
+        const modalTotalEl = document.getElementById('modalTotal');
+        const modalItemsListEl = document.getElementById('modalItemsList');
+        let revenueChartInstance = null;
+        
+        // Dữ liệu mẫu đã được COMMENT để sử dụng dữ liệu thật từ Firebase
+        // const samplePayments = [
+        //     {
+        //         key: "-O_tLiPX1S9NYGDQzu5P",
+        //         billId: "HD250924083344",
+        //         timestamp: "2025-09-24T01:33:44.606Z",
+        //         totalAmount: 610000,
+        //         finalTotal: 671000,
+        //         items: {
+        //             "-O_rTEe0SYGEcdvjBkNk": { name: "Mẹc 6 người", price: 500000, quantity: 1 },
+        //             "-O_rTHOtaya1rlvkNG3K": { name: "7 up", price: 30000, quantity: 1 },
+        //             "-O_rTJ0wxPOh3vwzVBkf": { name: "pepsi", price: 30000, quantity: 1 },
+        //             "-O_raC8-wztt2p_pkF9U": { name: "Canh cà đắng", price: 50000, quantity: 1 }
+        //         }
+        //     }
+        // ];
+
+        function fetchPayments() {
+            // ĐOẠN CODE NÀY BÂY GIỜ ĐÃ ĐƯỢC KÍCH HOẠT để lấy dữ liệu THẬT
+            return new Promise((resolve, reject) => {
+                database.ref('payment_history').once('value', (snapshot) => {
+                    const payments = [];
+                    snapshot.forEach(childSnapshot => {
+                        const payment = childSnapshot.val();
+                        payments.push({
+                            key: childSnapshot.key,
+                            ...payment,
+                            date: new Date(payment.timestamp).toISOString().slice(0, 10)
+                        });
+                    });
+                    resolve(payments);
+                }).catch(reject);
+            });
+            
+            // Vui lòng COMMENT đoạn code này khi bạn dùng đoạn code Firebase thật
+            // return Promise.resolve(samplePayments.map(p => {
+            //     return {
+            //         ...p,
+            //         date: new Date(p.timestamp).toISOString().slice(0, 10)
+            //     };
+            // }));
+        }
+
+        async function updateSummaryStats() {
+            const now = new Date();
+            const today = now.toISOString().slice(0, 10);
+            
+            const firstDayOfWeek = new Date(now);
+            firstDayOfWeek.setDate(now.getDate() - now.getDay());
+            const startOfWeek = firstDayOfWeek.toISOString().slice(0, 10);
+
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+            
+            const payments = await fetchPayments();
+            const dailyTotal = payments.filter(p => p.date === today).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
+            const weeklyTotal = payments.filter(p => p.date >= startOfWeek).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
+            const monthlyTotal = payments.filter(p => p.date >= startOfMonth).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
+
+            dailyRevenueEl.textContent = dailyTotal.toLocaleString('vi-VN') + '₫';
+            weeklyRevenueEl.textContent = weeklyTotal.toLocaleString('vi-VN') + '₫';
+            monthlyRevenueEl.textContent = monthlyTotal.toLocaleString('vi-VN') + '₫';
+        }
+
+        async function update30DayChart() {
+            const now = new Date();
+            const today = now.toISOString().slice(0, 10);
+            const daysAgo = (days) => {
+              const date = new Date();
+              date.setDate(date.getDate() - days);
+              return date.toISOString().slice(0, 10);
+            };
+            const startOfLast30Days = daysAgo(30);
+
+            const payments = await fetchPayments();
+            const filteredPayments = payments.filter(p => p.date >= startOfLast30Days && p.date <= today);
+
+            const revenueByDay = {};
+            filteredPayments.forEach(payment => {
+                const date = payment.date;
+                if (!revenueByDay[date]) {
+                    revenueByDay[date] = 0;
+                }
+                revenueByDay[date] += (payment.finalTotal || 0);
+            });
+            
+            const sortedDates = Object.keys(revenueByDay).sort();
+            const data = sortedDates.map(date => revenueByDay[date]);
+            
+            if (revenueChartInstance) {
+                revenueChartInstance.destroy();
+            }
+
+            revenueChartInstance = new Chart(revenueChartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: sortedDates,
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Doanh thu (₫)'
+                            },
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return value.toLocaleString('vi-VN') + '₫';
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Ngày'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        async function updateTopSellingItems() {
+            const payments = await fetchPayments();
+            
+            const foodSales = {};
+            const drinkSales = {};
+            
+            const drinksList = ["coca", "trà đào", "nước cam", "bia sài gòn", "7 up", "pepsi"];
+
+            payments.forEach(payment => {
+                if (payment.items) {
+                    Object.values(payment.items).forEach(item => {
+                        const itemName = item.name.toLowerCase();
+                        const quantity = item.quantity;
+                        
+                        if (drinksList.includes(itemName)) {
+                            if (drinkSales[itemName]) {
+                                drinkSales[itemName] += quantity;
+                            } else {
+                                drinkSales[itemName] = quantity;
+                            }
+                        } else {
+                            if (foodSales[itemName]) {
+                                foodSales[itemName] += quantity;
+                            } else {
+                                foodSales[itemName] = quantity;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            const sortedFoods = Object.entries(foodSales).sort(([, a], [, b]) => b - a);
+            const sortedDrinks = Object.entries(drinkSales).sort(([, a], [, b]) => b - a);
+
+            topSellingFoodsListEl.innerHTML = '';
+            if (sortedFoods.length === 0) {
+                topSellingFoodsListEl.innerHTML = '<li>Không có dữ liệu</li>';
+            } else {
+                sortedFoods.forEach(([name, quantity], index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${index + 1}. ${name}</span><span>Đã bán: ${quantity}</span>`;
+                    topSellingFoodsListEl.appendChild(li);
+                });
+            }
+
+            topSellingDrinksListEl.innerHTML = '';
+            if (sortedDrinks.length === 0) {
+                topSellingDrinksListEl.innerHTML = '<li>Không có dữ liệu</li>';
+            } else {
+                sortedDrinks.forEach(([name, quantity], index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${index + 1}. ${name}</span><span>Đã bán: ${quantity}</span>`;
+                    topSellingDrinksListEl.appendChild(li);
+                });
+            }
+        }
+
+        async function updateOrderHistory() {
+            const payments = await fetchPayments();
+            orderHistoryTableBody.innerHTML = '';
+
+            const sortedPayments = payments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            if (sortedPayments.length === 0) {
+                orderHistoryTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Không có dữ liệu hóa đơn</td></tr>';
+            } else {
+                sortedPayments.forEach(payment => {
+                    const row = document.createElement('tr');
+                    const formattedDate = new Date(payment.timestamp).toLocaleString('vi-VN');
+                    const formattedTotal = payment.finalTotal.toLocaleString('vi-VN') + '₫';
+                    
+                    row.innerHTML = `
+                        <td>${payment.billId || payment.key}</td>
+                        <td>${formattedDate}</td>
+                        <td>${formattedTotal}</td>
+                        <td><button class="view-details-btn" data-key="${payment.key}">Xem</button></td>
+                    `;
+                    orderHistoryTableBody.appendChild(row);
+                });
+            }
+        }
+        
+        orderHistoryTableBody.addEventListener('click', async (event) => {
+            if (event.target.classList.contains('view-details-btn')) {
+                const orderKey = event.target.dataset.key;
+                const payments = await fetchPayments();
+                const selectedPayment = payments.find(p => p.key === orderKey);
+                
+                if (selectedPayment) {
+                    showOrderDetails(selectedPayment);
+                }
+            }
+        });
+
+        function showOrderDetails(payment) {
+            modalBillIdEl.textContent = payment.billId || payment.key;
+            modalDateEl.textContent = new Date(payment.timestamp).toLocaleString('vi-VN');
+            modalTotalEl.textContent = payment.finalTotal.toLocaleString('vi-VN') + '₫';
+            
+            modalItemsListEl.innerHTML = '';
+            if (payment.items) {
+                Object.values(payment.items).forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = `${item.name} x ${item.quantity} - ${item.price.toLocaleString('vi-VN')}₫`;
+                    modalItemsListEl.appendChild(li);
+                });
+            }
+            
+            orderModal.style.display = 'block';
+        }
+        
+        closeButton.addEventListener('click', () => {
+            orderModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === orderModal) {
+                orderModal.style.display = 'none';
+            }
+        });
+
+        filterStatsButton.addEventListener('click', async () => {
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+            
+            if (startDate && endDate) {
+                const payments = await fetchPayments();
+                const filteredPayments = payments.filter(p => p.date >= startDate && p.date <= endDate);
+                const totalRevenue = filteredPayments.reduce((sum, p) => sum + (p.finalTotal || 0), 0);
+                
+                filteredRevenueEl.textContent = totalRevenue.toLocaleString('vi-VN') + '₫';
+                filteredRevenueBox.style.display = 'block';
+            } else {
+                alert('Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSummaryStats();
+            update30DayChart();
+            updateTopSellingItems();
+            updateOrderHistory();
+        });
+    </script>
+</body>
+</html>
+
