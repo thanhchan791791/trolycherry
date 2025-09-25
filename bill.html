@@ -49,6 +49,7 @@
         text-align: right;
         margin-top: 10px;
     }
+    /* Hóa đơn ở giữa */
     .invoice {
         width: 58mm;
         margin: 20px auto;
@@ -97,7 +98,7 @@
         <p class="total">Tổng: <span id="totalPrice">0</span>đ</p>
     </div>
 
-    <button class="print-btn" onclick="printInvoice()">In hóa đơn</button>
+    <button class="print-btn" onclick="printInvoiceInline()">In hóa đơn</button>
 
     <!-- Hóa đơn div riêng -->
     <div id="invoice" class="invoice">
@@ -147,47 +148,25 @@ function renderCart() {
     document.getElementById('totalPrice').textContent = total;
 }
 
-function printInvoice() {
-    const invoiceWindow = window.open('', '', 'width=300,height=600');
-    const invoiceTableBody = document.querySelector('#cartTable tbody').innerHTML;
-    const total = document.getElementById('totalPrice').textContent;
-    const today = new Date();
-    const dateStr = today.toLocaleDateString() + ' ' + today.toLocaleTimeString();
+// In trực tiếp trên cùng trang, ẩn các phần khác tạm thời
+function printInvoiceInline() {
+    const invoice = document.getElementById('invoice');
+    const otherElements = Array.from(document.body.children).filter(el => el.id !== 'invoice');
 
-    invoiceWindow.document.write(`
-        <html>
-            <head>
-                <title>Hóa đơn</title>
-                <style>
-                    body { font-family: monospace; margin: 0; width: 58mm; }
-                    table { width: 100%; border-collapse: collapse; }
-                    th, td { text-align: left; padding: 2px 0; }
-                    .total { font-weight: bold; text-align: right; margin-top: 5px; }
-                    h2, p { margin: 2px 0; font-size: 12px; }
-                </style>
-            </head>
-            <body>
-                <div>
-                    <h2>Quán Ăn ABC</h2>
-                    <p>Bàn: 5</p>
-                    <p>Ngày: ${dateStr}</p>
-                    <table>
-                        <thead>
-                            <tr><th>Món</th><th>SL</th><th>Giá</th></tr>
-                        </thead>
-                        <tbody>
-                            ${invoiceTableBody}
-                        </tbody>
-                    </table>
-                    <p class="total">Tổng: ${total}đ</p>
-                </div>
-            </body>
-        </html>
-    `);
-    invoiceWindow.document.close();
-    invoiceWindow.focus();
-    invoiceWindow.print();
-    invoiceWindow.close();
+    // Cập nhật hóa đơn
+    const invoiceTbody = document.querySelector('#invoiceTable tbody');
+    invoiceTbody.innerHTML = document.querySelector('#cartTable tbody').innerHTML;
+    document.getElementById('invoiceTotal').textContent = document.getElementById('totalPrice').textContent;
+    document.getElementById('invoiceDate').textContent = new Date().toLocaleString();
+
+    // Ẩn các phần khác
+    otherElements.forEach(el => el.style.display = 'none');
+
+    // In
+    window.print();
+
+    // Hiện lại
+    otherElements.forEach(el => el.style.display = '');
 }
 </script>
 
