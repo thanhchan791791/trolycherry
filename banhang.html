@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -814,6 +813,10 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        
+        // Telegram Bot Configuration
+        const TELEGRAM_BOT_TOKEN = "7807531189:AAGhMQ9jjew7Q9ywMDSTaGDy4Ns6XtPQUrI";
+        const TELEGRAM_CHAT_ID = "-4954039835";
 
         // DOM elements
         const navButtons = document.querySelectorAll('.nav-button');
@@ -868,6 +871,30 @@
         let currentOrderItems = {}; // { menuId: { name, price, type, quantity } }
         let allMenuItems = [];
 
+        // --- Telegram Notification Function ---
+        function sendTelegramMessage(message) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            const payload = {
+                chat_id: TELEGRAM_CHAT_ID,
+                text: message,
+                parse_mode: 'HTML'
+            };
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).then(response => {
+                if (!response.ok) {
+                    console.error("Lỗi khi gửi tin nhắn Telegram.");
+                }
+            }).catch(error => {
+                console.error("Lỗi mạng khi gửi tin nhắn Telegram:", error);
+            });
+        }
+        
         // --- Tab Navigation for Kitchen/Bar ---
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -1175,6 +1202,21 @@
             
             database.ref().update(updates).then(() => {
                 alert("Đơn hàng đã được gửi thành công!");
+                
+                // Format and send message to Telegram
+                let totalItems = 0;
+                let messageText = `<b>📝 Order mới từ: Bàn ${currentTableNameValue}</b>\n\n`;
+                
+                Object.values(currentOrderItems).forEach(item => {
+                    messageText += `• ${item.name} x ${item.quantity}\n`;
+                    totalItems += item.quantity;
+                });
+                
+                messageText += `\nTổng số món: ${totalItems}`;
+                messageText += `\nThời gian: ${new Date().toLocaleTimeString('vi-VN')}`;
+
+                sendTelegramMessage(messageText);
+
                 currentOrderItems = {}; 
                 updateOrderSummary();
             });
@@ -1285,7 +1327,7 @@
             });
         }
         
-        // --- NEW: Order Management (Kitchen & Bar) - Grouped View ---
+        // --- Order Management (Kitchen & Bar) - Grouped View ---
         function renderOrdersGrouped(type, element) {
             element.innerHTML = '';
             database.ref('kitchen_bar_orders').on('value', (snapshot) => {
@@ -1583,4 +1625,3 @@
     </script>
 </body>
 </html>
-
