@@ -1,90 +1,193 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bill POS</title>
-    <style>
-        body {
-            font-family: monospace;
-        }
-
-        #bill {
-            width: 58mm; /* chuẩn giấy máy in nhiệt */
-            padding: 5px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 2px 0;
-        }
-
-        .total {
-            font-weight: bold;
-        }
-
-        button {
-            margin-top: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS Bán Hàng</title>
+<style>
+    body {
+        font-family: monospace;
+        margin: 0;
+        padding: 0;
+        background: #f0f0f0;
+    }
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 10px;
+        background: #fff;
+        border-radius: 5px;
+    }
+    h1 {
+        text-align: center;
+    }
+    .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .menu button {
+        flex: 1 0 30%;
+        padding: 10px;
+        font-size: 16px;
+    }
+    #cart {
+        margin-bottom: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 5px;
+        text-align: left;
+        border-bottom: 1px solid #ccc;
+    }
+    .total {
+        font-weight: bold;
+        text-align: right;
+        margin-top: 10px;
+    }
+    .invoice {
+        width: 58mm;
+        margin: 20px auto;
+        padding: 5px;
+        border: 1px solid #000;
+        background: #fff;
+    }
+    .invoice h2, .invoice p {
+        margin: 2px 0;
+        font-size: 12px;
+    }
+    button.print-btn {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+</style>
 </head>
 <body>
 
-<div id="bill">
-    <h2>Quán Ăn ABC</h2>
-    <p>Bàn: 5</p>
-    <p>Ngày: 25/09/2025</p>
+<div class="container">
+    <h1>Quán Ăn ABC</h1>
 
-    <table>
-        <tr>
-            <th>Món</th>
-            <th>SL</th>
-            <th>Giá</th>
-        </tr>
-        <tr>
-            <td>Cơm gà xối mỡ</td>
-            <td>1</td>
-            <td>50.000đ</td>
-        </tr>
-        <tr>
-            <td>Trà đá</td>
-            <td>2</td>
-            <td>10.000đ</td>
-        </tr>
-    </table>
+    <div class="menu">
+        <button onclick="addItem('Cơm gà xối mỡ',50000)">Cơm gà xối mỡ - 50.000đ</button>
+        <button onclick="addItem('Phở bò',60000)">Phở bò - 60.000đ</button>
+        <button onclick="addItem('Trà đá',5000)">Trà đá - 5.000đ</button>
+        <button onclick="addItem('Nước ngọt',10000)">Nước ngọt - 10.000đ</button>
+    </div>
 
-    <p class="total">Tổng: 70.000đ</p>
+    <div id="cart">
+        <h3>Giỏ hàng</h3>
+        <table id="cartTable">
+            <thead>
+                <tr>
+                    <th>Món</th>
+                    <th>SL</th>
+                    <th>Giá</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Items added dynamically -->
+            </tbody>
+        </table>
+        <p class="total">Tổng: <span id="totalPrice">0</span>đ</p>
+    </div>
+
+    <button class="print-btn" onclick="printInvoice()">In hóa đơn</button>
+
+    <!-- Hóa đơn div riêng -->
+    <div id="invoice" class="invoice">
+        <h2>Quán Ăn ABC</h2>
+        <p>Bàn: 5</p>
+        <p>Ngày: <span id="invoiceDate"></span></p>
+
+        <table id="invoiceTable">
+            <thead>
+                <tr>
+                    <th>Món</th>
+                    <th>SL</th>
+                    <th>Giá</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Items sẽ copy từ giỏ hàng -->
+            </tbody>
+        </table>
+        <p class="total">Tổng: <span id="invoiceTotal"></span>đ</p>
+    </div>
 </div>
 
-<button onclick="printBill()">In bill</button>
-
 <script>
-function printBill() {
-    const billContent = document.getElementById('bill').outerHTML;
-    const printWindow = window.open('', '', 'width=300,height=600');
-    printWindow.document.write(`
+let cart = [];
+
+function addItem(name, price) {
+    let item = cart.find(i => i.name === name);
+    if (item) {
+        item.qty += 1;
+    } else {
+        cart.push({name: name, price: price, qty: 1});
+    }
+    renderCart();
+}
+
+function renderCart() {
+    const tbody = document.querySelector('#cartTable tbody');
+    tbody.innerHTML = '';
+    let total = 0;
+    cart.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${item.name}</td><td>${item.qty}</td><td>${item.price*item.qty}</td>`;
+        tbody.appendChild(row);
+        total += item.price * item.qty;
+    });
+    document.getElementById('totalPrice').textContent = total;
+}
+
+function printInvoice() {
+    const invoiceWindow = window.open('', '', 'width=300,height=600');
+    const invoiceTableBody = document.querySelector('#cartTable tbody').innerHTML;
+    const total = document.getElementById('totalPrice').textContent;
+    const today = new Date();
+    const dateStr = today.toLocaleDateString() + ' ' + today.toLocaleTimeString();
+
+    invoiceWindow.document.write(`
         <html>
             <head>
-                <title>In bill</title>
+                <title>Hóa đơn</title>
                 <style>
                     body { font-family: monospace; margin: 0; width: 58mm; }
                     table { width: 100%; border-collapse: collapse; }
                     th, td { text-align: left; padding: 2px 0; }
-                    .total { font-weight: bold; }
+                    .total { font-weight: bold; text-align: right; margin-top: 5px; }
+                    h2, p { margin: 2px 0; font-size: 12px; }
                 </style>
             </head>
-            <body>${billContent}</body>
+            <body>
+                <div>
+                    <h2>Quán Ăn ABC</h2>
+                    <p>Bàn: 5</p>
+                    <p>Ngày: ${dateStr}</p>
+                    <table>
+                        <thead>
+                            <tr><th>Món</th><th>SL</th><th>Giá</th></tr>
+                        </thead>
+                        <tbody>
+                            ${invoiceTableBody}
+                        </tbody>
+                    </table>
+                    <p class="total">Tổng: ${total}đ</p>
+                </div>
+            </body>
         </html>
     `);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    invoiceWindow.document.close();
+    invoiceWindow.focus();
+    invoiceWindow.print();
+    invoiceWindow.close();
 }
 </script>
 
