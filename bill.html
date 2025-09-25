@@ -10,13 +10,8 @@
         }
 
         #bill {
-            width: 58mm; /* Chuẩn giấy máy in nhiệt 58mm */
+            width: 58mm; /* chuẩn giấy máy in nhiệt */
             padding: 5px;
-            border: 1px solid #000;
-        }
-
-        h2, p {
-            margin: 2px 0;
         }
 
         table {
@@ -35,22 +30,6 @@
 
         button {
             margin-top: 10px;
-        }
-
-        /* Chỉ in div #bill, ẩn phần khác */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #bill, #bill * {
-                visibility: visible;
-            }
-            #bill {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 58mm;
-            }
         }
     </style>
 </head>
@@ -82,7 +61,32 @@
     <p class="total">Tổng: 70.000đ</p>
 </div>
 
-<button onclick="window.print()">In bill</button>
+<button onclick="printBill()">In bill</button>
+
+<script>
+function printBill() {
+    const billContent = document.getElementById('bill').outerHTML;
+    const printWindow = window.open('', '', 'width=300,height=600');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>In bill</title>
+                <style>
+                    body { font-family: monospace; margin: 0; width: 58mm; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { text-align: left; padding: 2px 0; }
+                    .total { font-weight: bold; }
+                </style>
+            </head>
+            <body>${billContent}</body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+}
+</script>
 
 </body>
 </html>
