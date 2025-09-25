@@ -33,12 +33,23 @@
             font-weight: bold;
         }
 
+        button {
+            margin-top: 10px;
+        }
+
+        /* Chỉ in div #bill, ẩn phần khác */
         @media print {
-            body {
-                margin: 0;
+            body * {
+                visibility: hidden;
             }
-            button {
-                display: none; /* Ẩn nút khi in */
+            #bill, #bill * {
+                visibility: visible;
+            }
+            #bill {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 58mm;
             }
         }
     </style>
@@ -71,18 +82,7 @@
     <p class="total">Tổng: 70.000đ</p>
 </div>
 
-<button onclick="printBill()">In bill</button>
-
-<script>
-function printBill() {
-    const printContents = document.getElementById('bill').innerHTML;
-    const originalContents = document.body.innerHTML;
-
-    document.body.innerHTML = printContents;
-    window.print();
-    document.body.innerHTML = originalContents;
-}
-</script>
+<button onclick="window.print()">In bill</button>
 
 </body>
 </html>
