@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill POS</title>
+    <style>
+        body {
+            font-family: monospace;
+        }
+
+        #bill {
+            width: 58mm; /* Chuẩn giấy máy in nhiệt 58mm */
+            padding: 5px;
+            border: 1px solid #000;
+        }
+
+        h2, p {
+            margin: 2px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 2px 0;
+        }
+
+        .total {
+            font-weight: bold;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+            }
+            button {
+                display: none; /* Ẩn nút khi in */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="bill">
+    <h2>Quán Ăn ABC</h2>
+    <p>Bàn: 5</p>
+    <p>Ngày: 25/09/2025</p>
+
+    <table>
+        <tr>
+            <th>Món</th>
+            <th>SL</th>
+            <th>Giá</th>
+        </tr>
+        <tr>
+            <td>Cơm gà xối mỡ</td>
+            <td>1</td>
+            <td>50.000đ</td>
+        </tr>
+        <tr>
+            <td>Trà đá</td>
+            <td>2</td>
+            <td>10.000đ</td>
+        </tr>
+    </table>
+
+    <p class="total">Tổng: 70.000đ</p>
+</div>
+
+<button onclick="printBill()">In bill</button>
+
+<script>
+function printBill() {
+    const printContents = document.getElementById('bill').innerHTML;
+    const originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+}
+</script>
+
+</body>
+</html>
