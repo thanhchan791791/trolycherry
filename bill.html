@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POS Bán Hàng</title>
+<title>POS Bán Hàng PDF</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
     body {
         font-family: monospace;
@@ -49,7 +50,6 @@
         text-align: right;
         margin-top: 10px;
     }
-    /* Hóa đơn ở giữa */
     .invoice {
         width: 58mm;
         margin: 20px auto;
@@ -61,7 +61,7 @@
         margin: 2px 0;
         font-size: 12px;
     }
-    button.print-btn {
+    button.print-btn, button.pdf-btn {
         display: block;
         margin: 20px auto;
         padding: 10px 20px;
@@ -98,14 +98,12 @@
         <p class="total">Tổng: <span id="totalPrice">0</span>đ</p>
     </div>
 
-    <button class="print-btn" onclick="printInvoiceInline()">In hóa đơn</button>
+    <button class="pdf-btn" onclick="generatePDF()">Xuất PDF</button>
 
-    <!-- Hóa đơn div riêng -->
     <div id="invoice" class="invoice">
         <h2>Quán Ăn ABC</h2>
         <p>Bàn: 5</p>
         <p>Ngày: <span id="invoiceDate"></span></p>
-
         <table id="invoiceTable">
             <thead>
                 <tr>
@@ -148,25 +146,46 @@ function renderCart() {
     document.getElementById('totalPrice').textContent = total;
 }
 
-// In trực tiếp trên cùng trang, ẩn các phần khác tạm thời
-function printInvoiceInline() {
-    const invoice = document.getElementById('invoice');
-    const otherElements = Array.from(document.body.children).filter(el => el.id !== 'invoice');
-
+// Xuất hóa đơn ra PDF
+function generatePDF() {
     // Cập nhật hóa đơn
     const invoiceTbody = document.querySelector('#invoiceTable tbody');
     invoiceTbody.innerHTML = document.querySelector('#cartTable tbody').innerHTML;
     document.getElementById('invoiceTotal').textContent = document.getElementById('totalPrice').textContent;
     document.getElementById('invoiceDate').textContent = new Date().toLocaleString();
 
-    // Ẩn các phần khác
-    otherElements.forEach(el => el.style.display = 'none');
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [80, 200] // giấy nhiệt 58-80mm
+    });
 
-    // In
-    window.print();
+    let y = 5;
+    doc.setFont("Courier", "normal");
+    doc.setFontSize(10);
 
-    // Hiện lại
-    otherElements.forEach(el => el.style.display = '');
+    doc.text("Quán Ăn ABC", 5, y);
+    y += 5;
+    doc.text("Bàn: 5", 5, y);
+    y += 5;
+    doc.text("Ngày: " + new Date().toLocaleString(), 5, y);
+    y += 5;
+    doc.text("----------------------------", 5, y);
+    y += 5;
+
+    cart.forEach(item => {
+        doc.text(`${item.name}`, 5, y);
+        doc.text(`x${item.qty}    ${item.price*item.qty}đ`, 5, y+5);
+        y += 10;
+    });
+
+    doc.text("----------------------------", 5, y);
+    y += 5;
+    doc.text(`Tổng: ${document.getElementById('totalPrice').textContent}đ`, 5, y);
+
+    // Xuất ra PDF và mở trình duyệt PDF để in
+    doc.save("HoaDon.pdf");
 }
 </script>
 
