@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -9,7 +8,7 @@
     <style>
         :root {
             --primary-color: #4CAF50;
-            --secondary-color: #f44336;
+            --secondary-color: #333; /* Màu đen/xám đậm thay cho màu đỏ */
             --info-color: #2196F3;
             --success-color: #008000;
             --warning-color: #FFC107;
@@ -378,7 +377,7 @@
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 1001; /* Tăng z-index để chắc chắn hiển thị trên mọi thứ */
             left: 0;
             top: 0;
             width: 100%;
@@ -410,70 +409,83 @@
             cursor: pointer;
         }
 
-        /* Bill-specific styles */
+        /* Bill-specific styles - MODIFIED FOR BOLDNESS/CLARITY/BLACK TEXT */
         .bill-header {
             text-align: center;
             margin-bottom: 20px;
+            color: #000; /* Đảm bảo màu đen */
+            font-weight: 700; /* Đảm bảo in đậm */
         }
 
         .bill-header h2 {
-            font-size: 1.5em;
-            color: #333;
+            font-size: 2.2em; /* Tăng kích thước chữ Hóa đơn thanh toán */
+            color: #000; 
             margin: 0;
+            font-weight: 900; /* Extra bold */
         }
         .bill-header p {
-            margin: 5px 0;
-            font-size: 0.9em;
-            color: #666;
+            margin: 5px 0; 
+            font-size: 1.2em; /* Tăng kích thước chữ */
+            color: #000; 
+            font-weight: 700; 
         }
         .bill-details {
             text-align: left;
             margin-bottom: 20px;
+            color: #000;
+            font-weight: 700;
         }
         .bill-details table {
             width: 100%;
             border-collapse: collapse;
         }
         .bill-details th, .bill-details td {
-            padding: 8px 0;
+            padding: 7px 0; /* Tăng padding cho rõ ràng */
             text-align: left;
-            font-size: 0.9em;
+            font-size: 1.3em; /* Tăng kích thước chữ */
+            color: #000; 
+            font-weight: 700; 
         }
         .bill-details th {
-            border-bottom: 1px solid #333;
-            font-weight: bold;
+            border-bottom: 2px solid #000; 
+            font-weight: 900; /* Extra bold header */
         }
         .bill-details td {
-            border-bottom: 1px dotted #ccc;
+            border-bottom: 1px dotted #000; 
         }
-        .bill-details .item-name {
-            width: 50%;
+       .bill-details .item-name {
+            width: 40%; /* Giảm từ 50% xuống 40% */
         }
         .bill-details .item-qty {
             width: 15%;
             text-align: center;
         }
         .bill-details .item-price {
-            width: 25%;
+            width: 25%; /* Giữ nguyên 25% */
             text-align: right;
+            /* Thêm padding phải để tạo khoảng cách */
+            padding-right: 15px; 
         }
         .bill-details .item-total {
-            width: 30%;
+            width: 20%; /* Giảm từ 30% xuống 20% (40+15+25+20=100%) */
             text-align: right;
         }
         .bill-summary {
-            border-top: 1px solid #333;
-            padding-top: 10px;
+            border-top: 2px solid #000; 
+            padding-top: 15px; 
+            color: #000;
+            font-weight: 700;
         }
         .bill-summary p {
             display: flex;
             justify-content: space-between;
-            margin: 5px 0;
+            margin: 10px 0; /* Tăng khoảng cách */
+            font-size: 1.3em; /* Tăng kích thước chữ */
         }
         .bill-total-price {
-            font-weight: bold;
-            font-size: 1.2em;
-            color: var(--secondary-color);
+            font-weight: 900; /* Make the final total extra bold */
+            font-size: 1.8em; /* Tăng kích thước chữ Thanh toán */
+            color: #000 !important; /* Đảm bảo màu đen tuyệt đối */
         }
 
         .pay-button {
@@ -486,7 +498,24 @@
             cursor: pointer;
             margin-top: 15px;
         }
-
+        
+        .print-button { 
+            background-color: var(--info-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 15px;
+            margin-right: 10px;
+        }
+        .button-group-bill {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
         /* Tabs for Kitchen/Bar */
         .tab-buttons {
             display: flex;
@@ -629,6 +658,49 @@
         body {
             padding-bottom: 80px;
         }
+
+        /* Print styles - MODIFIED FOR RELIABLE PRINTING AND CENTERED CONTENT */
+        @media print {
+            /* Tối ưu hóa việc in */
+            @page { 
+                margin: 0; /* Loại bỏ lề trang */
+            }
+            body * {
+                visibility: hidden;
+            }
+            .modal-content, .modal-content * {
+                visibility: visible;
+                /* Bật lại thuộc tính color-adjust cho máy in nhiệt */
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+                color: #000 !important; /* Đảm bảo mọi chữ đều màu đen */
+                font-weight: bold !important; /* Đảm bảo mọi chữ đều in đậm */
+            }
+            .modal-content {
+                position: absolute;
+                left: 50%; /* Bắt đầu căn giữa */
+                top: 0;
+                transform: translateX(-50%); /* Căn giữa hóa đơn theo chiều ngang */
+                width: 90%;
+                max-width: 450px; /* Chiều rộng tối đa cho hóa đơn */
+                padding: 10px;
+                box-shadow: none;
+                margin: 0 auto; /* Căn giữa hóa đơn trên trang in */
+            }
+            /* Ẩn các nút không cần thiết và thanh menu */
+            .close-button, .button-group-bill, .nav-buttons { 
+                display: none !important;
+            }
+            /* Tối ưu khoảng cách cho in bill */
+            .bill-details th, .bill-details td {
+                padding: 4px 0; 
+                font-size: 1.3em !important; /* Đảm bảo kích thước chữ lớn khi in */
+            }
+            /* Đảm bảo bill không bị tràn trang */
+            .modal-content {
+                overflow: visible !important; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -751,32 +823,39 @@
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <div class="bill-header">
-                <h2>Hóa đơn thanh toán</h2>
-                <p>Địa chỉ: 37 Nguyễn Khuyến, P.Nguyễn Du, Đăk Lăk</p>
-                <p>Ngày: <span id="billDate"></span></p>
-                <p>Bàn: <span id="billTableInfo"></span></p>
-                <p>Mã HĐ: <span id="billId"></span></p>
+            <div id="billContent"> 
+                <div class="bill-header">
+                    <h2>Ẩm thực buôn mê</h2>
+                    <h5>Đậm đà hương vị cơm đồng bào Ê-đê</h5>
+                    <p>Địa chỉ:285/94b Cách Mạng Tháng 8</p>
+                    <p>Ngày: <span id="billDate"></span></p>
+                    <p>Bàn: <span id="billTableInfo"></span></p>
+                    <p>Mã HĐ: <span id="billId"></span></p>
+                </div>
+                <div class="bill-details">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="item-name">Tên món</th>
+                                <th class="item-qty">SL</th>
+                                <th class="item-price">Đơn giá</th>
+                                <th class="item-total">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="billDetailsBody"></tbody>
+                    </table>
+                </div>
+                <div class="bill-summary">
+                    <p><span>Tổng tiền (Chưa VAT):</span> <span id="billTotalPrice"></span></p>
+                    <p><span>VAT (10%):</span> <span id="billVatPrice"></span></p>
+                    <p><span>Thanh toán:</span> <span id="billTotalPaid" class="bill-total-price"></span></p>
+                    <p style="font-size: 1.2em; text-align: center; margin-top: 15px; font-weight: 700; color: #000;">Cảm ơn quý khách và hẹn gặp lại!</p>
+                </div>
             </div>
-            <div class="bill-details">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="item-name">Tên món</th>
-                            <th class="item-qty">SL</th>
-                            <th class="item-price">Đơn giá</th>
-                            <th class="item-total">Thành tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody id="billDetailsBody"></tbody>
-                </table>
+            <div class="button-group-bill">
+                <button id="printBillButton" class="print-button">In Hóa đơn</button> 
+                <button id="confirmPaymentButton" class="pay-button">Xác nhận thanh toán</button>
             </div>
-            <div class="bill-summary">
-                <p><span>Tổng tiền:</span> <span id="billTotalPrice"></span></p>
-                <p><span>Tổng tiền trên đã bao gồm VAT:</span> <span id="billVatPrice"></span></p>
-                <p><span>Thanh toán:</span> <span id="billTotalPaid"></span></p>
-            </div>
-            <button id="confirmPaymentButton" class="pay-button">Xác nhận thanh toán</button>
         </div>
     </div>
     
@@ -856,6 +935,7 @@
         const billVatPrice = document.getElementById('billVatPrice');
         const billTotalPaid = document.getElementById('billTotalPaid');
         const confirmPaymentButton = document.getElementById('confirmPaymentButton');
+        const printBillButton = document.getElementById('printBillButton'); 
         
         // Tab buttons for Kitchen/Bar
         const tabButtons = document.querySelectorAll('.tab-button');
@@ -1493,9 +1573,11 @@
                         Object.keys(sentOrder.items).forEach(itemId => {
                             const item = sentOrder.items[itemId];
                             if (item.status === 'completed') {
+                                // Find item in allMenuItems to get the price, as sentOrder.items only stores the price at the time of order if available, but a robust system should rely on a fixed price lookup if not stored in the item itself (which your code does). We trust the price stored in the item for now.
                                 if (combinedItems[item.name]) {
                                     combinedItems[item.name].quantity += item.quantity;
                                 } else {
+                                    // Use all properties of the item, assuming price is available
                                     combinedItems[item.name] = { ...item };
                                 }
                             }
@@ -1505,14 +1587,16 @@
                 
                 let billItemsHtml = '';
                 Object.values(combinedItems).forEach((item, index) => {
-                    const itemTotal = item.price * item.quantity;
+                    // Ensure item.price is treated as a number
+                    const itemPrice = parseFloat(item.price); 
+                    const itemTotal = itemPrice * item.quantity;
                     totalAmount += itemTotal;
                     billItemsHtml += `
                         <tr>
-                            <td>${index + 1}. ${item.name}</td>
-                            <td>${item.quantity}</td>
-                            <td style="text-align: right;">${item.price.toLocaleString('vi-VN')}</td>
-                            <td style="text-align: right;">${itemTotal.toLocaleString('vi-VN')}</td>
+                            <td class="item-name">${index + 1}. ${item.name}</td>
+                            <td class="item-qty">${item.quantity}</td>
+                            <td class="item-price">${itemPrice.toLocaleString('vi-VN')}</td>
+                            <td class="item-total">${itemTotal.toLocaleString('vi-VN')}</td>
                         </tr>
                     `;
                 });
@@ -1527,8 +1611,10 @@
 
                 if (totalAmount === 0) {
                     confirmPaymentButton.style.display = 'none';
+                    printBillButton.style.display = 'none'; // Hide print button if nothing to pay
                 } else {
                     confirmPaymentButton.style.display = 'block';
+                    printBillButton.style.display = 'block'; // Show print button
                 }
             });
             
@@ -1561,15 +1647,19 @@
                         const itemsToKeep = {};
                         Object.keys(sentOrder.items).forEach(itemId => {
                             const item = sentOrder.items[itemId];
+                            // ONLY process completed items for payment
                             if (item.status === 'completed') {
+                                // Add to bill history data
                                 itemsForBill[itemId] = {
                                     name: item.name,
                                     quantity: item.quantity,
                                     price: item.price
                                 };
                                 totalAmount += item.price * item.quantity;
-                                completedItemIdsToRemove.push(itemId);
+                                // Add to list for removal from kitchen_bar_orders
+                                completedItemIdsToRemove.push(sentOrderId);
                             } else {
+                                // Keep pending items
                                 itemsToKeep[itemId] = item;
                                 hasPendingOrders = true;
                             }
@@ -1578,18 +1668,39 @@
                         if (Object.keys(itemsToKeep).length > 0) {
                             updates[`tables/${tableId}/sentOrders/${sentOrderId}/items`] = itemsToKeep;
                         } else {
+                            // If all items in this sentOrder are completed, remove the whole sentOrder entry
                             updates[`tables/${tableId}/sentOrders/${sentOrderId}`] = null;
                         }
                     }
                 });
                 
-                completedItemIdsToRemove.forEach(itemId => {
-                    updates[`kitchen_bar_orders/${itemId}`] = null;
+                // Remove the parent kitchen_bar_orders entry if all its items were processed for payment
+                completedItemIdsToRemove.forEach(orderId => {
+                    database.ref(`kitchen_bar_orders/${orderId}`).once('value', orderSnapshot => {
+                        const order = orderSnapshot.val();
+                        if (order && order.items) {
+                            let itemsLeft = false;
+                            for (const itemId in order.items) {
+                                // Check if any item is still not paid (i.e., not removed from sentOrders/items or is pending)
+                                // Simplified check: assume if it was completed and processed above, it should be removed. 
+                                // More robust logic: check if corresponding item is still in tables/${tableId}/sentOrders/${orderId}/items
+                                // Given the complex data structure, let's just remove the whole kitchen_bar_orders entry if the parent sentOrders was removed.
+                                if (!updates[`tables/${tableId}/sentOrders/${orderId}`]) {
+                                    updates[`kitchen_bar_orders/${orderId}`] = null;
+                                }
+                            }
+                        }
+                    });
                 });
                 
+                if (totalAmount === 0) {
+                    alert('Không có món nào đã hoàn thành để thanh toán.');
+                    return;
+                }
+
                 const newBillRef = database.ref('payment_history').push();
                 updates[`payment_history/${newBillRef.key}`] = {
-                    billId: generateBillId(),
+                    billId: billId.textContent, // Use the ID generated on modal open
                     tableId: tableId,
                     tableName: tableName,
                     timestamp: new Date().toISOString(),
@@ -1611,6 +1722,11 @@
                 });
             });
         }
+        
+        // --- Print Bill Functionality ---
+        printBillButton.addEventListener('click', () => {
+            window.print(); 
+        });
         
         closeButton.onclick = () => paymentModal.style.display = 'none';
         window.onclick = (event) => {
