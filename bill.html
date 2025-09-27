@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Kết nối QZ Tray</title>
-    <script src="https://unpkg.com/qz-tray/dist/qz-tray.js"></script>
 </head>
 <body>
     <h2>Kiểm tra kết nối QZ Tray</h2>
     <button id="connectBtn">Kết nối QZ Tray</button>
     <p id="status">Chưa kết nối</p>
 
+    <!-- Load QZ Tray JS trước -->
+    <script src="qz-tray.js"></script>
+
+    <!-- Sau đó mới dùng đối tượng qz -->
     <script>
         const statusEl = document.getElementById("status");
         const connectBtn = document.getElementById("connectBtn");
 
         connectBtn.addEventListener("click", () => {
             statusEl.textContent = "Đang kết nối...";
-            
+
             // Kết nối đến QZ Tray
             qz.websocket.connect().then(() => {
                 statusEl.textContent = "✅ Connected to QZ Tray!";
