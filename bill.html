@@ -1,193 +1,130 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POS Bán Hàng PDF</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<style>
-    body {
-        font-family: monospace;
-        margin: 0;
-        padding: 0;
-        background: #f0f0f0;
-    }
-    .container {
-        max-width: 800px;
-        margin: 20px auto;
-        padding: 10px;
-        background: #fff;
-        border-radius: 5px;
-    }
-    h1 {
-        text-align: center;
-    }
-    .menu {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-    .menu button {
-        flex: 1 0 30%;
-        padding: 10px;
-        font-size: 16px;
-    }
-    #cart {
-        margin-bottom: 20px;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    th, td {
-        padding: 5px;
-        text-align: left;
-        border-bottom: 1px solid #ccc;
-    }
-    .total {
-        font-weight: bold;
-        text-align: right;
-        margin-top: 10px;
-    }
-    .invoice {
-        width: 58mm;
-        margin: 20px auto;
-        padding: 5px;
-        border: 1px solid #000;
-        background: #fff;
-    }
-    .invoice h2, .invoice p {
-        margin: 2px 0;
-        font-size: 12px;
-    }
-    button.print-btn, button.pdf-btn {
-        display: block;
-        margin: 20px auto;
-        padding: 10px 20px;
-        font-size: 16px;
-    }
-</style>
+  <meta charset="UTF-8">
+  <title>POS Nhà hàng - In Bill & Mở Két</title>
+  <script src="qz-tray.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h2 { color: #2c3e50; }
+    .menu, .cart { margin-top: 20px; }
+    button { margin: 5px; padding: 8px 15px; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: #f4f4f4; }
+  </style>
 </head>
 <body>
+  <h2>Phần mềm POS đơn giản</h2>
+  <button onclick="connectQZ()">🔗 Kết nối QZ Tray</button>
 
-<div class="container">
-    <h1>Quán Ăn ABC</h1>
+  <!-- Menu chọn món -->
+  <div class="menu">
+    <h3>Thực đơn</h3>
+    <button onclick="addToCart('Phở Bò', 45000)">Phở Bò - 45k</button>
+    <button onclick="addToCart('Bún Chả', 50000)">Bún Chả - 50k</button>
+    <button onclick="addToCart('Trà Đá', 5000)">Trà Đá - 5k</button>
+    <button onclick="addToCart('Cà Phê Đen', 20000)">Cà Phê Đen - 20k</button>
+  </div>
 
-    <div class="menu">
-        <button onclick="addItem('Cơm gà xối mỡ',50000)">Cơm gà xối mỡ - 50.000đ</button>
-        <button onclick="addItem('Phở bò',60000)">Phở bò - 60.000đ</button>
-        <button onclick="addItem('Trà đá',5000)">Trà đá - 5.000đ</button>
-        <button onclick="addItem('Nước ngọt',10000)">Nước ngọt - 10.000đ</button>
-    </div>
+  <!-- Giỏ hàng -->
+  <div class="cart">
+    <h3>Giỏ hàng</h3>
+    <table id="cartTable">
+      <thead>
+        <tr>
+          <th>Món ăn</th>
+          <th>Giá</th>
+          <th>Số lượng</th>
+          <th>Thành tiền</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <h3>Tổng cộng: <span id="total">0</span> đ</h3>
+    <button onclick="checkout()">💳 Thanh toán</button>
+  </div>
 
-    <div id="cart">
-        <h3>Giỏ hàng</h3>
-        <table id="cartTable">
-            <thead>
-                <tr>
-                    <th>Món</th>
-                    <th>SL</th>
-                    <th>Giá</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Items added dynamically -->
-            </tbody>
-        </table>
-        <p class="total">Tổng: <span id="totalPrice">0</span>đ</p>
-    </div>
+  <script>
+    let cart = [];
 
-    <button class="pdf-btn" onclick="generatePDF()">Xuất PDF</button>
-
-    <div id="invoice" class="invoice">
-        <h2>Quán Ăn ABC</h2>
-        <p>Bàn: 5</p>
-        <p>Ngày: <span id="invoiceDate"></span></p>
-        <table id="invoiceTable">
-            <thead>
-                <tr>
-                    <th>Món</th>
-                    <th>SL</th>
-                    <th>Giá</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Items sẽ copy từ giỏ hàng -->
-            </tbody>
-        </table>
-        <p class="total">Tổng: <span id="invoiceTotal"></span>đ</p>
-    </div>
-</div>
-
-<script>
-let cart = [];
-
-function addItem(name, price) {
-    let item = cart.find(i => i.name === name);
-    if (item) {
-        item.qty += 1;
-    } else {
-        cart.push({name: name, price: price, qty: 1});
+    // Kết nối QZ Tray
+    function connectQZ() {
+      if (!qz.websocket.isActive()) {
+        qz.websocket.connect()
+          .then(() => alert("✅ Đã kết nối QZ Tray"))
+          .catch(err => alert("❌ Lỗi kết nối: " + err));
+      } else {
+        alert("⚡ QZ Tray đã kết nối rồi");
+      }
     }
-    renderCart();
-}
 
-function renderCart() {
-    const tbody = document.querySelector('#cartTable tbody');
-    tbody.innerHTML = '';
-    let total = 0;
-    cart.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${item.name}</td><td>${item.qty}</td><td>${item.price*item.qty}</td>`;
-        tbody.appendChild(row);
+    // Thêm món vào giỏ
+    function addToCart(name, price) {
+      let item = cart.find(i => i.name === name);
+      if (item) {
+        item.qty++;
+      } else {
+        cart.push({ name, price, qty: 1 });
+      }
+      renderCart();
+    }
+
+    // Hiển thị giỏ hàng
+    function renderCart() {
+      let tbody = document.querySelector("#cartTable tbody");
+      tbody.innerHTML = "";
+      let total = 0;
+      cart.forEach(item => {
+        let row = `<tr>
+          <td>${item.name}</td>
+          <td>${item.price.toLocaleString()}</td>
+          <td>${item.qty}</td>
+          <td>${(item.price * item.qty).toLocaleString()}</td>
+        </tr>`;
+        tbody.innerHTML += row;
         total += item.price * item.qty;
-    });
-    document.getElementById('totalPrice').textContent = total;
+      });
+      document.getElementById("total").innerText = total.toLocaleString();
+    }
+
+   function checkout() {
+  if (cart.length === 0) { alert("❌ Giỏ hàng trống!"); return; }
+
+  // Nội dung bill HTML
+  let billHtml = "<h3>===== HÓA ĐƠN THANH TOÁN =====</h3>";
+  billHtml += "<table style='width:100%; border-collapse:collapse'>";
+  billHtml += "<tr><th>Món</th><th>SL</th><th>Giá</th></tr>";
+  cart.forEach(item => {
+    billHtml += `<tr>
+      <td>${item.name}</td>
+      <td>${item.qty}</td>
+      <td>${(item.price * item.qty).toLocaleString()} đ</td>
+    </tr>`;
+  });
+  let total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  billHtml += "</table>";
+  billHtml += "<hr>";
+  billHtml += `<h3>TỔNG: ${total.toLocaleString()} đ</h3>`;
+  billHtml += "<p>Xin cảm ơn quý khách!</p>";
+
+  qz.printers.getDefault().then(printer => {
+    let config = qz.configs.create(printer);
+
+    // Job 1: in bill HTML
+    return qz.print(config, [{ type:'html', format:'plain', data:billHtml }])
+      .then(() => {
+        // Job 2: mở két tiền
+        let openDrawer = { type:'raw', format:'hex', data:'1B70003CFF' };
+        return qz.print(config, [openDrawer]);
+      });
+  }).then(() => {
+    alert("✅ In hóa đơn & mở két thành công");
+    cart = [];
+    renderCart();
+  }).catch(err => alert("❌ Lỗi in/mở két: " + err));
 }
 
-// Xuất hóa đơn ra PDF
-function generatePDF() {
-    // Cập nhật hóa đơn
-    const invoiceTbody = document.querySelector('#invoiceTable tbody');
-    invoiceTbody.innerHTML = document.querySelector('#cartTable tbody').innerHTML;
-    document.getElementById('invoiceTotal').textContent = document.getElementById('totalPrice').textContent;
-    document.getElementById('invoiceDate').textContent = new Date().toLocaleString();
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: [80, 200] // giấy nhiệt 58-80mm
-    });
-
-    let y = 5;
-    doc.setFont("Courier", "normal");
-    doc.setFontSize(10);
-
-    doc.text("Quán Ăn ABC", 5, y);
-    y += 5;
-    doc.text("Bàn: 5", 5, y);
-    y += 5;
-    doc.text("Ngày: " + new Date().toLocaleString(), 5, y);
-    y += 5;
-    doc.text("----------------------------", 5, y);
-    y += 5;
-
-    cart.forEach(item => {
-        doc.text(`${item.name}`, 5, y);
-        doc.text(`x${item.qty}    ${item.price*item.qty}đ`, 5, y+5);
-        y += 10;
-    });
-
-    doc.text("----------------------------", 5, y);
-    y += 5;
-    doc.text(`Tổng: ${document.getElementById('totalPrice').textContent}đ`, 5, y);
-
-    // Xuất ra PDF và mở trình duyệt PDF để in
-    doc.save("HoaDon.pdf");
-}
-</script>
-
+  </script>
 </body>
 </html>
