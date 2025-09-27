@@ -2,32 +2,112 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Kết nối QZ Tray</title>
+    <title>POS Nhà Hàng - In Bill & Mở Ké12312321</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .menu-item { margin-bottom: 5px; }
+        #bill { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
+        button { margin-top: 10px; padding: 5px 10px; }
+    </style>
 </head>
 <body>
-    <h2>Kiểm tra kết nối QZ Tray1</h2>
-    <button id="connectBtn">Kết nối QZ Tray</button>
-    <p id="status">Chưa kết nối</p>
+    <h2>Chọn M12312321ón</h2>
+    <div id="menu">
+        <div class="menu-item">
+            <span>Phở Bò - 50.000₫</span>
+            <button onclick="addItem('Phở Bò', 50000)">Thêm</button>
+        </div>
+        <div class="menu-item">
+            <span>Bún Chả - 45.000₫</span>
+            <button onclick="addItem('Bún Chả', 45000)">Thêm</button>
+        </div>
+        <div class="menu-item">
+            <span>Coca Cola - 15.000₫</span>
+            <button onclick="addItem('Coca Cola', 15000)">Thêm</button>
+        </div>
+    </div>
 
-    <!-- Load QZ Tray JS trước -->
+    <div id="bill">
+        <h3>Hóa đơn</h3>
+        <ul id="billList"></ul>
+        <strong>Tổng: <span id="total">0</span>₫</strong><br>
+        <button onclick="payBill()">Thanh toán & In Bill</button>
+    </div>
+
+    <p id="status">Chưa kết nối QZ Tray</p>
+
     <script src="qz-tray.js"></script>
-
-    <!-- Sau đó mới dùng đối tượng qz -->
     <script>
+        let billItems = [];
+        let total = 0;
+
+        const billListEl = document.getElementById("billList");
+        const totalEl = document.getElementById("total");
         const statusEl = document.getElementById("status");
-        const connectBtn = document.getElementById("connectBtn");
 
-        connectBtn.addEventListener("click", () => {
-            statusEl.textContent = "Đang kết nối...";
-
-            // Kết nối đến QZ Tray
-            qz.websocket.connect().then(() => {
-                statusEl.textContent = "✅ Connected to QZ Tray!";
-            }).catch(err => {
-                console.error(err);
-                statusEl.textContent = "❌ Không kết nối được QZ Tray: " + err;
-            });
+        // Kết nối QZ Tray tự động khi load trang
+        qz.websocket.connect().then(() => {
+            statusEl.textContent = "✅ Connected to QZ Tray!";
+        }).catch(err => {
+            statusEl.textContent = "❌ Không kết nối được QZ Tray: " + err;
         });
+
+        function addItem(name, price) {
+            billItems.push({name, price});
+            total += price;
+
+            const li = document.createElement("li");
+            li.textContent = `${name} - ${price.toLocaleString()}₫`;
+            billListEl.appendChild(li);
+            totalEl.textContent = total.toLocaleString();
+        }
+
+        function payBill() {
+            if (billItems.length === 0) {
+                alert("Chưa có món nào!");
+                return;
+            }
+
+            // Tạo raw hex cho máy in nhiệt (ESC/POS)
+            let rawData = "\x1B\x40"; // Initialize printer
+            rawData += "\x1B\x21\x08" + "HÓA ĐƠN NHÀ HÀNG\n"; // Bold
+            rawData += "\x1B\x21\x00";
+
+            billItems.forEach(item => {
+                rawData += `${item.name} - ${item.price.toLocaleString()}₫\n`;
+            });
+            rawData += `TỔNG: ${total.toLocaleString()}₫\n`;
+            rawData += "\n\n\n";
+            rawData += "\x1B\x70\x00\x19\xFA"; // Pulse drawer mở két
+
+            const printData = [{
+                type: 'raw',
+                format: 'hex',
+                data: stringToHex(rawData)
+            }];
+
+            qz.print(qz.configs.create("POS_PRINTER_NAME_HERE"), printData)
+                .then(() => {
+                    alert("✅ In bill xong & mở két thành công!");
+                    billItems = [];
+                    billListEl.innerHTML = "";
+                    total = 0;
+                    totalEl.textContent = total;
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("❌ In bill thất bại: " + err);
+                });
+        }
+
+        // Chuyển string sang hex (ESC/POS)
+        function stringToHex(str) {
+            let hex = '';
+            for (let i = 0; i < str.length; i++) {
+                hex += str.charCodeAt(i).toString(16).padStart(2, '0');
+            }
+            return hex;
+        }
     </script>
 </body>
 </html>
