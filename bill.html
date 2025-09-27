@@ -1,130 +1,30 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>POS Nhà hàng - In Bill & Mở Két</title>
-  <script src="qz-tray.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h2 { color: #2c3e50; }
-    .menu, .cart { margin-top: 20px; }
-    button { margin: 5px; padding: 8px 15px; cursor: pointer; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-    th { background: #f4f4f4; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Kết nối QZ Tray</title>
+    <script src="https://unpkg.com/qz-tray/dist/qz-tray.js"></script>
 </head>
 <body>
-  <h2>Phần mềm POS đơn giản</h2>
-  <button onclick="connectQZ()">🔗 Kết nối QZ Tray</button>
+    <h2>Kiểm tra kết nối QZ Tray</h2>
+    <button id="connectBtn">Kết nối QZ Tray</button>
+    <p id="status">Chưa kết nối</p>
 
-  <!-- Menu chọn món -->
-  <div class="menu">
-    <h3>Thực đơn</h3>
-    <button onclick="addToCart('Phở Bò', 45000)">Phở Bò - 45k</button>
-    <button onclick="addToCart('Bún Chả', 50000)">Bún Chả - 50k</button>
-    <button onclick="addToCart('Trà Đá', 5000)">Trà Đá - 5k</button>
-    <button onclick="addToCart('Cà Phê Đen', 20000)">Cà Phê Đen - 20k</button>
-  </div>
+    <script>
+        const statusEl = document.getElementById("status");
+        const connectBtn = document.getElementById("connectBtn");
 
-  <!-- Giỏ hàng -->
-  <div class="cart">
-    <h3>Giỏ hàng</h3>
-    <table id="cartTable">
-      <thead>
-        <tr>
-          <th>Món ăn</th>
-          <th>Giá</th>
-          <th>Số lượng</th>
-          <th>Thành tiền</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <h3>Tổng cộng: <span id="total">0</span> đ</h3>
-    <button onclick="checkout()">💳 Thanh toán</button>
-  </div>
-
-  <script>
-    let cart = [];
-
-    // Kết nối QZ Tray
-    function connectQZ() {
-      if (!qz.websocket.isActive()) {
-        qz.websocket.connect()
-          .then(() => alert("✅ Đã kết nối QZ Tray"))
-          .catch(err => alert("❌ Lỗi kết nối: " + err));
-      } else {
-        alert("⚡ QZ Tray đã kết nối rồi");
-      }
-    }
-
-    // Thêm món vào giỏ
-    function addToCart(name, price) {
-      let item = cart.find(i => i.name === name);
-      if (item) {
-        item.qty++;
-      } else {
-        cart.push({ name, price, qty: 1 });
-      }
-      renderCart();
-    }
-
-    // Hiển thị giỏ hàng
-    function renderCart() {
-      let tbody = document.querySelector("#cartTable tbody");
-      tbody.innerHTML = "";
-      let total = 0;
-      cart.forEach(item => {
-        let row = `<tr>
-          <td>${item.name}</td>
-          <td>${item.price.toLocaleString()}</td>
-          <td>${item.qty}</td>
-          <td>${(item.price * item.qty).toLocaleString()}</td>
-        </tr>`;
-        tbody.innerHTML += row;
-        total += item.price * item.qty;
-      });
-      document.getElementById("total").innerText = total.toLocaleString();
-    }
-
-   function checkout() {
-  if (cart.length === 0) { alert("❌ Giỏ hàng trống!"); return; }
-
-  // Nội dung bill HTML
-  let billHtml = "<h3>===== HÓA ĐƠN THANH TOÁN =====</h3>";
-  billHtml += "<table style='width:100%; border-collapse:collapse'>";
-  billHtml += "<tr><th>Món</th><th>SL</th><th>Giá</th></tr>";
-  cart.forEach(item => {
-    billHtml += `<tr>
-      <td>${item.name}</td>
-      <td>${item.qty}</td>
-      <td>${(item.price * item.qty).toLocaleString()} đ</td>
-    </tr>`;
-  });
-  let total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-  billHtml += "</table>";
-  billHtml += "<hr>";
-  billHtml += `<h3>TỔNG: ${total.toLocaleString()} đ</h3>`;
-  billHtml += "<p>Xin cảm ơn quý khách!</p>";
-
-  qz.printers.getDefault().then(printer => {
-    let config = qz.configs.create(printer);
-
-    // Job 1: in bill HTML
-    return qz.print(config, [{ type:'html', format:'plain', data:billHtml }])
-      .then(() => {
-        // Job 2: mở két tiền
-        let openDrawer = { type:'raw', format:'hex', data:'1B70003CFF' };
-        return qz.print(config, [openDrawer]);
-      });
-  }).then(() => {
-    alert("✅ In hóa đơn & mở két thành công");
-    cart = [];
-    renderCart();
-  }).catch(err => alert("❌ Lỗi in/mở két: " + err));
-}
-
-  </script>
+        connectBtn.addEventListener("click", () => {
+            statusEl.textContent = "Đang kết nối...";
+            
+            // Kết nối đến QZ Tray
+            qz.websocket.connect().then(() => {
+                statusEl.textContent = "✅ Connected to QZ Tray!";
+            }).catch(err => {
+                console.error(err);
+                statusEl.textContent = "❌ Không kết nối được QZ Tray: " + err;
+            });
+        });
+    </script>
 </body>
 </html>
