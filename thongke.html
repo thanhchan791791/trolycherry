@@ -1,403 +1,302 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giao diện Thống kê Doanh thu & Món bán chạy</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #f44336;
-            --info-color: #2196F3;
-            --success-color: #008000;
-            --warning-color: #FFC107;
-            --bg-color: #f0f2f5;
-            --card-bg: #fff;
-            --text-color: #333;
-            --border-color: #ddd;
-            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 10px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            box-shadow: var(--box-shadow);
-            padding: 15px;
-            box-sizing: border-box;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        h1 {
-            color: var(--primary-color);
-            font-size: 1.8em;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        h2, h3 {
-            color: var(--primary-color);
-            margin: 0;
-            font-size: 1.2em;
-        }
-        
-        .stat-summary {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .stat-box {
-            background-color: #e8f5e9;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            width: 100%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            box-sizing: border-box;
-        }
-        
-        .stat-box h4 {
-            margin-top: 0;
-            color: var(--info-color);
-            font-size: 0.9em;
-        }
-        
-        .stat-box p {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: var(--success-color);
-            margin: 5px 0 0;
-        }
-
-        .chart-container {
-            margin-top: 15px;
-        }
-        
-        .chart-container canvas {
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            width: 100% !important;
-            height: auto !important;
-        }
-
-        .date-filter {
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .date-filter input[type="date"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        .date-filter button {
-            width: 100%;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            background-color: var(--primary-color);
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .date-filter button:hover {
-            background-color: #3e8e41;
-        }
-
-        .top-selling-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .top-selling-list li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            padding: 8px 0;
-            border-bottom: 1px dotted #ccc;
-        }
-        
-        .top-selling-list li span:first-child {
-            font-weight: bold;
-            flex: 1;
-        }
-
-        .top-selling-list li span:last-child {
-            color: var(--info-color);
-            font-size: 0.9em;
-            min-width: 80px;
-            text-align: right;
-        }
-
-        .order-history-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            display: block;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        
-        .order-history-table th, .order-history-table td {
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            text-align: left;
-            font-size: 0.85em;
-        }
-        
-        .order-history-table th {
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: bold;
-        }
-        
-        .order-history-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        
-        .order-history-table tr:hover {
-            background-color: #f1f1f1;
-        }
-        
-        .view-details-btn {
-            background-color: var(--info-color);
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-size: 0.8em;
-        }
-        
-        .view-details-btn:hover {
-            background-color: #1a73e8;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-        
-        .modal-content {
-            background-color: var(--card-bg);
-            margin: 10% auto;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            width: 90%;
-            max-width: 600px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            position: relative;
-        }
-        
-        .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        
-        .close-button:hover, .close-button:focus {
-            color: #000;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        
-        .modal-items-list {
-            list-style-type: none;
-            padding: 0;
-        }
-        
-        .modal-items-list li {
-            padding: 6px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .modal-items-list li:last-child {
-            border-bottom: none;
-        }
-
-        @media (min-width: 768px) {
-            body {
-                padding: 20px;
-            }
-
-            .container {
-                padding: 20px;
-            }
-
-            .header h1 {
-                font-size: 2.5em;
-            }
-
-            .card h2, .card h3 {
-                font-size: 1.5em;
-            }
-
-            .stat-summary {
-                flex-direction: row;
-            }
-
-            .stat-box {
-                flex: 1;
-            }
-
-            .date-filter {
-                flex-direction: row;
-            }
-
-            .order-history-table {
-                display: table;
-                overflow-x: visible;
-                white-space: normal;
-            }
-        }
-    </style>
+    <title>Thống Kê Doanh Thu & Món Bán Chạy (iOS Style)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for beautiful charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Firebase JS (Giữ nguyên phiên bản và thứ tự của bạn) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>📊 Thống kê Doanh thu & Món bán chạy</h1>
-        </div>
-        
-        <div class="card">
-            <h2>Tổng quan Doanh thu</h2>
-            <div class="stat-summary">
-                <div class="stat-box">
-                    <h4>Doanh thu hôm nay</h4>
-                    <p id="dailyRevenue">0₫</p>
-                </div>
-                <div class="stat-box">
-                    <h4>Doanh thu tuần này</h4>
-                    <p id="weeklyRevenue">0₫</p>
-                </div>
-                <div class="stat-box">
-                    <h4>Doanh thu tháng này</h4>
-                    <p id="monthlyRevenue">0₫</p>
-                </div>
-            </div>
-        </div>
+    <style>
+        /* --- Cấu hình Tailwind và Biến CSS Tùy chỉnh (iOS Inspired) --- */
+        :root {
+            /* Light Mode Colors */
+            --bg-color: #F8F8F8; /* Light Grey/White iOS background */
+            --card-bg: #FFFFFF;
+            --text-color: #1C1C1E; /* iOS System Black */
+            --primary-ios: #007AFF; /* iOS Blue */
+            --secondary-ios: #34C759; /* iOS Green */
+            --danger-ios: #FF3B30; /* iOS Red */
+            --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.04);
+            --shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+            --header-gradient: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+        }
 
-        <div class="card">
-            <div class="date-filter">
-                <label for="startDate">Từ ngày:</label>
-                <input type="date" id="startDate">
-                <label for="endDate">Đến ngày:</label>
-                <input type="date" id="endDate">
-                <button id="filterStatsButton">Xem thống kê</button>
-            </div>
-            <div class="stat-box" id="filteredRevenueBox" style="display: none;">
-                <h4>Doanh thu theo khoảng thời gian</h4>
-                <p id="filteredRevenue">0₫</p>
-            </div>
-        </div>
+        /* Dark Mode Colors */
+        .dark {
+            --bg-color: #121212; /* Deep Dark Background */
+            --card-bg: #1C1C1E;
+            --text-color: #F2F2F7;
+            --primary-ios: #0A84FF; /* Dark Mode Blue */
+            --secondary-ios: #30D158;
+            --danger-ios: #FF453A;
+            --shadow-subtle: 0 1px 3px rgba(255, 255, 255, 0.05), 0 4px 10px rgba(255, 255, 255, 0.02);
+            --shadow-hover: 0 4px 8px rgba(255, 255, 255, 0.1), 0 10px 20px rgba(255, 255, 255, 0.04);
+            --header-gradient: linear-gradient(135deg, #0A84FF 0%, #409CFF 100%);
+        }
+
+        /* Base styles */
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+            min-height: 100vh;
+        }
         
-        <div class="card">
+        /* Cần thiết để Chart.js hoạt động Responsive tốt trong mọi container */
+        .chart-container {
+            position: relative;
+            height: 40vh; /* Chiều cao cố định cho mobile/tablet */
+            width: 100%;
+        }
+        
+        /* Ẩn scrollbar trên iOS-like Apps */
+        body::-webkit-scrollbar {
+            display: none;
+        }
+        body {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* --- Transitions và Animations kiểu iOS --- */
+        
+        /* 1. Card / Item Load Animation (Slide-up + Fade-in) */
+        .animated-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1.0), 
+                        transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1.0),
+                        box-shadow 0.3s ease-in-out,
+                        transform 0.15s ease-in-out;
+        }
+        
+        .animated-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 2. Hover/Active Effects cho Card và Button */
+
+        /* iOS Card Style */
+        .card-ios {
+            background-color: var(--card-bg);
+            border-radius: 16px; /* Bo tròn mềm mại */
+            box-shadow: var(--shadow-subtle);
+            transition: all 0.3s ease-in-out;
+            will-change: transform, box-shadow;
+        }
+
+        .card-ios:hover:not(.no-hover-effect) {
+            transform: scale(1.01); /* Scale nhẹ 1.02x */
+            box-shadow: var(--shadow-hover);
+            /* Gradient nhẹ khi hover, dùng filter để blend với background */
+            filter: brightness(1.05); 
+        }
+
+        /* Button Active (Press Down) Effect */
+        .btn-ios:active, .list-row:active {
+            transform: scale(0.98); /* Scale xuống 0.95x */
+            transition: transform 0.15s ease-out;
+        }
+        
+        .btn-ios {
+            transition: transform 0.15s ease-in-out, background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            will-change: transform, box-shadow;
+        }
+
+        /* 3. Modal iOS-like Slide-up */
+        .modal {
+            background-color: rgba(0, 0, 0, 0.2); /* Subtle dimming */
+            backdrop-filter: blur(5px);
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .modal-content-ios {
+            transition: transform 0.4s cubic-bezier(0.3, 0.5, 0.4, 1), opacity 0.4s ease-out;
+            transform: translateY(100%);
+        }
+
+        .modal.open .modal-content-ios {
+            transform: translateY(0);
+        }
+        
+        /* 4. Table Row Style */
+        .list-row {
+            transition: background-color 0.3s ease, transform 0.15s ease-out;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(var(--text-color-rgb), 0.1);
+        }
+
+        .list-row:hover {
+            background-color: rgba(var(--primary-ios-rgb), 0.05);
+        }
+        
+        /* Color Helper for dynamic RGB values */
+        .dark {
+            --text-color-rgb: 242, 242, 247;
+            --primary-ios-rgb: 10, 132, 255;
+        }
+        :root {
+            --text-color-rgb: 28, 28, 30;
+            --primary-ios-rgb: 0, 122, 255;
+        }
+
+        /* Fix for input date height */
+        input[type="date"] {
+            min-height: 44px; /* iOS-like touch target size */
+        }
+        
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header (Gradient, Shadow, Fixed Top) -->
+    <header class="sticky top-0 z-10 w-full p-4 shadow-xl backdrop-blur-md transition-colors duration-500"
+            style="background: var(--card-bg); border-bottom: 1px solid rgba(0,0,0,0.05);">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <h1 class="text-2xl font-bold tracking-tight" style="color: var(--primary-ios);">
+                <i class="fas fa-chart-line mr-2"></i> Thống Kê
+            </h1>
+            <!-- Light/Dark Mode Toggle -->
+            <button id="themeToggle" class="btn-ios p-2 rounded-full text-xl" 
+                    style="color: var(--primary-ios); background: rgba(var(--primary-ios-rgb), 0.1);" 
+                    aria-label="Toggle Dark Mode">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-4 max-w-4xl pt-8">
+        
+        <!-- Tổng quan Doanh thu - Stat Cards (Fade-in + Slide-up) -->
+        <section class="mb-8 space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-4">
+            <div class="card-ios p-4 text-center animated-item" data-delay="0.1">
+                <h4 class="text-base font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu hôm nay</h4>
+                <p id="dailyRevenue" class="text-2xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
+            </div>
+            <div class="card-ios p-4 text-center animated-item" data-delay="0.2">
+                <h4 class="text-base font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu tuần này</h4>
+                <p id="weeklyRevenue" class="text-2xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
+            </div>
+            <div class="card-ios p-4 text-center animated-item" data-delay="0.3">
+                <h4 class="text-base font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu tháng này</h4>
+                <p id="monthlyRevenue" class="text-2xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
+            </div>
+        </section>
+
+        <!-- Biểu đồ Doanh thu (Animate Chart + Scroll Fade-in) -->
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.4" id="chartSection">
+            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">📈 Biểu đồ Doanh thu 30 ngày gần nhất</h3>
             <div class="chart-container">
-                <h3>Biểu đồ Doanh thu 30 ngày gần nhất</h3>
                 <canvas id="revenueChart"></canvas>
             </div>
-        </div>
+        </section>
         
-        <div class="card">
-            <h3>Thống kê món ăn bán chạy</h3>
-            <ul id="topSellingFoodsList" class="top-selling-list">
-                <li>Không có dữ liệu</li>
-            </ul>
-            <h3>Thống kê đồ uống bán chạy</h3>
-            <ul id="topSellingDrinksList" class="top-selling-list">
-                <li>Không có dữ liệu</li>
-            </ul>
-        </div>
+        <!-- Bộ lọc ngày (iOS Input Style) -->
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.5">
+            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">📅 Thống kê theo khoảng thời gian</h3>
+            <div class="date-filter space-y-4 md:flex md:gap-4 md:items-end">
+                <div class="flex-1">
+                    <label for="startDate" class="text-sm font-medium opacity-70 block mb-1">Từ ngày:</label>
+                    <input type="date" id="startDate" 
+                           class="w-full p-2 card-ios border-none focus:ring-2 focus:ring-blue-500 transition duration-150"
+                           style="border-radius: 8px; background-color: var(--bg-color);">
+                </div>
+                <div class="flex-1">
+                    <label for="endDate" class="text-sm font-medium opacity-70 block mb-1">Đến ngày:</label>
+                    <input type="date" id="endDate" 
+                           class="w-full p-2 card-ios border-none focus:ring-2 focus:ring-blue-500 transition duration-150"
+                           style="border-radius: 8px; background-color: var(--bg-color);">
+                </div>
+                <button id="filterStatsButton" 
+                        class="btn-ios md:w-auto w-full px-6 py-3 font-semibold text-white rounded-xl shadow-lg hover:shadow-xl transition-all"
+                        style="background-color: var(--primary-ios);">
+                    <i class="fas fa-search mr-2"></i> Xem thống kê
+                </button>
+            </div>
+            
+            <div id="filteredRevenueBox" class="card-ios mt-4 p-4 text-center transition-all duration-300" style="display: none;">
+                <h4 class="text-base font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu đã lọc</h4>
+                <p id="filteredRevenue" class="text-2xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
+            </div>
+        </section>
 
-        <div class="card">
-            <h3>Lịch sử Đơn hàng</h3>
-            <table class="order-history-table">
-                <thead>
-                    <tr>
-                        <th>Mã Hóa đơn</th>
-                        <th>Ngày</th>
-                        <th>Tổng tiền</th>
-                        <th>Chi tiết</th>
-                    </tr>
-                </thead>
-                <tbody id="orderHistoryTableBody">
+        <!-- Thống kê món bán chạy (iOS List Style) -->
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.6">
+            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🔥 Top Món Ăn Bán Chạy</h3>
+            <ul id="topSellingFoodsList" class="divide-y divide-gray-200/50">
+                <!-- Data injected here -->
+            </ul>
+        </section>
+
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.7">
+            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🥤 Top Đồ Uống Bán Chạy</h3>
+            <ul id="topSellingDrinksList" class="divide-y divide-gray-200/50">
+                <!-- Data injected here -->
+            </ul>
+        </section>
+
+        <!-- Lịch sử Đơn hàng (iOS Table/List Style) -->
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.8">
+            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🧾 Lịch sử Đơn hàng gần nhất</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="text-left text-sm font-medium opacity-70 border-b" style="border-color: rgba(var(--text-color-rgb), 0.1);">
+                            <th class="py-3 px-2 md:px-4">Mã HĐ</th>
+                            <th class="py-3 px-2 md:px-4 hidden sm:table-cell">Ngày & Giờ</th>
+                            <th class="py-3 px-2 md:px-4">Tổng tiền</th>
+                            <th class="py-3 px-2 md:px-4"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderHistoryTableBody">
+                        <!-- Data injected here -->
                     </tbody>
-            </table>
+                </table>
+                <p id="noOrderData" class="py-4 text-center text-gray-500" style="display: none;">Không có dữ liệu hóa đơn</p>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Modal Chi tiết Hóa đơn (Slide-up iOS style) -->
+    <div id="orderModal" class="modal fixed inset-0 flex items-end justify-center z-50 opacity-0 pointer-events-none">
+        <div class="modal-content-ios card-ios w-full max-w-lg p-5 rounded-t-3xl shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h4 class="text-xl font-bold">Chi tiết Hóa đơn</h4>
+                <button class="close-button text-2xl font-light text-gray-500 hover:text-gray-800 transition duration-150 p-1 rounded-full btn-ios">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div id="modalContentDetails" class="space-y-3 pb-4">
+                <p class="text-sm opacity-70"><strong>Mã HĐ:</strong> <span id="modalBillId" class="font-semibold" style="color: var(--primary-ios);"></span></p>
+                <p class="text-sm opacity-70"><strong>Ngày:</strong> <span id="modalDate" class="font-semibold"></span></p>
+                <p class="text-sm opacity-70"><strong>Tổng tiền:</strong> <span id="modalTotal" class="font-bold text-lg" style="color: var(--danger-ios);"></span></p>
+                <p class="text-sm font-semibold mt-4">Các món đã mua:</p>
+                <ul id="modalItemsList" class="divide-y" style="border-color: rgba(var(--text-color-rgb), 0.05);"></ul>
+            </div>
         </div>
     </div>
     
-    <div id="orderModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h4>Chi tiết Hóa đơn</h4>
-            <div id="modalContentDetails">
-                <p><strong>Mã HĐ:</strong> <span id="modalBillId"></span></p>
-                <p><strong>Ngày:</strong> <span id="modalDate"></span></p>
-                <p><strong>Tổng tiền:</strong> <span id="modalTotal"></span></p>
-                <p><strong>Các món đã mua:</strong></p>
-                <ul id="modalItemsList" class="modal-items-list"></ul>
-            </div>
-        </div>
+    <!-- Custom Alert/Toast Modal (iOS-like) -->
+    <div id="customAlert" class="fixed top-5 left-1/2 -translate-x-1/2 p-3 rounded-xl shadow-xl z-50 transition-all duration-300 opacity-0 pointer-events-none"
+         style="background: var(--card-bg); color: var(--text-color); border: 1px solid rgba(var(--text-color-rgb), 0.1);">
+        <p id="alertMessage" class="text-sm font-medium"></p>
     </div>
 
     <script>
+        // --- 1. CONFIG & INITIALIZATION (Giữ nguyên cấu hình Firebase của bạn) ---
+        
         // Cấu hình Firebase của bạn
-        // Vui lòng thay thế bằng thông tin Firebase của bạn
         const firebaseConfig = {
             apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQyO5y10",
             authDomain: "chitieu-7263e.firebaseapp.com",
@@ -425,34 +324,84 @@
         const topSellingDrinksListEl = document.getElementById('topSellingDrinksList');
         const orderHistoryTableBody = document.getElementById('orderHistoryTableBody');
         const orderModal = document.getElementById('orderModal');
-        const modalContentDetails = document.getElementById('modalContentDetails');
-        const closeButton = document.querySelector('.close-button');
+        const closeModalButton = orderModal.querySelector('.close-button');
         const modalBillIdEl = document.getElementById('modalBillId');
         const modalDateEl = document.getElementById('modalDate');
         const modalTotalEl = document.getElementById('modalTotal');
         const modalItemsListEl = document.getElementById('modalItemsList');
+        const noOrderData = document.getElementById('noOrderData');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const customAlert = document.getElementById('customAlert');
+        const alertMessageEl = document.getElementById('alertMessage');
         let revenueChartInstance = null;
+        let paymentsCache = []; // Cache dữ liệu thanh toán
+
         
-        // Dữ liệu mẫu đã được COMMENT để sử dụng dữ liệu thật từ Firebase
-        // const samplePayments = [
-        //     {
-        //         key: "-O_tLiPX1S9NYGDQzu5P",
-        //         billId: "HD250924083344",
-        //         timestamp: "2025-09-24T01:33:44.606Z",
-        //         totalAmount: 610000,
-        //         finalTotal: 671000,
-        //         items: {
-        //             "-O_rTEe0SYGEcdvjBkNk": { name: "Mẹc 6 người", price: 500000, quantity: 1 },
-        //             "-O_rTHOtaya1rlvkNG3K": { name: "7 up", price: 30000, quantity: 1 },
-        //             "-O_rTJ0wxPOh3vwzVBkf": { name: "pepsi", price: 30000, quantity: 1 },
-        //             "-O_raC8-wztt2p_pkF9U": { name: "Canh cà đắng", price: 50000, quantity: 1 }
-        //         }
-        //     }
-        // ];
+        // --- 2. CORE UTILITIES (Animations, Dark Mode, Alerts) ---
+
+        // Custom Alert/Toast instead of window.alert()
+        function showCustomAlert(message) {
+            alertMessageEl.textContent = message;
+            customAlert.classList.remove('opacity-0', 'pointer-events-none');
+            customAlert.classList.add('opacity-100');
+            setTimeout(() => {
+                customAlert.classList.add('opacity-0', 'pointer-events-none');
+                customAlert.classList.remove('opacity-100');
+            }, 3000);
+        }
+        
+        // Dark Mode Toggle Logic
+        function loadTheme() {
+            const isDarkMode = localStorage.getItem('theme') === 'dark';
+            document.body.classList.toggle('dark', isDarkMode);
+            themeIcon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            const isDarkMode = document.body.classList.contains('dark');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            themeIcon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+            if (revenueChartInstance) {
+                // Cập nhật màu biểu đồ khi chuyển chế độ
+                updateChartColors();
+                revenueChartInstance.update();
+            }
+        });
+
+        // Scroll Animation Logic (Intersection Observer)
+        function setupScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const delay = parseFloat(entry.target.dataset.delay || 0);
+                        setTimeout(() => {
+                            entry.target.classList.add('active');
+                            observer.unobserve(entry.target);
+                        }, delay * 1000);
+                    }
+                });
+            }, { 
+                rootMargin: '0px', 
+                threshold: 0.1 // Bắt đầu load khi 10% element xuất hiện
+            });
+
+            document.querySelectorAll('.animated-item').forEach(item => {
+                observer.observe(item);
+            });
+        }
+        
+        // --- 3. FIREBASE DATA FETCHING (Giữ nguyên logic của bạn) ---
 
         function fetchPayments() {
-            // ĐOẠN CODE NÀY BÂY GIỜ ĐÃ ĐƯỢC KÍCH HOẠT để lấy dữ liệu THẬT
             return new Promise((resolve, reject) => {
+                // Kiểm tra cache trước
+                if (paymentsCache.length > 0) {
+                    return resolve(paymentsCache);
+                }
+                
+                // Lắng nghe một lần từ Firebase (Once), sau đó lưu vào cache
                 database.ref('payment_history').once('value', (snapshot) => {
                     const payments = [];
                     snapshot.forEach(childSnapshot => {
@@ -463,39 +412,32 @@
                             date: new Date(payment.timestamp).toISOString().slice(0, 10)
                         });
                     });
+                    
+                    paymentsCache = payments; // Lưu cache
                     resolve(payments);
                 }).catch(reject);
             });
-            
-            // Vui lòng COMMENT đoạn code này khi bạn dùng đoạn code Firebase thật
-            // return Promise.resolve(samplePayments.map(p => {
-            //     return {
-            //         ...p,
-            //         date: new Date(p.timestamp).toISOString().slice(0, 10)
-            //     };
-            // }));
         }
+        
+        // --- 4. DATA RENDERING FUNCTIONS (Cập nhật DOM và Animations) ---
 
-        async function updateSummaryStats() {
-            const now = new Date();
-            const today = now.toISOString().slice(0, 10);
+        function updateChartColors() {
+            const isDark = document.body.classList.contains('dark');
+            const chartColor = isDark ? 'rgba(10, 132, 255, 0.7)' : 'rgba(0, 122, 255, 0.7)'; // iOS Blue
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const labelColor = isDark ? 'var(--text-color)' : 'var(--text-color)';
             
-            const firstDayOfWeek = new Date(now);
-            firstDayOfWeek.setDate(now.getDate() - now.getDay());
-            const startOfWeek = firstDayOfWeek.toISOString().slice(0, 10);
-
-            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-            
-            const payments = await fetchPayments();
-            const dailyTotal = payments.filter(p => p.date === today).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
-            const weeklyTotal = payments.filter(p => p.date >= startOfWeek).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
-            const monthlyTotal = payments.filter(p => p.date >= startOfMonth).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
-
-            dailyRevenueEl.textContent = dailyTotal.toLocaleString('vi-VN') + '₫';
-            weeklyRevenueEl.textContent = weeklyTotal.toLocaleString('vi-VN') + '₫';
-            monthlyRevenueEl.textContent = monthlyTotal.toLocaleString('vi-VN') + '₫';
+            if (revenueChartInstance) {
+                revenueChartInstance.data.datasets[0].backgroundColor = chartColor;
+                revenueChartInstance.data.datasets[0].borderColor = chartColor;
+                revenueChartInstance.options.scales.y.grid.color = gridColor;
+                revenueChartInstance.options.scales.x.grid.color = gridColor;
+                revenueChartInstance.options.scales.y.ticks.color = labelColor;
+                revenueChartInstance.options.scales.x.ticks.color = labelColor;
+                revenueChartInstance.options.plugins.legend.labels.color = labelColor;
+            }
         }
-
+        
         async function update30DayChart() {
             const now = new Date();
             const today = now.toISOString().slice(0, 10);
@@ -524,6 +466,9 @@
             if (revenueChartInstance) {
                 revenueChartInstance.destroy();
             }
+            
+            const isDark = document.body.classList.contains('dark');
+            const chartColor = isDark ? 'rgba(10, 132, 255, 0.7)' : 'rgba(0, 122, 255, 0.7)';
 
             revenueChartInstance = new Chart(revenueChartCanvas, {
                 type: 'bar',
@@ -532,30 +477,56 @@
                     datasets: [{
                         label: 'Doanh thu',
                         data: data,
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
+                        backgroundColor: chartColor,
+                        borderColor: chartColor,
+                        borderRadius: 6, // Bo tròn thanh bar
+                        borderWidth: 1,
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000, // Easing mượt
+                        easing: 'easeInOutCubic',
+                        delay: (context) => context.dataIndex * 50 // Animate từng thanh
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toLocaleString('vi-VN') + '₫';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Doanh thu (₫)'
+                            grid: {
+                                color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                                drawBorder: false,
                             },
                             ticks: {
-                                callback: function(value, index, values) {
-                                    return value.toLocaleString('vi-VN') + '₫';
-                                }
+                                color: 'var(--text-color)',
+                                callback: (value) => value.toLocaleString('vi-VN') + '₫',
                             }
                         },
                         x: {
-                            title: {
-                                display: true,
-                                text: 'Ngày'
+                            grid: {
+                                display: false,
+                            },
+                            ticks: {
+                                color: 'var(--text-color)',
+                                maxRotation: 45,
+                                minRotation: 45
                             }
                         }
                     }
@@ -563,21 +534,44 @@
             });
         }
         
+        // Tái sử dụng logic cũ cho các phần thống kê tổng hợp (chỉ thay đổi cách hiển thị DOM)
+        async function updateSummaryStats() {
+            const now = new Date();
+            const today = now.toISOString().slice(0, 10);
+            
+            const firstDayOfWeek = new Date(now);
+            firstDayOfWeek.setDate(now.getDate() - now.getDay());
+            const startOfWeek = firstDayOfWeek.toISOString().slice(0, 10);
+
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+            
+            const payments = await fetchPayments();
+            const dailyTotal = payments.filter(p => p.date === today).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
+            const weeklyTotal = payments.filter(p => p.date >= startOfWeek).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
+            const monthlyTotal = payments.filter(p => p.date >= startOfMonth).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
+
+            dailyRevenueEl.textContent = dailyTotal.toLocaleString('vi-VN') + '₫';
+            weeklyRevenueEl.textContent = weeklyTotal.toLocaleString('vi-VN') + '₫';
+            monthlyRevenueEl.textContent = monthlyTotal.toLocaleString('vi-VN') + '₫';
+        }
+
         async function updateTopSellingItems() {
             const payments = await fetchPayments();
             
             const foodSales = {};
             const drinkSales = {};
             
-            const drinksList = ["coca", "trà đào", "nước cam", "bia sài gòn", "7 up", "pepsi"];
+            // Ví dụ: danh sách đồ uống để phân loại (Bạn có thể cập nhật danh sách này)
+            const drinksList = ["coca", "trà đào", "nước cam", "bia sài gòn", "7 up", "pepsi", "trà sữa"]; 
 
             payments.forEach(payment => {
                 if (payment.items) {
                     Object.values(payment.items).forEach(item => {
-                        const itemName = item.name.toLowerCase();
+                        const itemName = item.name.toLowerCase().trim();
                         const quantity = item.quantity;
                         
-                        if (drinksList.includes(itemName)) {
+                        // Phân loại đơn giản
+                        if (drinksList.some(drink => itemName.includes(drink))) {
                             if (drinkSales[itemName]) {
                                 drinkSales[itemName] += quantity;
                             } else {
@@ -594,30 +588,33 @@
                 }
             });
             
-            const sortedFoods = Object.entries(foodSales).sort(([, a], [, b]) => b - a);
-            const sortedDrinks = Object.entries(drinkSales).sort(([, a], [, b]) => b - a);
+            const sortedFoods = Object.entries(foodSales).sort(([, a], [, b]) => b - a).slice(0, 10);
+            const sortedDrinks = Object.entries(drinkSales).sort(([, a], [, b]) => b - a).slice(0, 10);
 
-            topSellingFoodsListEl.innerHTML = '';
-            if (sortedFoods.length === 0) {
-                topSellingFoodsListEl.innerHTML = '<li>Không có dữ liệu</li>';
-            } else {
-                sortedFoods.forEach(([name, quantity], index) => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span>${index + 1}. ${name}</span><span>Đã bán: ${quantity}</span>`;
-                    topSellingFoodsListEl.appendChild(li);
-                });
+            function renderTopList(listEl, data) {
+                listEl.innerHTML = '';
+                if (data.length === 0) {
+                    listEl.innerHTML = '<li class="py-3 text-center text-gray-500">Không có dữ liệu bán chạy</li>';
+                } else {
+                    data.forEach(([name, quantity], index) => {
+                        const li = document.createElement('li');
+                        li.className = 'flex justify-between items-center py-3 list-row';
+                        li.innerHTML = `
+                            <span class="font-medium flex-1 truncate">
+                                <span class="text-sm font-bold w-6 inline-block" style="color: var(--primary-ios);">${index + 1}.</span> 
+                                ${name.charAt(0).toUpperCase() + name.slice(1)}
+                            </span>
+                            <span class="text-sm font-semibold" style="color: var(--secondary-ios);">
+                                ${quantity.toLocaleString('vi-VN')} <span class="opacity-70">món</span>
+                            </span>
+                        `;
+                        listEl.appendChild(li);
+                    });
+                }
             }
 
-            topSellingDrinksListEl.innerHTML = '';
-            if (sortedDrinks.length === 0) {
-                topSellingDrinksListEl.innerHTML = '<li>Không có dữ liệu</li>';
-            } else {
-                sortedDrinks.forEach(([name, quantity], index) => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span>${index + 1}. ${name}</span><span>Đã bán: ${quantity}</span>`;
-                    topSellingDrinksListEl.appendChild(li);
-                });
-            }
+            renderTopList(topSellingFoodsListEl, sortedFoods);
+            renderTopList(topSellingDrinksListEl, sortedDrinks);
         }
 
         async function updateOrderHistory() {
@@ -625,40 +622,56 @@
             orderHistoryTableBody.innerHTML = '';
 
             const sortedPayments = payments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
+            
             if (sortedPayments.length === 0) {
-                orderHistoryTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Không có dữ liệu hóa đơn</td></tr>';
-            } else {
-                sortedPayments.forEach(payment => {
-                    const row = document.createElement('tr');
-                    const formattedDate = new Date(payment.timestamp).toLocaleString('vi-VN');
-                    const formattedTotal = payment.finalTotal.toLocaleString('vi-VN') + '₫';
-                    
-                    row.innerHTML = `
-                        <td>${payment.billId || payment.key}</td>
-                        <td>${formattedDate}</td>
-                        <td>${formattedTotal}</td>
-                        <td><button class="view-details-btn" data-key="${payment.key}">Xem</button></td>
-                    `;
-                    orderHistoryTableBody.appendChild(row);
-                });
+                noOrderData.style.display = 'block';
+                return;
             }
+            
+            noOrderData.style.display = 'none';
+
+            sortedPayments.forEach(payment => {
+                const row = document.createElement('tr');
+                // Sử dụng Date object để đảm bảo format chính xác
+                const dateObj = new Date(payment.timestamp);
+                const formattedDate = dateObj.toLocaleDateString('vi-VN') + ' ' + dateObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+                const formattedTotal = payment.finalTotal.toLocaleString('vi-VN') + '₫';
+                
+                row.className = 'list-row';
+                row.innerHTML = `
+                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-medium" style="color: var(--primary-ios);">${payment.billId || payment.key.substring(1, 7)}</td>
+                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm hidden sm:table-cell opacity-70">${formattedDate}</td>
+                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-semibold" style="color: var(--danger-ios);">${formattedTotal}</td>
+                    <td class="py-3 px-2 md:px-4 text-right">
+                        <button class="view-details-btn btn-ios text-sm font-semibold px-3 py-1 rounded-full text-white" 
+                                data-key="${payment.key}"
+                                style="background-color: var(--primary-ios);">
+                            Xem
+                        </button>
+                    </td>
+                `;
+                orderHistoryTableBody.appendChild(row);
+            });
         }
         
+        // --- 5. EVENT HANDLERS & MODALS ---
+
         orderHistoryTableBody.addEventListener('click', async (event) => {
             if (event.target.classList.contains('view-details-btn')) {
                 const orderKey = event.target.dataset.key;
-                const payments = await fetchPayments();
-                const selectedPayment = payments.find(p => p.key === orderKey);
+                // Sử dụng paymentsCache để tránh gọi lại fetchPayments nếu đã có dữ liệu
+                const selectedPayment = paymentsCache.find(p => p.key === orderKey);
                 
                 if (selectedPayment) {
                     showOrderDetails(selectedPayment);
+                } else {
+                    showCustomAlert('Lỗi: Không tìm thấy chi tiết hóa đơn này trong bộ nhớ cache.');
                 }
             }
         });
 
         function showOrderDetails(payment) {
-            modalBillIdEl.textContent = payment.billId || payment.key;
+            modalBillIdEl.textContent = payment.billId || payment.key.substring(1, 10) + '...';
             modalDateEl.textContent = new Date(payment.timestamp).toLocaleString('vi-VN');
             modalTotalEl.textContent = payment.finalTotal.toLocaleString('vi-VN') + '₫';
             
@@ -666,21 +679,32 @@
             if (payment.items) {
                 Object.values(payment.items).forEach(item => {
                     const li = document.createElement('li');
-                    li.textContent = `${item.name} x ${item.quantity} - ${item.price.toLocaleString('vi-VN')}₫`;
+                    li.className = 'flex justify-between py-2 text-sm';
+                    li.innerHTML = `
+                        <span class="opacity-80">${item.name} x <span class="font-bold" style="color: var(--primary-ios);">${item.quantity}</span></span>
+                        <span class="font-medium">${(item.price * item.quantity).toLocaleString('vi-VN')}₫</span>
+                    `;
                     modalItemsListEl.appendChild(li);
                 });
             }
             
-            orderModal.style.display = 'block';
+            // Hiển thị modal với animation
+            orderModal.classList.add('open', 'opacity-100', 'pointer-events-auto');
+            orderModal.classList.remove('opacity-0', 'pointer-events-none');
         }
         
-        closeButton.addEventListener('click', () => {
-            orderModal.style.display = 'none';
-        });
+        function hideModal() {
+            // Ẩn modal với animation
+            orderModal.classList.add('opacity-0', 'pointer-events-none');
+            orderModal.classList.remove('open', 'opacity-100', 'pointer-events-auto');
+        }
+        
+        closeModalButton.addEventListener('click', hideModal);
 
         window.addEventListener('click', (event) => {
+            // Đóng modal khi click ra bên ngoài
             if (event.target === orderModal) {
-                orderModal.style.display = 'none';
+                hideModal();
             }
         });
 
@@ -689,24 +713,32 @@
             const endDate = endDateInput.value;
             
             if (startDate && endDate) {
-                const payments = await fetchPayments();
+                // Tận dụng cache
+                const payments = await fetchPayments(); 
                 const filteredPayments = payments.filter(p => p.date >= startDate && p.date <= endDate);
                 const totalRevenue = filteredPayments.reduce((sum, p) => sum + (p.finalTotal || 0), 0);
                 
                 filteredRevenueEl.textContent = totalRevenue.toLocaleString('vi-VN') + '₫';
                 filteredRevenueBox.style.display = 'block';
+                filteredRevenueBox.classList.add('active'); // Thêm hiệu ứng load
+                
             } else {
-                alert('Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.');
+                showCustomAlert('Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.'); // Thay alert()
             }
         });
-
+        
+        // --- 6. INITIAL LOAD ---
+        
         document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            // Tải dữ liệu
             updateSummaryStats();
             update30DayChart();
             updateTopSellingItems();
             updateOrderHistory();
+            // Kích hoạt animations scroll sau khi dữ liệu tải xong
+            setupScrollAnimations();
         });
     </script>
 </body>
 </html>
-
