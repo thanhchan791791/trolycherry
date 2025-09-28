@@ -422,6 +422,8 @@
                     }
                     user.rolePermissions = currentPermissions; // Store explicit permissions
                     showDashboardScreen(user);
+                    localStorage.setItem("currentUser", JSON.stringify(user));
+
                 } else {
                     errorEl.textContent = `Vai trò '${user.role}' không hợp lệ hoặc chưa được phân quyền.`;
                     errorEl.classList.remove('hidden');
@@ -432,11 +434,13 @@
             }
         }
 
-        function logoutUser() {
-            currentUser = null;
-            currentPermissions = [];
-            showLoginScreen();
-        }
+       function logoutUser() {
+    currentUser = null;
+    currentPermissions = [];
+    localStorage.removeItem("currentUser"); // 👉 Xóa thông tin đã lưu
+    showLoginScreen();
+}
+
         
         // --- Navigation and View Switching (iOS Styling Applied) ---
 
@@ -784,23 +788,29 @@
                 });
         }
         
-        // --- Main execution flow ---
         document.addEventListener('DOMContentLoaded', async () => {
-            await createInitialAdmin();
+    await createInitialAdmin();
 
-            document.getElementById('login-button').addEventListener('click', loginUser);
-            // Attach logout listeners
-            document.getElementById('logout-button').addEventListener('click', logoutUser);
-            document.getElementById('logout-button-mobile').addEventListener('click', logoutUser); // Mobile logout button
-            
-            document.getElementById('password').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    loginUser();
-                }
-            });
+    document.getElementById('login-button').addEventListener('click', loginUser);
+    document.getElementById('logout-button').addEventListener('click', logoutUser);
+    document.getElementById('logout-button-mobile').addEventListener('click', logoutUser);
 
-            showLoginScreen(); 
-        });
+    document.getElementById('password').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            loginUser();
+        }
+    });
+
+    // 👉 Kiểm tra localStorage khi load trang
+    const savedUser = localStorage.getItem("currentUser");
+    if (savedUser) {
+        const user = JSON.parse(savedUser);
+        showDashboardScreen(user); 
+    } else {
+        showLoginScreen(); 
+    }
+});
+
 
     </script>
 </body>
