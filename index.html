@@ -324,23 +324,25 @@
         let currentPermissions = [];
         let currentViewId = 'main_menu'; // Track current view, default to main menu
 
-        // --- Role-Based Access Control (RBAC) Setup - UPDATED PERMISSIONS ---
-        const PERMISSIONS = {
-            'admin': ['sales', 'stats', 'revenue_expense', 'inventory', 'kitchen_bar', 'personnel'],
-            'waiter': ['sales'], 
-            'cashier': ['sales', 'stats', 'revenue_expense'], 
-            'kitchen_bar_staff': ['inventory', 'kitchen_bar'], 
-            'accountant': ['stats', 'revenue_expense', 'personnel'],
-        };
+       // --- Role-Based Access Control (RBAC) Setup - UPDATED PERMISSIONS ---
+const PERMISSIONS = {
+    'admin': ['sales', 'stats', 'revenue_expense', 'inventory', 'kitchen_bar', 'personnel', 'menu_management'], // THÊM 'menu_management' VÀO ĐÂY
+    'waiter': ['sales'], 
+    'cashier': ['sales', 'stats', 'revenue_expense'], 
+    'kitchen_bar_staff': ['inventory', 'kitchen_bar'], 
+    'accountant': ['stats', 'revenue_expense', 'personnel'],
+};
 
-        const MENU_ITEMS = [
-            { id: 'sales', name: 'Bán hàng', icon: 'fas fa-cash-register', color: '#007AFF', view: renderSalesView, file: 'banhang.html' }, // Blue
-            { id: 'stats', name: 'Thống kê', icon: 'fas fa-chart-pie', color: '#FF9500', view: renderStatsView, file: 'thongke.html' }, // Orange
-            { id: 'revenue_expense', name: 'Thu Chi', icon: 'fas fa-file-invoice-dollar', color: '#34C759', view: renderRevenueExpenseView, file: 'thuchi.html' }, // Green
-            { id: 'inventory', name: 'Tồn kho', icon: 'fas fa-boxes', color: '#AF52DE', view: renderInventoryView, file: 'quanlytonkho.html' }, // Purple
-            { id: 'kitchen_bar', name: 'Bếp & Bar', icon: 'fas fa-cookie-bite', color: '#FF3B30', view: renderKitchenBarView, file: 'bepbar.html' }, // Red
-            { id: 'personnel', name: 'Nhân sự', icon: 'fas fa-users', color: '#5856D6', view: renderPersonnelView }, // Indigo
-        ];
+       const MENU_ITEMS = [
+    { id: 'sales', name: 'Bán hàng', icon: 'fas fa-cash-register', color: '#007AFF', view: renderSalesView, file: 'banhang.html' }, // Blue
+    { id: 'stats', name: 'Thống kê', icon: 'fas fa-chart-pie', color: '#FF9500', view: renderStatsView, file: 'thongke.html' }, // Orange
+    { id: 'revenue_expense', name: 'Thu Chi', icon: 'fas fa-file-invoice-dollar', color: '#34C759', view: renderRevenueExpenseView, file: 'thuchi.html' }, // Green
+    { id: 'inventory', name: 'Tồn kho', icon: 'fas fa-boxes', color: '#AF52DE', view: renderInventoryView, file: 'quanlytonkho.html' }, // Purple
+    { id: 'kitchen_bar', name: 'Bếp & Bar', icon: 'fas fa-cookie-bite', color: '#FF3B30', view: renderKitchenBarView, file: 'bepbar.html' }, // Red
+    { id: 'personnel', name: 'Nhân sự', icon: 'fas fa-users', color: '#5856D6', view: renderPersonnelView }, // Indigo
+    // CHỨC NĂNG MỚI ĐƯỢC THÊM VÀO ĐÂY
+    { id: 'menu_management', name: 'Quản lý Menu', icon: 'fas fa-clipboard-list', color: '#9400D3', view: renderMenuView, file: 'menu.html' }, // Dark Violet
+];
         
         // --- Utility Functions (Firebase not modified) ---
         function showLoginScreen() {
@@ -810,7 +812,13 @@
         showLoginScreen(); 
     }
 });
+// Thêm hàm này vào nhóm "View Render Functions (iOS Style Placeholders - UPDATED TO IFRAME)"
 
+function renderMenuView() {
+    renderIframeView(getFile('menu_management'), getName('menu_management')); // menu.html
+}
+
+// ... các hàm render khác (renderSalesView, renderStatsView, v.v.)
 
     </script>
 </body>
