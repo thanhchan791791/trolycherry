@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Menu | Giao diện iOS</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* * -----------------------------------------------------------
+         * iOS HIG Styling (SF Pro Simulation, Soft Shadows, Blur)
+         * -----------------------------------------------------------
+         */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            /* Simulating SF Pro with Inter - clean, high-contrast, versatile */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #F8F8F8; /* Light background for high contrast */
+        }
+
+        /* Custom Soft Shadow (iOS-like) */
+        .shadow-soft {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 4px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Frosted Glass Effect (iOS Blur) */
+        .frosted-glass {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* iOS Button Press Effect */
+        .btn-ios:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+            transition-duration: 100ms;
+        }
+
+        /* Skeleton Shimmer Animation */
+        .shimmer-animation {
+            background: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-size: 1000px 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { background-position: -468px 0; }
+            100% { background-position: 468px 0; }
+        }
+    </style>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, onValue, push, update, remove, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // Global Firebase variables (UNCHANGED)
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
+            authDomain: "chitieu-7263e.firebaseapp.com",
+            databaseURL: "https://chitieu-7263e-default-rtdb.firebaseio.com",
+            projectId: "chitieu-7263e",
+            storageBucket: "chitieu-7263e.firebasestorage.app",
+            messagingSenderId: "83833140682",
+            appId: "1:83833140682:web:f9254b418ace3a659fcb33",
+            measurementId: "G-523X74K18N"
+        };
+        
+        let db, auth;
+        let selectedItem = null; // To hold the item being edited
+        let isLoading = true;
+
+        /**
+         * Converts number to VND currency format.
+         * @param {number} amount 
+         * @returns {string} Formatted string
+         */
+        const formatVND = (amount) => {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        };
+
+        // --- FIREBASE INITIALIZATION AND AUTHENTICATION (UNCHANGED) ---
+        window.onload = async () => {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getDatabase(app);
+
+                // Sign in anonymously to ensure access to Realtime Database
+                await signInAnonymously(auth);
+                console.log("Đã đăng nhập ẩn danh thành công.");
+
+                // Start listening for menu changes
+                listenForMenuUpdates();
+
+                // Setup event listeners for the form
+                document.getElementById('menuForm').addEventListener('submit', handleFormSubmit);
+                document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+                
+                // Setup scroll listener for Large Title effect
+                window.addEventListener('scroll', handleScroll);
+                
+            } catch (error) {
+                console.error("Lỗi khởi tạo Firebase hoặc đăng nhập:", error);
+                displayMessage("Lỗi hệ thống: Không thể kết nối đến Firebase. Vui lòng kiểm tra console.", 'error');
+                isLoading = false;
+                renderMenu({});
+            }
+        };
+
+        // --- LARGE TITLE SCROLL EFFECT ---
+        const handleScroll = () => {
+            const headerTitle = document.getElementById('largeTitle');
+            const scrollY = window.scrollY;
+            if (headerTitle) {
+                if (scrollY > 100) {
+                    headerTitle.classList.add('opacity-0', 'pointer-events-none');
+                    headerTitle.classList.remove('opacity-100');
+                } else {
+                    headerTitle.classList.add('opacity-100');
+                    headerTitle.classList.remove('opacity-0', 'pointer-events-none');
+                }
+            }
+        };
+
+
+        // --- REALTIME DATABASE LISTENER (UNCHANGED LOGIC) ---
+        const listenForMenuUpdates = () => {
+            const menuRef = ref(db, 'menu');
+            onValue(menuRef, (snapshot) => {
+                const menuData = snapshot.val() || { food: {}, drink: {} };
+                isLoading = false;
+                renderMenu(menuData);
+                console.log("Dữ liệu menu đã cập nhật:", menuData);
+            }, (error) => {
+                console.error("Lỗi đọc dữ liệu Realtime:", error);
+                displayMessage("Lỗi đọc dữ liệu menu. Vui lòng thử lại.", 'error');
+                isLoading = false;
+                renderMenu({});
+            });
+        };
+
+        // --- RENDERING FUNCTIONS ---
+        const renderSkeleton = () => {
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${Array(6).fill('').map(() => `
+                        <div class="bg-white p-5 rounded-3xl shadow-soft flex flex-col justify-between">
+                            <div class="space-y-3">
+                                <div class="h-6 w-3/4 rounded-md shimmer-animation"></div>
+                                <div class="h-8 w-1/2 rounded-md shimmer-animation"></div>
+                            </div>
+                            <div class="flex space-x-3 mt-4">
+                                <div class="h-10 flex-1 rounded-2xl shimmer-animation"></div>
+                                <div class="h-10 flex-1 rounded-2xl shimmer-animation"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        };
+
+        const renderMenu = (menuData) => {
+            const menuContainer = document.getElementById('menuContainer');
+            
+            if (isLoading) {
+                menuContainer.innerHTML = renderSkeleton();
+                return;
+            }
+
+            menuContainer.innerHTML = ''; // Clear existing content
+
+            ['food', 'drink'].forEach(category => {
+                const categoryItems = menuData[category] || {};
+                
+                const categoryTitle = document.createElement('h2');
+                // Simulating iOS Section Title
+                categoryTitle.className = 'text-2xl font-bold text-gray-800 mb-4 mt-8 pt-4 border-t border-gray-200 capitalize';
+                categoryTitle.textContent = category === 'food' ? 'Món Ăn' : 'Thức Uống';
+                menuContainer.appendChild(categoryTitle);
+
+                const list = document.createElement('div');
+                list.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5';
+
+                // Convert items object to array for easier iteration
+                const itemsArray = Object.entries(categoryItems).map(([key, value]) => ({ id: key, ...value }));
+
+                if (itemsArray.length === 0) {
+                    const emptyMsg = document.createElement('p');
+                    emptyMsg.className = 'col-span-3 text-center text-gray-400 italic p-6 bg-gray-50 rounded-2xl shadow-inner';
+                    emptyMsg.textContent = `Chưa có ${category === 'food' ? 'món ăn' : 'thức uống'} nào được thêm.`;
+                    list.appendChild(emptyMsg);
+                } else {
+                    itemsArray.forEach(item => {
+                        const card = document.createElement('div');
+                        // iOS Card Style: Large rounded corners, soft shadow
+                        card.className = 'bg-white p-5 rounded-3xl shadow-soft flex flex-col justify-between transition duration-300 transform hover:scale-[1.01]';
+                        
+                        // Content
+                        const content = `
+                            <div class="mb-4">
+                                <p class="text-xl font-semibold text-gray-900">${item.name}</p>
+                                <p class="text-3xl font-extrabold text-orange-500 mt-1">${formatVND(item.price)}</p>
+                            </div>
+                        `;
+                        card.innerHTML = content;
+
+                        // Actions
+                        const actions = document.createElement('div');
+                        actions.className = 'flex space-x-3 mt-4';
+                        
+                        const editBtn = createActionButton('Sửa', 'bg-blue-500 hover:bg-blue-600', () => openEditForm(item.id, category, item.name, item.price));
+                        const deleteBtn = createActionButton('Xóa', 'bg-red-500 hover:bg-red-600', () => confirmAndDelete(item.id, category, item.name));
+
+                        actions.appendChild(editBtn);
+                        actions.appendChild(deleteBtn);
+                        card.appendChild(actions);
+
+                        list.appendChild(card);
+                    });
+                }
+                menuContainer.appendChild(list);
+            });
+        };
+
+        const createActionButton = (text, colorClass, handler) => {
+            const button = document.createElement('button');
+            button.textContent = text;
+            // Apply iOS button press effect
+            button.className = `${colorClass} text-white font-medium py-3 px-4 rounded-2xl transition duration-150 shadow-md flex-1 btn-ios`;
+            button.addEventListener('click', handler);
+            return button;
+        };
+
+
+        // --- FORM AND CRUD HANDLERS (UNCHANGED LOGIC) ---
+
+        const handleFormSubmit = async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value.trim();
+            const price = parseInt(document.getElementById('price').value);
+            const category = document.getElementById('category').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+
+            if (!name || isNaN(price) || price <= 0) {
+                displayMessage("Vui lòng nhập tên món và giá hợp lệ (> 0).", 'warning');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = selectedItem ? 'Đang Lưu...' : 'Đang Thêm...';
+
+            try {
+                if (selectedItem) {
+                    // Update existing item
+                    await updateItem(selectedItem.id, category, name, price);
+                    displayMessage(`Đã cập nhật món "${name}" thành công!`, 'success');
+                } else {
+                    // Add new item
+                    await addItem(category, name, price);
+                    displayMessage(`Đã thêm món "${name}" thành công!`, 'success');
+                }
+                resetForm();
+
+            } catch (error) {
+                console.error("Lỗi xử lý menu:", error);
+                displayMessage(`Lỗi: Không thể ${selectedItem ? 'cập nhật' : 'thêm'} món.`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        };
+
+        const addItem = async (category, name, price) => {
+            const newRef = push(ref(db, `menu/${category}`));
+            await set(newRef, { name, price });
+        };
+
+        const updateItem = async (itemId, category, name, price) => {
+            const itemRef = ref(db, `menu/${category}/${itemId}`);
+            await update(itemRef, { name, price });
+        };
+
+        const confirmAndDelete = (itemId, category, itemName) => {
+            const confirmation = document.getElementById('confirmationModal');
+            document.getElementById('confirmText').textContent = `Bạn có chắc chắn muốn xóa món "${itemName}"? Thao tác này không thể hoàn tác.`;
+            document.getElementById('confirmDeleteBtn').onclick = async () => {
+                hideModal();
+                await deleteItem(itemId, category, itemName);
+            };
+            showModal();
+        };
+
+        const deleteItem = async (itemId, category, itemName) => {
+            try {
+                const itemRef = ref(db, `menu/${category}/${itemId}`);
+                await remove(itemRef);
+                displayMessage(`Đã xóa món "${itemName}" thành công.`, 'success');
+            } catch (error) {
+                console.error("Lỗi xóa dữ liệu:", error);
+                displayMessage(`Lỗi: Không thể xóa món "${itemName}".`, 'error');
+            }
+        };
+        
+        // --- UI UTILITIES (UPDATED STYLING) ---
+
+        const openEditForm = (id, category, name, price) => {
+            selectedItem = { id, category, name, price };
+
+            document.getElementById('name').value = name;
+            document.getElementById('price').value = price;
+            document.getElementById('category').value = category;
+            
+            document.getElementById('formTitle').textContent = 'Chỉnh Sửa Menu';
+            document.getElementById('submitBtn').textContent = 'Lưu Thay Đổi';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+            // Scroll to the form (iOS push animation simulation)
+            document.getElementById('managementSection').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        const resetForm = () => {
+            selectedItem = null;
+            document.getElementById('menuForm').reset();
+            
+            document.getElementById('formTitle').textContent = 'Thêm Món Mới';
+            document.getElementById('submitBtn').textContent = 'Thêm Món';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        };
+
+        const displayMessage = (text, type = 'info') => {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = text;
+            // Floating, slightly blurred notification box
+            messageBox.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 p-4 rounded-xl shadow-soft z-50 transition-transform duration-300 transform frosted-glass text-center';
+            
+            let textColor = 'text-gray-900';
+            switch (type) {
+                case 'success':
+                    textColor = 'text-green-600';
+                    break;
+                case 'error':
+                    textColor = 'text-red-600';
+                    break;
+                case 'warning':
+                    textColor = 'text-yellow-600';
+                    break;
+                default:
+                    textColor = 'text-blue-600';
+            }
+
+            messageBox.classList.add(textColor);
+            messageBox.style.transform = 'translate(-50%, 0)';
+
+            // Hide after 4 seconds
+            setTimeout(() => {
+                messageBox.style.transform = 'translate(-50%, 150%)';
+            }, 4000);
+        };
+        
+        const showModal = () => document.getElementById('confirmationModal').classList.remove('hidden');
+        const hideModal = () => document.getElementById('confirmationModal').classList.add('hidden');
+
+        // Attach hideModal to close buttons
+        document.getElementById('cancelDeleteBtn').addEventListener('click', hideModal);
+        document.getElementById('closeModalBtn').addEventListener('click', hideModal);
+        
+    </script>
+</head>
+<body class="min-h-screen">
+
+    <!-- Confirmation Modal (Frosted Glass backdrop + iOS Look) -->
+    <div id="confirmationModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity duration-300">
+        <div class="frosted-glass rounded-3xl p-8 max-w-xs w-full shadow-soft transform scale-100 transition-transform duration-300 text-center">
+            <div class="flex justify-end items-start mb-2 absolute top-2 right-2">
+                <button id="closeModalBtn" class="p-1 rounded-full text-gray-400 hover:text-gray-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <h3 class="text-xl font-bold text-red-600 mt-4 mb-2">Xác Nhận Xóa</h3>
+            <p id="confirmText" class="text-gray-700 mb-6 text-sm">Bạn có chắc chắn muốn xóa món này? Thao tác này không thể hoàn tác.</p>
+            <div class="flex flex-col space-y-3">
+                <button id="confirmDeleteBtn" class="py-3 bg-red-500 text-white font-semibold rounded-2xl shadow-md btn-ios">Xóa Ngay</button>
+                <button id="cancelDeleteBtn" class="py-3 bg-gray-100 text-gray-800 rounded-2xl font-medium btn-ios">Hủy</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Floating Notification Message Box -->
+    <div id="messageBox" class="fixed bottom-5 left-1/2 -translate-x-1/2 p-4 rounded-xl shadow-soft z-50 transition-transform duration-300 transform translate-y-full"></div>
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Large Title Navigation Bar Simulation -->
+        <header id="largeTitle" class="pt-8 pb-4 transition-opacity duration-300">
+            <h1 class="text-5xl font-extrabold text-gray-900 tracking-tight">
+                Menu
+            </h1>
+            <p class="text-xl text-gray-500 mt-1 font-semibold">Quản lý món ăn & thức uống</p>
+        </header>
+
+        <!-- Menu Management Form (Add/Edit) -->
+        <section id="managementSection" class="bg-white p-6 md:p-8 rounded-3xl shadow-soft mb-8">
+            <h2 id="formTitle" class="text-2xl font-bold text-gray-800 mb-6 border-b border-gray-100 pb-3">Thêm Món Mới</h2>
+            
+            <form id="menuForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <!-- Name -->
+                <div class="md:col-span-2">
+                    <label for="name" class="block text-sm font-medium text-gray-600 mb-1">Tên Món/Thức Uống</label>
+                    <!-- Rounded 2xl input -->
+                    <input type="text" id="name" required class="w-full p-3 border border-gray-200 rounded-2xl focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="Ví dụ: Cà Phê Đá">
+                </div>
+                
+                <!-- Price -->
+                <div>
+                    <label for="price" class="block text-sm font-medium text-gray-600 mb-1">Giá (VNĐ)</label>
+                    <input type="number" id="price" required min="1000" class="w-full p-3 border border-gray-200 rounded-2xl focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="30000">
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-600 mb-1">Loại</label>
+                    <select id="category" required class="w-full p-3 border border-gray-200 rounded-2xl focus:ring-blue-500 focus:border-blue-500 transition duration-150 bg-white">
+                        <option value="food">Món Ăn</option>
+                        <option value="drink">Thức Uống</option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="md:col-span-4 flex space-x-3 pt-2">
+                    <button type="submit" id="submitBtn" class="flex-1 py-3 px-6 bg-blue-500 text-white font-semibold rounded-2xl shadow-md hover:bg-blue-600 transition duration-150 btn-ios">
+                        Thêm Món
+                    </button>
+                    <button type="button" id="cancelEditBtn" class="hidden py-3 px-6 bg-gray-300 text-gray-800 font-medium rounded-2xl shadow-md hover:bg-gray-400 transition duration-150 btn-ios" title="Hủy bỏ chế độ chỉnh sửa">
+                        Hủy Bỏ
+                    </button>
+                </div>
+            </form>
+        </section>
+
+
+        <!-- Menu Display Section -->
+        <section class="bg-white p-6 md:p-8 rounded-3xl shadow-soft">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Danh Sách</h2>
+            <div id="menuContainer" class="space-y-4">
+                <!-- Menu items or skeleton loader will be rendered here by JavaScript -->
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 mt-10 pb-4">
+            Thiết kế theo chuẩn iOS HIG & Realtime by Firebase
+        </footer>
+    </div>
+</body>
+</html>
