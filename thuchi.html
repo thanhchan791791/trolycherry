@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sổ Thu Chi Hàng Ngày - Firebase</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #4CAF50; /* Green */
+            --secondary-color: #e0e7f7;
+            --text-color: #34495e; /* Dark Blue */
+            --light-bg: #f9fbfd;
+            --card-bg: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --border-color: #e6e9ed;
+            --positive: #28a745;
+            --negative: #dc3545;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-color);
+            transition: background-color 0.3s ease;
+        }
+        .container-fluid {
+            max-width: 1200px;
+        }
+        .card {
+            border: none;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px var(--shadow-light);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+        .card-header-styled {
+            background: linear-gradient(45deg, var(--primary-color), #81c784);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-top-left-radius: 1.5rem;
+            border-top-right-radius: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-control, .form-select {
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+            border-color: var(--primary-color);
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #388e3c;
+            border-color: #388e3c;
+            transform: translateY(-2px);
+        }
+        .btn-outline-secondary, .btn-light {
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+        }
+        .btn-sm-custom {
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+        }
+        .balance-box {
+            background-color: var(--secondary-color);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .balance-box:hover {
+            transform: scale(1.03);
+            background-color: #d1d8ec;
+        }
+        .balance-box .small-muted {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .balance-box .h4 {
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+        .balance-positive {
+            color: var(--positive);
+        }
+        .balance-negative {
+            color: var(--negative);
+        }
+        .total-summary {
+            background-color: #f0f4fa;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+        }
+        .table-fixed {
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border-radius: 1.5rem;
+        }
+        .table-fixed::-webkit-scrollbar {
+            width: 8px;
+        }
+        .table-fixed::-webkit-scrollbar-thumb {
+            background-color: #d1d8e0;
+            border-radius: 10px;
+        }
+        .table-fixed::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+        .table {
+            --bs-table-bg: var(--card-bg);
+        }
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+        .table tbody tr:hover {
+            background-color: #f0f4f7 !important;
+        }
+        .action-cell .btn {
+            margin-right: 0.25rem;
+            transition: all 0.2s ease;
+        }
+        .action-cell .btn:hover {
+            transform: scale(1.1);
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        /* CSS cho mobile, chỉ áp dụng cho bảng lịch sử giao dịch chính */
+        @media (max-width: 767.98px) {
+            .table.table-hover {
+                width: 100%;
+            }
+            .table-fixed {
+                border: 1px solid var(--border-color);
+            }
+            .table.table-hover thead, .action-header {
+                display: none;
+            }
+            .table.table-hover tbody tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid var(--border-color);
+                border-radius: 1rem;
+                padding: 1rem;
+                box-shadow: 0 4px 12px var(--shadow-light);
+            }
+            .table.table-hover tbody tr:hover {
+                background-color: var(--card-bg) !important;
+                transform: translateY(-2px);
+            }
+            .table.table-hover td {
+                display: block;
+                text-align: right;
+                border: none;
+                padding: 0.5rem 0;
+                position: relative;
+                padding-left: 50%;
+            }
+            .table.table-hover td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                width: calc(50% - 20px);
+                text-align: left;
+                font-weight: bold;
+                color: #6c757d;
+            }
+            .table.table-hover td button {
+                width: 100%;
+                margin: 0.25rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-5">
+        <div class="d-flex align-items-center mb-4 fade-in">
+            <h1 class="me-3 fw-bold text-primary">Sổ Thu Chi</h1>
+            <div class="badge bg-secondary-subtle text-secondary small-muted py-2 px-3 rounded-pill">Đồng bộ qua Firebase (Realtime)</div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="card p-4 fade-in-up">
+                    <div class="card-header-styled mb-4">
+                        <h4 class="mb-0 text-white"><i class="fas fa-plus-circle me-2"></i> Thêm Giao Dịch Mới</h4>
+                    </div>
+                    <div class="d-grid gap-3 d-md-flex justify-content-md-start mb-4">
+                        <button type="button" class="btn btn-success btn-lg flex-fill" id="addRevenueBtn"><i class="fas fa-arrow-down me-2"></i> Thêm Giao Dịch Thu</button>
+                        <button type="button" class="btn btn-danger btn-lg flex-fill" id="addExpenseBtn"><i class="fas fa-arrow-up me-2"></i> Thêm Giao Dịch Chi</button>
+                    </div>
+
+                    <hr class="text-secondary-subtle my-4">
+
+                    <div class="total-summary text-center">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="balance-box">
+                                    <div class="small-muted">Tổng Doanh thu</div>
+                                    <div id="totalRevenue" class="h4 balance-positive">0 ₫</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="balance-box">
+                                    <div class="small-muted">Tổng Chi tiêu</div>
+                                    <div id="totalExpense" class="h4 balance-negative">0 ₫</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="balance-box">
+                                    <div class="small-muted">Tổng Dư</div>
+                                    <div id="totalBalance" class="h4">0 ₫</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex flex-wrap gap-2">
+                        <button id="exportCsv" class="btn btn-sm btn-outline-success btn-sm-custom"><i class="fas fa-file-csv me-1"></i> CSV</button>
+                        <button id="exportJson" class="btn btn-sm btn-outline-primary btn-sm-custom"><i class="fas fa-file-code me-1"></i> JSON</button>
+                        <input type="file" id="importFile" accept=".json" style="display:none;">
+                        <button id="importJsonBtn" class="btn btn-sm btn-outline-dark btn-sm-custom"><i class="fas fa-upload me-1"></i> Import</button>
+                        <button id="resetBtn" class="btn btn-sm btn-outline-danger btn-sm-custom ms-auto"><i class="fas fa-trash-alt me-1"></i> Reset</button>
+                        <button id="addSampleBtn" class="btn btn-sm btn-outline-info btn-sm-custom"><i class="fas fa-database me-1"></i> Thêm dữ liệu mẫu</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card p-4 fade-in-up">
+                    <div class="d-flex align-items-center mb-3">
+                        <h4 class="mb-0 fw-bold me-auto" id="reportTitle"><i class="fas fa-history me-2"></i> Lịch sử Giao dịch</h4>
+                        <div class="d-flex align-items-center gap-2">
+                            <select id="reportView" class="form-select form-select-sm">
+                                <option value="day">Theo Ngày</option>
+                                <option value="month">Theo Tháng</option>
+                                <option value="quarter">Theo Quý</option>
+                            </select>
+                            <select id="sortOrder" class="form-select form-select-sm">
+                                <option value="desc">Mới nhất</option>
+                                <option value="asc">Cũ nhất</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-fixed">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr id="tableHeader">
+                                    <th class="date-header">Ngày</th>
+                                    <th>Doanh thu</th>
+                                    <th>Chi tiêu</th>
+                                    <th>Số dư</th>
+                                    <th>Chi tiết</th>
+                                    <th class="action-header">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody">
+                                </tbody>
+                        </table>
+                    </div>
+                    <div id="noDataMessage" class="text-center text-muted p-4 d-none">
+                        <i class="fas fa-box-open fa-2x mb-2"></i>
+                        <p>Chưa có dữ liệu nào. Hãy thêm giao dịch đầu tiên!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addTransactionModal" tabindex="-1" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTransactionModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addTransactionForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="transactionType">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ngày</label>
+                            <input type="date" id="modalEntryDate" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" id="modalAmountLabel"></label>
+                            <input type="text" id="modalAmount" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Chi tiết Giao dịch</label>
+                            <textarea id="modalDetails" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary" id="modalSubmitBtn"></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Chi tiết Giao dịch</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="detailsModalBody">
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <script>
+    /**
+     * Sổ Thu Chi Hàng Ngày - Firebase Edition
+     *
+     * Phiên bản này đã được cập nhật để lưu từng giao dịch một cách riêng biệt
+     * trong Firebase, cho phép hiển thị chi tiết cụ thể.
+     */
+
+    // Cấu hình Firebase của bạn
+    const firebaseConfig = {
+      apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
+      authDomain: "chitieu-7263e.firebaseapp.com",
+      databaseURL: "https://chitieu-7263e-default-rtdb.firebaseio.com",
+      projectId: "chitieu-7263e",
+      storageBucket: "chitieu-7263e.firebasestorage.app",
+      messagingSenderId: "83833140682",
+      appId: "1:83833140682:web:f9254b418ace3a659fcb33",
+      measurementId: "G-523X74K18N"
+    };
+
+    // Khởi tạo Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const recordsRef = database.ref('daily_records');
+
+    // UI Elements
+    const addRevenueBtn = document.getElementById('addRevenueBtn');
+    const addExpenseBtn = document.getElementById('addExpenseBtn');
+    const addTransactionModal = new bootstrap.Modal(document.getElementById('addTransactionModal'));
+    const addTransactionForm = document.getElementById('addTransactionForm');
+    const modalTitle = document.getElementById('addTransactionModalLabel');
+    const modalAmountLabel = document.getElementById('modalAmountLabel');
+    const modalSubmitBtn = document.getElementById('modalSubmitBtn');
+    const transactionTypeEl = document.getElementById('transactionType');
+    const modalEntryDateEl = document.getElementById('modalEntryDate');
+    const modalAmountEl = document.getElementById('modalAmount');
+    const modalDetailsEl = document.getElementById('modalDetails');
+    const historyBodyEl = document.getElementById('historyBody');
+    const totalRevenueEl = document.getElementById('totalRevenue');
+    const totalExpenseEl = document.getElementById('totalExpense');
+    const totalBalanceEl = document.getElementById('totalBalance');
+    const sortOrderEl = document.getElementById('sortOrder');
+    const reportViewEl = document.getElementById('reportView');
+    const reportTitleEl = document.getElementById('reportTitle');
+    const tableHeaderEl = document.getElementById('tableHeader');
+    const noDataMessageEl = document.getElementById('noDataMessage');
+    const addSampleBtn = document.getElementById('addSampleBtn');
+    const detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
+    const detailsModalBodyEl = document.getElementById('detailsModalBody');
+
+    // --- Core Functions for Firebase ---
+    function formatVND(n) {
+        if (n === undefined || n === null) return '0 ₫';
+        return Number(n).toLocaleString('vi-VN') + ' ₫';
+    }
+    
+    // Function to format the number input with thousands separators
+    function formatNumberInput(event) {
+        let value = event.target.value.replace(/\D/g, ''); // Remove all non-digit characters
+        if (value) {
+            value = parseInt(value, 10).toLocaleString('vi-VN');
+        }
+        event.target.value = value;
+    }
+
+    /**
+     * Helper function to format date from YYYY-MM-DD to DD/MM/YYYY.
+     */
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        return dateStr;
+    }
+
+    /**
+     * Adds a new transaction entry.
+     */
+    async function addEntry(date, revenue = 0, expense = 0, details = '') {
+        if (!date) return;
+        
+        const transactionRef = recordsRef.child(date).child('transactions').push();
+        await transactionRef.set({
+            revenue: Number(revenue || 0),
+            expense: Number(expense || 0),
+            details: details,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+    }
+
+    /**
+     * Deletes a full day's record and all its transactions.
+     */
+    async function deleteDay(date) {
+        if (confirm('Xóa toàn bộ giao dịch của ngày ' + formatDate(date) + '?')) {
+            await recordsRef.child(date).remove();
+        }
+    }
+    
+    /**
+     * Edits a single transaction.
+     */
+    async function editTransaction(date, transactionId, currentRev, currentExp, currentDetails) {
+        const newRev = prompt('Sửa doanh thu:', currentRev);
+        if (newRev === null) return;
+        const newExp = prompt('Sửa chi tiêu:', currentExp);
+        if (newExp === null) return;
+        const newDetails = prompt('Sửa chi tiết:', currentDetails);
+        if (newDetails === null) return;
+        
+        const updates = {
+            revenue: Number(newRev || 0),
+            expense: Number(newExp || 0),
+            details: newDetails
+        };
+        await recordsRef.child(date).child('transactions').child(transactionId).update(updates);
+    }
+    
+    /**
+     * Deletes a single transaction.
+     */
+    async function deleteTransaction(date, transactionId) {
+        if (confirm('Bạn có chắc muốn xóa giao dịch này không?')) {
+            await recordsRef.child(date).child('transactions').child(transactionId).remove();
+        }
+    }
+
+    async function clearAll() {
+        if (!confirm('Bạn có chắc muốn xóa tất cả dữ liệu trên Firebase? Thao tác này không thể hoàn tác.')) return;
+        await recordsRef.remove();
+    }
+    
+    function exportCsv(records) {
+        const rows = [['Ngày', 'Doanh thu (VND)', 'Chi tiêu (VND)', 'Số dư (VND)', 'Chi tiết Chi tiêu']];
+        Object.values(records).sort((a, b) => a.date.localeCompare(b.date)).forEach(r => {
+            const detailsList = r.transactions ? Object.values(r.transactions).map(t => t.details).join(', ') : '';
+            rows.push([formatDate(r.date), r.revenue, r.expense, r.net, detailsList]);
+        });
+        const csv = rows.map(r => r.map(String).map(c => /[,"\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c).join(',')).join('\n');
+        downloadFile(csv, 'finance_records.csv', 'text/csv;charset=utf-8;');
+    }
+
+    function exportJson(records) {
+        const json = JSON.stringify(records, null, 2);
+        downloadFile(json, 'finance_records.json', 'application/json');
+    }
+
+    function downloadFile(content, filename, type) {
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
+    }
+
+    async function importJsonFile(file) {
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            try {
+                const obj = JSON.parse(ev.target.result);
+                if (!confirm('Import sẽ ghi đè/ghép với dữ liệu hiện tại trên Firebase. Bạn muốn tiếp tục?')) return;
+                
+                // For simplicity, this import function will not merge transactions.
+                // It will overwrite existing dates with new data.
+                await recordsRef.set(obj);
+                alert('Import hoàn tất!');
+            } catch (err) {
+                alert('File JSON không hợp lệ.');
+            }
+        };
+        reader.readAsText(file);
+    }
+    
+    async function addSampleData() {
+        if (!confirm('Bạn có muốn thêm dữ liệu mẫu để thử nghiệm không? Dữ liệu này sẽ được trộn với dữ liệu hiện có.')) return;
+        
+        const sampleTransactions = {};
+        const detailsList = ["Ăn trưa", "Cà phê", "Mua sắm quần áo", "Tiền xăng", "Đi chợ", "Xem phim", "Phí dịch vụ", "Tiền điện", "Tiền nước", "Tiền internet"];
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+        const today = new Date();
+        let currentDate = startDate;
+        
+        while (currentDate <= today) {
+            const dateStr = currentDate.toISOString().slice(0, 10);
+            
+            if (!sampleTransactions[dateStr]) {
+                sampleTransactions[dateStr] = {};
+            }
+
+            // Always add a revenue transaction
+            const dailyRevenue = Math.floor(Math.random() * 5000000) + 500000; // Random revenue from 500,000 to 5,500,000 VND
+            const revenueId = `trans-rev-${dateStr}`;
+            sampleTransactions[dateStr][revenueId] = {
+                revenue: dailyRevenue,
+                expense: 0,
+                details: "", // No details for revenue
+                timestamp: currentDate.getTime() + Math.floor(Math.random() * 1000) // Ensure it's the first transaction
+            };
+
+            const numExpenses = Math.floor(Math.random() * 4) + 1; // 1-4 expense transactions per day
+            
+            for (let i = 0; i < numExpenses; i++) {
+                const amount = Math.floor(Math.random() * 500000) + 10000;
+                const details = detailsList[Math.floor(Math.random() * detailsList.length)];
+                
+                const transactionId = `trans-exp-${dateStr}-${i}`;
+                sampleTransactions[dateStr][transactionId] = {
+                    revenue: 0,
+                    expense: amount,
+                    details: details, // Details for expense only
+                    timestamp: currentDate.getTime() + Math.floor(Math.random() * 86400000)
+                };
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        
+        const updates = {};
+        for (const date in sampleTransactions) {
+            updates[date + '/transactions'] = { ...(window.cachedRecords[date]?.transactions || {}), ...sampleTransactions[date] };
+        }
+        await recordsRef.update(updates);
+        alert('Dữ liệu mẫu đã được thêm thành công!');
+    }
+
+
+    // --- UI Rendering ---
+    function renderAll(records) {
+        const viewMode = reportViewEl.value;
+        const sortOrder = sortOrderEl.value;
+        
+        // Transform the nested data for rendering and aggregation
+        const dailyAggregatedRecords = {};
+        let totalRev = 0, totalExp = 0;
+        
+        for (const dateKey in records) {
+            const dailyRecord = records[dateKey];
+            let dailyRevenue = 0;
+            let dailyExpense = 0;
+            
+            if (dailyRecord.transactions) {
+                Object.values(dailyRecord.transactions).forEach(trans => {
+                    dailyRevenue += Number(trans.revenue || 0);
+                    dailyExpense += Number(trans.expense || 0);
+                });
+            }
+            
+            dailyAggregatedRecords[dateKey] = {
+                date: dateKey,
+                revenue: dailyRevenue,
+                expense: dailyExpense,
+                net: dailyRevenue - dailyExpense,
+                // Add transactions for details button
+                transactions: dailyRecord.transactions
+            };
+            
+            totalRev += dailyRevenue;
+            totalExp += dailyExpense;
+        }
+
+        let dataToRender = {};
+        tableHeaderEl.innerHTML = '';
+        
+        switch (viewMode) {
+            case 'day':
+                reportTitleEl.innerHTML = '<i class="fas fa-history me-2"></i> Lịch sử Giao dịch';
+                tableHeaderEl.innerHTML = `
+                    <th class="date-header">Ngày</th>
+                    <th>Doanh thu</th>
+                    <th>Chi tiêu</th>
+                    <th>Số dư</th>
+                    <th>Chi tiết</th>
+                    <th class="action-header">Hành động</th>
+                `;
+                dataToRender = dailyAggregatedRecords;
+                break;
+            case 'month':
+                reportTitleEl.innerHTML = '<i class="fas fa-calendar-alt me-2"></i> Báo cáo theo Tháng';
+                tableHeaderEl.innerHTML = `
+                    <th>Tháng</th>
+                    <th>Doanh thu</th>
+                    <th>Chi tiêu</th>
+                    <th>Số dư</th>
+                `;
+                dataToRender = aggregateByPeriod(dailyAggregatedRecords, 'month');
+                break;
+            case 'quarter':
+                reportTitleEl.innerHTML = '<i class="fas fa-chart-line me-2"></i> Báo cáo theo Quý';
+                tableHeaderEl.innerHTML = `
+                    <th>Quý</th>
+                    <th>Doanh thu</th>
+                    <th>Chi tiêu</th>
+                    <th>Số dư</th>
+                `;
+                dataToRender = aggregateByPeriod(dailyAggregatedRecords, 'quarter');
+                break;
+        }
+
+        historyBodyEl.innerHTML = '';
+        const keys = Object.keys(dataToRender).sort();
+        if (sortOrder === 'desc') keys.reverse();
+
+        if (keys.length === 0) {
+            noDataMessageEl.classList.remove('d-none');
+        } else {
+            noDataMessageEl.classList.add('d-none');
+        }
+
+        keys.forEach((key, index) => {
+            const r = dataToRender[key];
+            const tr = document.createElement('tr');
+            tr.style.animationDelay = `${index * 0.05}s`;
+            tr.classList.add('fade-in-up');
+
+            if (viewMode === 'day') {
+                tr.innerHTML = `
+                    <td data-label="Ngày:"><strong>${formatDate(key)}</strong></td>
+                    <td data-label="Doanh thu:">${formatVND(r.revenue)}</td>
+                    <td data-label="Chi tiêu:">${formatVND(r.expense)}</td>
+                    <td data-label="Số dư:" class="${(r.net || 0) >= 0 ? 'balance-positive' : 'balance-negative'}">
+                        <strong>${formatVND(r.net)}</strong>
+                    </td>
+                    <td data-label="Chi tiết:">
+                        <button type="button" class="btn btn-sm btn-outline-info" onclick="handleShowDetails('${key}')">
+                            <i class="fas fa-search me-1"></i> Chi tiết
+                        </button>
+                    </td>
+                    <td data-label="Hành động:" class="action-cell">
+                        <button type="button" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="handleDelete('${key}')">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+            } else {
+                 tr.innerHTML = `
+                    <td data-label="${viewMode === 'month' ? 'Tháng:' : 'Quý:'}"><strong>${key}</strong></td>
+                    <td data-label="Doanh thu:">${formatVND(r.revenue)}</td>
+                    <td data-label="Chi tiêu:">${formatVND(r.expense)}</td>
+                    <td data-label="Số dư:" class="${(r.net || 0) >= 0 ? 'balance-positive' : 'balance-negative'}">
+                        <strong>${formatVND(r.net)}</strong>
+                    </td>
+                `;
+            }
+            historyBodyEl.appendChild(tr);
+        });
+
+        // Update totals
+        totalRevenueEl.innerText = formatVND(totalRev);
+        totalExpenseEl.innerText = formatVND(totalExp);
+        const totalBal = totalRev - totalExp;
+        totalBalanceEl.innerText = formatVND(totalBal);
+        totalBalanceEl.className = `h4 ${totalBal >= 0 ? 'balance-positive' : 'balance-negative'}`;
+    }
+
+    // Function to show transaction details in modal
+    async function handleShowDetails(date) {
+        const snapshot = await recordsRef.child(date).child('transactions').get();
+        const transactions = snapshot.val();
+        let htmlContent = `<p class="text-muted">Ngày: ${formatDate(date)}</p>`;
+        
+        if (!transactions) {
+            htmlContent += `<p>Không có giao dịch nào cho ngày này.</p>`;
+        } else {
+            // Sort transactions: revenue first, then expense
+            const sortedTransactions = Object.entries(transactions).sort(([, a], [, b]) => {
+                // If one is revenue and other is expense, put revenue first
+                if (a.revenue > 0 && b.expense > 0) return -1;
+                if (a.expense > 0 && b.revenue > 0) return 1;
+                
+                // Otherwise, sort by timestamp
+                return a.timestamp - b.timestamp;
+            });
+
+            htmlContent += `
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Số tiền</th>
+                                <th>Chi tiết</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+            sortedTransactions.forEach(([id, trans]) => {
+                const isExpense = trans.expense > 0;
+                const amount = isExpense ? trans.expense : trans.revenue;
+                const amountClass = isExpense ? 'text-danger' : 'text-success';
+                const type = isExpense ? 'Chi tiêu' : 'Doanh thu';
+                const time = trans.timestamp ? new Date(trans.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'}) : 'N/A';
+                
+                htmlContent += `
+                    <tr>
+                        <td>${time}</td>
+                        <td class="${amountClass}">${formatVND(amount)} (${type})</td>
+                        <td>${trans.details}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="window.editTransaction('${date}', '${id}', ${trans.revenue}, ${trans.expense}, '${trans.details.replace(/'/g, "\\'").replace(/"/g, '\\"')}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="window.deleteTransaction('${date}', '${id}')"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            htmlContent += `</tbody></table></div>`;
+        }
+        
+        detailsModalBodyEl.innerHTML = htmlContent;
+        detailsModal.show();
+    }
+
+    // New function to aggregate data by month or quarter
+    function aggregateByPeriod(records, period) {
+        const aggregated = {};
+        for (const date in records) {
+            const record = records[date];
+            let key;
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = d.getMonth() + 1; // getMonth() is 0-indexed
+
+            if (period === 'month') {
+                key = `${String(month).padStart(2, '0')}/${year}`;
+            } else if (period === 'quarter') {
+                const quarter = Math.floor((month - 1) / 3) + 1;
+                key = `Quý ${quarter}/${year}`;
+            }
+
+            if (!aggregated[key]) {
+                aggregated[key] = { revenue: 0, expense: 0, net: 0 };
+            }
+            aggregated[key].revenue += record.revenue;
+            aggregated[key].expense += record.expense;
+            aggregated[key].net += record.net;
+        }
+        return aggregated;
+    }
+
+
+    // Global Handlers for inline events (now calling async functions)
+    window.handleShowDetails = handleShowDetails;
+    window.handleDelete = async (date) => {
+        if (confirm('Xóa toàn bộ giao dịch của ngày ' + formatDate(date) + '?')) {
+            await deleteDay(date);
+        }
+    };
+    window.editTransaction = editTransaction;
+    window.deleteTransaction = deleteTransaction;
+
+    // --- Event Listeners & Init ---
+    (function init() {
+        // Set today's date
+        modalEntryDateEl.value = new Date().toISOString().slice(0, 10);
+
+        // Show modal for Revenue
+        addRevenueBtn.addEventListener('click', () => {
+            modalTitle.innerText = "Thêm Giao Dịch Thu";
+            modalAmountLabel.innerText = "Số tiền Thu (VND)";
+            modalSubmitBtn.innerText = "Thêm Giao Dịch Thu";
+            transactionTypeEl.value = "revenue";
+            modalAmountEl.value = "";
+            modalDetailsEl.value = "";
+            addTransactionModal.show();
+        });
+
+        // Show modal for Expense
+        addExpenseBtn.addEventListener('click', () => {
+            modalTitle.innerText = "Thêm Giao Dịch Chi";
+            modalAmountLabel.innerText = "Số tiền Chi (VND)";
+            modalSubmitBtn.innerText = "Thêm Giao Dịch Chi";
+            transactionTypeEl.value = "expense";
+            modalAmountEl.value = "";
+            modalDetailsEl.value = "";
+            addTransactionModal.show();
+        });
+        
+        // Handle form submission from the modal
+        addTransactionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const date = modalEntryDateEl.value;
+            // Sanitize the input value by removing thousands separators before converting to a number
+            const amount = Number(modalAmountEl.value.replace(/\./g, '') || 0);
+            const details = modalDetailsEl.value.trim();
+            const type = transactionTypeEl.value;
+            
+            if (type === "revenue") {
+                addEntry(date, amount, 0, details);
+            } else {
+                addEntry(date, 0, amount, details);
+            }
+            
+            addTransactionModal.hide();
+        });
+        
+        // Add event listener for number formatting
+        modalAmountEl.addEventListener('input', formatNumberInput);
+
+        // Event listeners for exports/imports
+        document.getElementById('exportCsv').addEventListener('click', async () => {
+            const snapshot = await recordsRef.get();
+            const records = snapshot.val() || {};
+            const dailyAggregatedRecords = {};
+            for (const dateKey in records) {
+                const dailyRecord = records[dateKey];
+                let dailyRevenue = 0;
+                let dailyExpense = 0;
+                if (dailyRecord.transactions) {
+                    Object.values(dailyRecord.transactions).forEach(trans => {
+                        dailyRevenue += Number(trans.revenue || 0);
+                        dailyExpense += Number(trans.expense || 0);
+                    });
+                }
+                dailyAggregatedRecords[dateKey] = {
+                    date: dateKey,
+                    revenue: dailyRevenue,
+                    expense: dailyExpense,
+                    net: dailyRevenue - dailyExpense,
+                    transactions: dailyRecord.transactions
+                };
+            }
+            exportCsv(dailyAggregatedRecords);
+        });
+        document.getElementById('exportJson').addEventListener('click', async () => {
+            const snapshot = await recordsRef.get();
+            exportJson(snapshot.val() || {});
+        });
+        document.getElementById('importJsonBtn').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        document.getElementById('importFile').addEventListener('change', (ev) => {
+            const f = ev.target.files[0];
+            if (!f) return;
+            importJsonFile(f);
+            ev.target.value = ''; // Reset file input
+        });
+
+        // Reset button
+        document.getElementById('resetBtn').addEventListener('click', clearAll);
+
+        // Add sample data button
+        addSampleBtn.addEventListener('click', addSampleData);
+
+        // Sort order & Report View
+        sortOrderEl.addEventListener('change', () => {
+            renderAll(window.cachedRecords || {});
+        });
+        reportViewEl.addEventListener('change', () => {
+            renderAll(window.cachedRecords || {});
+        });
+
+        // Listen for data changes on Firebase
+        recordsRef.on('value', (snapshot) => {
+            const records = snapshot.val() || {};
+            window.cachedRecords = records; // Cache data for quick sorting and viewing
+            renderAll(records);
+        }, (error) => {
+            console.error('Lỗi khi đọc dữ liệu từ Firebase:', error);
+            alert('Không thể kết nối với Firebase. Vui lòng kiểm tra kết nối mạng hoặc cấu hình.');
+        });
+    })();
+    </script>
+</body>
+</html>
