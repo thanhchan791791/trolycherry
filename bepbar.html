@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Đơn Hàng Bếp & Bar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* 1. iOS Font & General Styles */
+        body {
+            /* iOS Font Stack: SF Pro Display is often used */
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Arial, sans-serif;
+            background: #F2F2F7; /* iOS System Gray 5 - Light gray background */
+            min-height: 100vh;
+            color: #1C1C1E; /* iOS System Black */
+            /* Animation for smooth page changes */
+            transition: all 0.25s ease-in-out; 
+        }
+
+        /* 2. Color Variables (iOS inspired) */
+        :root {
+            --ios-blue: #007AFF; /* Primary Action */
+            --ios-green: #34C759; /* Success/Complete */
+            --ios-red: #FF3B30; /* Danger/Urgent/High Priority */
+            --ios-orange: #FF9500; /* Pending/Warning */
+            --ios-gray-2: #AEAEB2; /* Subtext/Inactive */
+            --ios-gray-6: #F2F2F7; /* Background */
+            --ios-card-bg: #FFFFFF; /* Card background */
+            --default-transition: all 0.25s ease-in-out;
+            --fast-transition: all 0.15s ease-out;
+        }
+
+        /* 3. iOS Card Style */
+        .card-ios {
+            background-color: var(--ios-card-bg);
+            border-radius: 16px; /* Bo góc mềm mại */
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transition: var(--default-transition);
+        }
+
+        /* 4. iOS Button Style & Press Animation */
+        .btn-ios {
+            padding: 12px 16px; 
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--fast-transition);
+            user-select: none; /* Ngăn chặn highlight khi chạm */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Hiệu ứng nhấn (Press effect) */
+        .btn-ios:active {
+            transform: scale(0.96); /* Scale nhỏ lại khi nhấn */
+            opacity: 0.9;
+        }
+
+        .ios-button-complete {
+            /* Override style cũ bằng style mới */
+            background-color: var(--ios-green);
+            color: white;
+            padding: 12px 16px; 
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--fast-transition);
+            box-shadow: 0 4px 10px rgba(52, 199, 89, 0.4); /* Shadow xanh lá */
+        }
+        .ios-button-complete:active {
+            transform: scale(0.96); 
+            background-color: #2CA94D;
+        }
+
+        /* 5. Segmented Control (Tabs) Style */
+        .segmented-control {
+            display: flex;
+            background-color: var(--ios-card-bg); /* Nền trắng */
+            border-radius: 12px;
+            padding: 4px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            /* Đảm bảo sticky hoạt động tốt */
+            top: 0; 
+        }
+        .segmented-control-item {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600; /* Medium to Semi-bold */
+            cursor: pointer;
+            color: #8E8E93; /* iOS System Gray 2 */
+            transition: var(--fast-transition);
+            font-size: 16px;
+        }
+        .segmented-control-item.active {
+            background-color: var(--ios-blue); /* iOS Blue */
+            color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 6. Order Card Specific Styles */
+        .order-card {
+            margin-bottom: 20px;
+            /* Thay thế class .card bằng .card-ios */
+            @apply card-ios; 
+            /* Món ăn/uống item list */
+            --item-color: #5856D6; /* iOS Indigo cho số lượng */
+        }
+        
+        /* Header Đơn hàng */
+        .order-header-food {
+            background-color: var(--ios-red); /* iOS Red */
+        }
+        .order-header-drink {
+            background-color: var(--ios-blue); /* iOS Blue */
+        }
+
+        /* Thẻ có độ ưu tiên cao (đơn hàng lâu) */
+        .order-card.priority-high {
+            /* Viền đỏ nổi bật hơn */
+            border: 2px solid var(--ios-red); 
+            box-shadow: 0 6px 20px rgba(255, 59, 48, 0.2);
+            animation: pulse-border 1.5s infinite alternate;
+        }
+        
+        /* Item List (Sản phẩm) */
+        .item-list-container {
+            border-top: 1px solid #E5E5EA; /* iOS separator color */
+            padding: 12px 0;
+            margin-top: 8px;
+        }
+        .item-list-container li {
+            font-size: 15px;
+        }
+        .item-list-container li span:last-child {
+            /* Số lượng nổi bật */
+            color: var(--item-color);
+            font-weight: 700;
+        }
+
+        /* 7. Modal & Animation */
+        #custom-modal-backdrop {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #custom-modal-backdrop.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #custom-modal-backdrop > div { /* Modal content */
+            transform: translateY(20px);
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            opacity: 0;
+            @apply card-ios;
+            border-radius: 20px; /* Bo góc lớn cho Modal */
+            padding: 24px;
+        }
+        #custom-modal-backdrop.show > div {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* 8. Status Styles */
+        .status-indicator-connecting {
+            color: var(--ios-orange);
+        }
+        .status-indicator-stable {
+            color: var(--ios-green);
+        }
+        .status-indicator-error {
+            color: var(--ios-red);
+        }
+        
+        /* 9. Header Nâng cấp */
+        header h1 {
+            font-size: 24px; /* Lớn hơn */
+            font-weight: 700;
+        }
+        .view-content h2 {
+            font-size: 20px;
+            font-weight: 700;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+
+        /* 10. Animation Keyframes */
+        @keyframes pulse-border {
+            0% { border-color: rgba(255, 59, 48, 0.5); }
+            100% { border-color: rgba(255, 59, 48, 0.9); }
+        }
+
+        /* Item load animation */
+        @keyframes slide-up-fade {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .order-card {
+            animation: slide-up-fade 0.5s ease-out backwards;
+        }
+        /* Dùng JS để gán delay cho từng item */
+
+    </style>
+</head>
+<body class="p-4 max-w-lg mx-auto">
+    <script>
+        document.body.style.opacity = 0;
+        document.addEventListener('DOMContentLoaded', () => {
+             document.body.style.opacity = 1;
+        });
+    </script>
+
+    <script>
+        // Cấu hình Firebase được cung cấp trực tiếp
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
+            authDomain: "chitieu-7263e.firebaseapp.com",
+            databaseURL: "https://chitieu-7263e-default-rtdb.firebaseio.com",
+            projectId: "chitieu-7263e",
+            storageBucket: "chitieu-7263e.firebasestorage.app",
+            messagingSenderId: "83833140682",
+            appId: "1:83833140682:web:f9254b418ace3a659fcb33",
+            measurementId: "G-523X74K18N"
+        };
+        
+        let app;
+        let database;
+
+        try {
+            // Tắt Firebase Analytics nếu không cần thiết
+            app = firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            console.log("Firebase Realtime Database initialized successfully.");
+        } catch (e) {
+            console.error("Error initializing Firebase:", e);
+        }
+        
+    </script>
+    
+    <header class="mb-6 pt-2 pb-2 flex justify-between items-center">
+        <h1 class="text-gray-800 flex items-center">
+            <i class="fas fa-shipping-fast text-blue-500 mr-2"></i> Phiếu Bếp & Bar
+        </h1>
+        <div id="status-indicator" class="text-sm font-medium">
+            <span class="status-indicator-connecting"><i class="fas fa-spinner animate-spin"></i> Đang kết nối...</span>
+        </div>
+    </header>
+
+    <nav class="segmented-control sticky top-0 z-10 mb-6 shadow-lg">
+        <div id="toggle-kitchen" class="segmented-control-item active flex items-center justify-center" onclick="changeView('kitchen')">
+            <i class="fas fa-fire-alt mr-1"></i> BẾP
+        </div>
+        <div id="toggle-bar" class="segmented-control-item flex items-center justify-center" onclick="changeView('bar')">
+            <i class="fas fa-cocktail mr-1"></i> BAR
+        </div>
+        <div id="toggle-history" class="segmented-control-item flex items-center justify-center" onclick="changeView('history')">
+            <i class="fas fa-history mr-1"></i> LỊCH SỬ
+        </div>
+    </nav>
+    
+    <div id="main-content">
+        
+        <div id="kitchen-view" class="view-content">
+            <h2 class="text-red-600 border-b pb-2">Đơn Hàng Món Ăn Đang Chờ</h2>
+            <div id="kitchen-orders-list" class="space-y-4">
+                <p id="kitchen-empty" class="text-gray-500 italic hidden p-4 text-center card-ios">Chưa có món ăn nào đang chờ.</p>
+            </div>
+        </div>
+
+        <div id="bar-view" class="view-content hidden">
+            <h2 class="text-blue-600 border-b pb-2">Đơn Hàng Đồ Uống Đang Chờ</h2>
+            <div id="bar-orders-list" class="space-y-4">
+                <p id="bar-empty" class="text-gray-500 italic hidden p-4 text-center card-ios">Chưa có đồ uống nào đang chờ.</p>
+            </div>
+        </div>
+
+        <div id="history-view" class="view-content hidden">
+            <h2 class="text-gray-600 border-b pb-2">Đơn Hàng Đã Hoàn Thành</h2>
+            <div id="history-orders-list" class="space-y-4">
+                <p id="history-empty" class="text-gray-500 italic hidden p-4 text-center card-ios">Chưa có đơn hàng nào được hoàn thành gần đây.</p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div id="custom-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm hidden justify-center items-center z-50" onclick="if(event.target.id === 'custom-modal-backdrop') document.getElementById('custom-modal-backdrop').classList.remove('show', 'hidden');">
+        <div class="w-11/12 max-w-sm" onclick="event.stopPropagation()">
+            <h3 id="custom-modal-title" class="text-xl font-bold mb-4 text-gray-800">Thông báo</h3>
+            <p id="custom-modal-message" class="mb-6 text-gray-700"></p>
+            <div class="flex justify-end space-x-3">
+                <button id="custom-modal-ok" class="btn-ios bg-blue-500 text-white">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Custom Alert Logic (Unchanged) ---
+        function customAlert(message, title = 'Thông báo') {
+            const backdrop = document.getElementById('custom-modal-backdrop');
+            document.getElementById('custom-modal-title').textContent = title;
+            document.getElementById('custom-modal-message').innerHTML = message;
+            document.getElementById('custom-modal-ok').onclick = () => {
+                backdrop.classList.remove('show');
+                // Ẩn hoàn toàn sau khi animation kết thúc
+                setTimeout(() => backdrop.classList.add('hidden'), 300); 
+            };
+            backdrop.classList.remove('hidden');
+            // Thêm class 'show' để kích hoạt animation
+            setTimeout(() => backdrop.classList.add('show'), 10); 
+        }
+
+        // --- View Toggle Logic (Đã cập nhật) ---
+        let currentView = 'kitchen';
+
+        function changeView(view) {
+            currentView = view;
+            const kitchenView = document.getElementById('kitchen-view');
+            const barView = document.getElementById('bar-view');
+            const historyView = document.getElementById('history-view'); // NEW
+            
+            const toggleKitchen = document.getElementById('toggle-kitchen');
+            const toggleBar = document.getElementById('toggle-bar');
+            const toggleHistory = document.getElementById('toggle-history'); // NEW
+
+            // Ẩn tất cả các view
+            kitchenView.classList.add('hidden');
+            barView.classList.add('hidden');
+            historyView.classList.add('hidden');
+
+            // Xóa trạng thái active của tất cả các nút
+            toggleKitchen.classList.remove('active');
+            toggleBar.classList.remove('active');
+            toggleHistory.classList.remove('active');
+
+
+            if (view === 'kitchen') {
+                kitchenView.classList.remove('hidden');
+                toggleKitchen.classList.add('active');
+            } else if (view === 'bar') {
+                barView.classList.remove('hidden');
+                toggleBar.classList.add('active');
+            } else if (view === 'history') { // Xử lý View Lịch Sử
+                historyView.classList.remove('hidden');
+                toggleHistory.classList.add('active');
+            }
+        }
+
+        /**
+         * Chuyển đổi timestamp sang định dạng ngày giờ dễ đọc
+         * (Unchanged)
+         */
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return "Không rõ thời gian";
+
+            const date = new Date(timestamp); // đọc ISO string
+
+            if (isNaN(date.getTime())) return "Không rõ thời gian";
+
+            // Cộng thêm 7 tiếng để chuẩn giờ VN (Giả định Firebase timestamp là UTC)
+            // LƯU Ý: Tuy nhiên, format ISO string của date.toString() đã tự dùng múi giờ local của trình duyệt. 
+            // Ta dùng cách đơn giản hơn để chỉ lấy giờ/phút/giây
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+
+            return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+        }
+        
+        /**
+         * Kiểm tra thời gian chờ để ưu tiên (ví dụ: > 15 phút thì ưu tiên)
+         * (Unchanged)
+         */
+        function isHighPriority(timestamp) {
+            const fifteenMinutes = 15 * 60 * 1000;
+            return (Date.now() - timestamp) > fifteenMinutes;
+        }
+
+        // --- Core Firebase Logic (Đã cập nhật) ---
+        const KITCHEN_ORDERS_REF = 'kitchen_bar_orders';
+        const statusIndicator = document.getElementById('status-indicator');
+
+        /**
+         * Cập nhật trạng thái của TẤT CẢ các món đang pending trong một đơn hàng thành "completed"
+         * (Unchanged)
+         */
+        async function completeOrder(orderKey) {
+            if (!database) {
+                customAlert(`Lỗi: Không thể kết nối đến cơ sở dữ liệu. Vui lòng kiểm tra cấu hình Firebase.`, 'Lỗi kết nối');
+                return;
+            }
+
+            const ref = database.ref(`${KITCHEN_ORDERS_REF}/${orderKey}/items`);
+            
+            try {
+                // 1. Lấy tất cả các items trong đơn hàng
+                const snapshot = await ref.once('value');
+                const items = snapshot.val();
+                
+                const updates = {};
+                let pendingItemsFound = 0;
+                let completedItemsCount = 0;
+                
+                if (items) {
+                    // 2. Chuẩn bị đối tượng cập nhật
+                    Object.entries(items).forEach(([itemKey, item]) => {
+                        if (item.status === 'pending') {
+                            updates[itemKey + '/status'] = 'completed';
+                            updates[itemKey + '/completedAt'] = firebase.database.ServerValue.TIMESTAMP;
+                            pendingItemsFound++;
+                        } else if (item.status === 'completed') {
+                            completedItemsCount++;
+                        }
+                    });
+                }
+
+                // 3. Thực hiện cập nhật
+                if (pendingItemsFound > 0) {
+                    await ref.update(updates);
+                    const tableName = document.querySelector(`#order-card-${orderKey} .order-table-name`)?.textContent || `Đơn hàng ${orderKey.substring(0, 8)}`;
+                    customAlert(`Đã hoàn thành ${pendingItemsFound} món đang chờ trong **${tableName}**!`, 'Xử lý thành công');
+                } else if (completedItemsCount > 0 && pendingItemsFound === 0) {
+                     customAlert(`Đơn hàng này đã được hoàn thành trước đó.`, 'Thông báo');
+                } else {
+                    customAlert(`Đơn hàng không có món nào đang chờ xử lý.`, 'Thông báo');
+                }
+
+            } catch (error) {
+                console.error(`Lỗi khi hoàn thành đơn hàng ${orderKey}:`, error);
+                customAlert(`Lỗi hệ thống: Không thể cập nhật trạng thái đơn hàng.`, 'Lỗi');
+            }
+        }
+        
+        /**
+         * Lắng nghe dữ liệu và render giao diện (Đã cập nhật)
+         */
+        function startOrderListener() {
+            if (!database) {
+                statusIndicator.innerHTML = '<span class="status-indicator-error"><i class="fas fa-times-circle"></i> Lỗi kết nối Firebase</span>';
+                return;
+            }
+            
+            const kitchenList = document.getElementById('kitchen-orders-list');
+            const barList = document.getElementById('bar-orders-list');
+            const historyList = document.getElementById('history-orders-list'); // NEW
+            const kitchenEmpty = document.getElementById('kitchen-empty');
+            const barEmpty = document.getElementById('bar-empty');
+            const historyEmpty = document.getElementById('history-empty'); // NEW
+
+            let orderIndex = 0; // Index để tạo animation delay
+
+            // Bắt đầu lắng nghe dữ liệu theo thời gian thực
+            database.ref(KITCHEN_ORDERS_REF).on('value', (snapshot) => {
+                const orders = snapshot.val();
+                let pendingFoodCountTotal = 0;
+                let pendingDrinkCountTotal = 0;
+                let totalCompletedItems = 0; // NEW: Đếm tổng món đã hoàn thành
+                orderIndex = 0; // Reset index
+
+                // Cập nhật trạng thái kết nối thành công
+                statusIndicator.innerHTML = '<span class="status-indicator-stable"><i class="fas fa-check-circle"></i> Kết nối ổn định</span>';
+
+                // Xóa nội dung cũ
+                kitchenList.innerHTML = '';
+                barList.innerHTML = '';
+                historyList.innerHTML = ''; // NEW: Xóa nội dung lịch sử
+
+                if (!orders) {
+                    kitchenEmpty.classList.remove('hidden');
+                    barEmpty.classList.remove('hidden');
+                    historyEmpty.classList.remove('hidden'); // NEW
+                    return;
+                }
+                
+                // 1. Nhóm các món đang chờ và đã hoàn thành
+                const groupedPendingOrders = {};
+                const groupedCompletedOrders = {}; // NEW
+
+                Object.entries(orders).forEach(([orderKey, order]) => {
+                    const items = order.items || {};
+                    const tableName = order.tableName || `Bàn ${orderKey.substring(0, 8)}`; 
+                    const createdAt = order.createdAt || order.timestamp || null;
+                    
+                    const pendingFoodItems = [];
+                    const pendingDrinkItems = [];
+                    const completedItems = []; // NEW: Món đã hoàn thành
+
+                    Object.entries(items).forEach(([itemKey, item]) => {
+                        if (item.itemName && item.quantity) {
+                            const itemData = { itemKey, ...item };
+                            
+                            if (item.status === 'pending') {
+                                if (item.type === 'food') {
+                                    pendingFoodItems.push(itemData);
+                                    pendingFoodCountTotal++;
+                                } else if (item.type === 'drink') {
+                                    pendingDrinkItems.push(itemData);
+                                    pendingDrinkCountTotal++;
+                                }
+                            } else if (item.status === 'completed') { // Lấy các món đã hoàn thành
+                                completedItems.push(itemData);
+                                totalCompletedItems++; // Tăng tổng số món đã hoàn thành
+                            }
+                        }
+                    });
+                    
+                    // Chỉ thêm order vào danh sách ĐANG CHỜ nếu có món đang chờ
+                    if (pendingFoodItems.length > 0 || pendingDrinkItems.length > 0) {
+                        groupedPendingOrders[orderKey] = {
+                            tableName,
+                            createdAt, 
+                            pendingFoodItems,
+                            pendingDrinkItems,
+                        };
+                    }
+
+                    // Chỉ thêm order vào danh sách ĐÃ HOÀN THÀNH nếu có món đã hoàn thành
+                    if (completedItems.length > 0) {
+                        groupedCompletedOrders[orderKey] = {
+                            tableName,
+                            createdAt,
+                            completedItems,
+                        };
+                    }
+                });
+
+                // 2a. Render các đơn hàng ĐANG CHỜ (sắp xếp theo đơn cũ lên trước)
+                const sortedPendingOrders = Object.entries(groupedPendingOrders)
+                    .map(([orderKey, data]) => ({ orderKey, ...data }))
+                    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+                sortedPendingOrders.forEach(data => {
+                    const { orderKey, tableName, createdAt, pendingFoodItems, pendingDrinkItems } = data;
+                    orderIndex++;
+
+                    if (pendingFoodItems.length > 0) {
+                        const orderCard = createOrderCard(orderKey, tableName, pendingFoodItems, 'food', createdAt, orderIndex);
+                        kitchenList.appendChild(orderCard);
+                    }
+                    
+                    if (pendingDrinkItems.length > 0) {
+                        const orderCard = createOrderCard(orderKey, tableName, pendingDrinkItems, 'drink', createdAt, orderIndex);
+                        barList.appendChild(orderCard);
+                    }
+                });
+                
+                // 2b. Render các đơn hàng ĐÃ HOÀN THÀNH (sắp xếp theo đơn hoàn thành gần nhất lên trước)
+                const sortedCompletedOrders = Object.entries(groupedCompletedOrders)
+                    .map(([orderKey, data]) => ({ orderKey, ...data }))
+                    // Sắp xếp theo thời gian hoàn thành mới nhất của món trong đơn
+                    .sort((a, b) => {
+                        const aLatest = a.completedItems.reduce((max, item) => Math.max(max, item.completedAt || 0), 0);
+                        const bLatest = b.completedItems.reduce((max, item) => Math.max(max, item.completedAt || 0), 0);
+                        return bLatest - aLatest; // Mới nhất lên đầu
+                    });
+
+                sortedCompletedOrders.forEach(data => {
+                    orderIndex++;
+                    const orderCard = createHistoryCard(data.orderKey, data.tableName, data.completedItems, data.createdAt, orderIndex);
+                    historyList.appendChild(orderCard);
+                });
+
+
+                // 3. Hiển thị/Ẩn thông báo trống
+                kitchenEmpty.classList.toggle('hidden', pendingFoodCountTotal > 0);
+                barEmpty.classList.toggle('hidden', pendingDrinkCountTotal > 0);
+                historyEmpty.classList.toggle('hidden', totalCompletedItems > 0);
+            }, (error) => {
+                 console.error("Lỗi Realtime Database:", error);
+                 statusIndicator.innerHTML = '<span class="status-indicator-error"><i class="fas fa-times-circle"></i> Lỗi dữ liệu</span>';
+            });
+        }
+        
+        /**
+         * Tạo thẻ (card) hiển thị toàn bộ đơn hàng đang chờ
+         * (Unchanged)
+         */
+        function createOrderCard(orderKey, tableName, items, cardType, createdAt, index) {
+            const card = document.createElement('div');
+            card.id = `order-card-${orderKey}`;
+            
+            // Xác định class ưu tiên dựa trên thời gian
+            const priorityClass = createdAt && isHighPriority(createdAt) ? 'priority-high' : '';
+
+            // SỬ DỤNG CLASS MỚI: card-ios
+            // Thêm style animation delay
+            card.className = `order-card p-4 flex flex-col justify-between shadow-md border border-gray-200 ${priorityClass}`;
+            card.style.animationDelay = `${index * 0.05}s`; /* Staggered delay */
+            
+            // Thiết lập màu sắc theo loại thẻ (Đỏ cho Bếp, Xanh cho Bar)
+            const typeColorClass = cardType === 'food' ? 'order-header-food' : 'order-header-drink';
+            const icon = cardType === 'food' ? 'fas fa-utensils' : 'fas fa-glass-martini-alt';
+
+            // Tạo danh sách các món
+            const itemsHtml = items.map(item => `
+                <li class="flex justify-between items-center text-gray-700 py-2 border-b border-gray-100 last:border-b-0">
+                    <span class="font-medium text-base">${item.itemName}</span>
+                    <span class="text-xl font-extrabold">${item.quantity}</span>
+                </li>
+            `).join('');
+            
+            const formattedTime = formatTimestamp(createdAt);
+
+            card.innerHTML = `
+                <div class="p-3 -m-4 -mt-4 mb-4 rounded-t-xl rounded-b-md flex flex-col sm:flex-row justify-between sm:items-center ${typeColorClass} text-white">
+                    <h3 class="text-xl font-bold flex items-center">
+                        <i class="${icon} mr-2"></i> ${cardType === 'food' ? 'BẾP' : 'BAR'} - 
+                        <span class="order-table-name ml-1">${tableName}</span>
+                    </h3>
+                    <div class="text-sm font-semibold mt-1 sm:mt-0 flex items-center opacity-90">
+                        <i class="far fa-clock mr-1"></i> ${formattedTime}
+                    </div>
+                </div>
+                
+                <div class="item-list-container">
+                    <ul class="space-y-1">
+                        ${itemsHtml}
+                    </ul>
+                </div>
+
+                <button onclick="completeOrder('${orderKey}')" 
+                        class="ios-button-complete btn-ios mt-4 flex items-center justify-center w-full">
+                    <i class="fas fa-check mr-2"></i> HOÀN THÀNH ĐƠN HÀNG
+                </button>
+            `;
+            
+            return card;
+        }
+
+        /**
+         * Tạo thẻ (card) hiển thị các món đã hoàn thành trong một đơn hàng (NEW)
+         */
+        function createHistoryCard(orderKey, tableName, items, createdAt, index) {
+            const card = document.createElement('div');
+            card.id = `history-order-card-${orderKey}`;
+            
+            // Sử dụng card-ios và thêm style animation delay
+            card.className = `order-card p-4 flex flex-col justify-between shadow-md`;
+            card.style.animationDelay = `${index * 0.05}s`; /* Staggered delay */
+            
+            // Sắp xếp món đã hoàn thành theo thời gian hoàn thành mới nhất
+            items.sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+
+            // Tạo danh sách các món đã hoàn thành
+            const itemsHtml = items.map(item => {
+                const itemIcon = item.type === 'food' ? 'fas fa-utensils text-red-400' : 'fas fa-cocktail text-blue-400';
+                const formattedCompletedTime = formatTimestamp(item.completedAt || Date.now());
+                
+                return `
+                    <li class="flex justify-between items-center text-gray-700 py-2 border-b border-gray-100 last:border-b-0">
+                        <div class="flex items-center space-x-2 w-full">
+                            <i class="${itemIcon}"></i>
+                            <span class="font-medium text-base">${item.itemName} (${item.type === 'food' ? 'Bếp' : 'Bar'})</span>
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <span class="text-lg font-extrabold text-gray-700">${item.quantity}</span>
+                            <span class="text-xs text-gray-500 mt-1">HT: ${formattedCompletedTime.substring(11, 16)}</span>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+            
+            const formattedCreatedTime = formatTimestamp(createdAt);
+            // Lấy thời gian hoàn thành mới nhất từ item đầu tiên đã sắp xếp
+            const latestCompletionTime = items[0]?.completedAt || createdAt; 
+            const formattedLatestCompletionTime = formatTimestamp(latestCompletionTime);
+
+            card.innerHTML = `
+                <div class="p-3 -m-4 -mt-4 mb-4 rounded-t-xl rounded-b-md flex flex-col sm:flex-row justify-between sm:items-center bg-gray-500 text-white shadow-lg">
+                    <h3 class="text-xl font-bold flex items-center">
+                        <i class="fas fa-history mr-2"></i> ĐH ${tableName}
+                    </h3>
+                    <div class="text-sm font-semibold mt-1 sm:mt-0 flex items-center opacity-90">
+                        <i class="fas fa-check mr-1"></i> Hoàn thành lúc: ${formattedLatestCompletionTime.substring(11, 16)}
+                    </div>
+                </div>
+                
+                <div class="item-list-container">
+                    <ul class="space-y-1">
+                        ${itemsHtml}
+                    </ul>
+                </div>
+
+                <div class="text-xs text-gray-500 mt-4 pt-2 border-t border-gray-200 flex justify-between">
+                    <span><i class="far fa-calendar-alt mr-1"></i> Tạo lúc: ${formattedCreatedTime}</span>
+                    <span class="font-semibold text-gray-600">(${items.length} món)</span>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // --- Event Listeners (Unchanged) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Bắt đầu lắng nghe đơn hàng khi DOM đã tải xong
+            startOrderListener();
+        });
+        
+    </script>
+</body>
+</html>
