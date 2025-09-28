@@ -2,288 +2,784 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <title>Dashboard Nhà Hàng</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Quản Lý Nhà Hàng - iOS Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="apple-touch-icon" href="IMG_5641.png">
+    
     <style>
-        :root {
-            --primary-color: #2e3b4e; /* Dark Blue */
-            --secondary-color: #f7b731; /* Golden Yellow */
-            --accent-color: #e5b13a; /* Highlight Gold */
-            --bg-color-light: #f4f7f6; /* Light Gray */
-            --bg-color-dark: #3a4759; /* Deeper Blue */
-            --card-bg: #ffffff;
-            --text-color-light: #f4f7f6;
-            --text-color-dark: #333333;
-            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
+        /* 1. iOS Font & General Styles */
         body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color-light);
-            color: var(--text-color-dark);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            overflow: hidden;
+            font-family: -apple-system, San Francisco, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #e0e7f1); /* Pastel light gradient background */
+            transition: background-color 0.5s ease;
         }
 
-        /* Sidebar Styling */
-        .sidebar {
-            width: 250px;
-            background-color: var(--primary-color);
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            left: 0;
-            top: 0;
-            height: 100%;
-            transform: translateX(-100%);
-            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            z-index: 100;
-        }
-        .sidebar.open {
-            transform: translateX(0);
-        }
-        .logo {
-            padding: 30px 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-color-light);
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-        .sidebar-menu {
-            list-style: none;
-            padding: 20px 0;
-            margin: 0;
-        }
-        .sidebar-menu li {
-            transform: translateX(-20px);
-            opacity: 0;
-            transition: transform 0.5s, opacity 0.5s;
-        }
-        .sidebar.open .sidebar-menu li {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        /* Staggered animation effect */
-        .sidebar.open .sidebar-menu li:nth-child(1) { transition-delay: 0.1s; }
-        .sidebar.open .sidebar-menu li:nth-child(2) { transition-delay: 0.2s; }
-        .sidebar.open .sidebar-menu li:nth-child(3) { transition-delay: 0.3s; }
-        .sidebar.open .sidebar-menu li:nth-child(4) { transition-delay: 0.4s; }
-
-        .sidebar-menu li a {
-            display: flex;
-            align-items: center;
-            padding: 15px 30px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: background-color 0.3s, color 0.3s, padding-left 0.3s;
-        }
-        .sidebar-menu li a i {
-            margin-right: 15px;
-            font-size: 1.2em;
-        }
-        .sidebar-menu li.active a,
-        .sidebar-menu li a:hover {
-            background-color: var(--bg-color-dark);
-            color: var(--secondary-color);
-            border-left: 5px solid var(--secondary-color);
-            padding-left: 25px;
-        }
-
-        /* Menu Toggle Button */
-        .menu-toggle {
-            position: fixed;
-            top: 40px; /* Adjusted position */
-            left: 20px;
-            background: var(--card-bg);
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: var(--primary-color);
-            box-shadow: var(--shadow-light);
-            z-index: 101;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .menu-toggle:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Main Content & Iframe Styling */
-        .main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            width: 100vw;
-            height: 100vh;
-            /* Removed padding-top here */
-            box-sizing: border-box;
+        /* 2. Color Variables (iOS inspired) */
+        :root {
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+            --ios-yellow: #FFCC00;
+            --ios-gray-bg: #F2F2F7;
+            --ios-card-bg: #FFFFFF;
+            --ios-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --ios-text-primary: #1C1C1E;
+            --ios-text-secondary: #6E6E73;
+            --sidebar-bg: #1C1C1E; /* Dark mode for sidebar for contrast */
         }
         
-        .content-container {
-            width: 100%;
-            height: 100%;
-            padding: 20px;
-            box-sizing: border-box;
+        /* Utility Classes for Tailwind */
+        .card-style {
+            border-radius: 12px;
+            box-shadow: var(--ios-shadow);
+            background-color: var(--ios-card-bg);
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth iOS transition curve */
+        }
+        
+        /* 3. Animations & Interactivity */
+        
+        /* Button Press Animation */
+        .btn-ios-press {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-ios-press:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         }
 
+        /* Card Hover/Interaction Animation */
+        .card-interactive:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+        
+        /* Fade In and Slide Up Animation */
+        @keyframes fadeInSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-stagger-in {
+            animation: fadeInSlideUp 0.6s ease-out forwards;
+        }
+
+        /* Main Menu Grid Item Style */
+        .menu-grid-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 150px; /* Uniform height for mobile appeal */
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+        }
+
+        .menu-grid-item:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        /* Modal Animation */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-animated {
+            animation: modalFadeIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        /* Sidebar item style (Kept for desktop layout) */
+        .sidebar-item {
+            color: #C0C0C0;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-radius: 8px;
+        }
+        .sidebar-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .sidebar-item.active {
+            background: var(--ios-blue); /* Changed to blue for consistency with Main Menu active color */
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.4);
+        }
+        /* Hide sidebar completely when viewing main menu */
+        .sidebar-hidden-on-main-menu {
+            display: none !important;
+        }
+
+        /* 4. Mobile Responsiveness */
+        .sidebar {
+            width: 280px; 
+        }
+        @media (max-width: 768px) {
+            /* Hide the entire sidebar on mobile to force main menu view */
+            .sidebar {
+                display: none !important; 
+            }
+            #dashboard-container {
+                flex-direction: column;
+            }
+            .content-area {
+                padding-bottom: 20px;
+            }
+            /* Hide mobile bottom nav as it's not needed for the Main Menu view */
+            .sidebar-nav-mobile {
+                display: none !important; 
+            }
+        }
+
+        /* Style cho iframe content */
         .iframe-container {
+            width: 100%;
+            height: calc(100vh - 120px); /* Adjust height based on header and padding */
+            overflow: hidden;
+            border-radius: 12px; /* Match iOS card style */
+            box-shadow: var(--ios-shadow);
+        }
+        .iframe-content {
             width: 100%;
             height: 100%;
             border: none;
-            border-radius: 12px;
-            box-shadow: var(--shadow-light);
-        }
-
-        /* Overlay */
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(2px);
-            z-index: 99;
-            transition: opacity 0.3s;
-            opacity: 0;
-        }
-        .sidebar.open + .overlay {
-            display: block;
-            opacity: 1;
-        }
-
-        /* Mobile specific adjustments */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 75%;
-                max-width: 300px;
-            }
-            .menu-toggle {
-                top: calc(env(safe-area-inset-top) + 40px); /* Adjusted position */
-                left: calc(env(safe-area-inset-left) + 15px);
-            }
-            .main-content {
-                padding-top: calc(env(safe-area-inset-top) + 10px);
-                padding-left: calc(env(safe-area-inset-left) + 10px);
-                padding-right: calc(env(safe-area-inset-right) + 10px);
-            }
-            .content-container {
-                padding: 10px;
-            }
+            background-color: white;
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen text-ios-text-primary" style="color: var(--ios-text-primary);">
 
-    <aside class="sidebar" id="sidebar">
-        <div class="logo">
-            QUẢN LÝ NHÀ HÀNG
+    <div id="customAlertModal" class="fixed inset-0 bg-gray-900 bg-opacity-30 z-50 hidden flex items-center justify-center transition-opacity duration-300">
+        <div class="card-style p-6 w-11/12 max-w-sm modal-animated text-center" style="border-radius: 14px;">
+            <h3 id="modalTitle" class="text-xl font-bold mb-3">Thông báo</h3>
+            <p id="modalMessage" class="mb-6 text-base text-ios-text-secondary"></p>
+            <div class="flex justify-center space-x-3 border-t pt-4">
+                <button id="modalCancel" class="hidden flex-1 px-4 py-2 bg-ios-gray-bg text-ios-text-primary rounded-xl hover:bg-gray-300 font-medium btn-ios-press">Hủy</button>
+                <button id="modalConfirm" class="flex-1 px-4 py-2 bg-ios-blue text-white rounded-xl hover:opacity-90 font-semibold btn-ios-press">Đồng ý</button>
+            </div>
         </div>
-        <ul class="sidebar-menu">
-            <li class="active" data-url="banhang.html">
-                <a href="#">
-                    <i class="fas fa-cash-register"></i>
-                    <span>Bán hàng</span>
-                </a>
-            </li>
-            <li data-url="thongke.html">
-                <a href="#">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Thống kê</span>
-                </a>
-            </li>
-            <li data-url="https://thanhchan791791.github.io/member/sothuchi/">
-                <a href="#">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                    <span>Sổ thu chi</span>
-                </a>
-            </li>
-            <li data-url="quanlytonkho.html">
-                <a href="#">
-                    <i class="fas fa-boxes"></i>
-                    <span>Quản lý tồn kho</span>
-                </a>
-            </li>
-        </ul>
-    </aside>
+    </div>
 
-    <div class="overlay" id="overlay"></div>
+    <div id="login-container" class="fixed inset-0 flex items-center justify-center" style="background: linear-gradient(135deg, #f0f4f8, #e0e7f1);">
+        <div class="card-style p-8 w-11/12 max-w-md transform transition duration-500 hover:scale-[1.01] animate-stagger-in">
+            <h2 class="text-3xl font-bold text-center mb-2" style="color: var(--ios-blue);">Quản Lý Nhà Hàng</h2>
+            <p class="text-center mb-6 text-ios-text-secondary">Đăng nhập để bắt đầu công việc</p>
+            
+            <div id="initial-setup-message" class="hidden p-3 mb-4 text-sm bg-yellow-100 text-yellow-800 card-style" role="alert" style="box-shadow: none;">
+                <i class="fas fa-info-circle mr-2"></i> Đang thiết lập tài khoản Admin lần đầu...
+            </div>
+            
+            <div class="mb-4">
+                <label for="username" class="block text-ios-text-secondary font-semibold mb-1 text-sm">Tên đăng nhập</label>
+                <input type="text" id="username" placeholder="admin hoặc tên nhân viên" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-ios-blue focus:border-transparent transition">
+            </div>
+            <div class="mb-6">
+                <label for="password" class="block text-sm font-medium text-ios-text-secondary">Mật khẩu</label>
+                <input type="password" id="password" placeholder="Mật khẩu của bạn" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-ios-blue focus:border-transparent transition">
+            </div>
+            
+           <button id="login-button" 
+    class="w-full bg-blue-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-blue-600 active:scale-95 transition-all duration-200 shadow-lg flex items-center justify-center gap-2"
+    style="box-shadow: 0 4px 10px rgba(0, 122, 255, 0.4);">
+    <i class="fas fa-sign-in-alt"></i>
+    <span>Đăng Nhập</span>
+</button>
 
-    <button class="menu-toggle" id="menuToggle">
-        <i class="fas fa-bars"></i>
-    </button>
+            <p id="login-error" class="text-ios-red text-center mt-4 hidden"></p>
+            <p class="text-center text-xs text-ios-text-secondary mt-6">
+                Gợi ý Admin: **admin / comdongbaobanme**
+            </p>
+        </div>
+    </div>
 
-    <div class="main-content">
-        <main class="content-container">
-            <iframe id="mainIframe" class="iframe-container" src="banhang.html"></iframe>
+    <div id="dashboard-container" class="hidden flex h-screen">
+        
+        <aside id="sidebar-desktop" class="sidebar bg-sidebar flex flex-col shadow-xl transition-all duration-300 z-30" style="background-color: var(--sidebar-bg);">
+            
+            <div class="p-6 flex items-center justify-center border-b border-gray-700 sidebar-header">
+                <i class="fas fa-utensils text-2xl text-ios-green mr-3"></i>
+                <h1 class="text-white text-xl font-extrabold tracking-tight">Q.LÝ NHÀ HÀNG</h1>
+            </div>
+
+            <nav id="sidebar-nav-desktop" class="flex-grow p-4 space-y-2 overflow-y-auto sidebar-nav-desktop">
+                </nav>
+            
+            <div class="p-4 border-t border-gray-700 sidebar-footer">
+                <div class="text-sm font-medium text-gray-300 mb-3 p-2 bg-gray-800 rounded-lg">
+                    <i class="fas fa-user-circle mr-2 text-ios-green"></i>
+                    Tài khoản: <span id="current-user-role" class="font-bold"></span>
+                </div>
+                <button id="logout-button" class="w-full flex items-center justify-center p-3 text-sm font-medium text-white bg-ios-red rounded-xl hover:opacity-90 transition duration-200 btn-ios-press">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Đăng Xuất
+                </button>
+            </div>
+        </aside>
+
+        <nav id="sidebar-nav-mobile" class="hidden"></nav>
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 content-area">
+            <header class="mb-6 pt-4 flex justify-between items-center">
+                <h2 id="current-view-title" class="text-2xl md:text-3xl font-bold tracking-tight" style="color: var(--ios-text-primary);">Menu Chính</h2>
+                <div id="main-menu-actions" class="flex space-x-3">
+                    <button id="logout-button-mobile" class="md:hidden p-2 text-ios-red hover:opacity-80 transition duration-200 btn-ios-press" style="border-radius: 8px;" title="Đăng xuất">
+                        <i class="fas fa-sign-out-alt text-xl"></i>
+                    </button>
+                </div>
+            </header>
+            
+            <div id="dashboard-content">
+                </div>
         </main>
     </div>
 
     <script>
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebarItems = document.querySelectorAll('.sidebar-menu li');
-        const mainIframe = document.getElementById('mainIframe');
-        const overlay = document.getElementById('overlay');
-
-        // Toggle mobile menu and overlay
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-        });
-
-        // Close sidebar when clicking outside
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-        });
-
-        // Handle sidebar menu clicks
-        sidebarItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
+        // --- Custom Alert/Confirm Logic (Using iOS Style Modal) ---
+        const customAlert = (message, title = "Thông báo") => {
+            return new Promise(resolve => {
+                const modal = document.getElementById('customAlertModal');
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalMessage').textContent = message;
+                document.getElementById('modalCancel').classList.add('hidden');
                 
-                // Remove active class from all items
-                sidebarItems.forEach(el => el.classList.remove('active'));
-                
-                // Add active class to clicked item
-                item.classList.add('active');
-                
-                // Update iframe source
-                const url = item.getAttribute('data-url');
-                mainIframe.src = url;
-
-                // Close sidebar after clicking
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
+                const confirmBtn = document.getElementById('modalConfirm');
+                confirmBtn.textContent = 'Đóng';
+                confirmBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    resolve(true);
+                };
+                modal.classList.remove('hidden');
             });
+        };
+
+        const customConfirm = (message, title = "Xác nhận") => {
+            return new Promise(resolve => {
+                const modal = document.getElementById('customAlertModal');
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalMessage').textContent = message;
+                
+                const cancelBtn = document.getElementById('modalCancel');
+                const confirmBtn = document.getElementById('modalConfirm');
+                
+                cancelBtn.classList.remove('hidden');
+                confirmBtn.textContent = 'Xác nhận';
+                
+                cancelBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    resolve(false);
+                };
+                
+                confirmBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    resolve(true);
+                };
+                
+                modal.classList.remove('hidden');
+            });
+        };
+
+        // --- Configuration & Initialization ---
+        // DO NOT CHANGE FIREBASE CODE
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
+            authDomain: "chitieu-7263e.firebaseapp.com",
+            databaseURL: "https://chitieu-7263e-default-rtdb.firebaseio.com",
+            projectId: "chitieu-7263e",
+            storageBucket: "chitieu-7263e.firebasestorage.app",
+            messagingSenderId: "83833140682",
+            appId: "1:83833140682:web:f9254b418ace3a659fcb33",
+            measurementId: "G-523X74K18N"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        let currentUser = null;
+        let currentPermissions = [];
+        let currentViewId = 'main_menu'; // Track current view, default to main menu
+
+        // --- Role-Based Access Control (RBAC) Setup - UPDATED PERMISSIONS ---
+        const PERMISSIONS = {
+            'admin': ['sales', 'stats', 'revenue_expense', 'inventory', 'kitchen_bar', 'personnel'],
+            'waiter': ['sales'], 
+            'cashier': ['sales', 'stats', 'revenue_expense'], 
+            'kitchen_bar_staff': ['inventory', 'kitchen_bar'], 
+            'accountant': ['stats', 'revenue_expense', 'personnel'],
+        };
+
+        const MENU_ITEMS = [
+            { id: 'sales', name: 'Bán hàng', icon: 'fas fa-cash-register', color: '#007AFF', view: renderSalesView, file: 'banhang.html' }, // Blue
+            { id: 'stats', name: 'Thống kê', icon: 'fas fa-chart-pie', color: '#FF9500', view: renderStatsView, file: 'thongke.html' }, // Orange
+            { id: 'revenue_expense', name: 'Thu Chi', icon: 'fas fa-file-invoice-dollar', color: '#34C759', view: renderRevenueExpenseView, file: 'thuchi.html' }, // Green
+            { id: 'inventory', name: 'Tồn kho', icon: 'fas fa-boxes', color: '#AF52DE', view: renderInventoryView, file: 'quanlytonkho.html' }, // Purple
+            { id: 'kitchen_bar', name: 'Bếp & Bar', icon: 'fas fa-cookie-bite', color: '#FF3B30', view: renderKitchenBarView, file: 'bepbar.html' }, // Red
+            { id: 'personnel', name: 'Nhân sự', icon: 'fas fa-users', color: '#5856D6', view: renderPersonnelView }, // Indigo
+        ];
+        
+        // --- Utility Functions (Firebase not modified) ---
+        function showLoginScreen() {
+            document.getElementById('dashboard-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function showDashboardScreen(user) {
+            currentUser = user;
+            currentPermissions = PERMISSIONS[user.role] || [];
+            document.getElementById('current-user-role').textContent = `${user.username} (${user.role.toUpperCase()})`;
+            
+            // Render menu based on permissions
+            renderSidebarMenu(); // Render sidebar for desktop/fallback
+            
+            // Switch views
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('dashboard-container').classList.remove('hidden');
+            
+            // RENDER MAIN MENU IMMEDIATELY AFTER LOGIN
+            switchView('main_menu'); 
+        }
+
+        async function createInitialAdmin() {
+            const usersRef = database.ref('users');
+            const snapshot = await usersRef.once('value');
+            if (!snapshot.exists()) {
+                document.getElementById('initial-setup-message').classList.remove('hidden');
+                
+                const adminData = {
+                    username: 'admin',
+                    password: 'comdongbaobanme', 
+                    role: 'admin',
+                    createdAt: new Date().toISOString()
+                };
+                
+                await usersRef.child('admin_user').set(adminData);
+                document.getElementById('initial-setup-message').classList.add('hidden');
+                customAlert('Tài khoản Admin đã được thiết lập thành công! Vui lòng đăng nhập.', 'Thiết lập thành công');
+            }
+        }
+        
+        // --- Authentication Logic (Firebase not modified) ---
+        async function loginUser() {
+            const usernameInput = document.getElementById('username').value.trim();
+            const passwordInput = document.getElementById('password').value.trim();
+            const errorEl = document.getElementById('login-error');
+
+            if (!usernameInput || !passwordInput) {
+                errorEl.textContent = 'Vui lòng nhập tên đăng nhập và mật khẩu.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            const usersRef = database.ref('users');
+            const snapshot = await usersRef.once('value');
+            const users = snapshot.val();
+            
+            if (!users) {
+                errorEl.textContent = 'Lỗi hệ thống: Không tìm thấy dữ liệu người dùng.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            const userId = Object.keys(users).find(key => users[key].username === usernameInput);
+            const user = userId ? users[userId] : null;
+
+            if (user && user.password === passwordInput) {
+                if (PERMISSIONS[user.role] || user.role === 'admin') {
+                    user.uid = userId;
+                    // Add 'dashboard' to permissions just for the main menu view if user is admin
+                    if (user.role === 'admin') {
+                         currentPermissions = MENU_ITEMS.map(item => item.id);
+                    } else {
+                         currentPermissions = PERMISSIONS[user.role] || [];
+                    }
+                    user.rolePermissions = currentPermissions; // Store explicit permissions
+                    showDashboardScreen(user);
+                } else {
+                    errorEl.textContent = `Vai trò '${user.role}' không hợp lệ hoặc chưa được phân quyền.`;
+                    errorEl.classList.remove('hidden');
+                }
+            } else {
+                errorEl.textContent = 'Tên đăng nhập hoặc mật khẩu không đúng.';
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function logoutUser() {
+            currentUser = null;
+            currentPermissions = [];
+            showLoginScreen();
+        }
+        
+        // --- Navigation and View Switching (iOS Styling Applied) ---
+
+        function renderSidebarMenu() {
+            const desktopNav = document.getElementById('sidebar-nav-desktop');
+            desktopNav.innerHTML = '';
+            
+            MENU_ITEMS.forEach(item => {
+                if (currentPermissions.includes(item.id)) {
+                    
+                    // Desktop Item
+                    const desktopBtn = document.createElement('button');
+                    desktopBtn.id = `nav-desktop-${item.id}`;
+                    // Add back button to main menu
+                    desktopBtn.className = 'sidebar-item w-full flex items-center p-3 text-sm font-medium rounded-lg focus:outline-none';
+                    desktopBtn.innerHTML = `<i class="${item.icon} text-lg w-6 text-center mr-3"></i> <span>${item.name}</span>`;
+                    desktopBtn.onclick = () => switchView(item.id);
+                    desktopNav.appendChild(desktopBtn);
+                }
+            });
+            
+            // Add Main Menu button for navigation back
+            const main_menu_btn = document.createElement('button');
+            main_menu_btn.id = 'nav-desktop-main_menu';
+            main_menu_btn.className = 'sidebar-item w-full flex items-center p-3 text-sm font-medium rounded-lg focus:outline-none bg-gray-700 text-white mt-4';
+            main_menu_btn.innerHTML = `<i class="fas fa-home text-lg w-6 text-center mr-3"></i> <span>Menu Chính</span>`;
+            main_menu_btn.onclick = () => switchView('main_menu');
+            desktopNav.prepend(main_menu_btn);
+        }
+        
+        function switchView(viewId) {
+            currentViewId = viewId;
+            const contentEl = document.getElementById('dashboard-content');
+            const titleEl = document.getElementById('current-view-title');
+            const sidebar = document.getElementById('sidebar-desktop');
+            const mainMenuActions = document.getElementById('main-menu-actions');
+            
+            // 1. Handle Sidebar/Mobile Visibility
+            if (viewId === 'main_menu') {
+                titleEl.innerHTML = `Xin chào, ${currentUser.username} (${currentUser.role.toUpperCase()})!`;
+                sidebar.classList.add('sidebar-hidden-on-main-menu');
+                mainMenuActions.innerHTML = ''; // Hide back button on main menu
+            } else {
+                const menuItem = MENU_ITEMS.find(item => item.id === viewId);
+                titleEl.textContent = menuItem ? menuItem.name : 'Chức năng';
+                sidebar.classList.remove('sidebar-hidden-on-main-menu');
+                // Show Back button on mobile
+                mainMenuActions.innerHTML = `
+                    <button onclick="switchView('main_menu')" class="md:hidden p-2 text-ios-blue hover:opacity-80 transition duration-200 btn-ios-press" style="border-radius: 8px;" title="Quay lại">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </button>
+                    <button id="logout-button-mobile" onclick="logoutUser()" class="md:hidden p-2 text-ios-red hover:opacity-80 transition duration-200 btn-ios-press" style="border-radius: 8px;" title="Đăng xuất">
+                        <i class="fas fa-sign-out-alt text-xl"></i>
+                    </button>
+                `;
+            }
+            
+            // 2. Update Active state
+            document.querySelectorAll('.sidebar-item').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeDesktopBtn = document.getElementById(`nav-desktop-${viewId}`);
+            if(activeDesktopBtn) {
+                activeDesktopBtn.classList.add('active');
+            }
+            
+            // 3. Render View Content
+            if (viewId === 'main_menu') {
+                renderMainMenu();
+            } else {
+                const menuItem = MENU_ITEMS.find(item => item.id === viewId);
+                if (!menuItem || !currentPermissions.includes(viewId)) {
+                    renderAccessDenied();
+                    return;
+                }
+                menuItem.view();
+            }
+        }
+        
+        // --- New Main Menu Render Function ---
+        function renderMainMenu() {
+            const contentEl = document.getElementById('dashboard-content');
+            
+            // Filter allowed menu items
+            const allowedItems = MENU_ITEMS.filter(item => currentPermissions.includes(item.id));
+
+            let htmlContent = `
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 pt-4">
+            `;
+
+            allowedItems.forEach((item, index) => {
+                const delay = (index * 0.08) + 0.1; // Staggered animation delay
+                htmlContent += `
+                    <div 
+                        onclick="switchView('${item.id}')" 
+                        class="menu-grid-item bg-white text-ios-text-primary card-style animate-stagger-in" 
+                        style="animation-delay: ${delay}s;"
+                    >
+                        <div class="p-4 rounded-full mb-3" style="background-color: ${item.color}15; color: ${item.color};">
+                            <i class="${item.icon} text-3xl"></i>
+                        </div>
+                        <span class="text-sm font-semibold text-center tracking-tight">${item.name}</span>
+                    </div>
+                `;
+            });
+
+            htmlContent += `</div>`;
+            contentEl.innerHTML = htmlContent;
+        }
+
+        // --- Access Denied View ---
+        function renderAccessDenied() {
+            const contentEl = document.getElementById('dashboard-content');
+            document.getElementById('current-view-title').textContent = 'Truy cập bị từ chối';
+            contentEl.innerHTML = `
+                <div class="p-8 text-center bg-ios-gray-bg card-style border-l-4 border-ios-red animate-stagger-in">
+                    <i class="fas fa-exclamation-triangle text-5xl mb-4 text-ios-red"></i>
+                    <h3 class="text-xl font-semibold text-ios-text-primary">Bạn không có quyền truy cập chức năng này.</h3>
+                    <p class="mt-2 text-ios-text-secondary">Vui lòng liên hệ Admin để được phân quyền.</p>
+                    <button onclick="switchView('main_menu')" class="mt-6 p-3 bg-ios-blue text-white rounded-xl hover:opacity-90 font-semibold btn-ios-press">
+                        <i class="fas fa-home mr-2"></i> Quay lại Menu Chính
+                    </button>
+                </div>
+            `;
+        }
+
+
+        // --- View Render Functions (iOS Style Placeholders - UPDATED TO IFRAME) ---
+        
+        const renderIframeView = (file, name, delay = 0.2) => {
+            const contentEl = document.getElementById('dashboard-content');
+            contentEl.innerHTML = `
+                <div class="iframe-container animate-stagger-in" style="animation-delay: ${delay}s;">
+                    <iframe src="${file}" title="${name}" class="iframe-content"></iframe>
+                </div>
+            `;
+        };
+        
+        // Lấy thông tin file từ MENU_ITEMS
+        const getFile = (id) => MENU_ITEMS.find(item => item.id === id).file;
+        const getName = (id) => MENU_ITEMS.find(item => item.id === id).name;
+
+
+        function renderSalesView() {
+            renderIframeView(getFile('sales'), getName('sales')); // banhang.html
+        }
+
+        function renderStatsView() {
+            renderIframeView(getFile('stats'), getName('stats')); // thongke.html
+        }
+
+        function renderRevenueExpenseView() {
+            renderIframeView(getFile('revenue_expense'), getName('revenue_expense')); // thuchi.html
+        }
+
+        function renderInventoryView() {
+            renderIframeView(getFile('inventory'), getName('inventory')); // quanlytonkho.html
+        }
+
+        function renderKitchenBarView() {
+            renderIframeView(getFile('kitchen_bar'), getName('kitchen_bar')); // bepba.html
+        }
+        
+        // --- Personnel Management View (KEPT INTACT - iOS Styling Applied) ---
+
+        function renderPersonnelView() {
+            const contentEl = document.getElementById('dashboard-content');
+            contentEl.innerHTML = `
+                <div class="p-4 md:p-6 card-style animate-stagger-in">
+                    <h3 class="text-2xl font-bold mb-6" style="color: var(--ios-blue);">Quản lý Nhân sự & Phân quyền</h3>
+                    <div class="mb-6 flex space-x-4">
+                       <button id="show-add-user-btn" 
+    class="p-3 bg-green-500 text-white rounded-xl hover:bg-green-600 font-medium shadow-md flex items-center gap-2">
+    <i class="fas fa-user-plus"></i> 
+    <span class="text-base">Tạo Tài khoản mới</span>
+</button>
+
+                    </div>
+
+                    <div id="add-user-form" class="bg-ios-gray-bg p-4 md:p-6 rounded-xl shadow-inner mb-8 hidden animate-stagger-in" style="border: 1px solid #E5E5EA;">
+                        <h4 class="text-xl font-semibold mb-4" style="color: var(--ios-text-primary);">Tạo Tài khoản Nhân viên</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-ios-text-secondary">Tên đăng nhập</label>
+                                <input type="text" id="new-user-username" class="mt-1 p-3 w-full border rounded-xl focus:ring-ios-blue focus:border-ios-blue transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-ios-text-secondary">Mật khẩu</label>
+                                <input type="password" id="new-user-password" class="mt-1 p-3 w-full border rounded-xl focus:ring-ios-blue focus:border-ios-blue transition">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-ios-text-secondary">Vai trò / Phân quyền</label>
+                            <select id="new-user-role" class="mt-1 p-3 w-full border rounded-xl bg-white focus:ring-ios-blue focus:border-ios-blue transition">
+                                <option value="waiter">Nhân viên Phục vụ (waiter) - Chỉ Bán hàng</option>
+                                <option value="cashier">Nhân viên Thu ngân (cashier) - Bán hàng, Thống kê, Thu Chi</option>
+                                <option value="kitchen_bar_staff">Nhân viên Bếp & Pha chế (kitchen_bar_staff) - Tồn kho, Bếp/Bar</option>
+                                <option value="accountant">Nhân viên Kế toán (accountant) - Thống kê, Thu Chi, Nhân sự</option>
+                            </select>
+                        </div>
+                        <div class="flex space-x-3 mt-6">
+                            <button id="submit-new-user" class="flex-1 p-3 bg-ios-blue text-white rounded-xl hover:opacity-90 font-semibold btn-ios-press">Lưu Tài khoản</button>
+                            <button id="hide-add-user-btn" class="flex-1 p-3 bg-gray-300 text-gray-700 rounded-xl hover:bg-gray-400 font-medium btn-ios-press">Hủy</button>
+                        </div>
+                    </div>
+
+                    <h4 class="text-xl font-semibold mb-3 mt-6">Danh sách Nhân viên</h4>
+                    <div class="overflow-x-auto card-style p-0" style="box-shadow: none;">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-ios-gray-bg">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-ios-text-secondary uppercase tracking-wider">Tên Đăng nhập</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-ios-text-secondary uppercase tracking-wider">Vai trò</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-ios-text-secondary uppercase tracking-wider hidden sm:table-cell">Quyền hạn</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold text-ios-text-secondary uppercase tracking-wider">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="user-list-tbody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            // Attach event listeners and load data for Personnel View
+            setupPersonnelListeners();
+            loadUserList();
+        }
+
+        // --- Personnel Management Logic (Firebase not modified) ---
+        function setupPersonnelListeners() {
+            const showBtn = document.getElementById('show-add-user-btn');
+            const hideBtn = document.getElementById('hide-add-user-btn');
+            const formDiv = document.getElementById('add-user-form');
+            const submitBtn = document.getElementById('submit-new-user');
+
+            showBtn.onclick = () => formDiv.classList.remove('hidden');
+            hideBtn.onclick = () => formDiv.classList.add('hidden');
+            submitBtn.onclick = saveNewUser;
+        }
+
+        async function loadUserList() {
+            // Note: This logic only runs if switchView('personnel') is called.
+            const tbody = document.getElementById('user-list-tbody');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-ios-text-secondary">Đang tải danh sách...</td></tr>';
+
+            const usersRef = database.ref('users');
+            usersRef.on('value', (snapshot) => {
+                const users = snapshot.val();
+                if (currentViewId !== 'personnel') return; // Prevent updating DOM if user navigated away
+
+                tbody.innerHTML = '';
+                if (users) {
+                    let delay = 0.0;
+                    Object.keys(users).forEach(uid => {
+                        const user = users[uid];
+                        // Use explicit permissions list for display
+                        const userPermissions = (user.role === 'admin' ? MENU_ITEMS.map(item => item.id) : PERMISSIONS[user.role]) || [];
+                        const permissionsText = userPermissions.join(', ');
+                        
+                        const row = document.createElement('tr');
+                        
+                        // Add iOS row animation style
+                        row.className = 'hover:bg-ios-gray-bg animate-stagger-in';
+                        row.style.animationDelay = `${delay}s`;
+                        
+                        row.innerHTML = `
+                            <td class="px-4 py-3 whitespace-nowrap font-medium text-ios-text-primary">${user.username}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color: ${user.role === 'admin' ? '#FEE2E2' : '#D1F7C4'}; color: ${user.role === 'admin' ? '#B91C1C' : '#15803D'};">
+                                    ${user.role.toUpperCase()}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-ios-text-secondary hidden sm:table-cell">${permissionsText}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                ${user.role !== 'admin' ? 
+                                    `<button onclick="deleteUser('${uid}', '${user.username}')" class="text-ios-red hover:text-red-800 ml-4 btn-ios-press">Xóa</button>` :
+                                    `<span class="text-ios-text-secondary opacity-50">Admin</span>`}
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                        delay += 0.05;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-ios-text-secondary">Chưa có tài khoản nào.</td></tr>';
+                }
+            });
+        }
+
+        async function saveNewUser() {
+            const username = document.getElementById('new-user-username').value.trim();
+            const password = document.getElementById('new-user-password').value.trim();
+            const role = document.getElementById('new-user-role').value;
+            const formDiv = document.getElementById('add-user-form');
+
+            if (!username || !password) {
+                customAlert('Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu.');
+                return;
+            }
+
+            const usersSnapshot = await database.ref('users').orderByChild('username').equalTo(username).once('value');
+            if (usersSnapshot.exists()) {
+                customAlert('Tên đăng nhập này đã tồn tại. Vui lòng chọn tên khác.');
+                return;
+            }
+
+            const confirm = await customConfirm(`Bạn có chắc chắn muốn tạo tài khoản "${username}" với vai trò "${role}"?`);
+            if (!confirm) return;
+
+            const newUserRef = database.ref('users').push(); 
+            const userData = {
+                username: username,
+                password: password,
+                role: role,
+                createdAt: new Date().toISOString()
+            };
+
+            newUserRef.set(userData)
+                .then(() => {
+                    customAlert(`Đã tạo thành công tài khoản: ${username}`);
+                    document.getElementById('new-user-username').value = '';
+                    document.getElementById('new-user-password').value = '';
+                    formDiv.classList.add('hidden');
+                })
+                .catch(error => {
+                    customAlert(`Lỗi khi tạo tài khoản: ${error.message}`, 'Lỗi Firebase');
+                    console.error("Lỗi Firebase:", error);
+                });
+        }
+        
+        async function deleteUser(uid, username) {
+            const confirm = await customConfirm(`Bạn có chắc chắn muốn xóa tài khoản "${username}"? Dữ liệu này không thể phục hồi.`, 'Cảnh báo');
+            if (!confirm) return;
+
+            database.ref(`users/${uid}`).remove()
+                .then(() => {
+                    customAlert(`Đã xóa thành công tài khoản: ${username}`);
+                })
+                .catch(error => {
+                    customAlert(`Lỗi khi xóa tài khoản: ${error.message}`, 'Lỗi Firebase');
+                    console.error("Lỗi Firebase:", error);
+                });
+        }
+        
+        // --- Main execution flow ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            await createInitialAdmin();
+
+            document.getElementById('login-button').addEventListener('click', loginUser);
+            // Attach logout listeners
+            document.getElementById('logout-button').addEventListener('click', logoutUser);
+            document.getElementById('logout-button-mobile').addEventListener('click', logoutUser); // Mobile logout button
+            
+            document.getElementById('password').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    loginUser();
+                }
+            });
+
+            showLoginScreen(); 
         });
 
-        // Set initial iframe source to 'banhang.html'
-        window.onload = () => {
-            mainIframe.src = 'banhang.html';
-        };
     </script>
 </body>
 </html>
