@@ -392,53 +392,54 @@
          * Cập nhật trạng thái của TẤT CẢ các món đang pending trong một đơn hàng thành "completed"
          * (Unchanged)
          */
-        async function completeOrder(orderKey) {
-            if (!database) {
-                customAlert(`Lỗi: Không thể kết nối đến cơ sở dữ liệu. Vui lòng kiểm tra cấu hình Firebase.`, 'Lỗi kết nối');
-                return;
-            }
+    // Mã Đã Sửa (Khoảng dòng 430)
+// Thêm tham số itemType vào hàm
+async function completeOrder(orderKey, itemType) { 
+    if (!database) {
+        customAlert(`Lỗi: Không thể kết nối đến cơ sở dữ liệu. Vui lòng kiểm tra cấu hình Firebase.`, 'Lỗi kết nối');
+        return;
+    }
 
-            const ref = database.ref(`${KITCHEN_ORDERS_REF}/${orderKey}/items`);
-            
-            try {
-                // 1. Lấy tất cả các items trong đơn hàng
-                const snapshot = await ref.once('value');
-                const items = snapshot.val();
-                
-                const updates = {};
-                let pendingItemsFound = 0;
-                let completedItemsCount = 0;
-                
-                if (items) {
-                    // 2. Chuẩn bị đối tượng cập nhật
-                    Object.entries(items).forEach(([itemKey, item]) => {
-                        if (item.status === 'pending') {
-                            updates[itemKey + '/status'] = 'completed';
-                            updates[itemKey + '/completedAt'] = firebase.database.ServerValue.TIMESTAMP;
-                            pendingItemsFound++;
-                        } else if (item.status === 'completed') {
-                            completedItemsCount++;
-                        }
-                    });
-                }
-
-                // 3. Thực hiện cập nhật
-                if (pendingItemsFound > 0) {
-                    await ref.update(updates);
-                    const tableName = document.querySelector(`#order-card-${orderKey} .order-table-name`)?.textContent || `Đơn hàng ${orderKey.substring(0, 8)}`;
-                    customAlert(`Đã hoàn thành ${pendingItemsFound} món đang chờ trong **${tableName}**!`, 'Xử lý thành công');
-                } else if (completedItemsCount > 0 && pendingItemsFound === 0) {
-                     customAlert(`Đơn hàng này đã được hoàn thành trước đó.`, 'Thông báo');
-                } else {
-                    customAlert(`Đơn hàng không có món nào đang chờ xử lý.`, 'Thông báo');
-                }
-
-            } catch (error) {
-                console.error(`Lỗi khi hoàn thành đơn hàng ${orderKey}:`, error);
-                customAlert(`Lỗi hệ thống: Không thể cập nhật trạng thái đơn hàng.`, 'Lỗi');
-            }
-        }
+    const ref = database.ref(`${KITCHEN_ORDERS_REF}/${orderKey}/items`);
+    
+    try {
+        const snapshot = await ref.once('value');
+        const items = snapshot.val();
         
+        const updates = {};
+        let pendingItemsFound = 0;
+        let completedItemsCount = 0;
+        
+        if (items) {
+            // 2. Chuẩn bị đối tượng cập nhật
+            Object.entries(items).forEach(([itemKey, item]) => {
+                // Bổ sung điều kiện kiểm tra itemType
+                if (item.status === 'pending' && item.type === itemType) { 
+                    updates[itemKey + '/status'] = 'completed';
+                    updates[itemKey + '/completedAt'] = firebase.database.ServerValue.TIMESTAMP;
+                    pendingItemsFound++;
+                } else if (item.status === 'completed') {
+                    completedItemsCount++;
+                }
+            });
+        }
+
+        // 3. Thực hiện cập nhật
+        if (pendingItemsFound > 0) {
+            await ref.update(updates);
+            const tableName = document.querySelector(`#order-card-${orderKey} .order-table-name`)?.textContent || `Đơn hàng ${orderKey.substring(0, 8)}`;
+            customAlert(`Đã hoàn thành ${pendingItemsFound} món **${itemType === 'food' ? 'ăn' : 'uống'}** đang chờ trong **${tableName}**!`, 'Xử lý thành công');
+        } else if (completedItemsCount > 0 && pendingItemsFound === 0) {
+             customAlert(`Đơn hàng này đã được hoàn thành trước đó.`, 'Thông báo');
+        } else {
+            customAlert(`Đơn hàng không có món ${itemType === 'food' ? 'ăn' : 'uống'} nào đang chờ xử lý.`, 'Thông báo');
+        }
+
+    } catch (error) {
+        console.error(`Lỗi khi hoàn thành đơn hàng ${orderKey}:`, error);
+        customAlert(`Lỗi hệ thống: Không thể cập nhật trạng thái đơn hàng.`, 'Lỗi');
+    }
+}
         /**
          * Lắng nghe dữ liệu và render giao diện (Đã cập nhật)
          */
@@ -626,7 +627,7 @@
                     </ul>
                 </div>
 
-                <button onclick="completeOrder('${orderKey}')" 
+                <button onclick="completeOrder('${orderKey}', '${cardType}')" 
                         class="ios-button-complete btn-ios mt-4 flex items-center justify-center w-full">
                     <i class="fas fa-check mr-2"></i> HOÀN THÀNH ĐƠN HÀNG
                 </button>
