@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống quản lý nhà hàng</title>
+    <title>Hệ thống quản lý nhà hàng - Quản lý Bán hàng</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
             --primary-color: #4CAF50;
-            --secondary-color: #333; /* Màu đen/xám đậm thay cho màu đỏ */
+            --secondary-color: #333;
             --info-color: #2196F3;
             --success-color: #008000;
             --warning-color: #FFC107;
@@ -377,7 +377,7 @@
         .modal {
             display: none;
             position: fixed;
-            z-index: 1001; /* Tăng z-index để chắc chắn hiển thị trên mọi thứ */
+            z-index: 1001;
             left: 0;
             top: 0;
             width: 100%;
@@ -409,25 +409,25 @@
             cursor: pointer;
         }
 
-        /* Bill-specific styles - MODIFIED FOR BOLDNESS/CLARITY/BLACK TEXT */
+        /* Bill-specific styles */
         .bill-header {
             text-align: center;
             margin-bottom: 20px;
-            color: #000; /* Đảm bảo màu đen */
-            font-weight: 700; /* Đảm bảo in đậm */
+            color: #000;
+            font-weight: 700;
         }
 
         .bill-header h2 {
-            font-size: 2.2em; /* Tăng kích thước chữ Hóa đơn thanh toán */
-            color: #000; 
+            font-size: 2.2em;
+            color: #000;
             margin: 0;
-            font-weight: 900; /* Extra bold */
+            font-weight: 900;
         }
         .bill-header p {
-            margin: 5px 0; 
-            font-size: 1.2em; /* Tăng kích thước chữ */
-            color: #000; 
-            font-weight: 700; 
+            margin: 5px 0;
+            font-size: 1.2em;
+            color: #000;
+            font-weight: 700;
         }
         .bill-details {
             text-align: left;
@@ -440,52 +440,51 @@
             border-collapse: collapse;
         }
         .bill-details th, .bill-details td {
-            padding: 7px 0; /* Tăng padding cho rõ ràng */
+            padding: 7px 0;
             text-align: left;
-            font-size: 1.3em; /* Tăng kích thước chữ */
-            color: #000; 
-            font-weight: 700; 
+            font-size: 1.3em;
+            color: #000;
+            font-weight: 700;
         }
         .bill-details th {
-            border-bottom: 2px solid #000; 
-            font-weight: 900; /* Extra bold header */
+            border-bottom: 2px solid #000;
+            font-weight: 900;
         }
         .bill-details td {
-            border-bottom: 1px dotted #000; 
+            border-bottom: 1px dotted #000;
         }
        .bill-details .item-name {
-            width: 40%; /* Giảm từ 50% xuống 40% */
+            width: 40%;
         }
         .bill-details .item-qty {
             width: 15%;
             text-align: center;
         }
         .bill-details .item-price {
-            width: 25%; /* Giữ nguyên 25% */
+            width: 25%;
             text-align: right;
-            /* Thêm padding phải để tạo khoảng cách */
-            padding-right: 15px; 
+            padding-right: 15px;
         }
         .bill-details .item-total {
-            width: 20%; /* Giảm từ 30% xuống 20% (40+15+25+20=100%) */
+            width: 20%;
             text-align: right;
         }
         .bill-summary {
-            border-top: 2px solid #000; 
-            padding-top: 15px; 
+            border-top: 2px solid #000;
+            padding-top: 15px;
             color: #000;
             font-weight: 700;
         }
         .bill-summary p {
             display: flex;
             justify-content: space-between;
-            margin: 10px 0; /* Tăng khoảng cách */
-            font-size: 1.3em; /* Tăng kích thước chữ */
+            margin: 10px 0;
+            font-size: 1.3em;
         }
         .bill-total-price {
-            font-weight: 900; /* Make the final total extra bold */
-            font-size: 1.8em; /* Tăng kích thước chữ Thanh toán */
-            color: #000 !important; /* Đảm bảo màu đen tuyệt đối */
+            font-weight: 900;
+            font-size: 1.8em;
+            color: #000 !important;
         }
 
         .pay-button {
@@ -516,187 +515,43 @@
             gap: 10px;
         }
         
-        /* Tabs for Kitchen/Bar */
-        .tab-buttons {
-            display: flex;
-            justify-content: flex-start;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .tab-button {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            background-color: #e0e0e0;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .tab-button.active {
-            background-color: var(--info-color);
-            color: white;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* New Styles for Kitchen/Bar View */
-        .order-container {
-            display: grid;
-            gap: 20px;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        }
-        
-        .order-card {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        
-        .order-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-        }
-
-        .order-card-header h3 {
-            color: var(--primary-color);
-            font-size: 1.5em;
-        }
-
-        .order-card-header span {
-            font-size: 0.9em;
-            color: #777;
-        }
-        
-        .order-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px dotted #e0e0e0;
-        }
-        
-        .order-list-item:last-child {
-            border-bottom: none;
-        }
-        
-        .item-details {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .item-details i {
-            font-size: 1.2em;
-            color: var(--primary-color);
-        }
-        
-        .item-details p {
-            margin: 0;
-            font-size: 1.1em;
-        }
-        
-        .item-quantity {
-            background-color: #eee;
-            color: var(--text-color);
-            border-radius: 50%;
-            padding: 5px 10px;
-            font-weight: bold;
-            min-width: 30px;
-            text-align: center;
-        }
-        
-        .item-actions .complete-btn {
-            background-color: var(--info-color);
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .item-actions .complete-btn:hover {
-            background-color: #1e88e5;
-        }
-
-        .history-item {
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            background-color: #fafafa;
-        }
-        
-        .history-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px dotted #ccc;
-            padding-bottom: 8px;
-            margin-bottom: 8px;
-        }
-        
-        .history-item-details {
-            font-size: 0.9em;
-        }
-        
         body {
             padding-bottom: 80px;
         }
 
-        /* Print styles - MODIFIED FOR RELIABLE PRINTING AND CENTERED CONTENT */
+        /* Print styles */
         @media print {
-            /* Tối ưu hóa việc in */
             @page { 
-                margin: 0; /* Loại bỏ lề trang */
+                margin: 0;
             }
             body * {
                 visibility: hidden;
             }
             .modal-content, .modal-content * {
                 visibility: visible;
-                /* Bật lại thuộc tính color-adjust cho máy in nhiệt */
                 -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact;
-                color: #000 !important; /* Đảm bảo mọi chữ đều màu đen */
-                font-weight: bold !important; /* Đảm bảo mọi chữ đều in đậm */
+                color: #000 !important;
+                font-weight: bold !important;
             }
             .modal-content {
                 position: absolute;
-                left: 50%; /* Bắt đầu căn giữa */
+                left: 50%;
                 top: 0;
-                transform: translateX(-50%); /* Căn giữa hóa đơn theo chiều ngang */
+                transform: translateX(-50%);
                 width: 90%;
-                max-width: 450px; /* Chiều rộng tối đa cho hóa đơn */
+                max-width: 450px;
                 padding: 10px;
                 box-shadow: none;
-                margin: 0 auto; /* Căn giữa hóa đơn trên trang in */
+                margin: 0 auto;
             }
-            /* Ẩn các nút không cần thiết và thanh menu */
             .close-button, .button-group-bill, .nav-buttons { 
                 display: none !important;
             }
-            /* Tối ưu khoảng cách cho in bill */
             .bill-details th, .bill-details td {
                 padding: 4px 0; 
-                font-size: 1.3em !important; /* Đảm bảo kích thước chữ lớn khi in */
+                font-size: 1.3em !important;
             }
-            /* Đảm bảo bill không bị tràn trang */
             .modal-content {
                 overflow: visible !important; 
             }
@@ -755,67 +610,11 @@
                         <button id="sendOrderButton" class="add-button" style="width: 100%; margin-top: 15px;">Gửi Order</button>
                     </div>
                     <div class="card">
-                        <h3>Đơn đã gửi cho Bếp / Pha chế</h3>
+                        <h3>Đơn đã gửi</h3>
                         <ul id="sentOrdersList" class="list"></ul>
                         <button id="checkoutButton" class="add-button" style="width: 100%; margin-top: 15px; display: none;">Thanh toán</button>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <div id="kitchen-bar" class="content-section">
-            <div class="tab-buttons">
-                <button class="tab-button active" data-tab="kitchen-orders">Bếp</button>
-                <button class="tab-button" data-tab="bar-orders">Pha chế</button>
-                <button class="tab-button" data-tab="kitchen-history">Lịch sử Bếp</button>
-                <button class="tab-button" data-tab="bar-history">Lịch sử Pha chế</button>
-            </div>
-            <div id="kitchen-orders" class="tab-content active">
-                <div class="card">
-                    <h2>Danh sách món ăn cần làm</h2>
-                    <div id="kitchenOrdersContainer" class="order-container"></div>
-                </div>
-            </div>
-            <div id="bar-orders" class="tab-content">
-                <div class="card">
-                    <h2>Danh sách thức uống cần làm</h2>
-                    <div id="barOrdersContainer" class="order-container"></div>
-                </div>
-            </div>
-            <div id="kitchen-history" class="tab-content">
-                <div class="card">
-                    <h2>Lịch sử món ăn đã hoàn thành</h2>
-                    <div id="kitchenHistoryContainer" class="order-container"></div>
-                </div>
-            </div>
-            <div id="bar-history" class="tab-content">
-                <div class="card">
-                    <h2>Lịch sử thức uống đã hoàn thành</h2>
-                    <div id="barHistoryContainer" class="order-container"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="menu" class="content-section">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Thêm món mới vào Menu</h2>
-                </div>
-                <select id="menuTypeSelect">
-                    <option value="food">Đồ ăn</option>
-                    <option value="drink">Thức uống</option>
-                </select>
-                <input type="text" id="menuNameInput" placeholder="Tên món">
-                <input type="number" id="menuPriceInput" placeholder="Giá (ví dụ: 50000)">
-                <button id="addMenuButton" class="add-button">Thêm vào Menu</button>
-            </div>
-            <div class="card">
-                <h2>Menu</h2>
-                <h3>Đồ ăn</h3>
-                <ul id="foodMenuList" class="list"></ul>
-                <hr>
-                <h3>Thức uống</h3>
-                <ul id="drinkMenuList" class="list"></ul>
             </div>
         </div>
     </div>
@@ -862,15 +661,7 @@
     <div class="nav-buttons">
         <button class="nav-button active" data-section="tables">
             <i class="fas fa-utensils"></i>
-            <span>Bàn</span>
-        </button>
-        <button class="nav-button" data-section="kitchen-bar">
-            <i class="fas fa-fire-burner"></i>
-            <span>Bếp / Bar</span>
-        </button>
-        <button class="nav-button" data-section="menu">
-            <i class="fas fa-book"></i>
-            <span>Menu</span>
+            <span>Bán hàng</span>
         </button>
     </div>
 
@@ -904,12 +695,6 @@
         const tableNameInput = document.getElementById('tableNameInput');
         const addTableButton = document.getElementById('addTableButton');
         const tablesList = document.getElementById('tablesList');
-        const menuTypeSelect = document.getElementById('menuTypeSelect');
-        const menuNameInput = document.getElementById('menuNameInput');
-        const menuPriceInput = document.getElementById('menuPriceInput');
-        const addMenuButton = document.getElementById('addMenuButton');
-        const foodMenuList = document.getElementById('foodMenuList');
-        const drinkMenuList = document.getElementById('drinkMenuList');
         
         // New elements for table view
         const tableViewList = document.getElementById('tableViewList');
@@ -936,21 +721,25 @@
         const billTotalPaid = document.getElementById('billTotalPaid');
         const confirmPaymentButton = document.getElementById('confirmPaymentButton');
         const printBillButton = document.getElementById('printBillButton'); 
-        
-        // Tab buttons for Kitchen/Bar
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
-        
-        // New Kitchen/Bar Containers
-        const kitchenOrdersContainer = document.getElementById('kitchenOrdersContainer');
-        const barOrdersContainer = document.getElementById('barOrdersContainer');
-        const kitchenHistoryContainer = document.getElementById('kitchenHistoryContainer');
-        const barHistoryContainer = document.getElementById('barHistoryContainer');
 
         let currentTableId = null;
         let currentTableNameValue = '';
         let currentOrderItems = {}; // { menuId: { name, price, type, quantity } }
         let allMenuItems = [];
+
+        // >> START: CODE MỚI CHO REAL-TIME LISTENER
+        let activeListeners = [];
+
+        // Hàm dọn dẹp tất cả các listener hiện tại
+        function cleanupListeners() {
+            activeListeners.forEach(listener => {
+                if (listener.ref && listener.callback) {
+                    listener.ref.off('value', listener.callback);
+                }
+            });
+            activeListeners = [];
+        }
+        // << END: CODE MỚI CHO REAL-TIME LISTENER
 
         // --- Telegram Notification Function ---
         function sendTelegramMessage(message) {
@@ -976,23 +765,6 @@
             });
         }
         
-        // --- Tab Navigation for Kitchen/Bar ---
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                
-                tabContents.forEach(tab => tab.classList.remove('active'));
-                const tabId = button.getAttribute('data-tab');
-                document.getElementById(tabId).classList.add('active');
-                
-                if (tabId === 'kitchen-orders') renderOrdersGrouped('food', kitchenOrdersContainer);
-                if (tabId === 'bar-orders') renderOrdersGrouped('drink', barOrdersContainer);
-                if (tabId === 'kitchen-history') renderHistoryGrouped('food', kitchenHistoryContainer);
-                if (tabId === 'bar-history') renderHistoryGrouped('drink', barHistoryContainer);
-            });
-        });
-
         // --- Main Navigation Logic ---
         navButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -1003,14 +775,12 @@
                 const sectionId = button.getAttribute('data-section');
                 document.getElementById(sectionId).classList.add('active');
                 
-                if (sectionId === 'kitchen-bar') {
-                    document.querySelector('.tab-button[data-tab="kitchen-orders"]').click();
-                } else if (sectionId === 'tables') {
+                if (sectionId === 'tables') {
+                    // Khi chuyển khỏi chế độ xem Order, dọn dẹp Listener
+                    cleanupListeners(); 
                     tableViewList.style.display = 'block';
                     tableOrderView.style.display = 'none';
                     renderTables();
-                } else if (sectionId === 'menu') {
-                    renderMenu();
                 }
             });
         });
@@ -1033,6 +803,7 @@
 
         function renderTables() {
             tablesList.innerHTML = '';
+            // Lắng nghe thay đổi trên tất cả các bàn
             database.ref('tables').on('value', (snapshot) => {
                 tablesList.innerHTML = '';
                 snapshot.forEach((childSnapshot) => {
@@ -1078,6 +849,7 @@
         
         // --- Table Order View ---
         backToTables.addEventListener('click', () => {
+            cleanupListeners(); // Dọn dẹp listener khi quay lại danh sách bàn
             tableViewList.style.display = 'block';
             tableOrderView.style.display = 'none';
         });
@@ -1091,6 +863,7 @@
             foodMenuOrderList.innerHTML = '';
             drinkMenuOrderList.innerHTML = '';
 
+            // Tải Menu Đồ ăn
             database.ref('menu/food').once('value', (snapshot) => {
                 snapshot.forEach((childSnapshot) => {
                     allMenuItems.push({
@@ -1102,6 +875,7 @@
                 renderMenuForOrder();
             });
 
+            // Tải Menu Thức uống
             database.ref('menu/drink').once('value', (snapshot) => {
                 snapshot.forEach((childSnapshot) => {
                     allMenuItems.push({
@@ -1126,7 +900,7 @@
                 div.setAttribute('data-price', item.price);
                 div.innerHTML = `
                     <h4>${item.name}</h4>
-                    <p>${item.price.toLocaleString('vi-VN')}₫</p>
+                    <p>${parseFloat(item.price).toLocaleString('vi-VN')}₫</p>
                 `;
 
                 if (item.type === 'food') {
@@ -1221,6 +995,7 @@
             currentOrderSummary.querySelectorAll('.decrement-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const itemName = event.target.getAttribute('data-name');
+                    // Tìm menuId dựa trên tên món (cần tìm lại key)
                     const menuId = Object.keys(currentOrderItems).find(key => currentOrderItems[key].name === itemName);
 
                     if (currentOrderItems[menuId] && currentOrderItems[menuId].quantity > 1) {
@@ -1232,7 +1007,8 @@
                 });
             });
         }
-
+        
+        // >> START: HÀM GỬI ORDER ĐÃ CẬP NHẬT LƯU GIÁ VÀO BẾP VÀ BÀN
         sendOrderButton.addEventListener('click', () => {
             if (Object.keys(currentOrderItems).length === 0) {
                 alert("Đơn hàng rỗng. Vui lòng chọn món.");
@@ -1255,21 +1031,24 @@
                         tableId: currentTableId,
                         tableName: currentTableNameValue,
                         timestamp: timestamp,
-                        type: item.type,
+                        type: item.type, 
                         items: {}
                     };
                 }
                 
+                // LƯU TRỮ GIÁ VÀO KITCHEN_BAR_ORDERS
                 updates[`kitchen_bar_orders/${tableOrderRef.key}`].items[menuId] = {
                     itemName: item.name,
                     quantity: item.quantity,
                     type: item.type,
-                    status: 'pending'
+                    status: 'pending',
+                    price: item.price // << LƯU GIÁ VÀO BẾP
                 };
 
+                // LƯU TRỮ GIÁ VÀO SENT ORDERS CỦA BÀN
                 itemsForSentList[menuId] = {
                     name: item.name,
-                    price: item.price,
+                    price: item.price, // << LƯU GIÁ VÀO BÀN
                     type: item.type,
                     quantity: item.quantity,
                     status: 'pending' 
@@ -1284,7 +1063,6 @@
             database.ref().update(updates).then(() => {
                 alert("Đơn hàng đã được gửi thành công!");
                 
-                // Format and send message to Telegram
                 let totalItems = 0;
                 let messageText = `<b>📝 Order mới từ: Bàn ${currentTableNameValue}</b>\n\n`;
                 
@@ -1302,324 +1080,222 @@
                 updateOrderSummary();
             });
         });
-        
+        // >> END: HÀM GỬI ORDER ĐÃ CẬP NHẬT LƯU GIÁ VÀO BẾP VÀ BÀN
+
+
+        // >> START: HÀM RENDER ĐÃ CẬP NHẬT REAL-TIME
         function renderTableSentOrders() {
+            // Dọn dẹp tất cả listener cũ khi hàm được gọi
+            cleanupListeners(); 
+
             sentOrdersList.innerHTML = '';
-            if (currentTableId) {
-                database.ref(`tables/${currentTableId}/sentOrders`).on('value', (snapshot) => {
-                    sentOrdersList.innerHTML = '';
-                    let hasCompletedItems = false;
-                    snapshot.forEach((childSnapshot) => {
-                        const order = childSnapshot.val();
-                        const orderId = childSnapshot.key;
-                        const time = new Date(order.timestamp).toLocaleTimeString('vi-VN');
-                        const li = document.createElement('li');
-                        li.classList.add('order-item');
+            if (!currentTableId) return;
+
+            // 1. Listener chính: Theo dõi Order đã gửi của bàn (thêm/xóa Order)
+            const sentOrdersRef = database.ref(`tables/${currentTableId}/sentOrders`);
+            const sentOrdersCallback = sentOrdersRef.on('value', (sentOrdersSnapshot) => {
+                
+                sentOrdersList.innerHTML = '';
+                
+                sentOrdersSnapshot.forEach((orderChildSnapshot) => {
+                    const orderId = orderChildSnapshot.key;
+                    const order = orderChildSnapshot.val();
+                    const time = new Date(order.timestamp).toLocaleTimeString('vi-VN');
+
+                    const li = document.createElement('li');
+                    li.classList.add('order-item');
+                    li.id = `order-list-item-${orderId}`; 
+                    
+                    let orderDetailsHtml = `<p><strong>Thời gian:</strong> ${time}</p><hr><ul id="order-items-list-${orderId}" style="list-style-type: none; padding: 0;"></ul>`;
+                    li.innerHTML = orderDetailsHtml;
+                    sentOrdersList.appendChild(li);
+
+                    // 2. Listener phụ: Theo dõi trạng thái Real-time từ Bếp (chỉ cập nhật status)
+                    const kitchenOrderRef = database.ref(`kitchen_bar_orders/${orderId}/items`);
+                    const kitchenOrderCallback = kitchenOrderRef.on('value', (kitchenItemsSnapshot) => {
                         
-                        let orderDetailsHtml = `
-                            <p><strong>Thời gian:</strong> ${time}</p>
-                            <hr>
-                            <ul style="list-style-type: none; padding: 0;">`;
+                        let itemsListHtml = '';
                         
+                        // Lặp qua các món trong order đã gửi của bàn
                         Object.keys(order.items).forEach(itemId => {
                             const item = order.items[itemId];
-                            const statusText = item.status === 'completed' ? 'Đã xong' : 'Đang làm';
-                            const statusClass = item.status === 'completed' ? 'completed' : 'pending';
-                            orderDetailsHtml += `
+                            let currentStatus = item.status; 
+                            
+                            // Lấy trạng thái mới nhất từ Bếp (nếu tồn tại)
+                            const kitchenItem = kitchenItemsSnapshot.child(itemId).val();
+                            if (kitchenItem && kitchenItem.status) {
+                                currentStatus = kitchenItem.status;
+                            }
+                            
+                            const statusText = currentStatus === 'completed' ? 'Đã xong' : 'Đang làm';
+                            const statusClass = currentStatus === 'completed' ? 'completed' : 'pending';
+                            
+                            itemsListHtml += `
                                 <li style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
                                     <span>${item.name} x ${item.quantity}</span>
                                     <span class="status ${statusClass}">${statusText}</span>
                                 </li>`;
-                                if (item.status === 'completed') {
-                                    hasCompletedItems = true;
-                                }
                         });
                         
-                        orderDetailsHtml += `</ul>`;
-                        
-                        li.innerHTML = orderDetailsHtml;
-                        sentOrdersList.appendChild(li);
+                        // Cập nhật HTML của danh sách món ăn
+                        const itemsListElement = document.getElementById(`order-items-list-${orderId}`);
+                        if (itemsListElement) {
+                            itemsListElement.innerHTML = itemsListHtml;
+                        }
+
+                        // Cập nhật nút Thanh toán sau mỗi lần cập nhật trạng thái
+                        updateCheckoutButtonVisibility();
                     });
-                    
-                    updateCheckoutButtonVisibility(hasCompletedItems);
+
+                    // Lưu trữ listener phụ để dọn dẹp
+                    activeListeners.push({ ref: kitchenOrderRef, callback: kitchenOrderCallback });
                 });
-            }
+            });
+            
+            // Lưu trữ listener chính để dọn dẹp
+            activeListeners.push({ ref: sentOrdersRef, callback: sentOrdersCallback });
         }
-        
-        function updateCheckoutButtonVisibility(hasCompletedItems) {
+        // >> END: HÀM RENDER ĐÃ CẬP NHẬT REAL-TIME
+
+        // >> START: HÀM KIỂM TRA CHECKOUT ĐÃ CẬP NHẬT
+        function updateCheckoutButtonVisibility() {
+            if (!currentTableId) {
+                checkoutButton.style.display = 'none';
+                return;
+            }
+            
+            // Kiểm tra xem có món nào có trạng thái 'completed' hay không
             database.ref(`tables/${currentTableId}/sentOrders`).once('value', snapshot => {
                 let anyCompleted = false;
+                
+                // Sử dụng Promise.all để đợi tất cả các lần kiểm tra trạng thái từ Bếp
+                const checkPromises = [];
+
                 snapshot.forEach(sentOrderSnapshot => {
                     const sentOrder = sentOrderSnapshot.val();
                     if (sentOrder.items) {
-                        Object.values(sentOrder.items).forEach(item => {
-                            if (item.status === 'completed') {
-                                anyCompleted = true;
-                            }
-                        });
-                    }
-                });
-                checkoutButton.style.display = anyCompleted ? 'block' : 'none';
-            });
-        }
-
-        // --- Menu Management ---
-        addMenuButton.addEventListener('click', () => {
-            const type = menuTypeSelect.value;
-            const name = menuNameInput.value.trim();
-            const price = parseFloat(menuPriceInput.value);
-            
-            if (name && !isNaN(price)) {
-                const newMenuItemRef = database.ref(`menu/${type}`).push();
-                newMenuItemRef.set({
-                    name: name,
-                    price: price
-                }).then(() => {
-                    menuNameInput.value = '';
-                    menuPriceInput.value = '';
-                }).catch(error => {
-                    console.error("Lỗi khi thêm món vào menu:", error);
-                });
-            }
-        });
-
-        function renderMenu() {
-            foodMenuList.innerHTML = '';
-            drinkMenuList.innerHTML = '';
-            database.ref('menu/food').on('value', (snapshot) => {
-                foodMenuList.innerHTML = '';
-                snapshot.forEach((childSnapshot) => {
-                    const food = childSnapshot.val();
-                    const li = document.createElement('li');
-                    li.classList.add('list-item');
-                    li.innerHTML = `<span>${food.name}</span><span>${food.price.toLocaleString('vi-VN')}₫</span>`;
-                    foodMenuList.appendChild(li);
-                });
-            });
-            database.ref('menu/drink').on('value', (snapshot) => {
-                drinkMenuList.innerHTML = '';
-                snapshot.forEach((childSnapshot) => {
-                    const drink = childSnapshot.val();
-                    const li = document.createElement('li');
-                    li.classList.add('list-item');
-                    li.innerHTML = `<span>${drink.name}</span><span>${drink.price.toLocaleString('vi-VN')}₫</span>`;
-                    drinkMenuList.appendChild(li);
-                });
-            });
-        }
-        
-        // --- Order Management (Kitchen & Bar) - Grouped View ---
-        function renderOrdersGrouped(type, element) {
-            element.innerHTML = '';
-            database.ref('kitchen_bar_orders').on('value', (snapshot) => {
-                const groupedOrders = {};
-                snapshot.forEach((childSnapshot) => {
-                    const order = childSnapshot.val();
-                    const orderId = childSnapshot.key;
-                    
-                    let hasPendingItems = false;
-                    for (const itemId in order.items) {
-                        if (order.items[itemId].type === type && order.items[itemId].status === 'pending') {
-                            hasPendingItems = true;
-                            if (!groupedOrders[order.tableId]) {
-                                groupedOrders[order.tableId] = {
-                                    tableName: order.tableName,
-                                    timestamp: order.timestamp,
-                                    items: []
-                                };
-                            }
-                            groupedOrders[order.tableId].items.push({
-                                orderId,
-                                itemId,
-                                itemName: order.items[itemId].itemName,
-                                quantity: order.items[itemId].quantity
-                            });
-                        }
-                    }
-                });
-
-                element.innerHTML = '';
-                if (Object.keys(groupedOrders).length === 0) {
-                    element.innerHTML = '<p>Không có đơn hàng nào.</p>';
-                    return;
-                }
-
-                for (const tableId in groupedOrders) {
-                    const group = groupedOrders[tableId];
-                    const card = document.createElement('div');
-                    card.classList.add('order-card');
-                    
-                    let itemsHtml = '';
-                    group.items.forEach(item => {
-                        itemsHtml += `
-                            <div class="order-list-item">
-                                <div class="item-details">
-                                    <i class="fas fa-utensils"></i>
-                                    <p>${item.itemName}</p>
-                                </div>
-                                <div class="item-actions">
-                                    <span class="item-quantity">x${item.quantity}</span>
-                                </div>
-                            </div>`;
-                    });
-
-                    card.innerHTML = `
-                        <div class="order-card-header">
-                            <h3>Bàn ${group.tableName}</h3>
-                            <span>${new Date(group.timestamp).toLocaleTimeString('vi-VN')}</span>
-                        </div>
-                        <div class="order-card-body">
-                            ${itemsHtml}
-                        </div>
-                        <button class="complete-table-btn add-button" data-table-id="${tableId}" style="width: 100%; margin-top: 10px;">Hoàn thành bàn này</button>
-                    `;
-                    element.appendChild(card);
-                }
-
-                element.querySelectorAll('.complete-table-btn').forEach(button => {
-                    button.addEventListener('click', (event) => {
-                        const tableId = event.target.getAttribute('data-table-id');
+                        const sentOrderId = sentOrderSnapshot.key;
                         
-                        database.ref(`kitchen_bar_orders`).once('value', snapshot => {
-                            const updates = {};
-                            snapshot.forEach(orderSnapshot => {
-                                const order = orderSnapshot.val();
-                                const orderId = orderSnapshot.key;
-                                if (order.tableId === tableId) {
-                                    for (const itemId in order.items) {
-                                        if (order.items[itemId].type === type && order.items[itemId].status === 'pending') {
-                                            updates[`kitchen_bar_orders/${orderId}/items/${itemId}/status`] = 'completed';
-                                            updates[`tables/${tableId}/sentOrders/${orderId}/items/${itemId}/status`] = 'completed';
-                                        }
-                                    }
+                        const promise = database.ref(`kitchen_bar_orders/${sentOrderId}/items`).once('value').then(kitchenItemsSnapshot => {
+                            kitchenItemsSnapshot.forEach(itemSnapshot => {
+                                if (itemSnapshot.val().status === 'completed') {
+                                    anyCompleted = true;
                                 }
                             });
-                            database.ref().update(updates);
                         });
-                    });
+                        checkPromises.push(promise);
+                    }
                 });
+                
+                Promise.all(checkPromises).then(() => {
+                    // Sau khi tất cả các lần kiểm tra hoàn tất, cập nhật visibility
+                    checkoutButton.style.display = anyCompleted ? 'block' : 'none';
+                });
+
+                if (!snapshot.exists()) {
+                    checkoutButton.style.display = 'none';
+                }
             });
         }
-        
-        function renderHistoryGrouped(type, element) {
-            element.innerHTML = '';
-            database.ref('kitchen_bar_orders').on('value', (snapshot) => {
-                const groupedHistory = {};
-                snapshot.forEach((childSnapshot) => {
-                    const order = childSnapshot.val();
-                    const orderId = childSnapshot.key;
+        // >> END: HÀM KIỂM TRA CHECKOUT ĐÃ CẬP NHẬT
+    // >> HÀM SHOW PAYMENT ĐÃ CHỈNH SỬA LẠI LOGIC CHỐT ĐƠN VÀ DÙNG ASYNC/AWAIT <<
+async function showPaymentModal(tableId, tableName) {
+    paymentModal.style.display = 'flex';
+    billTableInfo.textContent = tableName;
+    billDate.textContent = new Date().toLocaleDateString('vi-VN');
+    billId.textContent = generateBillId();
+    billDetailsBody.innerHTML = '';
+    
+    let totalAmount = 0;
+    let combinedCompletedItems = {}; 
+    let hasCompletedItemsToPay = false;
+
+    confirmPaymentButton.onclick = () => confirmPayment(tableId, tableName);
+    
+    // Lấy tất cả các đơn hàng đã gửi của bàn
+    const sentOrdersSnapshot = await database.ref(`tables/${tableId}/sentOrders`).once('value');
+    
+    // Tạo mảng các Promise để kiểm tra trạng thái Bếp/Bar cho từng Order
+    const checkPromises = [];
+
+    sentOrdersSnapshot.forEach(sentOrderSnapshot => {
+        const orderId = sentOrderSnapshot.key;
+        const sentOrder = sentOrderSnapshot.val();
+
+        if (sentOrder.items) {
+            // Lấy trạng thái chi tiết từ Bếp/Bar
+            const kitchenPromise = database.ref(`kitchen_bar_orders/${orderId}/items`).once('value').then(kitchenItemsSnapshot => {
+                const kitchenItems = kitchenItemsSnapshot.val() || {};
+                
+                // Lặp qua các món trong order đã gửi của bàn
+                Object.keys(sentOrder.items).forEach(itemId => {
+                    const item = sentOrder.items[itemId];
+                    const kitchenItem = kitchenItems[itemId];
                     
-                    for (const itemId in order.items) {
-                        if (order.items[itemId].type === type && order.items[itemId].status === 'completed') {
-                            if (!groupedHistory[orderId]) {
-                                groupedHistory[orderId] = {
-                                    tableName: order.tableName,
-                                    timestamp: order.timestamp,
-                                    items: []
+                    // CHỈ TÍNH CÁC MÓN CÓ TRẠNG THÁI 'completed' TỪ KITCHEN_BAR_ORDERS
+                    if (kitchenItem && kitchenItem.status === 'completed') {
+                        hasCompletedItemsToPay = true;
+                        const itemNameKey = item.name; 
+                        const itemPrice = parseFloat(item.price);
+                        
+                        if (itemPrice > 0) {
+                            if (combinedCompletedItems[itemNameKey]) {
+                                combinedCompletedItems[itemNameKey].quantity += item.quantity;
+                            } else {
+                                combinedCompletedItems[itemNameKey] = { 
+                                    name: item.name, 
+                                    quantity: item.quantity,
+                                    price: itemPrice // Lấy giá đã lưu trong Order
                                 };
                             }
-                            groupedHistory[orderId].items.push({
-                                itemName: order.items[itemId].itemName,
-                                quantity: order.items[itemId].quantity
-                            });
                         }
                     }
                 });
-                
-                element.innerHTML = '';
-                if (Object.keys(groupedHistory).length === 0) {
-                    element.innerHTML = '<p>Không có đơn hàng nào trong lịch sử.</p>';
-                    return;
-                }
-                
-                for (const orderId in groupedHistory) {
-                    const group = groupedHistory[orderId];
-                    const card = document.createElement('div');
-                    card.classList.add('history-item');
-                    
-                    let itemsHtml = '';
-                    group.items.forEach(item => {
-                        itemsHtml += `<p>${item.itemName} x ${item.quantity}</p>`;
-                    });
-                    
-                    card.innerHTML = `
-                        <div class="history-item-header">
-                            <strong>Bàn ${group.tableName}</strong>
-                            <span class="status completed">Đã hoàn thành lúc ${new Date(group.timestamp).toLocaleTimeString('vi-VN')}</span>
-                        </div>
-                        <div class="history-item-details">
-                            ${itemsHtml}
-                        </div>
-                    `;
-                    element.appendChild(card);
-                }
             });
+            checkPromises.push(kitchenPromise);
         }
+    });
 
-        function showPaymentModal(tableId, tableName) {
-            paymentModal.style.display = 'flex';
-            billTableInfo.textContent = tableName;
-            billDate.textContent = new Date().toLocaleDateString('vi-VN');
-            billId.textContent = generateBillId();
-            billDetailsBody.innerHTML = '';
+    // Đợi tất cả các Promise kiểm tra trạng thái hoàn tất
+    await Promise.all(checkPromises);
+
+    // Bắt đầu hiển thị hóa đơn sau khi đã tổng hợp xong
+    let billItemsHtml = '';
+    if (hasCompletedItemsToPay) {
+        Object.values(combinedCompletedItems).forEach((item, index) => {
+            const itemPrice = item.price; 
+            const itemTotal = itemPrice * item.quantity;
+            totalAmount += itemTotal;
             
-            let totalAmount = 0;
-            let combinedItems = {};
+            billItemsHtml += `
+                <tr>
+                    <td class="item-name">${index + 1}. ${item.name}</td>
+                    <td class="item-qty" style="text-align: center;">${item.quantity}</td>
+                    <td class="item-price">${itemPrice.toLocaleString('vi-VN')}</td>
+                    <td class="item-total">${itemTotal.toLocaleString('vi-VN')}</td>
+                </tr>
+            `;
+        });
+    } else {
+         billItemsHtml = '<tr><td colspan="4" style="text-align: center; font-style: italic;">Chưa có món nào được Bếp/Bar hoàn thành.</td></tr>';
+    }
 
-            database.ref(`tables/${tableId}/sentOrders`).once('value', (snapshot) => {
-                snapshot.forEach(sentOrderSnapshot => {
-                    const sentOrder = sentOrderSnapshot.val();
-                    if (sentOrder.items) {
-                        Object.keys(sentOrder.items).forEach(itemId => {
-                            const item = sentOrder.items[itemId];
-                            if (item.status === 'completed') {
-                                // Find item in allMenuItems to get the price, as sentOrder.items only stores the price at the time of order if available, but a robust system should rely on a fixed price lookup if not stored in the item itself (which your code does). We trust the price stored in the item for now.
-                                if (combinedItems[item.name]) {
-                                    combinedItems[item.name].quantity += item.quantity;
-                                } else {
-                                    // Use all properties of the item, assuming price is available
-                                    combinedItems[item.name] = { ...item };
-                                }
-                            }
-                        });
-                    }
-                });
-                
-                let billItemsHtml = '';
-                Object.values(combinedItems).forEach((item, index) => {
-                    // Ensure item.price is treated as a number
-                    const itemPrice = parseFloat(item.price); 
-                    const itemTotal = itemPrice * item.quantity;
-                    totalAmount += itemTotal;
-                    billItemsHtml += `
-                        <tr>
-                            <td class="item-name">${index + 1}. ${item.name}</td>
-                            <td class="item-qty">${item.quantity}</td>
-                            <td class="item-price">${itemPrice.toLocaleString('vi-VN')}</td>
-                            <td class="item-total">${itemTotal.toLocaleString('vi-VN')}</td>
-                        </tr>
-                    `;
-                });
-                
-                billDetailsBody.innerHTML = billItemsHtml;
-                const vatAmount = totalAmount * 0.1;
-                const finalTotal = totalAmount + vatAmount;
+    billDetailsBody.innerHTML = billItemsHtml;
+    const vatAmount = totalAmount * 0.1;
+    const finalTotal = totalAmount + vatAmount;
 
-                billTotalPrice.textContent = totalAmount.toLocaleString('vi-VN') + '₫';
-                billVatPrice.textContent = vatAmount.toLocaleString('vi-VN') + '₫';
-                billTotalPaid.textContent = finalTotal.toLocaleString('vi-VN') + '₫';
+    billTotalPrice.textContent = totalAmount.toLocaleString('vi-VN') + '₫';
+    billVatPrice.textContent = vatAmount.toLocaleString('vi-VN') + '₫';
+    billTotalPaid.textContent = finalTotal.toLocaleString('vi-VN') + '₫';
 
-                if (totalAmount === 0) {
-                    confirmPaymentButton.style.display = 'none';
-                    printBillButton.style.display = 'none'; // Hide print button if nothing to pay
-                } else {
-                    confirmPaymentButton.style.display = 'block';
-                    printBillButton.style.display = 'block'; // Show print button
-                }
-            });
-            
-            confirmPaymentButton.onclick = () => confirmPayment(tableId, tableName);
-        }
+    if (totalAmount === 0) {
+        confirmPaymentButton.style.display = 'none';
+        printBillButton.style.display = 'none';
+    } else {
+        confirmPaymentButton.style.display = 'block';
+        printBillButton.style.display = 'block';
+    }
+}
 
         function generateBillId() {
             const now = new Date();
@@ -1632,96 +1308,118 @@
             return `HD${year}${month}${day}${hour}${minute}${second}`;
         }
         
-        function confirmPayment(tableId, tableName) {
-            const updates = {};
-            const itemsForBill = {};
-            let totalAmount = 0;
-            let hasPendingOrders = false;
+ // >> HÀM CONFIRM PAYMENT ĐÃ CHỈNH SỬA LẠI LOGIC XỬ LÝ TRẠNG THÁI MÓN <<
+async function confirmPayment(tableId, tableName) {
+    const updates = {};
+    const itemsForBill = {};
+    let totalAmount = 0;
+    let hasPendingOrders = false;
+    
+    const sentOrdersSnapshot = await database.ref(`tables/${tableId}/sentOrders`).once('value');
+    const paymentTimestamp = new Date().toISOString();
+    
+    // Lặp qua từng order đã gửi
+    const checkPromises = [];
+    
+    sentOrdersSnapshot.forEach(sentOrderSnapshot => {
+        const sentOrderId = sentOrderSnapshot.key;
+        const sentOrder = sentOrderSnapshot.val();
+        
+        if (sentOrder.items) {
             
-            database.ref(`tables/${tableId}/sentOrders`).once('value', snapshot => {
-                const completedItemIdsToRemove = [];
-                snapshot.forEach(sentOrderSnapshot => {
-                    const sentOrder = sentOrderSnapshot.val();
-                    const sentOrderId = sentOrderSnapshot.key;
-                    if (sentOrder.items) {
-                        const itemsToKeep = {};
-                        Object.keys(sentOrder.items).forEach(itemId => {
-                            const item = sentOrder.items[itemId];
-                            // ONLY process completed items for payment
-                            if (item.status === 'completed') {
-                                // Add to bill history data
-                                itemsForBill[itemId] = {
+            const promise = database.ref(`kitchen_bar_orders/${sentOrderId}/items`).once('value').then(kitchenItemsSnapshot => {
+                const kitchenItems = kitchenItemsSnapshot.val() || {};
+                const itemsToKeepInTableOrder = {};
+                const itemsToKeepInKitchenOrder = {};
+                
+                let orderFullyPaid = true;
+
+                // Lặp qua từng món trong order
+                Object.keys(sentOrder.items).forEach(itemId => {
+                    const item = sentOrder.items[itemId];
+                    const kitchenItem = kitchenItems[itemId];
+                    
+                    if (kitchenItem && kitchenItem.status === 'completed') {
+                        // 1. Món Đã Xong -> Thanh toán
+                        const itemPrice = parseFloat(item.price);
+                        
+                        if (itemPrice > 0) {
+                            // Tổng hợp món cho Hóa đơn (payment_history)
+                            const itemNameKey = item.name;
+                            if (itemsForBill[itemNameKey]) {
+                                itemsForBill[itemNameKey].quantity += item.quantity;
+                            } else {
+                                itemsForBill[itemNameKey] = {
                                     name: item.name,
                                     quantity: item.quantity,
-                                    price: item.price
+                                    price: itemPrice
                                 };
-                                totalAmount += item.price * item.quantity;
-                                // Add to list for removal from kitchen_bar_orders
-                                completedItemIdsToRemove.push(sentOrderId);
-                            } else {
-                                // Keep pending items
-                                itemsToKeep[itemId] = item;
-                                hasPendingOrders = true;
                             }
-                        });
-                        
-                        if (Object.keys(itemsToKeep).length > 0) {
-                            updates[`tables/${tableId}/sentOrders/${sentOrderId}/items`] = itemsToKeep;
-                        } else {
-                            // If all items in this sentOrder are completed, remove the whole sentOrder entry
-                            updates[`tables/${tableId}/sentOrders/${sentOrderId}`] = null;
+                            totalAmount += itemPrice * item.quantity;
                         }
+                    } else {
+                        // 2. Món Đang Chờ/Chưa Gửi -> Giữ lại
+                        itemsToKeepInTableOrder[itemId] = item;
+                        itemsToKeepInKitchenOrder[itemId] = kitchenItem;
+                        hasPendingOrders = true;
+                        orderFullyPaid = false;
                     }
                 });
-                
-                // Remove the parent kitchen_bar_orders entry if all its items were processed for payment
-                completedItemIdsToRemove.forEach(orderId => {
-                    database.ref(`kitchen_bar_orders/${orderId}`).once('value', orderSnapshot => {
-                        const order = orderSnapshot.val();
-                        if (order && order.items) {
-                            let itemsLeft = false;
-                            for (const itemId in order.items) {
-                                // Check if any item is still not paid (i.e., not removed from sentOrders/items or is pending)
-                                // Simplified check: assume if it was completed and processed above, it should be removed. 
-                                // More robust logic: check if corresponding item is still in tables/${tableId}/sentOrders/${orderId}/items
-                                // Given the complex data structure, let's just remove the whole kitchen_bar_orders entry if the parent sentOrders was removed.
-                                if (!updates[`tables/${tableId}/sentOrders/${orderId}`]) {
-                                    updates[`kitchen_bar_orders/${orderId}`] = null;
-                                }
-                            }
-                        }
-                    });
-                });
-                
-                if (totalAmount === 0) {
-                    alert('Không có món nào đã hoàn thành để thanh toán.');
-                    return;
+
+                // Cập nhật Database
+                if (orderFullyPaid) {
+                    // Xóa hoàn toàn order khỏi bàn và bếp
+                    updates[`tables/${tableId}/sentOrders/${sentOrderId}`] = null;
+                    updates[`kitchen_bar_orders/${sentOrderId}`] = null;
+                } else if (Object.keys(itemsToKeepInTableOrder).length > 0) {
+                    // Cập nhật lại order của bàn (chỉ còn món chưa xong)
+                    updates[`tables/${tableId}/sentOrders/${sentOrderId}/items`] = itemsToKeepInTableOrder;
+                    // Cập nhật lại order của bếp (chỉ còn món chưa xong)
+                    updates[`kitchen_bar_orders/${sentOrderId}/items`] = itemsToKeepInKitchenOrder;
                 }
-
-                const newBillRef = database.ref('payment_history').push();
-                updates[`payment_history/${newBillRef.key}`] = {
-                    billId: billId.textContent, // Use the ID generated on modal open
-                    tableId: tableId,
-                    tableName: tableName,
-                    timestamp: new Date().toISOString(),
-                    items: itemsForBill,
-                    totalAmount: totalAmount,
-                    vatAmount: totalAmount * 0.1,
-                    finalTotal: totalAmount * 1.1
-                };
-
-                database.ref().update(updates).then(() => {
-                    alert('Thanh toán thành công!');
-                    paymentModal.style.display = 'none';
-                    if (!hasPendingOrders) {
-                        database.ref(`tables/${tableId}`).update({ status: 'available' });
-                    }
-                    renderTables(); 
-                }).catch(error => {
-                    console.error("Lỗi khi thanh toán:", error);
-                });
             });
+            checkPromises.push(promise);
         }
+    });
+    
+    await Promise.all(checkPromises);
+    
+    if (totalAmount === 0) {
+        alert('Không có món nào đã hoàn thành để thanh toán.');
+        return;
+    }
+
+    // 3. Ghi hóa đơn vào lịch sử thanh toán
+    const newBillRef = database.ref('payment_history').push();
+    const finalItemsForBill = Object.values(itemsForBill); // Chuyển từ Object sang Array
+    
+    const vatAmount = totalAmount * 0.1;
+    const finalTotal = totalAmount + vatAmount;
+
+    updates[`payment_history/${newBillRef.key}`] = {
+        billId: billId.textContent,
+        tableId: tableId,
+        tableName: tableName,
+        timestamp: paymentTimestamp,
+        items: finalItemsForBill,
+        totalAmount: totalAmount,
+        vatAmount: vatAmount,
+        finalTotal: finalTotal
+    };
+
+    // Thực hiện các cập nhật lên Firebase
+    database.ref().update(updates).then(() => {
+        alert('Thanh toán thành công!');
+        paymentModal.style.display = 'none';
+        if (!hasPendingOrders) {
+            // Nếu không còn bất kỳ đơn nào pending trên bàn, chuyển bàn về 'available'
+            database.ref(`tables/${tableId}`).update({ status: 'available' });
+        }
+        renderTables(); 
+    }).catch(error => {
+        console.error("Lỗi khi thanh toán:", error);
+    });
+}
         
         // --- Print Bill Functionality ---
         printBillButton.addEventListener('click', () => {
@@ -1737,7 +1435,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             renderTables();
-            renderMenu();
         });
     </script>
 </body>
