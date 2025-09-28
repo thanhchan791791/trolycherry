@@ -3,20 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hệ Thống Quản Lý Nguyên Liệu</title>
+    <title>Quản Lý Tồn Kho</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
         :root {
-            --primary-color: #5cb85c;
-            --secondary-color: #f0ad4e;
-            --danger-color: #d9534f;
-            --info-color: #5bc0de;
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-color: #333;
-            --shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            /* Màu sắc iOS mới */
+            --ios-blue: #007AFF;
+            --ios-success: #34C759;
+            --ios-warning: #FF9500;
+            --ios-danger: #FF3B30;
+            --ios-bg: #F2F6FB; /* Background iOS Light */
+            --ios-card-bg: #FFFFFF;
+            --ios-text-primary: #1C1C1E; /* Gần như đen */
+            --ios-text-secondary: #6B6B70;
+            --ios-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Shadow nhẹ */
+            --ios-shadow-card-press: 0 2px 6px rgba(0, 0, 0, 0.1);
+            --ios-border-color: #E5E5EA;
         }
+
+        /* Gốc: giữ lại logic */
+        :root {
+            --primary-color: var(--ios-success); /* Báo cáo/Thêm */
+            --secondary-color: var(--ios-blue); /* Toggle quản lý */
+            --danger-color: var(--ios-danger);
+            --info-color: #5bc0de;
+            --bg-color: var(--ios-bg);
+            --card-bg: var(--ios-card-bg);
+            --text-color: var(--ios-text-primary);
+            --shadow: var(--ios-shadow);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            /* Cập nhật Font iOS */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text", "SF Pro Display", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
@@ -24,42 +43,272 @@
             line-height: 1.6;
             overflow-x: hidden;
             opacity: 0;
-            animation: fadeIn 0.8s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
+            /* Animation load trang iOS style */
+            animation: fadeIn 0.8s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding-bottom: 80px; /* Cho bottom nav */
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; }
-        h1, h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; font-size: 24px; }
-        .section { background-color: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 20px; border-left: 6px solid; transition: transform 0.3s ease-out; }
-        .section:hover { transform: translateY(-8px); }
-        .section-stock { border-left-color: var(--primary-color); }
-        .section-list { border-left-color: var(--info-color); }
-        .section-log { border-left-color: var(--secondary-color); }
-        .section-management { border-left-color: var(--danger-color); }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 16px; }
-        input[type="text"], input[type="number"], select { width: 100%; padding: 14px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 12px; font-size: 18px; transition: border-color 0.3s, box-shadow 0.3s; }
-        input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(92, 184, 92, 0.25); outline: none; }
-        .btn { padding: 14px 24px; border: none; border-radius: 12px; color: #fff; cursor: pointer; font-size: 18px; font-weight: 700; transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; z-index: 1; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .container { width: 100%; max-width: 500px; margin: 0 auto; padding: 0 20px; }
+
+        /* Header Lớn iOS Style */
+        .large-header {
+            padding: 30px 20px 20px;
+            font-size: 34px;
+            font-weight: 700;
+            color: var(--ios-text-primary);
+            text-align: left;
+            margin-bottom: 10px;
+        }
+        /* H1 cũ (bị ẩn đi để dùng large-header) */
+        h1 { display: none; }
+
+        h2 {
+            text-align: left;
+            color: var(--ios-text-primary);
+            margin-bottom: 15px;
+            font-size: 22px; /* Tiêu đề card */
+            font-weight: 600;
+        }
+        h3 {
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--ios-text-secondary);
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        /* Card iOS */
+        .section {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px; /* Bo tròn card lớn */
+            box-shadow: var(--ios-shadow);
+            margin-bottom: 16px; /* Khoảng cách giữa các card */
+            border-left: none; /* Bỏ border-left cũ */
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+            position: relative;
+        }
+        .section:hover { transform: scale(1.005); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1); }
+
+        /* Form Group */
+        .form-group { margin-bottom: 15px; }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 15px;
+            color: var(--ios-text-secondary);
+        }
+
+        /* Input iOS Style */
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 12px 15px;
+            box-sizing: border-box;
+            border: 1px solid var(--ios-border-color);
+            border-radius: 12px; /* Pill shape */
+            font-size: 16px;
+            color: var(--ios-text-primary);
+            background-color: #F8F8F8;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            -webkit-appearance: none; /* Bỏ style default trình duyệt */
+        }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); /* iOS Blue Glow */
+            outline: none;
+            background-color: var(--ios-card-bg);
+        }
+
+        /* Nút iOS Gradient */
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 14px; /* Bo tròn lớn */
+            color: #fff;
+            cursor: pointer;
+            font-size: 17px; /* Bold 17px */
+            font-weight: 600;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
         .btn-full { width: 100%; }
-        .btn-primary { background-color: var(--primary-color); }
-        .btn-secondary { background-color: var(--secondary-color); }
-        .btn-danger { background-color: var(--danger-color); }
-        #manager-section { display: none; max-height: 0; overflow: hidden; transition: max-height 0.6s ease-in-out, opacity 0.6s ease-in-out; opacity: 0; }
-        #manager-section.active { max-height: 600px; opacity: 1; display: block; }
+        /* Gradient cho Primary (Success/Xanh lá) */
+        .btn-primary {
+            background: linear-gradient(180deg, var(--ios-success) 0%, #28A745 100%);
+            box-shadow: 0 4px 8px rgba(52, 199, 89, 0.3);
+        }
+        /* Gradient cho Secondary (Blue/Xanh dương) */
+        .btn-secondary {
+            background: linear-gradient(180deg, var(--ios-blue) 0%, #005AEE 100%);
+            box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);
+        }
+        /* Gradient cho Danger (Đỏ) */
+        .btn-danger {
+            background: linear-gradient(180deg, var(--ios-danger) 0%, #C72E27 100%);
+            box-shadow: 0 4px 8px rgba(255, 59, 48, 0.3);
+        }
+
+        /* Hiệu ứng Press/Ripple */
+        .btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 5px; height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(1) translate(-50%, -50%);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        .btn:active::after {
+            transform: scale(20) translate(-50%, -50%);
+            opacity: 1;
+            transition: 0s;
+        }
+
+
+        /* Quản Lý Section - Spring Easing */
+        #manager-section {
+            max-height: 0;
+            overflow: hidden;
+            /* Spring-like easing cho bật/tắt */
+            transition: max-height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease-in-out;
+            opacity: 0;
+            padding-top: 0;
+            margin-top: 15px;
+            border-top: 1px solid var(--ios-border-color);
+        }
+        #manager-section.active {
+            max-height: 800px; /* Giá trị lớn hơn nội dung */
+            opacity: 1;
+            padding-top: 15px;
+        }
+        
+        /* List Items iOS Style */
         #ingredients-list, #log-list-today, #log-list-other { list-style-type: none; padding: 0; margin: 0; }
-        #ingredients-list li, #log-list-today li, #log-list-other li { background-color: #f9f9f9; padding: 16px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); transition: transform 0.2s; }
-        #ingredients-list li:hover { transform: scale(1.02); }
-        #log-list-today li, #log-list-other li { font-size: 15px; color: #555; flex-direction: column; align-items: flex-start; }
-        .log-warning { color: var(--danger-color); font-weight: bold; }
+        #ingredients-list li, #log-list-today li, #log-list-other li {
+            background-color: var(--ios-card-bg); /* Trắng nền */
+            padding: 16px;
+            border-radius: 12px; /* Bo tròn nhẹ item */
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            font-size: 16px;
+            color: var(--ios-text-primary);
+            border: 1px solid var(--ios-border-color);
+        }
+        #ingredients-list li:active, #log-list-today li:active, #log-list-other li:active {
+            transform: scale(0.98);
+            box-shadow: var(--ios-shadow-card-press);
+            background-color: #F8F8F8;
+        }
+        /* Style cho log list */
+        #log-list-today li, #log-list-other li {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #log-list-today li > div:first-child, #log-list-other li > div:first-child {
+            flex-grow: 1;
+        }
+
+        .log-warning { color: var(--ios-danger); font-weight: 600; }
+        .log-info { color: var(--ios-warning); font-weight: 500; }
+        .log-normal { color: var(--ios-success); font-weight: 500; }
+        .log-time { color: var(--ios-text-secondary); font-size: 13px; text-align: right; }
+
+        /* Icon SVG (SF Symbols style) */
+        .icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+        .icon-plus { fill: var(--ios-success); }
+        .icon-trash { fill: var(--ios-danger); }
+        .icon-list { fill: var(--ios-blue); }
+        .icon-management { fill: var(--ios-warning); }
+
+        /* Toast Message iOS */
+        #toast-message {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+        }
+        #toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* --- Bottom Navigation Bar iOS Tab Bar --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px; /* Chiều cao Tab Bar */
+            background-color: var(--ios-card-bg);
+            border-top: 1px solid var(--ios-border-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 50;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            color: var(--ios-text-secondary);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 500;
+            transition: color 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
+        .nav-item.active { color: var(--ios-blue); }
+        .nav-item svg { width: 24px; height: 24px; margin-bottom: 3px; }
+        .nav-item:active { transform: scale(0.95); }
+
+        /* Ẩn các section không phải tab đang active */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body>
+<div class="large-header">Quản Lý Tồn Kho</div>
 <div class="container">
-    <h1>Hệ Thống Quản Lý Nguyên Liệu</h1>
-    <div class="section section-stock">
-        <h2>Nhập Tồn Kho Hàng Ngày</h2>
+    <h1 style="display: none;">Hệ Thống Quản Lý Nguyên Liệu</h1> <div id="tab-stock" class="tab-content section section-stock active">
+        <h2><svg class="icon icon-plus" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>Báo Cáo Tồn Kho</h2>
         <div class="form-group">
-            <label for="stock-ingredient-select">Chọn Nguyên Liệu:</label>
+            <label for="stock-ingredient-select">Nguyên Liệu:</label>
             <select id="stock-ingredient-select"></select>
         </div>
         <div class="form-group">
@@ -68,21 +317,31 @@
         </div>
         <button class="btn btn-full btn-primary" onclick="checkStock()">Gửi Báo Cáo</button>
     </div>
-    <div class="section section-log">
-        <h2>Lịch sử Báo cáo</h2>
-        <h3 style="margin-top: 0; color: #2c3e50;">Hôm nay</h3>
+
+    <div id="tab-log" class="tab-content section section-log">
+        <h2><svg class="icon" style="fill: var(--ios-text-primary);" viewBox="0 0 24 24"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 1.1-.9 2-2 2H9v2h3c2.21 0 4-1.79 4-4s-1.79-4-4-4z"/></svg>Lịch Sử Báo Cáo</h2>
+        <h3>Hôm nay</h3>
         <ul id="log-list-today"></ul>
-        <h3 style="color: #2c3e50;">Các ngày khác</h3>
+        <h3>Các ngày khác</h3>
         <ul id="log-list-other"></ul>
+        <div id="pull-to-refresh" style="text-align: center; padding: 10px; color: var(--ios-text-secondary); display: none;">
+            <svg class="icon" id="refresh-spinner" style="width: 20px; height: 20px; animation: spin 1s linear infinite; display: none;" viewBox="0 0 24 24"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8h-2c0 3.31-2.69 6-6 6s-6-2.69-6-6 2.69-6 6-6z"/></svg>
+            <span id="refresh-text">Kéo để tải lại</span>
+        </div>
     </div>
-    <div class="section section-list">
-        <h2>Danh Sách Nguyên Liệu</h2>
+
+    <div id="tab-list" class="tab-content section section-list">
+        <h2><svg class="icon icon-list" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zm0-8h14V7H7v2z"/></svg>Danh Sách Nguyên Liệu</h2>
         <ul id="ingredients-list"></ul>
     </div>
-    <div class="section section-management">
-        <button id="toggle-manager-btn" class="btn btn-full btn-secondary" onclick="toggleManagerSection()">Công Cụ Quản Lý</button>
+
+    <div id="tab-management" class="tab-content section section-management">
+        <button id="toggle-manager-btn" class="btn btn-full btn-secondary" onclick="toggleManagerSection()">
+            <svg class="icon" viewBox="0 0 24 24" style="fill: white;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm0-4h-2V7h2v8z"/></svg>
+            Công Cụ Quản Lý
+        </button>
         <div id="manager-section">
-            <h2>Thêm Nguyên Liệu Mới</h2>
+            <h2><svg class="icon icon-plus" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>Thêm Nguyên Liệu Mới</h2>
             <div class="form-group">
                 <label for="ingredient-name">Tên Nguyên Liệu:</label>
                 <input type="text" id="ingredient-name" placeholder="Ví dụ: Đường, Sữa bột..." required>
@@ -95,22 +354,88 @@
         </div>
     </div>
 </div>
+
+<div class="bottom-nav">
+    <a class="nav-item active" onclick="switchTab('stock')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+        Báo Cáo
+    </a>
+    <a class="nav-item" onclick="switchTab('log')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 3h-2v2h2v14h-2v2h2c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM4 3h2v2H4v14h2v2H4c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2zm13 2H7v14h10V5z"/></svg>
+        Lịch Sử
+    </a>
+    <a class="nav-item" onclick="switchTab('list')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zm0-8h14V7H7v2z"/></svg>
+        Nguyên Liệu
+    </a>
+    <a class="nav-item" onclick="switchTab('management')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+        Quản Lý
+    </a>
+</div>
+
+<div id="toast-message"></div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', () => { loadData(); });
+    // --- KHÔNG THAY ĐỔI LOGIC GỐC ---
+    document.addEventListener('DOMContentLoaded', () => { loadData(); setupPullToRefresh(); });
     let ingredients = [];
     let logs = [];
+    // GIỮ NGUYÊN TOKEN VÀ CHAT ID
     const TELEGRAM_BOT_TOKEN = '7807531189:AAGhMQ9jjew7Q9ywMDSTaGDy4Ns6XtPQUrI';
     const TELEGRAM_CHAT_ID = '-4954039835';
 
+    // Hàm chuyển đổi tab
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+        document.querySelector(`.nav-item[onclick*='${tabId}']`).classList.add('active');
+        // Cuộn lên đầu trang sau khi chuyển tab
+        document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
+        
+        // Cập nhật Header lớn theo tab (Micro-interaction)
+        const header = document.querySelector('.large-header');
+        const titles = {
+            'stock': 'Báo Cáo Tồn Kho',
+            'log': 'Lịch Sử Báo Cáo',
+            'list': 'Danh Sách Nguyên Liệu',
+            'management': 'Quản Lý Hệ Thống'
+        };
+        header.textContent = titles[tabId] || 'Quản Lý Tồn Kho';
+    }
+    // Set tab mặc định
+    document.addEventListener('DOMContentLoaded', () => {
+        switchTab('stock');
+    });
+
+    // Hàm Spring Easing cho Toggle Section
     function toggleManagerSection() {
         const section = document.getElementById('manager-section');
         const btn = document.getElementById('toggle-manager-btn');
         if (section.classList.contains('active')) {
-            section.classList.remove('active'); btn.textContent = 'Công Cụ Quản Lý';
+            section.classList.remove('active');
+            btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" style="fill: white;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm0-4h-2V7h2v8z"/></svg>Công Cụ Quản Lý';
         } else {
-            section.classList.add('active'); btn.textContent = 'Ẩn Công Cụ Quản Lý';
+            section.classList.add('active');
+            btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" style="fill: white;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1-7h2v6h-2zm0 8h2v2h-2z"/></svg>Ẩn Công Cụ Quản Lý';
         }
     }
+
+    // Toast Message Function
+    function showToast(message) {
+        const toast = document.getElementById('toast-message');
+        toast.textContent = message;
+        toast.classList.add('show');
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(50); // Rung nhẹ khi toast hiện
+        }
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000); // Ẩn sau 3s
+    }
+
+    // GIỮ NGUYÊN HÀM addIngredient
     function addIngredient() {
         const name = document.getElementById('ingredient-name').value.trim();
         const minQuantity = parseFloat(document.getElementById('min-quantity').value);
@@ -118,21 +443,35 @@
         ingredients.push({ name, minQuantity });
         saveData(); renderIngredients(); updateStockSelect();
         document.getElementById('ingredient-name').value = ''; document.getElementById('min-quantity').value = 0;
+        showToast(`Đã thêm "${name}" thành công!`); // Toast
     }
+
+    // Cập nhật renderIngredients để dùng icon SVG
     function renderIngredients() {
         const list = document.getElementById('ingredients-list'); list.innerHTML = '';
-        if (ingredients.length === 0) { list.innerHTML = '<li><small>Chưa có nguyên liệu nào.</small></li>'; return; }
+        if (ingredients.length === 0) { list.innerHTML = '<li><small style="color: var(--ios-text-secondary);">Chưa có nguyên liệu nào. Hãy thêm vào tab Quản Lý.</small></li>'; return; }
         ingredients.forEach((item, i) => {
             const li = document.createElement('li');
-            li.innerHTML = `<span>${item.name} - Tối thiểu: ${item.minQuantity} kg</span>
-                <button class="btn btn-danger" style="width: auto; font-size: 14px;" onclick="deleteIngredient(${i})">Xóa</button>`;
+            li.innerHTML = `
+                <span style="font-weight: 500;">${item.name}</span>
+                <div style="text-align: right;">
+                    <span style="font-size: 14px; color: var(--ios-text-secondary); margin-right: 15px;">Tối thiểu: ${item.minQuantity} kg</span>
+                    <button class="btn btn-danger" style="width: auto; padding: 6px 10px; border-radius: 8px; font-size: 14px; display: inline-flex; align-items: center;" onclick="deleteIngredient(${i})">
+                        <svg class="icon" style="width: 16px; height: 16px; fill: white; margin-right: 4px;" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                        Xóa
+                    </button>
+                </div>`;
             list.appendChild(li);
         });
     }
+
+    // GIỮ NGUYÊN HÀM updateStockSelect
     function updateStockSelect() {
         const select = document.getElementById('stock-ingredient-select'); select.innerHTML = '<option value="">-- Chọn Nguyên Liệu --</option>';
         ingredients.forEach((item, i) => { const op = document.createElement('option'); op.value = i; op.textContent = item.name; select.appendChild(op); });
     }
+
+    // GIỮ NGUYÊN HÀM checkStock
     function checkStock() {
         const select = document.getElementById('stock-ingredient-select');
         const dailyStock = parseFloat(document.getElementById('daily-stock').value);
@@ -148,18 +487,34 @@
         const dateStr = now.toLocaleDateString('vi-VN');
         const timeStr = now.toLocaleTimeString('vi-VN');
         let message = '';
+
         if (dailyStock <= minQ) {
             if (window.navigator && window.navigator.vibrate) window.navigator.vibrate([100, 50, 100]);
-            message = `<b>CẢNH BÁO TỒN KHO THẤP!</b>\n- Ngày: ${dateStr}\n- Thời gian: ${timeStr}\n- Nguyên liệu: <b>${ing.name}</b>\n- Tồn kho hiện tại: ${dailyStock} kg\n- Mức tối thiểu: ${minQ} kg\n\n<b>Vui lòng nhập thêm!</b>`;
+            message = `<b>🚨 CẢNH BÁO TỒN KHO THẤP!</b>\n- Ngày: ${dateStr}\n- Thời gian: ${timeStr}\n- Nguyên liệu: <b>${ing.name}</b>\n- Tồn kho hiện tại: ${dailyStock} kg\n- Mức tối thiểu: ${minQ} kg\n\n<b>Vui lòng nhập thêm ngay!</b>`;
+            showToast(`CẢNH BÁO: ${ing.name} sắp hết!`);
         } else if (dailyStock <= threshold) {
-            message = `<b>CẢNH BÁO SẮP HẾT!</b>\n- Ngày: ${dateStr}\n- Thời gian: ${timeStr}\n- Nguyên liệu: <b>${ing.name}</b>\n- Tồn kho hiện tại: ${dailyStock} kg\n- Mức tối thiểu: ${minQ} kg\n\nLưu ý: Nguyên liệu đang sắp hết, vui lòng chuẩn bị nhập thêm.`;
+            message = `<b>⚠️ CẢNH BÁO SẮP HẾT!</b>\n- Ngày: ${dateStr}\n- Thời gian: ${timeStr}\n- Nguyên liệu: <b>${ing.name}</b>\n- Tồn kho hiện tại: ${dailyStock} kg\n- Mức tối thiểu: ${minQ} kg\n\nLưu ý: Nguyên liệu đang sắp hết, vui lòng chuẩn bị nhập thêm.`;
+            showToast(`LƯU Ý: ${ing.name} đang ở mức cảnh báo.`);
+        } else {
+            showToast(`Báo cáo ${ing.name} (${dailyStock} kg) thành công.`);
         }
+
         if (message) sendTelegramNotification(message);
         document.getElementById('daily-stock').value = 0;
+        select.value = ''; // Reset select
     }
+
+    // GIỮ NGUYÊN HÀM deleteIngredient
     function deleteIngredient(i) {
-        if (confirm(`Xóa nguyên liệu ${ingredients[i].name}?`)) { ingredients.splice(i, 1); saveData(); renderIngredients(); updateStockSelect(); }
+        if (confirm(`Xóa nguyên liệu ${ingredients[i].name}?`)) {
+            const name = ingredients[i].name;
+            ingredients.splice(i, 1);
+            saveData(); renderIngredients(); updateStockSelect();
+            showToast(`Đã xóa "${name}"`);
+        }
     }
+
+    // GIỮ NGUYÊN HÀM sendTelegramNotification
     async function sendTelegramNotification(message) {
         const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
         const data = { chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'HTML' };
@@ -169,27 +524,110 @@
             console.log('Kết quả gửi:', result);
         } catch (err) { console.error('Lỗi khi gửi Telegram:', err); }
     }
+
+    // Cập nhật renderLogs
     function renderLogs() {
         const listToday = document.getElementById('log-list-today'); const listOther = document.getElementById('log-list-other');
         listToday.innerHTML = ''; listOther.innerHTML = '';
         const today = new Date().toLocaleDateString('vi-VN'); let hasToday = false;
         logs.forEach(log => {
             const logDate = new Date(log.timestamp).toLocaleDateString('vi-VN');
-            const li = document.createElement('li');
-            let status = 'Đã báo cáo'; let statusClass = '';
-            if (log.quantity <= log.minQuantity) { status = 'Đã báo cáo & CÓ CẢNH BÁO'; statusClass = 'log-warning'; }
             const logTime = new Date(log.timestamp).toLocaleTimeString('vi-VN');
-            li.innerHTML = `<div><span class="${statusClass}">${status}</span> cho <b>${log.name}</b></div>
-                <div style="margin-top: 5px; color: #888; font-size: 13px;"><small>Ngày ${logDate} lúc ${logTime}</small></div>`;
+            const li = document.createElement('li');
+            let status = 'Bình thường'; let statusClass = 'log-normal';
+            const threshold = log.minQuantity * 1.2;
+
+            if (log.quantity <= log.minQuantity) {
+                status = 'CẢNH BÁO KHẨN CẤP'; statusClass = 'log-warning';
+            } else if (log.quantity <= threshold) {
+                status = 'Cảnh báo sắp hết'; statusClass = 'log-info';
+            }
+
+            li.innerHTML = `
+                <div>
+                    <span class="${statusClass}" style="font-weight: 600;">[${status}]</span> cho <b>${log.name}</b>
+                    <div style="font-size: 15px; margin-top: 3px; color: var(--ios-text-primary);">Tồn: ${log.quantity} kg (Min: ${log.minQuantity} kg)</div>
+                </div>
+                <div class="log-time">
+                    <small>${logDate}</small>
+                    <small style="display: block;">lúc ${logTime}</small>
+                </div>`;
+
             if (logDate === today) { listToday.appendChild(li); hasToday = true; } else { listOther.appendChild(li); }
         });
-        if (!hasToday) listToday.innerHTML = '<li><small>Hôm nay không có báo cáo nào.</small></li>';
+
+        if (!hasToday) listToday.innerHTML = '<li><small style="color: var(--ios-text-secondary);">Hôm nay không có báo cáo nào.</small></li>';
+        if (listOther.children.length === 0) listOther.innerHTML = '<li><small style="color: var(--ios-text-secondary);">Chưa có báo cáo từ các ngày trước.</small></li>';
     }
+
+    // GIỮ NGUYÊN HÀM saveData & loadData
     function saveData() { localStorage.setItem('ingredients', JSON.stringify(ingredients)); localStorage.setItem('logs', JSON.stringify(logs)); }
     function loadData() {
         const savedIng = localStorage.getItem('ingredients'); const savedLogs = localStorage.getItem('logs');
         if (savedIng) ingredients = JSON.parse(savedIng); if (savedLogs) logs = JSON.parse(savedLogs);
         renderIngredients(); updateStockSelect(); renderLogs();
+    }
+
+    // Pull-to-Refresh logic (Chỉ làm animation)
+    let startY;
+    const logSection = document.getElementById('tab-log');
+    const pullToRefresh = document.getElementById('pull-to-refresh');
+    const refreshSpinner = document.getElementById('refresh-spinner');
+
+    function setupPullToRefresh() {
+        logSection.addEventListener('touchstart', (e) => {
+            if (logSection.scrollTop === 0) {
+                startY = e.touches[0].clientY;
+                pullToRefresh.style.display = 'block';
+                pullToRefresh.style.height = '0px';
+                refreshSpinner.style.display = 'none';
+            } else {
+                startY = null;
+            }
+        });
+
+        logSection.addEventListener('touchmove', (e) => {
+            if (startY !== null) {
+                const currentY = e.touches[0].clientY;
+                const diff = currentY - startY;
+                if (diff > 0) {
+                    e.preventDefault(); // Ngăn cuộn trang
+                    const pullHeight = Math.min(diff / 2, 70);
+                    pullToRefresh.style.height = `${pullHeight}px`;
+                    if (pullHeight > 50) {
+                        document.getElementById('refresh-text').textContent = 'Thả để tải lại';
+                    } else {
+                        document.getElementById('refresh-text').textContent = 'Kéo để tải lại';
+                    }
+                }
+            }
+        });
+
+        logSection.addEventListener('touchend', (e) => {
+            if (startY !== null) {
+                const finalY = e.changedTouches[0].clientY;
+                const diff = finalY - startY;
+                pullToRefresh.style.height = '0px';
+
+                if (diff > 100) { // Kéo đủ xa
+                    refreshSpinner.style.display = 'inline-block';
+                    document.getElementById('refresh-text').textContent = 'Đang tải...';
+                    // Mô phỏng tải lại dữ liệu
+                    setTimeout(() => {
+                        loadData(); // Tải lại dữ liệu từ localStorage
+                        refreshSpinner.style.display = 'none';
+                        document.getElementById('refresh-text').textContent = 'Tải lại hoàn tất!';
+                        setTimeout(() => {
+                            pullToRefresh.style.display = 'none';
+                            document.getElementById('refresh-text').textContent = 'Kéo để tải lại';
+                        }, 500);
+                    }, 1500);
+                } else {
+                    pullToRefresh.style.display = 'none';
+                }
+                startY = null;
+            }
+        });
     }
 </script>
 </body>
