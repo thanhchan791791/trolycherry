@@ -501,10 +501,15 @@
             color: var(--ios-red);
         }
 
-        /* Bill-specific styles (Giữ nguyên cho in ấn) */
-        .bill-header, .bill-details, .bill-summary {
+        /* Bill-specific styles (Chỉnh sửa để căn lề trái đều và đẹp) */
+        .bill-header, .bill-summary {
+            text-align: left; /* Căn lề trái cho header và summary */
             color: #000;
             font-weight: 500;
+        }
+        
+        .bill-header p {
+            margin: 5px 0;
         }
 
         .bill-header h2 {
@@ -512,12 +517,31 @@
             color: #000;
             margin: 0;
             font-weight: 800;
+            text-align: center; /* Giữ tiêu đề trung tâm */
+        }
+        
+        .bill-header h5 {
+            text-align: center;
+            margin: 5px 0 15px 0;
+        }
+        
+        .bill-details {
+             /* Đảm bảo bảng căn lề trái đều */
+             width: 100%;
+             margin: 15px 0;
+        }
+        
+        .bill-details table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left; /* Căn lề trái cho bảng */
         }
         
         .bill-details th, .bill-details td {
             font-size: 1.2em;
             color: #000;
             font-weight: 500;
+            padding: 8px 0; /* Thêm padding dọc cho dễ đọc */
         }
 
         .bill-details th {
@@ -525,9 +549,39 @@
             font-weight: 700;
         }
         
+        .bill-details td.item-name {
+            width: 45%; /* Tên món chiếm nhiều diện tích hơn */
+        }
+        .bill-details th.item-qty, .bill-details td.item-qty {
+            width: 15%;
+            text-align: center; /* Số lượng trung tâm */
+        }
+        .bill-details th.item-price, .bill-details td.item-price, 
+        .bill-details th.item-total, .bill-details td.item-total {
+             width: 20%;
+             text-align: right; /* Giá tiền căn phải */
+        }
+        
+        .bill-summary p {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 1.1em;
+            padding: 3px 0;
+        }
+        
+        .bill-summary p span:first-child {
+            font-weight: 500;
+        }
+        
+        .bill-summary p span:last-child {
+            font-weight: 700;
+            text-align: right;
+        }
+
         .bill-total-price {
-            font-weight: 800;
-            font-size: 1.6em;
+            font-weight: 800 !important;
+            font-size: 1.4em !important;
             color: var(--ios-red) !important; /* Màu đỏ nổi bật cho tổng */
         }
         
@@ -541,9 +595,9 @@
         .bill-qr-container img {
             max-width: 200px;
             height: auto;
-            border: 1px solid #ccc;
-            padding: 5px;
-            border-radius: 5px;
+            border: 2px solid #000; /* Tăng độ đậm của border */
+            padding: 10px; /* Tăng padding để QR nổi bật hơn */
+            border-radius: 8px; /* Bo góc nhẹ */
         }
 
         /* Group button */
@@ -551,6 +605,7 @@
             display: flex;
             justify-content: center;
             gap: 15px;
+            margin-top: 20px;
         }
         
         /* Print styles - Giữ nguyên */
@@ -582,10 +637,36 @@
             .close-button, .button-group-bill, .nav-buttons { 
                 display: none !important;
             }
-            .bill-details th, .bill-details td {
-                padding: 4px 0; 
-                font-size: 1.3em !important;
-            }
+            /* Chỉnh sửa thêm cho in ấn để đảm bảo căn chỉnh đều */
+             .bill-details table {
+                 table-layout: fixed; /* Giữ nguyên chiều rộng cột */
+             }
+             .bill-details th, .bill-details td {
+                 padding: 4px 0; 
+                 font-size: 1.1em !important; /* Giảm font size cho in nhiệt */
+                 font-weight: 500 !important;
+             }
+             .bill-details th {
+                 font-weight: 700 !important;
+             }
+             .bill-details td.item-price, .bill-details td.item-total {
+                 text-align: right !important;
+             }
+             .bill-details th.item-total {
+                 text-align: right !important;
+             }
+             .bill-details td.item-qty {
+                 text-align: center !important;
+             }
+             .bill-summary p span:last-child {
+                text-align: right;
+             }
+             .bill-total-price {
+                 font-size: 1.4em !important;
+             }
+             .bill-qr-container img {
+                 border: 2px solid #000;
+             }
             .modal-content {
                 overflow: visible !important; 
             }
@@ -657,22 +738,25 @@
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <div id="billContent"> 
-                <div class="bill-header">
+                <div class="bill-header" style="text-align: center;">
                     <h2>Ẩm thực buôn mê</h2>
                     <h5>Đậm đà hương vị cơm đồng bào Ê-đê</h5>
-                    <p>Địa chỉ:285/94b Cách Mạng Tháng 8</p>
-                    <p>Ngày: <span id="billDate"></span></p>
-                    <p>Bàn: <span id="billTableInfo"></span></p>
-                    <p>Mã HĐ: <span id="billId"></span></p>
-                </div>
+                    <div style="text-align: left; margin: 15px 0;">
+                        <p>Địa chỉ: 285/94b Cách Mạng Tháng 8</p>
+                        <p>Ngày: <span id="billDate"></span></p>
+                        <p>Thời gian in: <span id="billTime"></span></p>
+                        <p>Bàn: <span id="billTableInfo"></span></p>
+                        <p>Mã HĐ: <span id="billId"></span></p>
+                    </div>
+                    </div>
                 <div class="bill-details">
                     <table>
                         <thead>
                             <tr>
-                                <th class="item-name">Tên món</th>
-                                <th class="item-qty">SL</th>
-                                <th class="item-price">Đơn giá</th>
-                                <th class="item-total">Thành tiền</th>
+                                <th class="item-name" style="text-align: left;">Tên món</th>
+                                <th class="item-qty" style="text-align: center;">SL</th>
+                                <th class="item-price" style="text-align: right;">Đơn giá</th>
+                                <th class="item-total" style="text-align: right;">Thành tiền</th>
                             </tr>
                         </thead>
                         <tbody id="billDetailsBody"></tbody>
@@ -750,11 +834,12 @@
         const checkoutButton = document.getElementById('checkoutButton');
         const orderSearchInput = document.getElementById('orderSearchInput');
         
-        // Modal elements
-        const paymentModal = document.getElementById('paymentModal');
-        const closeButton = document.querySelector('.close-button');
-        const billTableInfo = document.getElementById('billTableInfo');
-        const billDate = document.getElementById('billDate');
+       // Modal elements
+const paymentModal = document.getElementById('paymentModal');
+const closeButton = document.querySelector('.close-button');
+const billTableInfo = document.getElementById('billTableInfo');
+const billDate = document.getElementById('billDate');
+const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
         const billId = document.getElementById('billId');
         const billDetailsBody = document.getElementById('billDetailsBody');
         const billTotalPrice = document.getElementById('billTotalPrice');
@@ -1061,7 +1146,7 @@
             }
 
             const timestamp = new Date().toISOString();
-            const tableOrderRef = database.ref(`tables/${currentTableId}/sentOrders`).push();
+            const tableOrderRef = database.ref('tables').child(currentTableId).child('sentOrders').push();
 
             database.ref(`tables/${currentTableId}`).update({ status: 'occupied' });
 
@@ -1245,9 +1330,11 @@
         // >> END: HÀM KIỂM TRA CHECKOUT ĐÃ CẬP NHẬT
     // >> HÀM SHOW PAYMENT ĐÃ CHỈNH SỬA LẠI LOGIC CHỐT ĐƠN VÀ DÙNG ASYNC/AWAIT <<
 async function showPaymentModal(tableId, tableName) {
+     const now = new Date();
     paymentModal.style.display = 'flex';
     billTableInfo.textContent = tableName;
-    billDate.textContent = new Date().toLocaleDateString('vi-VN');
+    billDate.textContent = now.toLocaleDateString('vi-VN');
+    billTime.textContent = now.toLocaleTimeString('vi-VN'); // << DÒNG THÊM MỚI
     billId.textContent = generateBillId();
     billDetailsBody.innerHTML = '';
     
@@ -1264,13 +1351,13 @@ async function showPaymentModal(tableId, tableName) {
     const amount = ""; // để rỗng = không gợi ý số tiền
     const addInfo = ""; // nội dung chuyển khoản mặc định nếu cần
 
-    // === START: PHẦN CẦN SỬA ĐỔI NỘI DUNG CHUYỂN KHOẢN ===
+  // === NỘI DUNG CHUYỂN KHOẢN (ĐÃ SỬA TỪ TRƯỚC) ===
     let tableCode = tableName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase(); // Lấy tên bàn, bỏ khoảng trắng và ký tự đặc biệt
-    let billCode = billId.textContent ? billId.textContent.slice(-6) : ''; // 6 ký tự cuối của Mã HĐ
+    let fullBillCode = billId.textContent ? billId.textContent : ''; // << LẤY TOÀN BỘ MÃ HĐ TRÊN BILL
     
-    // Đặt nội dung chuyển khoản là Số Bàn và Mã HĐ (Ví dụ: BAN1.HD123456)
-    let transferContent = `${tableCode}.HD${billCode}`;
-    // === END: PHẦN CẦN SỬA ĐỔI NỘI DUNG CHUYỂN KHOẢN ===
+    // Đặt nội dung chuyển khoản là Số Bàn và Mã HĐ (Ví dụ: BAN1.HD2410300945)
+    let transferContent = `${tableCode}.${fullBillCode}`; // << SỬ DỤNG FULL MÃ HĐ
+    // ===========================================
 
     // URL VietQR (Sử dụng transferContent mới)
     let qrUrl = `https://img.vietqr.io/image/${acqId}-${accountNo}-compact.png`;
@@ -1343,10 +1430,10 @@ async function showPaymentModal(tableId, tableName) {
             
             billItemsHtml += `
                 <tr>
-                    <td class="item-name">${index + 1}. ${item.name}</td>
+                    <td class="item-name" style="text-align: left;">${index + 1}. ${item.name}</td>
                     <td class="item-qty" style="text-align: center;">${item.quantity}</td>
-                    <td class="item-price">${itemPrice.toLocaleString('vi-VN')}</td>
-                    <td class="item-total">${itemTotal.toLocaleString('vi-VN')}</td>
+                    <td class="item-price" style="text-align: right;">${itemPrice.toLocaleString('vi-VN')}</td>
+                    <td class="item-total" style="text-align: right;">${itemTotal.toLocaleString('vi-VN')}</td>
                 </tr>
             `;
         });
