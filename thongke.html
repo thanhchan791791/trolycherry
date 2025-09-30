@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thống Kê Doanh Thu & Món Bán Chạy (iOS Style)</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js for beautiful charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Firebase JS (Giữ nguyên phiên bản và thứ tự của bạn) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
@@ -155,18 +151,30 @@
         input[type="date"] {
             min-height: 44px; /* iOS-like touch target size */
         }
+
+        /* Thêm style cho input tìm kiếm độc đáo */
+        #billSearchInput {
+            background-color: var(--bg-color);
+            border: 2px solid transparent;
+            transition: all 0.3s ease-in-out;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        #billSearchInput:focus {
+            background-color: var(--card-bg);
+            border-color: var(--primary-ios);
+            box-shadow: 0 0 0 3px rgba(var(--primary-ios-rgb), 0.2);
+        }
         
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <!-- Header (Gradient, Shadow, Fixed Top) -->
     <header class="sticky top-0 z-10 w-full p-4 shadow-xl backdrop-blur-md transition-colors duration-500"
             style="background: var(--card-bg); border-bottom: 1px solid rgba(0,0,0,0.05);">
         <div class="max-w-4xl mx-auto flex items-center justify-between">
             <h1 class="text-2xl font-bold tracking-tight" style="color: var(--primary-ios);">
                 <i class="fas fa-chart-line mr-2"></i> Thống Kê
             </h1>
-            <!-- Light/Dark Mode Toggle -->
             <button id="themeToggle" class="btn-ios p-2 rounded-full text-xl" 
                     style="color: var(--primary-ios); background: rgba(var(--primary-ios-rgb), 0.1);" 
                     aria-label="Toggle Dark Mode">
@@ -177,7 +185,6 @@
 
     <div class="container mx-auto p-4 max-w-4xl pt-8">
         
-        <!-- Tổng quan Doanh thu - Stat Cards (Fade-in + Slide-up) -->
         <section class="mb-8 space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-4">
             <div class="card-ios p-4 text-center animated-item" data-delay="0.1">
                 <h4 class="text-base font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu hôm nay</h4>
@@ -193,7 +200,6 @@
             </div>
         </section>
 
-        <!-- Biểu đồ Doanh thu (Animate Chart + Scroll Fade-in) -->
         <section class="card-ios p-5 mb-8 animated-item" data-delay="0.4" id="chartSection">
             <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">📈 Biểu đồ Doanh thu 30 ngày gần nhất</h3>
             <div class="chart-container">
@@ -201,7 +207,6 @@
             </div>
         </section>
         
-        <!-- Bộ lọc ngày (iOS Input Style) -->
         <section class="card-ios p-5 mb-8 animated-item" data-delay="0.5">
             <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">📅 Thống kê theo khoảng thời gian</h3>
             <div class="date-filter space-y-4 md:flex md:gap-4 md:items-end">
@@ -230,24 +235,29 @@
             </div>
         </section>
 
-        <!-- Thống kê món bán chạy (iOS List Style) -->
         <section class="card-ios p-5 mb-8 animated-item" data-delay="0.6">
             <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🔥 Top Món Ăn Bán Chạy</h3>
             <ul id="topSellingFoodsList" class="divide-y divide-gray-200/50">
-                <!-- Data injected here -->
-            </ul>
+                </ul>
         </section>
 
         <section class="card-ios p-5 mb-8 animated-item" data-delay="0.7">
             <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🥤 Top Đồ Uống Bán Chạy</h3>
             <ul id="topSellingDrinksList" class="divide-y divide-gray-200/50">
-                <!-- Data injected here -->
-            </ul>
+                </ul>
         </section>
 
-        <!-- Lịch sử Đơn hàng (iOS Table/List Style) -->
         <section class="card-ios p-5 mb-8 animated-item" data-delay="0.8">
             <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🧾 Lịch sử Đơn hàng gần nhất</h3>
+
+            <div class="mb-5 relative">
+                <i class="fas fa-receipt absolute left-4 top-1/2 -translate-y-1/2 text-lg" style="color: var(--primary-ios);"></i>
+                <input type="text" id="billSearchInput" 
+                       placeholder="Tìm hóa đơn theo Mã HĐ..." 
+                       class="w-full pl-12 pr-4 py-3 rounded-xl text-lg outline-none"
+                       style="border-radius: 12px; height: 50px;">
+                <i id="clearSearchButton" class="fas fa-times-circle absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hidden"></i>
+            </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
@@ -259,15 +269,14 @@
                         </tr>
                     </thead>
                     <tbody id="orderHistoryTableBody">
-                        <!-- Data injected here -->
-                    </tbody>
+                        </tbody>
                 </table>
                 <p id="noOrderData" class="py-4 text-center text-gray-500" style="display: none;">Không có dữ liệu hóa đơn</p>
+                <p id="noFilteredData" class="py-4 text-center text-gray-500" style="display: none;">Không tìm thấy hóa đơn nào trùng khớp.</p>
             </div>
         </section>
     </div>
     
-    <!-- Modal Chi tiết Hóa đơn (Slide-up iOS style) -->
     <div id="orderModal" class="modal fixed inset-0 flex items-end justify-center z-50 opacity-0 pointer-events-none">
         <div class="modal-content-ios card-ios w-full max-w-lg p-5 rounded-t-3xl shadow-2xl">
             <div class="flex justify-between items-center mb-4">
@@ -287,7 +296,6 @@
         </div>
     </div>
     
-    <!-- Custom Alert/Toast Modal (iOS-like) -->
     <div id="customAlert" class="fixed top-5 left-1/2 -translate-x-1/2 p-3 rounded-xl shadow-xl z-50 transition-all duration-300 opacity-0 pointer-events-none"
          style="background: var(--card-bg); color: var(--text-color); border: 1px solid rgba(var(--text-color-rgb), 0.1);">
         <p id="alertMessage" class="text-sm font-medium"></p>
@@ -330,10 +338,14 @@
         const modalTotalEl = document.getElementById('modalTotal');
         const modalItemsListEl = document.getElementById('modalItemsList');
         const noOrderData = document.getElementById('noOrderData');
+        const noFilteredData = document.getElementById('noFilteredData'); // Thêm element này
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const customAlert = document.getElementById('customAlert');
         const alertMessageEl = document.getElementById('alertMessage');
+        const billSearchInput = document.getElementById('billSearchInput'); // Thêm input tìm kiếm
+        const clearSearchButton = document.getElementById('clearSearchButton'); // Thêm nút xóa tìm kiếm
+        
         let revenueChartInstance = null;
         let paymentsCache = []; // Cache dữ liệu thanh toán
 
@@ -408,6 +420,8 @@
                         const payment = childSnapshot.val();
                         payments.push({
                             key: childSnapshot.key,
+                            // Đảm bảo billId luôn tồn tại để tìm kiếm
+                            billId: payment.billId || childSnapshot.key.substring(1, 7).toUpperCase(), 
                             ...payment,
                             date: new Date(payment.timestamp).toISOString().slice(0, 10)
                         });
@@ -616,21 +630,27 @@
             renderTopList(topSellingFoodsListEl, sortedFoods);
             renderTopList(topSellingDrinksListEl, sortedDrinks);
         }
-
-        async function updateOrderHistory() {
-            const payments = await fetchPayments();
+        
+        // Hàm render/filter hóa đơn
+        function renderOrderRows(paymentsToRender) {
             orderHistoryTableBody.innerHTML = '';
-
-            const sortedPayments = payments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
-            if (sortedPayments.length === 0) {
-                noOrderData.style.display = 'block';
+            if (paymentsToRender.length === 0) {
+                // Hiển thị thông báo phù hợp
+                if (billSearchInput.value.trim() !== '') {
+                    noFilteredData.style.display = 'block';
+                    noOrderData.style.display = 'none';
+                } else {
+                    noOrderData.style.display = 'block';
+                    noFilteredData.style.display = 'none';
+                }
                 return;
             }
             
             noOrderData.style.display = 'none';
+            noFilteredData.style.display = 'none';
 
-            sortedPayments.forEach(payment => {
+            paymentsToRender.forEach(payment => {
                 const row = document.createElement('tr');
                 // Sử dụng Date object để đảm bảo format chính xác
                 const dateObj = new Date(payment.timestamp);
@@ -639,7 +659,7 @@
                 
                 row.className = 'list-row';
                 row.innerHTML = `
-                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-medium" style="color: var(--primary-ios);">${payment.billId || payment.key.substring(1, 7)}</td>
+                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-medium" style="color: var(--primary-ios);">${payment.billId}</td>
                     <td class="py-3 px-2 md:px-4 text-xs md:text-sm hidden sm:table-cell opacity-70">${formattedDate}</td>
                     <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-semibold" style="color: var(--danger-ios);">${formattedTotal}</td>
                     <td class="py-3 px-2 md:px-4 text-right">
@@ -654,7 +674,49 @@
             });
         }
         
+        async function updateOrderHistory() {
+            const payments = await fetchPayments();
+            const sortedPayments = payments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            renderOrderRows(sortedPayments);
+        }
+        
+        function filterOrders() {
+            const searchTerm = billSearchInput.value.trim().toLowerCase();
+            
+            // Cập nhật nút xóa
+            clearSearchButton.classList.toggle('hidden', searchTerm === '');
+
+            // Nếu không có từ khóa, hiển thị toàn bộ lịch sử
+            if (searchTerm === '') {
+                const sortedPayments = paymentsCache.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                renderOrderRows(sortedPayments);
+                return;
+            }
+
+            // Lọc hóa đơn theo billId
+            const filtered = paymentsCache.filter(payment => 
+                (payment.billId && payment.billId.toLowerCase().includes(searchTerm))
+            );
+            
+            // Sắp xếp kết quả lọc theo thời gian
+            const sortedFiltered = filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            renderOrderRows(sortedFiltered);
+        }
+        
         // --- 5. EVENT HANDLERS & MODALS ---
+        
+        // Lắng nghe sự kiện gõ phím trên ô tìm kiếm
+        billSearchInput.addEventListener('input', filterOrders);
+        
+        // Lắng nghe sự kiện click nút xóa
+        clearSearchButton.addEventListener('click', () => {
+            billSearchInput.value = '';
+            filterOrders(); // Gọi hàm lọc để hiển thị lại toàn bộ danh sách
+            billSearchInput.focus();
+        });
+
 
         orderHistoryTableBody.addEventListener('click', async (event) => {
             if (event.target.classList.contains('view-details-btn')) {
@@ -671,7 +733,7 @@
         });
 
         function showOrderDetails(payment) {
-            modalBillIdEl.textContent = payment.billId || payment.key.substring(1, 10) + '...';
+            modalBillIdEl.textContent = payment.billId; // billId đã được làm sạch trong fetchPayments
             modalDateEl.textContent = new Date(payment.timestamp).toLocaleString('vi-VN');
             modalTotalEl.textContent = payment.finalTotal.toLocaleString('vi-VN') + '₫';
             
@@ -735,7 +797,10 @@
             updateSummaryStats();
             update30DayChart();
             updateTopSellingItems();
-            updateOrderHistory();
+            // Đảm bảo dữ liệu được cache trước khi render/filter
+            fetchPayments().then(() => {
+                updateOrderHistory(); // Sử dụng hàm updateOrderHistory sau khi cache
+            });
             // Kích hoạt animations scroll sau khi dữ liệu tải xong
             setupScrollAnimations();
         });
