@@ -764,7 +764,7 @@
                 </div>
                 <div class="bill-summary">
                     <p><span>Tổng tiền (Chưa VAT):</span> <span id="billTotalPrice"></span></p>
-                    <p><span>VAT (10%):</span> <span id="billVatPrice"></span></p>
+                    <p><span>VAT (8%):</span> <span id="billVatPrice"></span></p>
                     <p><span>Thanh toán:</span> <span id="billTotalPaid" class="bill-total-price"></span></p>
                     
                     <div class="bill-qr-container">
@@ -1442,8 +1442,11 @@ async function showPaymentModal(tableId, tableName) {
     }
 
     billDetailsBody.innerHTML = billItemsHtml;
-    const vatAmount = totalAmount * 0.1;
+    // START: SỬA ĐỔI VAT TẠI ĐÂY
+    const vatRate = 0.08; // Thay đổi 10% (0.1) thành 8% (0.08)
+    const vatAmount = totalAmount * vatRate;
     const finalTotal = totalAmount + vatAmount;
+    // END: SỬA ĐỔI VAT TẠI ĐÂY
 
     billTotalPrice.textContent = totalAmount.toLocaleString('vi-VN') + '₫';
     billVatPrice.textContent = vatAmount.toLocaleString('vi-VN') + '₫';
@@ -1561,8 +1564,11 @@ async function confirmPayment(tableId, tableName) {
     const newBillRef = database.ref('payment_history').push();
     const finalItemsForBill = Object.values(itemsForBill); // Chuyển từ Object sang Array
     
-    const vatAmount = totalAmount * 0.1;
+    // START: SỬA ĐỔI VAT TẠI ĐÂY
+    const vatRate = 0.08; // Thay đổi 10% (0.1) thành 8% (0.08)
+    const vatAmount = totalAmount * vatRate;
     const finalTotal = totalAmount + vatAmount;
+    // END: SỬA ĐỔI VAT TẠI ĐÂY
 
     updates[`payment_history/${newBillRef.key}`] = {
         billId: billId.textContent,
