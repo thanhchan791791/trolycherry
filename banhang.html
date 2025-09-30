@@ -530,6 +530,21 @@
             font-size: 1.6em;
             color: var(--ios-red) !important; /* Màu đỏ nổi bật cho tổng */
         }
+        
+        .bill-qr-container {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #ccc;
+            text-align: center;
+        }
+        
+        .bill-qr-container img {
+            max-width: 200px;
+            height: auto;
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 5px;
+        }
 
         /* Group button */
         .button-group-bill {
@@ -667,6 +682,14 @@
                     <p><span>Tổng tiền (Chưa VAT):</span> <span id="billTotalPrice"></span></p>
                     <p><span>VAT (10%):</span> <span id="billVatPrice"></span></p>
                     <p><span>Thanh toán:</span> <span id="billTotalPaid" class="bill-total-price"></span></p>
+                    
+                    <div class="bill-qr-container">
+                        <p style="font-weight: 700; color: #000; margin-bottom: 10px; font-size: 1.2em;">Thanh toán bằng VietQR</p>
+                        <img id="vietQrCode" alt="Mã VietQR" style="width: 100%; max-width: 250px; display: block; margin: 0 auto;"/>
+                        <p style="font-weight: 500; color: #000; margin-top: 5px;">NGÂN HÀNG: MB Bank</p>
+                        <p style="font-weight: 500; color: #000; margin: 0;">SỐ TK: 0909650816</p>
+                        <p style="font-weight: 500; color: #000; margin: 0;">CHỦ TK: TRAN VU NGOC THANH</p>
+                    </div>
                     <p style="font-size: 1.2em; text-align: center; margin-top: 15px; font-weight: 700; color: #000;">Cảm ơn quý khách và hẹn gặp lại!</p>
                 </div>
             </div>
@@ -739,6 +762,9 @@
         const billTotalPaid = document.getElementById('billTotalPaid');
         const confirmPaymentButton = document.getElementById('confirmPaymentButton');
         const printBillButton = document.getElementById('printBillButton'); 
+        
+        // VietQR Element
+        const vietQrCode = document.getElementById('vietQrCode');
 
         let currentTableId = null;
         let currentTableNameValue = '';
@@ -1228,6 +1254,35 @@ async function showPaymentModal(tableId, tableName) {
     let totalAmount = 0;
     let combinedCompletedItems = {}; 
     let hasCompletedItemsToPay = false;
+    
+  // ...
+
+    // Thông tin VietQR
+    const acqId = "970422"; // MB Bank Napas acqId
+    const accountNo = "0909650816";
+    const accountName = "TRAN VU NGOC THANH";
+    const amount = ""; // để rỗng = không gợi ý số tiền
+    const addInfo = ""; // nội dung chuyển khoản mặc định nếu cần
+
+    // === START: PHẦN CẦN SỬA ĐỔI NỘI DUNG CHUYỂN KHOẢN ===
+    let tableCode = tableName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase(); // Lấy tên bàn, bỏ khoảng trắng và ký tự đặc biệt
+    let billCode = billId.textContent ? billId.textContent.slice(-6) : ''; // 6 ký tự cuối của Mã HĐ
+    
+    // Đặt nội dung chuyển khoản là Số Bàn và Mã HĐ (Ví dụ: BAN1.HD123456)
+    let transferContent = `${tableCode}.HD${billCode}`;
+    // === END: PHẦN CẦN SỬA ĐỔI NỘI DUNG CHUYỂN KHOẢN ===
+
+    // URL VietQR (Sử dụng transferContent mới)
+    let qrUrl = `https://img.vietqr.io/image/${acqId}-${accountNo}-compact.png`;
+// ...
+    // Thêm nội dung chuyển khoản vào URL (amount sẽ được thêm sau khi tính tổng)
+    if (transferContent || amount) {
+        qrUrl += `?addInfo=${encodeURIComponent(transferContent)}`;
+        if (amount) {
+            qrUrl += `&amount=${amount}`;
+        }
+    }
+    vietQrCode.src = qrUrl;
 
     confirmPaymentButton.onclick = () => confirmPayment(tableId, tableName);
     
@@ -1306,6 +1361,13 @@ async function showPaymentModal(tableId, tableName) {
     billTotalPrice.textContent = totalAmount.toLocaleString('vi-VN') + '₫';
     billVatPrice.textContent = vatAmount.toLocaleString('vi-VN') + '₫';
     billTotalPaid.textContent = finalTotal.toLocaleString('vi-VN') + '₫';
+    
+    // Cập nhật lại URL VietQR với tổng số tiền
+    if (totalAmount > 0) {
+        qrUrl = `https://img.vietqr.io/image/${acqId}-${accountNo}-compact.png?amount=${Math.round(finalTotal)}&addInfo=${encodeURIComponent(transferContent)}`;
+        vietQrCode.src = qrUrl;
+    }
+
 
     if (totalAmount === 0) {
         confirmPaymentButton.style.display = 'none';
