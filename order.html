@@ -684,10 +684,7 @@
                 <div class="card-header">
                     <h2>Quản lý Bàn</h2>
                 </div>
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <input type="text" id="tableNameInput" placeholder="Tên bàn (ví dụ: Bàn 1, VIP 2)" style="flex-grow: 1;">
-                    <button id="addTableButton" class="add-button">Thêm bàn</button>
-                </div>
+               
                 <div id="tablesList" class="tables-list-container"></div>
             </div>
             
@@ -818,7 +815,7 @@
         const navButtons = document.querySelectorAll('.nav-button');
         const sections = document.querySelectorAll('.content-section');
         const tableNameInput = document.getElementById('tableNameInput');
-        const addTableButton = document.getElementById('addTableButton');
+
         const tablesList = document.getElementById('tablesList');
         
         // New elements for table view
@@ -914,21 +911,7 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
             });
         });
 
-        // --- Tables Management ---
-        addTableButton.addEventListener('click', () => {
-            const tableName = tableNameInput.value.trim();
-            if (tableName) {
-                const newTableRef = database.ref('tables').push();
-                newTableRef.set({
-                    name: tableName,
-                    status: 'available'
-                }).then(() => {
-                    tableNameInput.value = '';
-                }).catch(error => {
-                    console.error("Lỗi khi thêm bàn:", error);
-                });
-            }
-        });
+      
 
         function renderTables() {
             tablesList.innerHTML = '';
