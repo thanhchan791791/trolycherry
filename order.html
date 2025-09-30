@@ -1296,14 +1296,9 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
                     }
                 });
                 
-                Promise.all(checkPromises).then(() => {
-                    // Sau khi tất cả các lần kiểm tra hoàn tất, cập nhật visibility
-                    checkoutButton.style.display = anyCompleted ? 'block' : 'none';
-                });
+               
 
-                if (!snapshot.exists()) {
-                    checkoutButton.style.display = 'none';
-                }
+               
             });
         }
         // >> END: HÀM KIỂM TRA CHECKOUT ĐÃ CẬP NHẬT
