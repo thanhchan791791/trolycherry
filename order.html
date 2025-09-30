@@ -724,7 +724,6 @@
                     <div class="card">
                         <h3>Đơn đã gửi</h3>
                         <ul id="sentOrdersList" class="list"></ul>
-                        <button id="checkoutButton" class="checkout-table-btn" style="width: 100%; margin-top: 15px; display: none; background-color: var(--ios-red);">Thanh toán</button>
                     </div>
                 </div>
             </div>
@@ -828,7 +827,6 @@
         const currentOrderSummary = document.getElementById('currentOrderSummary');
         const sendOrderButton = document.getElementById('sendOrderButton');
         const sentOrdersList = document.getElementById('sentOrdersList');
-        const checkoutButton = document.getElementById('checkoutButton');
         const orderSearchInput = document.getElementById('orderSearchInput');
         
        // Modal elements
@@ -966,9 +964,7 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
             tableOrderView.style.display = 'none';
         });
 
-        checkoutButton.addEventListener('click', () => {
-            showPaymentModal(currentTableId, currentTableNameValue);
-        });
+      
 
         function loadAllMenuItems() {
             allMenuItems = [];
