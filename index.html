@@ -5,18 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Quản Lý Nhà Hàng - iOS Style</title>
 
-    <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <!-- iOS PWA -->
-<meta name="mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="POS Nhà Hàng">
     <link rel="apple-touch-icon" href="IMG_5641.png">
@@ -322,14 +318,18 @@
 
        // --- Role-Based Access Control (RBAC) Setup - UPDATED PERMISSIONS ---
 const PERMISSIONS = {
-    'admin': ['sales', 'stats', 'revenue_expense', 'inventory', 'kitchen_bar', 'personnel', 'menu_management'], // THÊM 'menu_management' VÀO ĐÂY
-    'waiter': ['sales'], 
+    // 1. Cập nhật phân quyền cho Admin: Thêm 'order' và 'menu_management'
+    'admin': ['order', 'sales', 'stats', 'revenue_expense', 'inventory', 'kitchen_bar', 'personnel', 'menu_management'], 
+    // 2. Cập nhật phân quyền cho Waiter: Chỉ có 'order'
+    'waiter': ['order'], 
     'cashier': ['sales', 'stats', 'revenue_expense'], 
     'kitchen_bar_staff': ['inventory', 'kitchen_bar'], 
     'accountant': ['stats', 'revenue_expense', 'personnel'],
 };
 
        const MENU_ITEMS = [
+    // THÊM CHỨC NĂNG ORDER (ĐẶT MÓN) VÀO ĐÂY
+    { id: 'order', name: 'Đặt món', icon: 'fas fa-clipboard-check', color: '#FF9500', view: renderOrderView, file: 'order.html' }, // Orange (New)
     { id: 'sales', name: 'Bán hàng', icon: 'fas fa-cash-register', color: '#007AFF', view: renderSalesView, file: 'banhang.html' }, // Blue
     { id: 'stats', name: 'Thống kê', icon: 'fas fa-chart-pie', color: '#FF9500', view: renderStatsView, file: 'thongke.html' }, // Orange
     { id: 'revenue_expense', name: 'Thu Chi', icon: 'fas fa-file-invoice-dollar', color: '#34C759', view: renderRevenueExpenseView, file: 'thuchi.html' }, // Green
@@ -414,7 +414,8 @@ const PERMISSIONS = {
                     user.uid = userId;
                     // Add 'dashboard' to permissions just for the main menu view if user is admin
                     if (user.role === 'admin') {
-                         currentPermissions = MENU_ITEMS.map(item => item.id);
+                         // Sử dụng PERMISSIONS[user.role] đã được cập nhật
+                         currentPermissions = PERMISSIONS[user.role];
                     } else {
                          currentPermissions = PERMISSIONS[user.role] || [];
                     }
@@ -581,6 +582,11 @@ const PERMISSIONS = {
         const getFile = (id) => MENU_ITEMS.find(item => item.id === id).file;
         const getName = (id) => MENU_ITEMS.find(item => item.id === id).name;
 
+        // THÊM HÀM RENDER CHO CHỨC NĂNG ORDER MỚI
+        function renderOrderView() {
+            renderIframeView(getFile('order'), getName('order')); // order.html
+        }
+
 
         function renderSalesView() {
             renderIframeView(getFile('sales'), getName('sales')); // banhang.html
@@ -633,7 +639,7 @@ const PERMISSIONS = {
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-ios-text-secondary">Vai trò / Phân quyền</label>
                             <select id="new-user-role" class="mt-1 p-3 w-full border rounded-xl bg-white focus:ring-ios-blue focus:border-ios-blue transition">
-                                <option value="waiter">Nhân viên Phục vụ (waiter) - Chỉ Bán hàng</option>
+                                <option value="waiter">Nhân viên Phục vụ (waiter) - Chỉ Đặt món</option>
                                 <option value="cashier">Nhân viên Thu ngân (cashier) - Bán hàng, Thống kê, Thu Chi</option>
                                 <option value="kitchen_bar_staff">Nhân viên Bếp & Pha chế (kitchen_bar_staff) - Tồn kho, Bếp/Bar</option>
                                 <option value="accountant">Nhân viên Kế toán (accountant) - Thống kê, Thu Chi, Nhân sự</option>
@@ -699,7 +705,8 @@ const PERMISSIONS = {
                     Object.keys(users).forEach(uid => {
                         const user = users[uid];
                         // Use explicit permissions list for display
-                        const userPermissions = (user.role === 'admin' ? MENU_ITEMS.map(item => item.id) : PERMISSIONS[user.role]) || [];
+                        // Lấy danh sách quyền từ PERMISSIONS
+                        const userPermissions = PERMISSIONS[user.role] || [];
                         const permissionsText = userPermissions.join(', ');
                         
                         const row = document.createElement('tr');
@@ -803,6 +810,8 @@ const PERMISSIONS = {
     const savedUser = localStorage.getItem("currentUser");
     if (savedUser) {
         const user = JSON.parse(savedUser);
+        // Cần cập nhật lại rolePermissions từ PERMISSIONS mới nhất khi đăng nhập lại
+        user.rolePermissions = PERMISSIONS[user.role] || [];
         showDashboardScreen(user); 
     } else {
         showLoginScreen(); 
