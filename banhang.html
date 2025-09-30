@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống quản lý nhà hàng - Quản lý Bán hàng</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-   <style>
+    <style>
         /* START: UI nâng cấp - iOS Style */
         :root {
             /* Màu sắc iOS */
@@ -501,136 +501,34 @@
             color: var(--ios-red);
         }
 
-        /* --- START: Bill-specific styles NÂNG CẤP (CHỮ TO, ĐẬM HƠN) --- */
-        .bill-container {
-            font-family: Arial, sans-serif;
+        /* Bill-specific styles (Giữ nguyên cho in ấn) */
+        .bill-header, .bill-details, .bill-summary {
             color: #000;
-            width: 100%;
-            max-width: 380px; /* Chiều rộng bill in 80mm */
-            margin: 0 auto;
-            /* CHỈNH SỬA: Tăng font size cơ bản */
-            font-size: 16px; 
-            padding: 5px; 
+            font-weight: 500;
         }
-        
-        .bill-header {
-            text-align: center;
-            margin-bottom: 10px;
-            border-bottom: 1px dashed #555;
-            padding-bottom: 10px;
-        }
-        
+
         .bill-header h2 {
-            /* CHỈNH SỬA: Tên nhà hàng to và đậm nhất */
-            font-size: 2.2em; /* Rất to */
-            font-weight: 900; /* Đậm nhất */
-            margin: 5px 0;
+            font-size: 2.2em;
             color: #000;
-        }
-
-        .bill-header h5 {
-            /* CHỈNH SỬA: Thông tin địa chỉ/sdt to hơn */
-            font-size: 1.2em; 
-            margin: 5px 0;
-            font-weight: 700; /* Đậm */
-            color: #444;
+            margin: 0;
+            font-weight: 800;
         }
         
-        .bill-info p {
-            /* CHỈNH SỬA: Thông tin bàn, ngày giờ to hơn */
-            margin: 3px 0;
-            font-size: 1.1em; 
-            font-weight: 600; /* Đậm */
-            text-align: left;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .bill-title {
-            /* CHỈNH SỬA: Tiêu đề Hóa đơn to và đậm hơn */
-            text-align: center;
-            font-size: 1.8em; 
-            font-weight: 900;
-            margin: 10px 0;
+        .bill-details th, .bill-details td {
+            font-size: 1.2em;
             color: #000;
-        }
-
-        .bill-details table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
+            font-weight: 500;
         }
 
         .bill-details th {
-            /* CHỈNH SỬA: Tiêu đề cột đậm hơn */
-            font-weight: 800;
-            border-top: 1px dashed #555;
-            border-bottom: 1px dashed #555;
-        }
-        
-        .bill-details td {
-            /* CHỈNH SỬA: Nội dung bảng to hơn và đậm hơn */
-            font-size: 1.1em; 
-            padding: 5px 2px;
-            color: #000;
-            font-weight: 600; 
-            vertical-align: top;
-            line-height: 1.3;
-        }
-        
-        .bill-details .item-name {
-            text-align: left;
-            width: 50%;
-        }
-        
-        .bill-details .item-qty, .bill-details .item-price, .bill-details .item-total {
-            text-align: right;
-            width: 15%;
-        }
-
-        .bill-details .item-total {
-             width: 20%;
-        }
-
-        .bill-summary {
-            border-top: 1px dashed #555;
-            padding-top: 10px;
-            margin-top: 10px;
-        }
-        
-        .bill-summary p {
-            /* CHỈNH SỬA: Tổng kết to hơn và đậm hơn */
-            display: flex;
-            justify-content: space-between;
-            margin: 7px 0;
-            font-size: 1.2em; 
+            border-bottom: 2px solid #000;
             font-weight: 700;
-        }
-
-        .bill-total-row {
-            border-top: 1px solid #000; /* Đường kẻ đậm cho tổng cộng */
-            padding-top: 5px !important;
         }
         
         .bill-total-price {
-            /* CHỈNH SỬA: Tổng tiền to nhất và đậm nhất */
-            font-weight: 900 !important;
-            font-size: 2.2em !important; 
-            color: #000 !important; 
-        }
-        
-        .bill-footer {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px dashed #555;
-            text-align: center;
-        }
-        
-        .bill-footer p {
-            /* CHỈNH SỬA: Footer to hơn và đậm hơn */
-            font-size: 1.2em;
-            font-weight: 800; 
-            color: #000;
+            font-weight: 800;
+            font-size: 1.6em;
+            color: var(--ios-red) !important; /* Màu đỏ nổi bật cho tổng */
         }
 
         /* Group button */
@@ -638,66 +536,46 @@
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-top: 20px;
         }
         
-        /* --- END: Bill-specific styles NÂNG CẤP --- */
-        
-        /* Print styles - Đảm bảo in 1 tờ bill đẹp (80mm, top alignment) */
+        /* Print styles - Giữ nguyên */
         @media print {
             @page { 
-                /* QUAN TRỌNG: Ép buộc khổ giấy 80mm và bỏ lề */
                 margin: 0;
-                size: 80mm auto; 
             }
             body * {
                 visibility: hidden;
             }
-            
-            /* QUAN TRỌNG: Loại bỏ căn giữa/modal display để in từ đầu trang */
-            .modal {
-                display: block !important; 
-            }
-            
             .modal-content, .modal-content * {
-                visibility: visible !important;
+                visibility: visible;
                 -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact;
                 color: #000 !important;
-                font-family: 'Arial', sans-serif !important;
-                page-break-after: avoid; /* Ngăn nội dung bị đẩy sang trang mới */
+                font-weight: bold !important;
             }
             .modal-content {
-                position: static !important; /* Đảm bảo không bị fixed/absolute gây lỗi in */
-                transform: none !important;
-                width: 100% !important; /* Chiếm 100% của 80mm */
-                max-width: 100% !important; 
-                padding: 0 !important;
+                position: absolute;
+                left: 50%;
+                top: 0;
+                transform: translateX(-50%);
+                width: 90%;
+                max-width: 450px;
+                padding: 10px;
                 box-shadow: none;
-                margin: 0 !important; /* Loại bỏ margin auto theo chiều dọc */
-                overflow: visible !important;
-                border-radius: 0;
+                margin: 0 auto;
             }
-            
-            .bill-container {
-                width: 100% !important; /* Đảm bảo bill container chiếm toàn bộ */
-                margin: 0 !important;
-                padding: 5px !important;
-            }
-            
             .close-button, .button-group-bill, .nav-buttons { 
                 display: none !important;
             }
-            
             .bill-details th, .bill-details td {
-                /* Bỏ override font-size 1em để sử dụng font to đã set ở trên (1.1em) */
-                padding: 4px 2px;
+                padding: 4px 0; 
+                font-size: 1.3em !important;
             }
-            .bill-details table {
-                page-break-inside: avoid; /* Ngăn bảng bị chia đôi */
+            .modal-content {
+                overflow: visible !important; 
             }
         }
-        /* --- END: Bill-specific styles NÂNG CẤP --- */
+        /* END: UI nâng cấp */
     </style>
 </head>
 <body>
@@ -763,44 +641,35 @@
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <div id="billContent" class="bill-container"> <div class="bill-header">
+            <div id="billContent"> 
+                <div class="bill-header">
                     <h2>Ẩm thực buôn mê</h2>
-                    <h5>Địa chỉ: 285/94b Cách Mạng Tháng 8</h5>
-                    <h5>Điện thoại: 0123 456 789</h5>
+                    <h5>Đậm đà hương vị cơm đồng bào Ê-đê</h5>
+                    <p>Địa chỉ:285/94b Cách Mạng Tháng 8</p>
+                    <p>Ngày: <span id="billDate"></span></p>
+                    <p>Bàn: <span id="billTableInfo"></span></p>
+                    <p>Mã HĐ: <span id="billId"></span></p>
                 </div>
-                
-                <h3 class="bill-title">HÓA ĐƠN THANH TOÁN</h3>
-
-                <div class="bill-info">
-                    <p><span>Bàn:</span> <span id="billTableInfo"></span></p>
-                    <p><span>Mã HĐ:</span> <span id="billId"></span></p>
-                    <p><span>Ngày giờ:</span> <span id="billDate"></span></p>
-                    <p><span>Nhân viên:</span> <span>NV123</span></p> </div>
-                
                 <div class="bill-details">
                     <table>
                         <thead>
                             <tr>
                                 <th class="item-name">Tên món</th>
                                 <th class="item-qty">SL</th>
-                                <th class="item-price">Đ.Giá</th>
+                                <th class="item-price">Đơn giá</th>
                                 <th class="item-total">Thành tiền</th>
                             </tr>
                         </thead>
                         <tbody id="billDetailsBody"></tbody>
                     </table>
                 </div>
-                
                 <div class="bill-summary">
-                    <p><span>Tạm tính (Subtotal):</span> <span id="billTotalPrice"></span></p>
-                    <p style="font-size: 1.1em; font-weight: 600;"><span>Giảm giá:</span> <span>0₫</span></p> <p class="bill-total-row"><span>TỔNG CỘNG:</span> <span id="billTotalPaid" class="bill-total-price"></span></p>
-                </div>
-                
-                <div class="bill-footer">
-                    <p>Cảm ơn quý khách – Hẹn gặp lại!</p>
+                    <p><span>Tổng tiền (Chưa VAT):</span> <span id="billTotalPrice"></span></p>
+                    <p><span>VAT (10%):</span> <span id="billVatPrice"></span></p>
+                    <p><span>Thanh toán:</span> <span id="billTotalPaid" class="bill-total-price"></span></p>
+                    <p style="font-size: 1.2em; text-align: center; margin-top: 15px; font-weight: 700; color: #000;">Cảm ơn quý khách và hẹn gặp lại!</p>
                 </div>
             </div>
-            
             <div class="button-group-bill">
                 <button id="printBillButton" class="print-button">In Hóa đơn</button> 
                 <button id="confirmPaymentButton" class="pay-button">Xác nhận thanh toán</button>
@@ -866,6 +735,7 @@
         const billId = document.getElementById('billId');
         const billDetailsBody = document.getElementById('billDetailsBody');
         const billTotalPrice = document.getElementById('billTotalPrice');
+        const billVatPrice = document.getElementById('billVatPrice');
         const billTotalPaid = document.getElementById('billTotalPaid');
         const confirmPaymentButton = document.getElementById('confirmPaymentButton');
         const printBillButton = document.getElementById('printBillButton'); 
@@ -1165,7 +1035,7 @@
             }
 
             const timestamp = new Date().toISOString();
-            const tableOrderRef = database.ref('tables').child(currentTableId).child('sentOrders').push();
+            const tableOrderRef = database.ref(`tables/${currentTableId}/sentOrders`).push();
 
             database.ref(`tables/${currentTableId}`).update({ status: 'occupied' });
 
@@ -1351,10 +1221,7 @@
 async function showPaymentModal(tableId, tableName) {
     paymentModal.style.display = 'flex';
     billTableInfo.textContent = tableName;
-    
-    // Cập nhật ngày giờ in bill
-    billDate.textContent = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' ' + new Date().toLocaleDateString('vi-VN');
-    
+    billDate.textContent = new Date().toLocaleDateString('vi-VN');
     billId.textContent = generateBillId();
     billDetailsBody.innerHTML = '';
     
@@ -1414,15 +1281,15 @@ async function showPaymentModal(tableId, tableName) {
     // Bắt đầu hiển thị hóa đơn sau khi đã tổng hợp xong
     let billItemsHtml = '';
     if (hasCompletedItemsToPay) {
-        Object.values(combinedCompletedItems).forEach((item) => {
+        Object.values(combinedCompletedItems).forEach((item, index) => {
             const itemPrice = item.price; 
             const itemTotal = itemPrice * item.quantity;
             totalAmount += itemTotal;
             
             billItemsHtml += `
                 <tr>
-                    <td class="item-name">${item.name}</td>
-                    <td class="item-qty">${item.quantity}</td>
+                    <td class="item-name">${index + 1}. ${item.name}</td>
+                    <td class="item-qty" style="text-align: center;">${item.quantity}</td>
                     <td class="item-price">${itemPrice.toLocaleString('vi-VN')}</td>
                     <td class="item-total">${itemTotal.toLocaleString('vi-VN')}</td>
                 </tr>
@@ -1434,9 +1301,10 @@ async function showPaymentModal(tableId, tableName) {
 
     billDetailsBody.innerHTML = billItemsHtml;
     const vatAmount = totalAmount * 0.1;
-    const finalTotal = totalAmount;
+    const finalTotal = totalAmount + vatAmount;
 
     billTotalPrice.textContent = totalAmount.toLocaleString('vi-VN') + '₫';
+    billVatPrice.textContent = vatAmount.toLocaleString('vi-VN') + '₫';
     billTotalPaid.textContent = finalTotal.toLocaleString('vi-VN') + '₫';
 
     if (totalAmount === 0) {
@@ -1544,7 +1412,8 @@ async function confirmPayment(tableId, tableName) {
     const newBillRef = database.ref('payment_history').push();
     const finalItemsForBill = Object.values(itemsForBill); // Chuyển từ Object sang Array
     
-    const finalTotal = totalAmount ;
+    const vatAmount = totalAmount * 0.1;
+    const finalTotal = totalAmount + vatAmount;
 
     updates[`payment_history/${newBillRef.key}`] = {
         billId: billId.textContent,
