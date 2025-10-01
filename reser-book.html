@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <title>Quản lý Đặt bàn & Phản hồi - iOS Style</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Google Font (San Francisco-like) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
   
   <style>
@@ -252,7 +250,6 @@
 </head>
 <body>
 
-  <!-- App Header - Fixed Top Bar -->
   <header class="app-header p-3 mb-3">
     <div class="container d-flex justify-content-center">
       <h2 class="h5 mb-0 fw-bold">
@@ -262,13 +259,10 @@
   </header>
 
   <div class="container">
-    <!-- Main Content Area -->
     <div class="tab-content mt-3 mb-5 pb-5"> 
       
-      <!-- BOOKINGS TAB -->
       <div class="tab-pane fade show active" id="bookings" role="tabpanel">
         
-        <!-- Search box with iOS style -->
         <div class="mb-4 p-2">
             <div class="input-group">
                 <span class="input-group-text bg-transparent border-0"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
@@ -276,7 +270,6 @@
             </div>
         </div>
         
-        <!-- Desktop Table View -->
         <div class="table-responsive">
           <table class="table table-hover table-sm table-dark align-middle" id="bookings-table">
             <thead>
@@ -291,23 +284,18 @@
               </tr>
             </thead>
             <tbody>
-              <!-- Dữ liệu được chèn bởi JS -->
-            </tbody>
+              </tbody>
           </table>
         </div>
 
-        <!-- Mobile Card List View -->
         <div id="bookings-card-list" class="card-list">
-          <!-- Dữ liệu được chèn bởi JS -->
           <div class="text-center text-muted p-5" id="bookings-loading">Đang tải dữ liệu...</div>
         </div>
       </div>
 
-      <!-- CONTACTS TAB -->
       <div class="tab-pane fade" id="contacts" role="tabpanel">
         <h3 class="h4 fw-bold mb-3">📩 Danh sách Phản hồi</h3>
         
-        <!-- Desktop Table View -->
         <div class="table-responsive">
           <table class="table table-hover table-sm table-dark align-middle" id="contacts-table">
             <thead>
@@ -320,21 +308,17 @@
               </tr>
             </thead>
             <tbody>
-              <!-- Dữ liệu được chèn bởi JS -->
-            </tbody>
+              </tbody>
           </table>
         </div>
 
-        <!-- Mobile Card List View -->
         <div id="contacts-card-list" class="card-list">
-          <!-- Dữ liệu được chèn bởi JS -->
           <div class="text-center text-muted p-5" id="contacts-loading">Đang tải dữ liệu...</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Bottom Navigation Bar (Mobile/Tablet Only) -->
   <nav class="bottom-navbar d-md-none">
     <div class="container h-100">
       <ul class="nav nav-pills nav-fill h-100">
@@ -354,10 +338,8 @@
     </div>
   </nav>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Firebase - KHÔNG THAY ĐỔI LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
@@ -403,6 +385,25 @@
         snapshot.forEach(child => {
             allBookings.push({ key: child.key, ...child.val() });
         });
+        
+        // --- LOGIC SẮP XẾP MỚI ---
+        allBookings.sort((a, b) => {
+            const statusA = a.status || "Chưa gọi";
+            const statusB = b.status || "Chưa gọi";
+            
+            // Ưu tiên "Chưa gọi" (0) lên trước "Đã gọi" (1)
+            const statusWeightA = statusA === "Chưa gọi" ? 0 : 1;
+            const statusWeightB = statusB === "Chưa gọi" ? 0 : 1;
+            
+            if (statusWeightA !== statusWeightB) {
+                return statusWeightA - statusWeightB;
+            }
+            
+            // Sắp xếp phụ: khách đặt trước (createdAt nhỏ hơn) lên trước
+            return (a.createdAt || 0) - (b.createdAt || 0);
+        });
+        // --- KẾT THÚC LOGIC SẮP XẾP MỚI ---
+
         renderBookings(allBookings);
     });
 
