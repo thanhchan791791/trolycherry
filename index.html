@@ -330,7 +330,7 @@ const PERMISSIONS = {
        const MENU_ITEMS = [
     // THÊM CHỨC NĂNG ORDER (ĐẶT MÓN) VÀO ĐÂY
     { id: 'order', name: 'Đặt món', icon: 'fas fa-clipboard-check', color: '#FF9500', view: renderOrderView, file: 'order.html' }, // Orange (New)
-    { id: 'sales', name: 'Bán hàng', icon: 'fas fa-cash-register', color: '#007AFF', view: renderSalesView, file: 'banhang.html' }, // Blue
+    { id: 'sales', name: 'Thanh toán', icon: 'fas fa-cash-register', color: '#007AFF', view: renderSalesView, file: 'banhang.html' }, // Blue
     { id: 'stats', name: 'Thống kê', icon: 'fas fa-chart-pie', color: '#FF9500', view: renderStatsView, file: 'thongke.html' }, // Orange
     { id: 'revenue_expense', name: 'Thu Chi', icon: 'fas fa-file-invoice-dollar', color: '#34C759', view: renderRevenueExpenseView, file: 'thuchi.html' }, // Green
     { id: 'inventory', name: 'Tồn kho', icon: 'fas fa-boxes', color: '#AF52DE', view: renderInventoryView, file: 'quanlytonkho.html' }, // Purple
@@ -640,7 +640,7 @@ const PERMISSIONS = {
                             <label class="block text-sm font-medium text-ios-text-secondary">Vai trò / Phân quyền</label>
                             <select id="new-user-role" class="mt-1 p-3 w-full border rounded-xl bg-white focus:ring-ios-blue focus:border-ios-blue transition">
                                 <option value="waiter">Nhân viên Phục vụ (waiter) - Chỉ Đặt món</option>
-                                <option value="cashier">Nhân viên Thu ngân (cashier) - Bán hàng, Thống kê, Thu Chi</option>
+                                <option value="cashier">Nhân viên Thu ngân (cashier) - Thanh toán, Thống kê, Thu Chi</option>
                                 <option value="kitchen_bar_staff">Nhân viên Bếp & Pha chế (kitchen_bar_staff) - Tồn kho, Bếp/Bar</option>
                                 <option value="accountant">Nhân viên Kế toán (accountant) - Thống kê, Thu Chi, Nhân sự</option>
                             </select>
