@@ -319,17 +319,21 @@
        // --- Role-Based Access Control (RBAC) Setup - UPDATED PERMISSIONS ---
 const PERMISSIONS = {
     // 1. Cập nhật phân quyền cho Admin: Thêm 'order' và 'menu_management'
-    'admin': ['order', 'sales', 'stats', 'revenue_expense', 'inventory', 'kitchen_bar', 'personnel', 'menu_management'], 
+    'admin': ['order', 'sales', 'stats', 'revenue_expense', 'inventory', 'kitchen_bar', 'personnel', 'menu_management', 'table_booking'], // THÊM QUYỀN MỚI
     // 2. Cập nhật phân quyền cho Waiter: Chỉ có 'order'
     'waiter': ['order'], 
-    'cashier': ['sales', 'stats', 'revenue_expense'], 
+    'cashier': ['sales', 'stats', 'revenue_expense', 'table_booking'], // THÊM QUYỀN MỚI
     'kitchen_bar_staff': ['inventory', 'kitchen_bar'], 
     'accountant': ['stats', 'revenue_expense', 'personnel'],
+    // THÊM VAI TRÒ MỚI: RECEPTIONIST
+    'receptionist': ['order', 'table_booking'],
 };
 
        const MENU_ITEMS = [
     // THÊM CHỨC NĂNG ORDER (ĐẶT MÓN) VÀO ĐÂY
     { id: 'order', name: 'Đặt món', icon: 'fas fa-clipboard-check', color: '#FF9500', view: renderOrderView, file: 'order.html' }, // Orange (New)
+    // THÊM CHỨC NĂNG ĐẶT BÀN & PHẢN HỒI MỚI
+    { id: 'table_booking', name: 'Đặt bàn & Phản hồi', icon: 'fas fa-concierge-bell', color: '#00C7BE', view: renderTableBookingView, file: 'reser-book.html' }, // Teal (New)
     { id: 'sales', name: 'Thanh toán', icon: 'fas fa-cash-register', color: '#007AFF', view: renderSalesView, file: 'banhang.html' }, // Blue
     { id: 'stats', name: 'Thống kê', icon: 'fas fa-chart-pie', color: '#FF9500', view: renderStatsView, file: 'thongke.html' }, // Orange
     { id: 'revenue_expense', name: 'Thu Chi', icon: 'fas fa-file-invoice-dollar', color: '#34C759', view: renderRevenueExpenseView, file: 'thuchi.html' }, // Green
@@ -586,6 +590,11 @@ const PERMISSIONS = {
         function renderOrderView() {
             renderIframeView(getFile('order'), getName('order')); // order.html
         }
+        
+        // THÊM HÀM RENDER CHO CHỨC NĂNG ĐẶT BÀN MỚI
+        function renderTableBookingView() {
+            renderIframeView(getFile('table_booking'), getName('table_booking')); // reser-book.html
+        }
 
 
         function renderSalesView() {
@@ -640,7 +649,8 @@ const PERMISSIONS = {
                             <label class="block text-sm font-medium text-ios-text-secondary">Vai trò / Phân quyền</label>
                             <select id="new-user-role" class="mt-1 p-3 w-full border rounded-xl bg-white focus:ring-ios-blue focus:border-ios-blue transition">
                                 <option value="waiter">Nhân viên Phục vụ (waiter) - Chỉ Đặt món</option>
-                                <option value="cashier">Nhân viên Thu ngân (cashier) - Thanh toán, Thống kê, Thu Chi</option>
+                                <option value="receptionist">Nhân viên Lễ tân (receptionist) - Đặt món, Đặt bàn & Phản hồi</option>
+                                <option value="cashier">Nhân viên Thu ngân (cashier) - Thanh toán, Thống kê, Thu Chi, Đặt bàn & Phản hồi</option>
                                 <option value="kitchen_bar_staff">Nhân viên Bếp & Pha chế (kitchen_bar_staff) - Tồn kho, Bếp/Bar</option>
                                 <option value="accountant">Nhân viên Kế toán (accountant) - Thống kê, Thu Chi, Nhân sự</option>
                             </select>
