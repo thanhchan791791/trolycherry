@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -9,22 +10,24 @@
   
   <style>
     /* -------------------------------------- */
-    /* 1. TYPOGRAPHY & BASE STYLES (iOS Aesthetic) */
+    /* 1. TYPOGRAPHY & BASE STYLES (iOS Aesthetic - WARM & LUXE LOOK) */
     /* -------------------------------------- */
     :root {
-      --ios-primary: #007aff; /* Blue */
-      --ios-secondary: #ff9500; /* Orange */
-      --ios-success: #34c759; /* Green */
-      --ios-danger: #ff3b30; /* Red */
-      --ios-bg-light: #f9f9f9;
-      --ios-bg-dark: #1c1c1e;
-      --card-bg-light: rgba(255, 255, 255, 0.9);
-      --card-bg-dark: rgba(28, 28, 30, 0.7);
+      /* MÀU SẮC THIẾT KẾ MỚI: Ấm áp, sang trọng (Đỏ Mận & Vàng Đồng) */
+      --ios-primary: #A52A2A; /* Deep Red/Maroon - Màu chính: Sang trọng */
+      --ios-secondary: #D4AF37; /* Gold/Bronze - Màu nhấn/Cảnh báo */
+      --ios-success: #007A99; /* Deep Teal/Navy - Đã gọi: Chuyên nghiệp */
+      --ios-danger: #D84315; /* Deep Orange Red */
+      --ios-bg-light: #F5F5F0; /* Nền sáng dịu (Off-white/Beige) */
+      --ios-bg-dark: #1C1C1E;
+      --card-bg-light: rgba(255, 255, 255, 0.95);
+      --card-bg-dark: rgba(28, 28, 30, 0.8);
     }
 
     body {
       font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
       background-color: var(--ios-bg-light);
+      color: #333; /* Đảm bảo chữ đen trên nền sáng */
       transition: background-color 0.3s, color 0.3s;
       padding-bottom: 70px; /* Space for bottom nav */
     }
@@ -52,6 +55,10 @@
       .table-dark {
           background-color: var(--ios-bg-dark) !important;
           color: #fff;
+      }
+      /* Đảm bảo text trên nền tối vẫn rõ */
+      .badge-warning-ios {
+        color: #1c1c1e !important; 
       }
     }
 
@@ -93,7 +100,7 @@
     }
 
     .bottom-navbar .nav-link.active {
-      color: var(--ios-primary);
+      color: var(--ios-primary); /* Đỏ Mận */
     }
     .bottom-navbar .nav-link.active::after {
         content: '';
@@ -101,7 +108,7 @@
         top: 0;
         width: 30px;
         height: 3px;
-        background-color: var(--ios-primary);
+        background-color: var(--ios-primary); /* Đỏ Mận */
         border-radius: 0 0 5px 5px;
     }
 
@@ -157,7 +164,7 @@
     #bookings-table th, #contacts-table th {
         font-weight: 600;
         background-color: #343a40 !important;
-        border-bottom: 2px solid var(--ios-primary);
+        border-bottom: 2px solid var(--ios-primary); /* Đỏ Mận */
     }
     
     #bookings-table td, #contacts-table td {
@@ -177,8 +184,8 @@
     }
 
     .ios-form-control:focus {
-      border-color: var(--ios-primary);
-      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.2); /* iOS Focus Glow */
+      border-color: var(--ios-primary); /* Đỏ Mận */
+      box-shadow: 0 0 0 4px rgba(165, 42, 42, 0.2); /* iOS Focus Glow với Đỏ Mận */
       background-color: #fff;
     }
 
@@ -196,16 +203,18 @@
       transition: all 0.2s ease;
     }
 
+    /* Đã gọi: Deep Teal/Navy */
     .badge-success-ios {
-        background-image: linear-gradient(135deg, #34c759, #6cd97d);
-        color: #fff;
-        box-shadow: 0 2px 8px rgba(52, 199, 89, 0.4);
+        background-image: linear-gradient(135deg, var(--ios-success), #0097a7);
+        color: #fff; /* Chữ trắng rõ ràng */
+        box-shadow: 0 2px 8px rgba(0, 122, 153, 0.4);
     }
 
+    /* Chưa gọi: Gold/Bronze */
     .badge-warning-ios {
-        background-image: linear-gradient(135deg, #ff9500, #ffcc00);
-        color: #333; /* Dark text for light badge */
-        box-shadow: 0 2px 8px rgba(255, 149, 0, 0.3);
+        background-image: linear-gradient(135deg, var(--ios-secondary), #ffc107);
+        color: #333; /* Chữ đen/xám đậm RÕ RÀNG trên nền sáng */
+        box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
     }
     
     /* Button Animation */
@@ -386,12 +395,11 @@
             allBookings.push({ key: child.key, ...child.val() });
         });
         
-        // --- LOGIC SẮP XẾP MỚI ---
+        // Sắp xếp Đặt bàn: Ưu tiên "Chưa gọi" lên trước, sau đó là thời gian tạo sớm nhất
         allBookings.sort((a, b) => {
             const statusA = a.status || "Chưa gọi";
             const statusB = b.status || "Chưa gọi";
             
-            // Ưu tiên "Chưa gọi" (0) lên trước "Đã gọi" (1)
             const statusWeightA = statusA === "Chưa gọi" ? 0 : 1;
             const statusWeightB = statusB === "Chưa gọi" ? 0 : 1;
             
@@ -399,10 +407,8 @@
                 return statusWeightA - statusWeightB;
             }
             
-            // Sắp xếp phụ: khách đặt trước (createdAt nhỏ hơn) lên trước
-            return (a.createdAt || 0) - (b.createdAt || 0);
+            return (a.createdAt || 0) - (b.createdAt || 0); // Thời gian tạo sớm hơn lên trước
         });
-        // --- KẾT THÚC LOGIC SẮP XẾP MỚI ---
 
         renderBookings(allBookings);
     });
@@ -448,7 +454,7 @@
             const card = `
                 <div class="ios-card animate-item" style="animation-delay: ${index * 0.05}s;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="card-header-ios text-primary">
+                        <span class="card-header-ios" style="color: var(--ios-primary);">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M15 10l4.5 4.5M15 10l-4.5 4.5M15 10l-.5-.5M15 10l.5.5"></path><path d="M12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z"></path></svg>
                             ${item.name || "Khách hàng"}
                         </span>
@@ -531,6 +537,9 @@
             return;
         }
 
+        // Sắp xếp Phản hồi: Ưu tiên khách nào gửi trước (createdAt nhỏ hơn) lên đầu
+        allContacts.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
         allContacts.forEach((data, index) => {
             // --- Table Row (Desktop) ---
             const row = `
@@ -546,7 +555,7 @@
             // --- Card Item (Mobile) ---
             const card = `
                 <div class="ios-card animate-item" style="animation-delay: ${index * 0.05}s;">
-                    <span class="card-header-ios text-secondary">
+                    <span class="card-header-ios" style="color: var(--ios-secondary);">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                         ${data.subject || "Phản hồi chung"}
                     </span>
