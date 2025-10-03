@@ -1192,80 +1192,134 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
         // >> END: HÀM GỬI ORDER ĐÃ CẬP NHẬT LƯU GIÁ VÀO BẾP VÀ BÀN
 
 
-        // >> START: HÀM RENDER ĐÃ CẬP NHẬT REAL-TIME
-        function renderTableSentOrders() {
-            // Dọn dẹp tất cả listener cũ khi hàm được gọi
-            cleanupListeners(); 
-
-            sentOrdersList.innerHTML = '';
-            if (!currentTableId) return;
-
-            // 1. Listener chính: Theo dõi Order đã gửi của bàn (thêm/xóa Order)
-            const sentOrdersRef = database.ref(`tables/${currentTableId}/sentOrders`);
-            const sentOrdersCallback = sentOrdersRef.on('value', (sentOrdersSnapshot) => {
-                
-                sentOrdersList.innerHTML = '';
-                
-                sentOrdersSnapshot.forEach((orderChildSnapshot) => {
-                    const orderId = orderChildSnapshot.key;
-                    const order = orderChildSnapshot.val();
-                    const time = new Date(order.timestamp).toLocaleTimeString('vi-VN');
-
-                    const li = document.createElement('li');
-                    li.classList.add('order-item');
-                    li.id = `order-list-item-${orderId}`; 
-                    
-                    let orderDetailsHtml = `<p><strong>Thời gian:</strong> ${time}</p><hr><ul id="order-items-list-${orderId}" style="list-style-type: none; padding: 0;"></ul>`;
-                    li.innerHTML = orderDetailsHtml;
-                    sentOrdersList.appendChild(li);
-
-                    // 2. Listener phụ: Theo dõi trạng thái Real-time từ Bếp (chỉ cập nhật status)
-                    const kitchenOrderRef = database.ref(`kitchen_bar_orders/${orderId}/items`);
-                    const kitchenOrderCallback = kitchenOrderRef.on('value', (kitchenItemsSnapshot) => {
-                        
-                        let itemsListHtml = '';
-                        
-                        // Lặp qua các món trong order đã gửi của bàn
-                        Object.keys(order.items).forEach(itemId => {
-                            const item = order.items[itemId];
-                            let currentStatus = item.status; 
-                            
-                            // Lấy trạng thái mới nhất từ Bếp (nếu tồn tại)
-                            const kitchenItem = kitchenItemsSnapshot.child(itemId).val();
-                            if (kitchenItem && kitchenItem.status) {
-                                currentStatus = kitchenItem.status;
-                            }
-                            
-                            const statusText = currentStatus === 'completed' ? 'Đã xong' : 'Đang làm';
-                            const statusClass = currentStatus === 'completed' ? 'completed' : 'pending';
-                            
-                            itemsListHtml += `
-                                <li style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px dotted var(--ios-separator);">
-                                    <span>${item.name} x ${item.quantity}</span>
-                                    <span class="status ${statusClass}">${statusText}</span>
-                                </li>`;
-                        });
-                        
-                        // Cập nhật HTML của danh sách món ăn
-                        const itemsListElement = document.getElementById(`order-items-list-${orderId}`);
-                        if (itemsListElement) {
-                            itemsListElement.innerHTML = itemsListHtml;
-                        }
-
-                        // Cập nhật nút Thanh toán sau mỗi lần cập nhật trạng thái
-                        updateCheckoutButtonVisibility();
-                    });
-
-                    // Lưu trữ listener phụ để dọn dẹp
-                    activeListeners.push({ ref: kitchenOrderRef, callback: kitchenOrderCallback });
-                });
-            });
+   
+// Hàm khởi tạo Listener phụ cho trạng thái món ăn (theo dõi trạng thái trên kitchen_bar_orders)
+function startKitchenOrderListener(orderId, sentOrderItems) {
+    const kitchenOrderRef = database.ref(`kitchen_bar_orders/${orderId}/items`);
+    const kitchenOrderCallback = kitchenOrderRef.on('value', (kitchenItemsSnapshot) => {
+        let itemsListHtml = '';
+        const kitchenItems = kitchenItemsSnapshot.val() || {};
+        
+        // Lặp qua các món đã được lưu trong Order (Tạm coi là đã lấy từ kitchen_bar_orders)
+        Object.keys(sentOrderItems).forEach(itemId => {
+            const item = sentOrderItems[itemId];
+            let currentStatus = item.status || 'pending'; // Dùng status đã lưu ban đầu
             
-            // Lưu trữ listener chính để dọn dẹp
-            activeListeners.push({ ref: sentOrdersRef, callback: sentOrdersCallback });
+            // Lấy trạng thái mới nhất từ Bếp (nếu tồn tại)
+            const kitchenItem = kitchenItems[itemId];
+            if (kitchenItem && kitchenItem.status) {
+                currentStatus = kitchenItem.status;
+            }
+            
+            const statusText = currentStatus === 'completed' ? 'Đã xong' : 'Đang làm';
+            const statusClass = currentStatus === 'completed' ? 'completed' : 'pending';
+            
+            itemsListHtml += `
+                <li style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px dotted var(--ios-separator);">
+                    <span>${item.name} x ${item.quantity}</span>
+                    <span class="status ${statusClass}">${statusText}</span>
+                </li>`;
+        });
+        
+        // Cập nhật HTML của danh sách món ăn
+        const itemsListElement = document.getElementById(`order-items-list-${orderId}`);
+        if (itemsListElement) {
+            itemsListElement.innerHTML = itemsListHtml;
         }
-        // >> END: HÀM RENDER ĐÃ CẬP NHẬT REAL-TIME
 
+        // Cập nhật nút Thanh toán sau mỗi lần cập nhật trạng thái
+        updateCheckoutButtonVisibility();
+    });
+
+    // Lưu trữ listener phụ để dọn dẹp
+    activeListeners.push({ ref: kitchenOrderRef, callback: kitchenOrderCallback });
+}
+
+
+function renderTableSentOrders() {
+    // Dọn dẹp tất cả listener cũ khi hàm được gọi
+    cleanupListeners();
+
+    sentOrdersList.innerHTML = '';
+    if (!currentTableId || !currentTableNameValue) return;
+
+    // >> CHỈ LẮNG NGHE TỪ KITCHEN_BAR_ORDERS DÙNG QUERY THEO TÊN BÀN <<
+    const kitchenOrdersRef = database.ref('kitchen_bar_orders').orderByChild('tableName').equalTo(currentTableNameValue);
+
+    
+    // Lưu trữ dữ liệu order
+    let externalOrders = {};
+    
+    // Hàm render Order
+    const renderOrders = (snapshot) => {
+        externalOrders = snapshot.val() || {};
+        
+        sentOrdersList.innerHTML = '';
+        const allOrders = [];
+
+        // Thêm Orders từ Kitchen/Bar
+        Object.keys(externalOrders).forEach(orderId => {
+            const order = externalOrders[orderId];
+            
+            // Tạo cấu trúc items để tái sử dụng logic
+            const itemsForTableSent = {};
+            if(order.items) {
+                Object.keys(order.items).forEach(itemId => {
+                    const item = order.items[itemId];
+                    itemsForTableSent[itemId] = {
+                        name: item.itemName, // Kitchen dùng 'itemName'
+                        price: item.price,
+                        type: item.type,
+                        quantity: item.quantity,
+                        status: item.status // Lấy status trực tiếp từ kitchen order item
+                    };
+                });
+            }
+            
+            // Chỉ thêm nếu có items hợp lệ
+            if (Object.keys(itemsForTableSent).length > 0) {
+                allOrders.push({
+                    id: orderId,
+                    timestamp: order.timestamp,
+                    items: itemsForTableSent,
+                    source: 'external' // Đánh dấu là nguồn ngoài (từ kitchen_bar_orders)
+                });
+            }
+        });
+        
+        // Sắp xếp theo thời gian mới nhất lên đầu
+        allOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+
+        // Render Order List
+        allOrders.forEach(order => {
+            const time = new Date(order.timestamp).toLocaleTimeString('vi-VN');
+
+            const li = document.createElement('li');
+            li.classList.add('order-item');
+            li.id = `order-list-item-${order.id}`;
+
+            // Ghi chú nguồn
+            const sourceNote = '<span style="color: var(--warning-color); font-weight: 500;">(Đã gửi)</span>';
+
+            let orderDetailsHtml = `<p><strong>Thời gian:</strong> ${time} ${sourceNote}</p><hr><ul id="order-items-list-${order.id}" style="list-style-type: none; padding: 0;"></ul>`;
+            li.innerHTML = orderDetailsHtml;
+            sentOrdersList.appendChild(li);
+
+            // Bắt đầu lắng nghe trạng thái của món trong order này (từ Kitchen/Bar)
+            startKitchenOrderListener(order.id, order.items);
+        });
+        
+        // Cập nhật nút Thanh toán sau khi render xong
+        updateCheckoutButtonVisibility();
+    };
+
+
+    // Listener chính cho Orders từ kitchen_bar_orders
+    const externalCallback = kitchenOrdersRef.on('value', renderOrders);
+    activeListeners.push({ ref: kitchenOrdersRef, callback: externalCallback });
+}
+// >> END: CODE ĐÃ CHỈNH SỬA CHỈ LẤY TỪ KITCHEN_BAR_ORDERS
         // >> START: HÀM KIỂM TRA CHECKOUT ĐÃ CẬP NHẬT
         function updateCheckoutButtonVisibility() {
             if (!currentTableId) {
