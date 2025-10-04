@@ -909,7 +909,8 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
                     cleanupListeners(); 
                     tableViewList.style.display = 'block';
                     tableOrderView.style.display = 'none';
-                    renderTables();
+                    // KHÔNG CẦN GỌI renderTables() Ở ĐÂY, vì listener chính đã được thiết lập ở DOMContentLoaded
+                    // Khi checkout thành công, lệnh renderTables() ở confirmPayment đã gọi lại list
                 }
             });
         });
@@ -930,82 +931,79 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
             }
         });
 
-       function renderTables() {
-    tablesList.innerHTML = '';
-    
-    // Lắng nghe thay đổi trên tất cả các bàn
-    database.ref('tables').on('value', async (snapshot) => { // << THÊM 'async'
-        tablesList.innerHTML = '';
-        const tablesData = [];
-        snapshot.forEach((childSnapshot) => {
-            tablesData.push({
-                id: childSnapshot.key,
-                ...childSnapshot.val()
+       // BỎ LISTENER FIREBASE RA KHỎI HÀM NÀY ĐỂ TRÁNH LẶP LẠI (FIX LỖI HIỂN THỊ 2 LẦN)
+       async function renderTables(snapshot) {
+            tablesList.innerHTML = '';
+            
+            const tablesData = [];
+            snapshot.forEach((childSnapshot) => {
+                tablesData.push({
+                    id: childSnapshot.key,
+                    ...childSnapshot.val()
+                });
             });
-        });
 
-        // 1. Tải TẤT CẢ orders hiện có trong kitchen_bar_orders
-        // Sử dụng Promise để đợi dữ liệu kitchen/bar
-        const kitchenOrdersSnapshot = await database.ref('kitchen_bar_orders').once('value');
-        const kitchenOrders = kitchenOrdersSnapshot.val() || {};
-        
-        // 2. Gom nhóm các đơn hàng theo TÊN BÀN (tableName)
-        const occupiedTables = new Set();
-        Object.values(kitchenOrders).forEach(order => {
-            // Nếu có bất kỳ order nào trùng tableName, coi bàn đó là đang sử dụng
-            if (order.tableName) {
-                occupiedTables.add(order.tableName);
-            }
-        });
-
-        // 3. Render danh sách bàn
-        tablesData.forEach((table) => {
-            const tableId = table.id;
-            const tableName = table.name;
+            // 1. Tải TẤT CẢ orders hiện có trong kitchen_bar_orders
+            // Sử dụng Promise để đợi dữ liệu kitchen/bar
+            const kitchenOrdersSnapshot = await database.ref('kitchen_bar_orders').once('value');
+            const kitchenOrders = kitchenOrdersSnapshot.val() || {};
             
-            // XÁC ĐỊNH TRẠNG THÁI MỚI DỰA TRÊN occupiedTables
-            let currentStatus = 'available'; // Mặc định là 'available'
-            if (occupiedTables.has(tableName)) {
-                currentStatus = 'occupied'; // Nếu tên bàn tồn tại trong kitchen_bar_orders, set là 'occupied'
-            } 
-            // KHÔNG CẦN CẬP NHẬT TRỞ LẠI FIREBASE Ở ĐÂY, CHỈ CẬP NHẬT TRÊN UI (UI sẽ đồng bộ)
-
-            const statusText = currentStatus === 'available' ? 'Có sẵn' : 'Đang sử dụng';
-            const statusClass = currentStatus === 'available' ? 'available' : 'occupied';
-            
-            const card = document.createElement('div');
-            card.classList.add('table-card');
-            
-            card.innerHTML = `
-                <h3>${tableName}</h3>
-                <span class="status ${statusClass}">${statusText}</span>
-                <div class="btn-group">
-                    <button class="select-table-btn add-button" data-table-id="${tableId}" data-table-name="${tableName}">Chọn bàn</button>
-                    <button class="checkout-table-btn remove-button" data-table-id="${tableId}" data-table-name="${tableName}" style="display: ${currentStatus === 'available' ? 'none' : 'inline-block'};">Thanh toán</button>
-                </div>
-            `;
-            tablesList.appendChild(card);
-
-            card.querySelector('.select-table-btn').addEventListener('click', () => {
-                currentTableId = tableId;
-                currentTableNameValue = tableName;
-                currentOrderItems = {};
-                currentTableName.textContent = `Bàn: ${currentTableNameValue}`;
-                tableViewList.style.display = 'none';
-                tableOrderView.style.display = 'grid';
-                loadAllMenuItems();
-                renderTableSentOrders();
-                updateOrderSummary();
-                updateCheckoutButtonVisibility();
+            // 2. Gom nhóm các đơn hàng theo TÊN BÀN (tableName)
+            const occupiedTables = new Set();
+            Object.values(kitchenOrders).forEach(order => {
+                // Nếu có bất kỳ order nào trùng tableName, coi bàn đó là đang sử dụng
+                if (order.tableName) {
+                    occupiedTables.add(order.tableName);
+                }
             });
-            
-            const checkoutBtn = card.querySelector('.checkout-table-btn');
-            if (checkoutBtn) {
-                checkoutBtn.addEventListener('click', () => showPaymentModal(tableId, tableName));
-            }
-        });
-    });
-}
+
+            // 3. Render danh sách bàn
+            tablesData.forEach((table) => {
+                const tableId = table.id;
+                const tableName = table.name;
+                
+                // XÁC ĐỊNH TRẠNG THÁI MỚI DỰA TRÊN occupiedTables
+                let currentStatus = 'available'; // Mặc định là 'available'
+                if (occupiedTables.has(tableName)) {
+                    currentStatus = 'occupied'; // Nếu tên bàn tồn tại trong kitchen_bar_orders, set là 'occupied'
+                } 
+                // KHÔNG CẦN CẬP NHẬT TRỞ LẠI FIREBASE Ở ĐÂY, CHỈ CẬP NHẬT TRÊN UI (UI sẽ đồng bộ)
+
+                const statusText = currentStatus === 'available' ? 'Có sẵn' : 'Đang sử dụng';
+                const statusClass = currentStatus === 'available' ? 'available' : 'occupied';
+                
+                const card = document.createElement('div');
+                card.classList.add('table-card');
+                
+                card.innerHTML = `
+                    <h3>${tableName}</h3>
+                    <span class="status ${statusClass}">${statusText}</span>
+                    <div class="btn-group">
+                        <button class="select-table-btn add-button" data-table-id="${tableId}" data-table-name="${tableName}">Chọn bàn</button>
+                        <button class="checkout-table-btn remove-button" data-table-id="${tableId}" data-table-name="${tableName}" style="display: ${currentStatus === 'available' ? 'none' : 'inline-block'};">Thanh toán</button>
+                    </div>
+                `;
+                tablesList.appendChild(card);
+
+                card.querySelector('.select-table-btn').addEventListener('click', () => {
+                    currentTableId = tableId;
+                    currentTableNameValue = tableName;
+                    currentOrderItems = {};
+                    currentTableName.textContent = `Bàn: ${currentTableNameValue}`;
+                    tableViewList.style.display = 'none';
+                    tableOrderView.style.display = 'grid';
+                    loadAllMenuItems();
+                    renderTableSentOrders();
+                    updateOrderSummary();
+                    updateCheckoutButtonVisibility();
+                });
+                
+                const checkoutBtn = card.querySelector('.checkout-table-btn');
+                if (checkoutBtn) {
+                    checkoutBtn.addEventListener('click', () => showPaymentModal(tableId, tableName));
+                }
+            });
+       }
         
         // --- Table Order View ---
         backToTables.addEventListener('click', () => {
@@ -1645,7 +1643,11 @@ async function confirmPayment(tableId, tableName) {
         // Dọn dẹp dữ liệu tạm
         delete window.tempPaymentData; 
         
-        renderTables(); 
+        // Listener chính ở DOMContentLoaded sẽ tự động gọi renderTables khi trạng thái bàn thay đổi.
+        // Tuy nhiên, vì hàm renderTables cũ đã bị xóa, ta cần gọi lại nó 1 lần để đảm bảo cập nhật UI ngay lập tức
+        // hoặc rely vào listener ở DOMContentLoaded. Vì ta đã sửa listener ở DOMContentLoaded, 
+        // nó sẽ tự động chạy khi updates[`tables/${tableId}/status`] = 'available' được thực hiện.
+        
     }).catch(error => {
         console.error("Lỗi khi thanh toán:", error);
     });
@@ -1665,7 +1667,8 @@ async function confirmPayment(tableId, tableName) {
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderTables();
+            // FIX: Thiết lập listener Firebase cho danh sách bàn chỉ 1 LẦN DUY NHẤT khi ứng dụng khởi động.
+            database.ref('tables').on('value', renderTables);
         });
     </script>
 </body>
