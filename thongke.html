@@ -153,14 +153,14 @@
         }
 
         /* Thêm style cho input tìm kiếm độc đáo */
-        #billSearchInput {
+        #billSearchInput, #billDateFilterInput {
             background-color: var(--bg-color);
             border: 2px solid transparent;
             transition: all 0.3s ease-in-out;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        #billSearchInput:focus {
+        #billSearchInput:focus, #billDateFilterInput:focus {
             background-color: var(--card-bg);
             border-color: var(--primary-ios);
             box-shadow: 0 0 0 3px rgba(var(--primary-ios-rgb), 0.2);
@@ -248,16 +248,33 @@
         </section>
 
         <section class="card-ios p-5 mb-8 animated-item" data-delay="0.8">
-            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🧾 Lịch sử Đơn hàng gần nhất</h3>
-
-            <div class="mb-5 relative">
-                <i class="fas fa-receipt absolute left-4 top-1/2 -translate-y-1/2 text-lg" style="color: var(--primary-ios);"></i>
-                <input type="text" id="billSearchInput" 
-                       placeholder="Tìm hóa đơn theo Mã HĐ..." 
-                       class="w-full pl-12 pr-4 py-3 rounded-xl text-lg outline-none"
-                       style="border-radius: 12px; height: 50px;">
-                <i id="clearSearchButton" class="fas fa-times-circle absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hidden"></i>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold" style="color: var(--text-color);">🧾 Lịch sử Đơn hàng</h3>
+                <button id="showAllOrdersButton" 
+                        class="btn-ios text-sm font-semibold px-3 py-1 rounded-full text-white"
+                        style="background-color: var(--primary-ios);">
+                    <i class="fas fa-list-ul mr-1"></i> Xem tất cả
+                </button>
             </div>
+            
+            <div class="mb-5 space-y-3">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-calendar-alt text-lg" style="color: var(--primary-ios);"></i>
+                    <input type="date" id="billDateFilterInput" 
+                           class="flex-1 px-4 py-2 rounded-xl text-lg outline-none"
+                           style="border-radius: 12px; height: 50px; background-color: var(--bg-color);">
+                </div>
+                
+                <div class="relative">
+                    <i class="fas fa-receipt absolute left-4 top-1/2 -translate-y-1/2 text-lg" style="color: var(--primary-ios);"></i>
+                    <input type="text" id="billSearchInput" 
+                           placeholder="Tìm hóa đơn theo Mã HĐ..." 
+                           class="w-full pl-12 pr-4 py-3 rounded-xl text-lg outline-none"
+                           style="border-radius: 12px; height: 50px;">
+                    <i id="clearSearchButton" class="fas fa-times-circle absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hidden"></i>
+                </div>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
@@ -338,14 +355,20 @@
         const modalTotalEl = document.getElementById('modalTotal');
         const modalItemsListEl = document.getElementById('modalItemsList');
         const noOrderData = document.getElementById('noOrderData');
-        const noFilteredData = document.getElementById('noFilteredData'); // Thêm element này
+        const noFilteredData = document.getElementById('noFilteredData');
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const customAlert = document.getElementById('customAlert');
         const alertMessageEl = document.getElementById('alertMessage');
-        const billSearchInput = document.getElementById('billSearchInput'); // Thêm input tìm kiếm
-        const clearSearchButton = document.getElementById('clearSearchButton'); // Thêm nút xóa tìm kiếm
+        const billSearchInput = document.getElementById('billSearchInput');
+        const clearSearchButton = document.getElementById('clearSearchButton');
         
+        // ********** START: Thay đổi cho yêu cầu mới **********
+        const showAllOrdersButton = document.getElementById('showAllOrdersButton');
+        const billDateFilterInput = document.getElementById('billDateFilterInput');
+        const TODAY = new Date().toISOString().slice(0, 10);
+        // ********** END: Thay đổi cho yêu cầu mới **********
+
         let revenueChartInstance = null;
         let paymentsCache = []; // Cache dữ liệu thanh toán
 
@@ -637,7 +660,7 @@
             
             if (paymentsToRender.length === 0) {
                 // Hiển thị thông báo phù hợp
-                if (billSearchInput.value.trim() !== '') {
+                if (billSearchInput.value.trim() !== '' || billDateFilterInput.value.trim() !== '') {
                     noFilteredData.style.display = 'block';
                     noOrderData.style.display = 'none';
                 } else {
@@ -674,31 +697,65 @@
             });
         }
         
-        async function updateOrderHistory() {
+        async function updateOrderHistory(targetDate = TODAY) {
             const payments = await fetchPayments();
-            const sortedPayments = payments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            let paymentsToDisplay = payments;
+
+            if (targetDate) {
+                // Lọc theo ngày cụ thể (mặc định là ngày hôm nay)
+                paymentsToDisplay = payments.filter(p => p.date === targetDate);
+            }
+            
+            const sortedPayments = paymentsToDisplay.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
             renderOrderRows(sortedPayments);
+            
+            // Đặt giá trị cho bộ lọc ngày nếu đang lọc theo ngày cụ thể
+            if (targetDate) {
+                billDateFilterInput.value = targetDate;
+            } else {
+                billDateFilterInput.value = ''; // Xóa nếu đang xem tất cả
+            }
+            
+            // Đảm bảo ô tìm kiếm mã HĐ trống
+            billSearchInput.value = '';
+            clearSearchButton.classList.add('hidden');
         }
         
+        // ********** START: Thay đổi cho yêu cầu mới **********
+        
+        function showAllOrders() {
+            // Hiển thị tất cả đơn hàng (không lọc theo ngày)
+            billDateFilterInput.value = '';
+            billSearchInput.value = '';
+            clearSearchButton.classList.add('hidden');
+            
+            const sortedPayments = paymentsCache.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            renderOrderRows(sortedPayments);
+        }
+
         function filterOrders() {
             const searchTerm = billSearchInput.value.trim().toLowerCase();
+            const filterDate = billDateFilterInput.value; // Dạng YYYY-MM-DD
             
-            // Cập nhật nút xóa
+            // Cập nhật nút xóa tìm kiếm
             clearSearchButton.classList.toggle('hidden', searchTerm === '');
 
-            // Nếu không có từ khóa, hiển thị toàn bộ lịch sử
-            if (searchTerm === '') {
-                const sortedPayments = paymentsCache.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                renderOrderRows(sortedPayments);
-                return;
+            let filtered = paymentsCache;
+
+            // 1. Lọc theo ngày trước (nếu có)
+            if (filterDate) {
+                filtered = filtered.filter(payment => payment.date === filterDate);
+            }
+            
+            // 2. Lọc theo mã hóa đơn (nếu có)
+            if (searchTerm !== '') {
+                filtered = filtered.filter(payment => 
+                    (payment.billId && payment.billId.toLowerCase().includes(searchTerm))
+                );
             }
 
-            // Lọc hóa đơn theo billId
-            const filtered = paymentsCache.filter(payment => 
-                (payment.billId && payment.billId.toLowerCase().includes(searchTerm))
-            );
-            
             // Sắp xếp kết quả lọc theo thời gian
             const sortedFiltered = filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
@@ -713,9 +770,21 @@
         // Lắng nghe sự kiện click nút xóa
         clearSearchButton.addEventListener('click', () => {
             billSearchInput.value = '';
-            filterOrders(); // Gọi hàm lọc để hiển thị lại toàn bộ danh sách
+            filterOrders(); // Gọi hàm lọc để hiển thị lại danh sách
             billSearchInput.focus();
         });
+
+        // Lắng nghe sự kiện thay đổi ngày
+        billDateFilterInput.addEventListener('change', () => {
+             // Khi thay đổi ngày, gọi filterOrders để áp dụng cả tìm kiếm mã nếu có
+             // Nếu ô tìm kiếm mã trống, filterOrders sẽ lọc theo ngày và hiển thị kết quả
+             filterOrders();
+        });
+        
+        // Lắng nghe nút "Xem tất cả đơn"
+        showAllOrdersButton.addEventListener('click', showAllOrders);
+
+        // ********** END: Thay đổi cho yêu cầu mới **********
 
 
         orderHistoryTableBody.addEventListener('click', async (event) => {
@@ -797,10 +866,13 @@
             updateSummaryStats();
             update30DayChart();
             updateTopSellingItems();
+            
             // Đảm bảo dữ liệu được cache trước khi render/filter
             fetchPayments().then(() => {
-                updateOrderHistory(); // Sử dụng hàm updateOrderHistory sau khi cache
+                // Mặc định hiển thị đơn hàng ngày hôm nay
+                updateOrderHistory(TODAY); 
             });
+            
             // Kích hoạt animations scroll sau khi dữ liệu tải xong
             setupScrollAnimations();
         });
