@@ -801,6 +801,10 @@
             appId: "1:83833140682:web:f9254b418ace3a659fcb33",
             measurementId: "G-523X74K18N"
         };
+        
+        // >> DÒNG THÊM MỚI: API ENDPOINT CHO MÁY IN <<
+        const PRINT_API_ENDPOINT = "http://192.168.156.102:5000/print";
+        // ---------------------------------------------
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -1117,7 +1121,7 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
             });
         }
         
-        // >> START: HÀM GỬI ORDER ĐÃ CẬP NHẬT LƯU GIÁ VÀO BẾP VÀ BÀN
+        // >> START: HÀM GỬI ORDER ĐÃ CẬP NHẬT LƯU GIÁ VÀO BẾP VÀ BÀN VÀ THÊM PRINT
         sendOrderButton.addEventListener('click', () => {
             if (Object.keys(currentOrderItems).length === 0) {
                 alert("Đơn hàng rỗng. Vui lòng chọn món.");
@@ -1131,6 +1135,9 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
 
             const itemsForSentList = {};
             const updates = {};
+            
+            // Dữ liệu cho máy in
+            const printItems = [];
             
             Object.keys(currentOrderItems).forEach(menuId => {
                 const item = currentOrderItems[menuId];
@@ -1162,6 +1169,12 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
                     quantity: item.quantity,
                     status: 'pending' 
                 };
+                
+                // Chuẩn bị dữ liệu cho máy in (Đúng cấu trúc [{'name': '...', 'qty': ...}])
+                printItems.push({
+                    name: item.name,
+                    qty: item.quantity
+                });
             });
             
             updates[`tables/${currentTableId}/sentOrders/${tableOrderRef.key}`] = {
@@ -1172,6 +1185,29 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
             database.ref().update(updates).then(() => {
                 alert("Đơn hàng đã được gửi thành công!");
                 
+                // --- THÊM PHẦN GỌI API MÁY IN START ---
+                const printPayload = {
+                    table: currentTableNameValue,
+                    items: printItems
+                };
+                
+                fetch(PRINT_API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(printPayload)
+                }).then(response => {
+                    if (response.ok) {
+                        console.log("Đã gửi lệnh in Order thành công.");
+                    } else {
+                        console.error("Lỗi khi gửi lệnh in Order:", response.statusText);
+                    }
+                }).catch(error => {
+                    console.error("Lỗi mạng khi gửi lệnh in Order:", error);
+                });
+                // --- THÊM PHẦN GỌI API MÁY IN END ---
+
                 let totalItems = 0;
                 let messageText = `<b>📝 Order mới từ: Bàn ${currentTableNameValue}</b>\n\n`;
                 
@@ -1189,7 +1225,7 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
                 updateOrderSummary();
             });
         });
-        // >> END: HÀM GỬI ORDER ĐÃ CẬP NHẬT LƯU GIÁ VÀO BẾP VÀ BÀN
+        // >> END: HÀM GỬI ORDER ĐÃ CẬP NHẬT LƯU GIÁ VÀO BẾP VÀ BÀN VÀ THÊM PRINT
 
 
    

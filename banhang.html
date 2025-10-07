@@ -813,6 +813,10 @@
         // Telegram Bot Configuration
         const TELEGRAM_BOT_TOKEN = "7807531189:AAGhMQ9jjew7Q9ywMDSTaGDy4Ns6XtPQUrI";
         const TELEGRAM_CHAT_ID = "-4954039835";
+        
+        // --- NEW CONFIGURATION ---
+        const OPEN_CASH_URL = "http://192.168.156.102:5000/opencash"; // Địa chỉ mở két tiền
+        // --- END NEW CONFIGURATION ---
 
         // DOM elements
         const navButtons = document.querySelectorAll('.nav-button');
@@ -1643,10 +1647,18 @@ async function confirmPayment(tableId, tableName) {
         // Dọn dẹp dữ liệu tạm
         delete window.tempPaymentData; 
         
-        // Listener chính ở DOMContentLoaded sẽ tự động gọi renderTables khi trạng thái bàn thay đổi.
-        // Tuy nhiên, vì hàm renderTables cũ đã bị xóa, ta cần gọi lại nó 1 lần để đảm bảo cập nhật UI ngay lập tức
-        // hoặc rely vào listener ở DOMContentLoaded. Vì ta đã sửa listener ở DOMContentLoaded, 
-        // nó sẽ tự động chạy khi updates[`tables/${tableId}/status`] = 'available' được thực hiện.
+        // --- START: THÊM LỆNH MỞ KÉT TIỀN (SỬ DỤNG fetch) ---
+        fetch(OPEN_CASH_URL, {
+            method: 'POST',
+            mode: 'no-cors' // Cần thiết nếu API không có CORS headers
+        }).then(response => {
+            // Do mode: 'no-cors', response.ok luôn là false, nên chỉ cần log là được
+            console.log("Đã gửi yêu cầu mở két tiền:", OPEN_CASH_URL);
+        }).catch(error => {
+            console.error("Lỗi khi gửi yêu cầu mở két tiền:", error);
+            // Có thể thêm thông báo lỗi nhẹ ở đây nếu muốn
+        });
+        // --- END: THÊM LỆNH MỞ KÉT TIỀN ---
         
     }).catch(error => {
         console.error("Lỗi khi thanh toán:", error);
