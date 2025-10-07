@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -55,6 +56,9 @@
       }
       .ios-card-header { /* ĐÃ ĐỔI TÊN */ 
         color: #fff; 
+      }
+      .ios-card div[style*="background-color: #f0f0f7"] {
+        background-color: rgba(69, 69, 69, 0.7) !important;
       }
     }
 
@@ -262,7 +266,8 @@
 </head>
 <body>
 
-  <header class="ios-header p-3 mb-3"> <div class="container d-flex justify-content-center">
+  <header class="ios-header p-3 mb-3"> 
+    <div class="container d-flex justify-content-center">
       <h2 class="h5 mb-0 fw-bold">
         <span style="color: var(--ios-primary);">📅</span> Quản lý Đặt bàn & Phản hồi
       </h2>
@@ -272,14 +277,17 @@
   <div class="container">
     <div class="tab-content mt-3 mb-5 pb-5"> 
       
-      <div class="tab-pane fade show active" id="ios-bookings-tab" role="tabpanel"> <div class="mb-4 p-2">
+      <div class="tab-pane fade show active" id="ios-bookings-tab" role="tabpanel"> 
+        <div class="mb-4 p-2">
             <div class="input-group">
                 <span class="input-group-text bg-transparent border-0"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
-                <input type="text" id="ios-search-phone" class="form-control ios-form-control border-0" placeholder="Tìm theo SĐT/Tên (iOS Search Style)..."> </div>
+                <input type="text" id="ios-search-phone" class="form-control ios-form-control border-0" placeholder="Tìm theo SĐT/Tên (iOS Search Style)..."> 
+            </div>
         </div>
         
         <div class="table-responsive">
-          <table class="table table-hover table-sm table-dark align-middle" id="ios-bookings-table"> <thead>
+          <table class="table table-hover table-sm table-dark align-middle" id="ios-bookings-table"> 
+            <thead>
               <tr>
                 <th>Tên</th>
                 <th>SĐT</th>
@@ -295,13 +303,17 @@
           </table>
         </div>
 
-        <div id="ios-bookings-card-list" class="card-list"> <div class="text-center text-muted p-5" id="ios-bookings-loading">Đang tải dữ liệu...</div> </div>
+        <div id="ios-bookings-card-list" class="card-list"> 
+            <div class="text-center text-muted p-5" id="ios-bookings-loading">Đang tải dữ liệu...</div> 
+        </div>
       </div>
 
-      <div class="tab-pane fade" id="ios-contacts-tab" role="tabpanel"> <h3 class="h4 fw-bold mb-3">📩 Danh sách Phản hồi</h3>
+      <div class="tab-pane fade" id="ios-contacts-tab" role="tabpanel"> 
+        <h3 class="h4 fw-bold mb-3">📩 Danh sách Phản hồi</h3>
         
         <div class="table-responsive">
-          <table class="table table-hover table-sm table-dark align-middle" id="ios-contacts-table"> <thead>
+          <table class="table table-hover table-sm table-dark align-middle" id="ios-contacts-table"> 
+            <thead>
               <tr>
                 <th>Tên</th>
                 <th>SĐT</th>
@@ -315,20 +327,25 @@
           </table>
         </div>
 
-        <div id="ios-contacts-card-list" class="card-list"> <div class="text-center text-muted p-5" id="ios-contacts-loading">Đang tải dữ liệu...</div> </div>
+        <div id="ios-contacts-card-list" class="card-list"> 
+            <div class="text-center text-muted p-5" id="ios-contacts-loading">Đang tải dữ liệu...</div> 
+        </div>
       </div>
     </div>
   </div>
 
-  <nav class="ios-bottom-navbar d-md-none"> <div class="container h-100">
+  <nav class="ios-bottom-navbar d-md-none"> 
+    <div class="container h-100">
       <ul class="nav nav-pills nav-fill h-100">
         <li class="nav-item">
-          <button class="nav-link active" id="ios-mobile-bookings-tab-btn" data-bs-toggle="tab" data-bs-target="#ios-bookings-tab" type="button" role="tab"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l2 1.5 7.5 1.5 7 7-3 3z"></path></svg>
+          <button class="nav-link active" id="ios-mobile-bookings-tab-btn" data-bs-toggle="tab" data-bs-target="#ios-bookings-tab" type="button" role="tab"> 
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l2 1.5 7.5 1.5 7 7-3 3z"></path></svg>
             Đặt bàn
           </button>
         </li>
         <li class="nav-item">
-          <button class="nav-link" id="ios-mobile-contacts-tab-btn" data-bs-toggle="tab" data-bs-target="#ios-contacts-tab" type="button" role="tab"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          <button class="nav-link" id="ios-mobile-contacts-tab-btn" data-bs-toggle="tab" data-bs-target="#ios-contacts-tab" type="button" role="tab"> 
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
             Phản hồi
           </button>
         </li>
@@ -372,7 +389,6 @@
     // ======================================
     // ====== BOOKINGS (Cập nhật UI) ========
     // ======================================
-    // ĐÃ ĐỔI TÊN ID
     const bookingsTableBody = document.querySelector("#ios-bookings-table tbody");
     const bookingsCardList = document.getElementById("ios-bookings-card-list");
     const bookingsLoading = document.getElementById("ios-bookings-loading");
@@ -385,7 +401,7 @@
             allBookings.push({ key: child.key, ...child.val() });
         });
         
-        // --- LOGIC SẮP XẾP MỚI (Giữ nguyên) ---
+        // --- LOGIC SẮP XẾP MỚI ---
         allBookings.sort((a, b) => {
             const statusA = a.status || "Chưa gọi";
             const statusB = b.status || "Chưa gọi";
@@ -419,7 +435,6 @@
 
         data.forEach((item, index) => {
             const status = item.status || "Chưa gọi";
-            // ĐÃ ĐỔI TÊN CLASS
             const badgeClass = status === "Đã gọi" ? "ios-badge-success" : "ios-badge-warning";
             const isDisabled = status === "Đã gọi" ? "disabled" : "";
 
@@ -429,7 +444,7 @@
                     <td>${item.name || ""}</td>
                     <td>${item.phone || ""}</td>
                     <td>${item.people || ""}</td>
-                    <td>${item.date || ""} lúc ${item.time || ""}</td>
+                    <td>${item.time || ""} - ${item.date || ""}</td>
                     <td>${item.message || ""}</td>
                     <td>${formatDateTime(item.createdAt)}</td>
                     <td>
@@ -443,34 +458,53 @@
                 </tr>`;
             bookingsTableBody.insertAdjacentHTML("beforeend", row);
             
-            // --- Card Item (Mobile) ---
+            // --- Card Item (Mobile) - ĐÃ THIẾT KẾ LẠI ---
             const card = `
-                <div class="ios-card ios-animate-item" style="animation-delay: ${index * 0.05}s;"> <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="ios-card-header text-primary"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M15 10l4.5 4.5M15 10l-4.5 4.5M15 10l-.5-.5M15 10l.5.5"></path><path d="M12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z"></path></svg>
-                            ${item.name || "Khách hàng"}
-                        </span>
-                        <button 
-                            class="ios-badge ios-btn-toggle ${badgeClass} p-2" data-id="${item.key}"
+                <div class="ios-card ios-animate-item" style="animation-delay: ${index * 0.05}s;"> 
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="fw-bold mb-0" style="color: var(--ios-primary);">${item.name || "Khách hàng"}</h5>
+                        <button class="ios-badge ios-btn-toggle ${badgeClass} p-2" data-id="${item.key}"
                             data-status="${status}"
                             ${isDisabled}>
-                            ${status}
+                            ${status.toUpperCase()}
                         </button>
                     </div>
-                    <div class="row g-2 mb-2">
-                        <div class="col-6"><small class="text-muted">SĐT:</small><br><strong class="text-break">${item.phone || "N/A"}</strong></div>
-                        <div class="col-6"><small class="text-muted">Số người:</small><br><strong>${item.people || "1"}</strong></div>
-                        <div class="col-12"><small class="text-muted">Thời gian:</small><br><strong>${item.time || "N/A"} - ${item.date || "N/A"}</strong></div>
+                    
+                    <div class="row g-1 mb-2">
+                        <div class="col-8 d-flex align-items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1 text-muted"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-5.65-5.65A19.79 19.79 0 0 1 2 4.18a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2 1.5 1.5 0 0 0 .5 1.5l-1.5 3c.5.5 1 1 1.5 1.5l3-1.5a1.5 1.5 0 0 0 1.5.5h3a2 2 0 0 1 2 2v3z"></path></svg>
+                            <strong class="text-break">${item.phone || "N/A"}</strong>
+                        </div>
+                        <div class="col-4 text-end">
+                            <small class="text-muted">👥</small>
+                            <strong style="font-size: 1.1rem;">${item.people || "1"}</strong>
+                        </div>
                     </div>
-                    <div class="mt-2 pt-2 border-top">
-                        <small class="text-muted">Ghi chú:</small> <span>${item.message || "Không"}</span><br>
-                        <small class="text-muted fst-italic">Tạo lúc: ${formatDateTime(item.createdAt)}</small>
+
+                    <hr class="my-2">
+
+                    <div class="d-flex justify-content-between align-items-end mb-1">
+                        <div>
+                            <small class="text-muted">🕑 Thời gian đến:</small>
+                            <h4 class="fw-bold mb-0 text-danger">${item.time || "N/A"}</h4>
+                            <small>ngày ${item.date || "N/A"}</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted fst-italic">Tạo lúc: ${formatDateTime(item.createdAt)}</small>
+                        </div>
                     </div>
+                    
+                    <div class="mt-2 p-2 rounded" style="background-color: var(--ios-bg-light);">
+                        <small class="text-muted fw-semibold">✍ Ghi chú:</small>
+                        <span class="d-block fst-italic">${item.message || "Không"}</span>
+                    </div>
+
                 </div>`;
             bookingsCardList.insertAdjacentHTML("beforeend", card);
         });
 
         // Gắn sự kiện toggle cho nút
-        document.querySelectorAll(".ios-btn-toggle").forEach(btn => { // ĐÃ ĐỔI TÊN CLASS
+        document.querySelectorAll(".ios-btn-toggle").forEach(btn => { 
             btn.addEventListener("click", () => {
                 const id = btn.getAttribute("data-id");
                 const currentStatus = btn.getAttribute("data-status");
@@ -490,7 +524,7 @@
     }
 
     // Filter theo số điện thoại (Giữ nguyên logic)
-    document.getElementById("ios-search-phone").addEventListener("input", (e) => { // ĐÃ ĐỔI TÊN ID
+    document.getElementById("ios-search-phone").addEventListener("input", (e) => { 
         const keyword = e.target.value.trim().toLowerCase();
         if (keyword === "") {
             renderBookings(allBookings);
@@ -506,7 +540,6 @@
     // ======================================
     // ====== CONTACTS (Cập nhật UI) ========
     // ======================================
-    // ĐÃ ĐỔI TÊN ID
     const contactsTableBody = document.querySelector("#ios-contacts-table tbody");
     const contactsCardList = document.getElementById("ios-contacts-card-list");
     const contactsLoading = document.getElementById("ios-contacts-loading");
@@ -542,7 +575,9 @@
 
             // --- Card Item (Mobile) ---
             const card = `
-                <div class="ios-card ios-animate-item" style="animation-delay: ${index * 0.05}s;"> <span class="ios-card-header text-secondary"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                <div class="ios-card ios-animate-item" style="animation-delay: ${index * 0.05}s;"> 
+                    <span class="ios-card-header text-secondary"> 
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                         ${data.subject || "Phản hồi chung"}
                     </span>
                     <hr class="my-2">
