@@ -245,7 +245,7 @@
         <div class="mb-4 p-2">
             <div class="input-group">
                 <span class="input-group-text bg-transparent border-0"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
-                <input type="text" id="ios-search-phone" class="form-control ios-form-control border-0" placeholder="Tìm theo SĐT/Tên (iOS Search Style)..."> 
+                <input type="text" id="ios-search-phone" class="form-control ios-form-control border-0" placeholder="Tìm theo SĐT/Tên "> 
             </div>
         </div>
         
@@ -365,7 +365,7 @@
             allBookings.push({ key: child.key, ...child.val() });
         });
         
-        // --- LOGIC SẮP XẾP MỚI ---
+        // --- LOGIC SẮP XẾP (Đặt bàn: ưu tiên "Chưa gọi" lên đầu, sau đó sắp xếp theo thời gian tạo cũ nhất lên trước) ---
         allBookings.sort((a, b) => {
             const statusA = a.status || "Chưa gọi";
             const statusB = b.status || "Chưa gọi";
@@ -378,10 +378,10 @@
                 return statusWeightA - statusWeightB;
             }
             
-            // Sắp xếp phụ: khách đặt trước (createdAt nhỏ hơn) lên trước
+            // Sắp xếp phụ: khách đặt trước (createdAt nhỏ hơn) lên trước (a - b)
             return (a.createdAt || 0) - (b.createdAt || 0);
         });
-        // --- KẾT THÚC LOGIC SẮP XẾP MỚI ---
+        // --- KẾT THÚC LOGIC SẮP XẾP ---
 
         renderBookings(allBookings);
     });
@@ -519,6 +519,12 @@
             allContacts.push({ key: child.key, ...child.val() });
         });
         
+       allContacts.sort((a, b) => {
+            // b.createdAt - a.createdAt: Đảm bảo dữ liệu có thời gian lớn hơn (mới hơn) nằm ở vị trí đầu tiên.
+            return (b.createdAt || 0) - (a.createdAt || 0); 
+        });
+        // --------------------------------------------------------------------
+
         if (allContacts.length === 0) {
             contactsTableBody.insertAdjacentHTML("beforeend", '<tr><td colspan="5" class="text-center">Không có dữ liệu phản hồi.</td></tr>');
             contactsCardList.insertAdjacentHTML("beforeend", '<div class="text-center text-muted p-5">Không có dữ liệu phản hồi.</div>');
