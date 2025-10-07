@@ -1,92 +1,58 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Quản lý Đặt bàn & Phản hồi - Giao diện iOS</title>
+  <title>Quản lý Đặt bàn & Phản hồi - Giao diện iOS Sáng</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
   
   <style>
     /* -------------------------------------- */
-    /* 1. TYPOGRAPHY & BASE STYLES (iOS Aesthetic) - ĐÃ ĐỔI TÊN BIẾN */
+    /* 1. TYPOGRAPHY & BASE STYLES (iOS Aesthetic - LIGHT MODE ONLY) */
     /* -------------------------------------- */
     :root {
       --ios-primary: #007aff; /* Blue */
       --ios-secondary: #ff9500; /* Orange */
       --ios-success: #34c759; /* Green */
       --ios-danger: #ff3b30; /* Red */
-      --ios-bg-light: #f0f0f7; /* Nền sáng hơn, mát mắt hơn */
-      --ios-bg-dark: #1c1c1e;
-      --card-bg-light: rgba(255, 255, 255, 0.95); /* Card sáng hơn */
-      --card-bg-dark: rgba(28, 28, 30, 0.85);
+      --ios-bg-light: #f0f0f7; /* Nền sáng, mát mắt */
+      --card-bg-light: rgba(255, 255, 255, 0.95); /* Card sáng */
+      --text-color-dark: #333; /* Màu chữ chính */
     }
 
     body {
       font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
       background-color: var(--ios-bg-light);
-      transition: background-color 0.3s, color 0.3s;
+      color: var(--text-color-dark); /* Đảm bảo màu chữ tối */
       padding-bottom: 70px; /* Space for bottom nav */
     }
 
-    /* Dark Mode Support */
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: var(--ios-bg-dark);
-        color: #fff;
-      }
-      .ios-header { /* ĐÃ ĐỔI TÊN */
-        background: rgba(44, 44, 46, 0.9);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Bóng sâu hơn */
-      }
-      .ios-card { /* ĐÃ ĐỔI TÊN */
-        background-color: var(--card-bg-dark);
-        color: #fff;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-      }
-      .form-control, .form-control:focus {
-        background-color: rgba(69, 69, 69, 0.7);
-        color: #fff;
-        border-color: rgba(255, 255, 255, 0.1);
-      }
-      .table-dark {
-          background-color: var(--ios-bg-dark) !important;
-          color: #fff;
-      }
-      .ios-card-header { /* ĐÃ ĐỔI TÊN */ 
-        color: #fff; 
-      }
-      .ios-card div[style*="background-color: #f0f0f7"] {
-        background-color: rgba(69, 69, 69, 0.7) !important;
-      }
-    }
-
     /* -------------------------------------- */
-    /* 2. HEADER & BOTTOM NAV (iOS Style) - ĐÃ ĐỔI TÊN CLASS */
+    /* 2. HEADER & BOTTOM NAV (iOS Style) */
     /* -------------------------------------- */
-    .ios-header { /* ĐÃ ĐỔI TÊN */
+    .ios-header { 
       background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(15px); /* Blur mạnh hơn */
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Bóng rõ nét hơn */
+      backdrop-filter: blur(15px); 
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
       position: sticky;
       top: 0;
       z-index: 1000;
     }
     
-    .ios-bottom-navbar { /* ĐÃ ĐỔI TÊN */
+    .ios-bottom-navbar { 
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       height: 60px;
       background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(15px); /* Blur mạnh hơn */
+      backdrop-filter: blur(15px); 
       box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
       z-index: 1050;
     }
 
-    .ios-bottom-navbar .nav-link { /* ĐÃ ĐỔI TÊN */
+    .ios-bottom-navbar .nav-link { 
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -99,10 +65,10 @@
       position: relative;
     }
 
-    .ios-bottom-navbar .nav-link.active { /* ĐÃ ĐỔI TÊN */
+    .ios-bottom-navbar .nav-link.active { 
       color: var(--ios-primary);
     }
-    .ios-bottom-navbar .nav-link.active::after { /* ĐÃ ĐỔI TÊN */
+    .ios-bottom-navbar .nav-link.active::after { 
       content: '';
       position: absolute;
       top: 0;
@@ -113,29 +79,28 @@
     }
 
     /* -------------------------------------- */
-    /* 3. CARD & TABLE STYLES (Responsive) - ĐÃ ĐỔI TÊN CLASS/ID */
+    /* 3. CARD & TABLE STYLES (Responsive) */
     /* -------------------------------------- */
-    .ios-card { /* ĐÃ ĐỔI TÊN */
+    .ios-card { 
       background-color: var(--card-bg-light);
-      border-radius: 15px; /* Bo góc mềm mại hơn */
+      border-radius: 15px; 
       padding: 16px;
-      /* Thay đổi bóng đổ để trông sáng và "nổi" hơn */
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.07), 0 2px 5px rgba(0, 0, 0, 0.05); 
       margin-bottom: 12px;
       transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
       cursor: pointer;
-      border: none; /* Bỏ border để card nổi hơn */
+      border: none; 
     }
 
-    .ios-card:hover { /* ĐÃ ĐỔI TÊN */
+    .ios-card:hover { 
       transform: translateY(-3px);
       box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.08);
     }
 
-    .ios-card-header { /* ĐÃ ĐỔI TÊN */
+    .ios-card-header { 
       font-size: 1.15rem;
       font-weight: 600;
-      color: #333;
+      color: var(--text-color-dark); /* Màu chữ tối */
     }
 
     /* Hide table on mobile, show on desktop/tablet */
@@ -154,57 +119,56 @@
       .card-list {
         display: none;
       }
-      .ios-bottom-navbar { /* ĐÃ ĐỔI TÊN */
+      .ios-bottom-navbar { 
         display: none !important;
       }
     }
     
-    /* Table styling for desktop - ĐÃ ĐỔI TÊN ID */
-    #ios-bookings-table th, #ios-contacts-table th { /* ĐÃ ĐỔI TÊN ID */
+    /* Table styling for desktop */
+    #ios-bookings-table th, #ios-contacts-table th { 
         font-weight: 600;
-        background-color: #343a40 !important;
-        border-bottom: 3px solid var(--ios-primary); /* Đường viền nổi bật */
+        background-color: #f8f9fa !important; /* Thay thế màu tối bằng màu sáng */
+        color: var(--text-color-dark);
+        border-bottom: 3px solid var(--ios-primary); 
+    }
+    /* Điều chỉnh table-hover và table-sm cho light mode */
+    #ios-bookings-table, #ios-contacts-table {
+        background-color: white; 
+    }
+    #ios-bookings-table tbody tr:hover, #ios-contacts-table tbody tr:hover {
+        background-color: #f5f5f5;
     }
     
-    #ios-bookings-table td, #ios-contacts-table td { /* ĐÃ ĐỔI TÊN ID */
+    #ios-bookings-table td, #ios-contacts-table td { 
         vertical-align: middle;
         padding: 12px;
     }
 
     /* -------------------------------------- */
-    /* 4. FORM & SEARCH BAR - ĐÃ ĐỔI TÊN CLASS */
+    /* 4. FORM & SEARCH BAR */
     /* -------------------------------------- */
-    .ios-form-control { /* ĐÃ ĐỔI TÊN */
+    .ios-form-control { 
       border-radius: 12px;
       padding: 12px 18px;
-      border: 1px solid #e0e0e0; /* Border nhạt hơn */
+      border: 1px solid #e0e0e0; 
       transition: border-color 0.3s, box-shadow 0.3s;
       background-color: #fff;
+      color: var(--text-color-dark);
     }
 
-    .ios-form-control:focus { /* ĐÃ ĐỔI TÊN */
+    .ios-form-control:focus { 
       border-color: var(--ios-primary);
-      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.25); /* iOS Focus Glow */
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.25); 
       background-color: #fff;
     }
-    @media (prefers-color-scheme: dark) {
-        .ios-form-control { /* ĐÃ ĐỔI TÊN */
-            background-color: rgba(69, 69, 69, 0.7);
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-        .ios-form-control:focus { /* ĐÃ ĐỔI TÊN */
-            background-color: rgba(69, 69, 69, 0.7);
-        }
-    }
 
     /* -------------------------------------- */
-    /* 5. BADGES & BUTTONS - ĐÃ ĐỔI TÊN CLASS */
+    /* 5. BADGES & BUTTONS */
     /* -------------------------------------- */
-    .ios-badge { /* ĐÃ ĐỔI TÊN */
+    .ios-badge { 
       display: inline-block;
-      padding: 5px 14px; /* Pad lớn hơn */
-      border-radius: 12px; /* Bo tròn hơn */
+      padding: 5px 14px; 
+      border-radius: 12px; 
       font-weight: 600;
       font-size: 0.85rem;
       min-width: 90px;
@@ -212,35 +176,35 @@
       transition: all 0.2s ease;
     }
 
-    .ios-badge-success { /* ĐÃ ĐỔI TÊN */
+    .ios-badge-success { 
         background-image: linear-gradient(135deg, #34c759, #6cd97d);
         color: #fff;
-        box-shadow: 0 2px 10px rgba(52, 199, 89, 0.5); /* Bóng rõ hơn */
+        box-shadow: 0 2px 10px rgba(52, 199, 89, 0.5); 
     }
 
-    .ios-badge-warning { /* ĐÃ ĐỔI TÊN */
-        background-image: linear-gradient(135deg, #ff9500, #ffc700); /* Màu tươi hơn */
+    .ios-badge-warning { 
+        background-image: linear-gradient(135deg, #ff9500, #ffc700); 
         color: #333; 
         box-shadow: 0 2px 10px rgba(255, 149, 0, 0.4);
     }
     
-    /* Button Animation - ĐÃ ĐỔI TÊN CLASS */
-    .ios-btn-toggle { /* ĐÃ ĐỔI TÊN */
+    /* Button Animation */
+    .ios-btn-toggle { 
         border: none;
         cursor: pointer;
         outline: none;
         transition: transform 0.1s, box-shadow 0.2s;
     }
-    .ios-btn-toggle:active { /* ĐÃ ĐỔI TÊN */
+    .ios-btn-toggle:active { 
         transform: scale(0.95);
         opacity: 0.8;
     }
 
     /* -------------------------------------- */
-    /* 6. ANIMATION & MISC - ĐÃ ĐỔI TÊN CLASS */
+    /* 6. ANIMATION & MISC */
     /* -------------------------------------- */
     /* Fade-in/Slide-up for items */
-    .ios-animate-item { /* ĐÃ ĐỔI TÊN */
+    .ios-animate-item { 
         opacity: 0;
         transform: translateY(10px);
         animation: fadeInSlide 0.4s ease-out forwards;
@@ -286,7 +250,7 @@
         </div>
         
         <div class="table-responsive">
-          <table class="table table-hover table-sm table-dark align-middle" id="ios-bookings-table"> 
+          <table class="table table-hover table-sm align-middle" id="ios-bookings-table"> 
             <thead>
               <tr>
                 <th>Tên</th>
@@ -312,7 +276,7 @@
         <h3 class="h4 fw-bold mb-3">📩 Danh sách Phản hồi</h3>
         
         <div class="table-responsive">
-          <table class="table table-hover table-sm table-dark align-middle" id="ios-contacts-table"> 
+          <table class="table table-hover table-sm align-middle" id="ios-contacts-table"> 
             <thead>
               <tr>
                 <th>Tên</th>
@@ -458,7 +422,7 @@
                 </tr>`;
             bookingsTableBody.insertAdjacentHTML("beforeend", row);
             
-            // --- Card Item (Mobile) - ĐÃ THIẾT KẾ LẠI ---
+            // --- Card Item (Mobile) ---
             const card = `
                 <div class="ios-card ios-animate-item" style="animation-delay: ${index * 0.05}s;"> 
                     <div class="d-flex justify-content-between align-items-center mb-2">
