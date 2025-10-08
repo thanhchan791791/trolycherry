@@ -608,6 +608,35 @@
             margin-top: 20px;
         }
         
+        /* Modal chọn hình thức thanh toán */
+        #paymentMethodModal .modal-content {
+            max-width: 350px;
+            padding: 20px;
+        }
+        .payment-method-button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .payment-method-button:active {
+            transform: scale(0.98);
+        }
+        .cash-button {
+            background-color: var(--ios-green); /* Xanh lá cho Tiền mặt */
+        }
+        .transfer-button {
+            background-color: var(--ios-blue); /* Xanh dương cho Chuyển khoản */
+        }
+        /* End Modal chọn hình thức thanh toán */
+
+
         /* Print styles - Giữ nguyên */
         @media print {
             @page { 
@@ -634,7 +663,7 @@
                 box-shadow: none;
                 margin: 0 auto;
             }
-            .close-button, .button-group-bill, .nav-buttons { 
+            .close-button, .button-group-bill, .nav-buttons, #paymentMethodModal { 
                 display: none !important;
             }
             /* Chỉnh sửa thêm cho in ấn để đảm bảo căn chỉnh đều */
@@ -736,7 +765,7 @@
     
     <div id="paymentModal" class="modal">
         <div class="modal-content">
-            <span class="close-button">&times;</span>
+            <span class="close-button" id="closeBillModal">&times;</span>
             <div id="billContent"> 
                 <div class="bill-header" style="text-align: center;">
                     <h2>Ẩm thực buôn mê</h2>
@@ -779,6 +808,21 @@
             <div class="button-group-bill">
                 <button id="printBillButton" class="print-button">In Hóa đơn</button> 
                 <button id="confirmPaymentButton" class="pay-button">Xác nhận thanh toán</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="paymentMethodModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeMethodModal">&times;</span>
+            <h2>Chọn Hình thức Thanh toán</h2>
+            <div id="paymentMethodButtons" style="margin-top: 20px;">
+                <button class="payment-method-button cash-button" onclick="handlePaymentMethodSelection('Tiền mặt')">
+                    <i class="fas fa-money-bill-wave"></i> Tiền mặt
+                </button>
+                <button class="payment-method-button transfer-button" onclick="handlePaymentMethodSelection('Chuyển khoản')">
+                    <i class="fas fa-qrcode"></i> Chuyển khoản
+                </button>
             </div>
         </div>
     </div>
@@ -839,18 +883,21 @@
         
        // Modal elements
         const paymentModal = document.getElementById('paymentModal');
-        const closeButton = document.querySelector('.close-button');
+        const closeBillModal = document.getElementById('closeBillModal'); // Đổi tên
         const billTableInfo = document.getElementById('billTableInfo');
         const billDate = document.getElementById('billDate');
         const billTime = document.getElementById('billTime'); 
         const billId = document.getElementById('billId');
         const billDetailsBody = document.getElementById('billDetailsBody');
         const billTotalPrice = document.getElementById('billTotalPrice');
-        // const billVatPrice = document.getElementById('billVatPrice'); // Đã xóa khỏi HTML, không cần DOM
         const billTotalPaid = document.getElementById('billTotalPaid');
         const confirmPaymentButton = document.getElementById('confirmPaymentButton');
         const printBillButton = document.getElementById('printBillButton'); 
         
+        // Modal chọn hình thức thanh toán (MỚI)
+        const paymentMethodModal = document.getElementById('paymentMethodModal');
+        const closeMethodModal = document.getElementById('closeMethodModal');
+
         // VietQR Element
         const vietQrCode = document.getElementById('vietQrCode');
 
@@ -1414,7 +1461,7 @@ function renderTableSentOrders() {
             });
         }
         // >> END: HÀM KIỂM TRA CHECKOUT ĐÃ CẬP NHẬT
-// >> HÀM SHOW PAYMENT ĐÃ CHỈNH SỬA LẠI LOGIC CHỐT ĐƠN VÀ DÙNG ASYNC/AWAIT (BỎ VAT) <<
+// >> HÀM showPaymentModal ĐÃ CHỈNH SỬA LẠI LOGIC CHỐT ĐƠN VÀ THAY NÚT CONFIRM (BỎ VAT) <<
 async function showPaymentModal(tableId, tableName) {
     const now = new Date();
     paymentModal.style.display = 'flex';
@@ -1559,7 +1606,8 @@ async function showPaymentModal(tableId, tableName) {
     }
 
     // --- Cập nhật nút Thanh toán ---
-    confirmPaymentButton.onclick = () => confirmPayment(tableId, tableName);
+    // THAY ĐỔI: Thay vì gọi confirmPayment, gọi hàm mở modal chọn hình thức
+    confirmPaymentButton.onclick = openPaymentMethodModal; 
     if (totalAmount === 0) {
         confirmPaymentButton.style.display = 'none';
         printBillButton.style.display = 'none';
@@ -1568,7 +1616,7 @@ async function showPaymentModal(tableId, tableName) {
         printBillButton.style.display = 'block';
     }
 }
-// >> END: CODE ĐÃ CHỈNH SỬA CHO HÀM THANH TOÁN
+// >> END: HÀM showPaymentModal ĐÃ CHỈNH SỬA CHO HÀM THANH TOÁN
 
         function generateBillId() {
             const now = new Date();
@@ -1581,13 +1629,33 @@ async function showPaymentModal(tableId, tableName) {
             return `HD${year}${month}${day}${hour}${minute}${second}`;
         }
         
- // >> CODE SỬA HÀM confirmPayment (BỎ VAT)
-async function confirmPayment(tableId, tableName) {
+// >> HÀM MỚI: Mở Modal chọn hình thức thanh toán
+function openPaymentMethodModal() {
+    if (!window.tempPaymentData || window.tempPaymentData.finalItemsForBill.length === 0) {
+        alert("Không có món ăn nào đã hoàn thành để thanh toán.");
+        return;
+    }
+    // Đóng Modal hóa đơn và mở Modal chọn hình thức
+    paymentModal.style.display = 'none';
+    paymentMethodModal.style.display = 'flex';
+}
+        
+// >> HÀM MỚI: Xử lý lựa chọn hình thức thanh toán và gọi processPayment
+function handlePaymentMethodSelection(method) {
+    paymentMethodModal.style.display = 'none'; // Đóng modal chọn hình thức
+    // Gọi hàm thanh toán chính với hình thức đã chọn
+    const tableId = window.tempPaymentData.tableId;
+    const tableName = window.tempPaymentData.tableName;
+    processPayment(tableId, tableName, method); // Truyền thêm method
+}
+
+ // >> CODE SỬA HÀM confirmPayment (Đổi tên thành processPayment và nhận thêm paymentMethod)
+async function processPayment(tableId, tableName, paymentMethod) {
     // 1. Lấy dữ liệu đã được tính toán trong showPaymentModal
     const paymentData = window.tempPaymentData;
 
     if (!paymentData || !paymentData.finalItemsForBill || paymentData.finalItemsForBill.length === 0) {
-        alert("Không có món ăn nào đã hoàn thành để thanh toán.");
+        alert("Lỗi dữ liệu thanh toán.");
         return;
     }
     
@@ -1620,8 +1688,8 @@ async function confirmPayment(tableId, tableName) {
         timestamp: paymentTimestamp,
         items: finalItemsForBill, // Đã được gom nhóm và tính toán
         totalAmount: totalAmount,
-        // vatAmount: 0, // Bỏ hẳn hoặc gán = 0 nếu cần schema
-        finalTotal: finalTotal // Bằng totalAmount
+        finalTotal: finalTotal, // Bằng totalAmount
+        paymentMethod: paymentMethod // << TRƯỜNG MỚI ĐÃ THÊM
     };
 
     // 5. Cập nhật trạng thái bàn về 'available' sau khi đã thanh toán
@@ -1629,40 +1697,50 @@ async function confirmPayment(tableId, tableName) {
 
     // 6. Thực hiện các cập nhật lên Firebase
     database.ref().update(updates).then(() => {
-        alert('Thanh toán thành công!');
-        paymentModal.style.display = 'none';
-        
+        alert(`Thanh toán thành công bằng ${paymentMethod}!`);
+        // Không đóng modal hóa đơn ở đây, nó đã được đóng ở openPaymentMethodModal
+
         // Dọn dẹp dữ liệu tạm
         delete window.tempPaymentData; 
         
         // --- START: THÊM LỆNH MỞ KÉT TIỀN (SỬ DỤNG fetch) ---
-        fetch(OPEN_CASH_URL, {
-            method: 'POST',
-            mode: 'no-cors' // Cần thiết nếu API không có CORS headers
-        }).then(response => {
-            // Do mode: 'no-cors', response.ok luôn là false, nên chỉ cần log là được
-            console.log("Đã gửi yêu cầu mở két tiền:", OPEN_CASH_URL);
-        }).catch(error => {
-            console.error("Lỗi khi gửi yêu cầu mở két tiền:", error);
-            // Có thể thêm thông báo lỗi nhẹ ở đây nếu muốn
-        });
+        // Chỉ mở két nếu thanh toán bằng Tiền mặt
+        if (paymentMethod === 'Tiền mặt') {
+            fetch(OPEN_CASH_URL, {
+                method: 'POST',
+                mode: 'no-cors' // Cần thiết nếu API không có CORS headers
+            }).then(response => {
+                console.log("Đã gửi yêu cầu mở két tiền:", OPEN_CASH_URL);
+            }).catch(error => {
+                console.error("Lỗi khi gửi yêu cầu mở két tiền:", error);
+            });
+        }
         // --- END: THÊM LỆNH MỞ KÉT TIỀN ---
         
     }).catch(error => {
         console.error("Lỗi khi thanh toán:", error);
     });
 }
-// >> END: CODE SỬA HÀM confirmPayment
+// >> END: CODE SỬA HÀM processPayment
         
         // --- Print Bill Functionality ---
         printBillButton.addEventListener('click', () => {
             window.print(); 
         });
         
-        closeButton.onclick = () => paymentModal.style.display = 'none';
+        closeBillModal.onclick = () => paymentModal.style.display = 'none';
+        closeMethodModal.onclick = () => {
+             paymentMethodModal.style.display = 'none';
+             paymentModal.style.display = 'flex'; // Quay lại modal hóa đơn
+        };
+        
         window.onclick = (event) => {
             if (event.target == paymentModal) {
                 paymentModal.style.display = 'none';
+            }
+            if (event.target == paymentMethodModal) {
+                 paymentMethodModal.style.display = 'none';
+                 paymentModal.style.display = 'flex'; // Quay lại modal hóa đơn
             }
         };
 
