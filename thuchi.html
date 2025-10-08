@@ -19,6 +19,8 @@
             --border-color: #e6e9ed;
             --positive: #28a745;
             --negative: #dc3545;
+            --cash: #ffc107; /* Amber for Cash */
+            --transfer: #007bff; /* Blue for Transfer */
         }
 
         body {
@@ -113,6 +115,12 @@
         }
         .balance-negative {
             color: var(--negative);
+        }
+        .balance-cash {
+            color: var(--cash);
+        }
+        .balance-transfer {
+            color: var(--transfer);
         }
         .total-summary {
             background-color: #f0f4fa;
@@ -223,6 +231,12 @@
                 width: 100%;
                 margin: 0.25rem 0;
             }
+            
+            /* Điều chỉnh kích thước cột cho mobile */
+            .total-summary .row.g-3 > div {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -249,22 +263,34 @@
                     <div class="total-summary text-center">
                         <h5 class="fw-bold mb-3"><i class="fas fa-chart-pie me-2"></i> Tổng hợp (Tất cả dữ liệu)</h5>
                         <div class="row g-3 overall-totals">
-                            <div class="col-md-4">
+                            <div class="col-6 col-md-4">
                                 <div class="balance-box">
-                                    <div class="small-muted">Tổng Doanh thu</div>
-                                    <div id="totalRevenue" class="h4 balance-positive">0 ₫</div>
+                                    <div class="small-muted">Thu Tiền mặt</div>
+                                    <div id="totalRevenueCash" class="h4 balance-cash">0 ₫</div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-6 col-md-4">
+                                <div class="balance-box">
+                                    <div class="small-muted">Thu Chuyển khoản</div>
+                                    <div id="totalRevenueTransfer" class="h4 balance-transfer">0 ₫</div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
                                 <div class="balance-box">
                                     <div class="small-muted">Tổng Chi tiêu</div>
                                     <div id="totalExpense" class="h4 balance-negative">0 ₫</div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-6 col-md-6">
                                 <div class="balance-box">
                                     <div class="small-muted">Tổng Dư</div>
                                     <div id="totalBalance" class="h4">0 ₫</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-6">
+                                <div class="balance-box">
+                                    <div class="small-muted">Dư Tiền mặt</div>
+                                    <div id="totalBalanceCash" class="h4">0 ₫</div>
                                 </div>
                             </div>
                         </div>
@@ -275,15 +301,11 @@
                         </button>
 
                         <div id="dateFilterControls" style="display: none;">
-                            <h5 class="fw-bold mb-3 text-start"><i class="fas fa-sliders-h me-2"></i> Chọn Phạm vi Ngày</h5>
+                            <h5 class="fw-bold mb-3 text-start"><i class="fas fa-sliders-h me-2"></i> Chọn Ngày Cụ thể</h5>
                             <div class="row g-3 align-items-end mb-4">
-                                <div class="col-6 col-md-4">
-                                    <label for="startDateFilter" class="form-label small-muted mb-1">Từ ngày</label>
-                                    <input type="date" id="startDateFilter" class="form-control" />
-                                </div>
-                                <div class="col-6 col-md-4">
-                                    <label for="endDateFilter" class="form-label small-muted mb-1">Đến ngày</label>
-                                    <input type="date" id="endDateFilter" class="form-control" />
+                                <div class="col-12 col-md-8">
+                                    <label for="specificDateFilter" class="form-label small-muted mb-1">Ngày</label>
+                                    <input type="date" id="specificDateFilter" class="form-control" />
                                 </div>
                                 <div class="col-12 col-md-4">
                                     <button id="applyDateFilterBtn" class="btn btn-primary w-100"><i class="fas fa-filter me-1"></i> Lọc & Hiển thị</button>
@@ -291,22 +313,34 @@
                             </div>
 
                             <div id="filteredTotals" class="row g-3">
-                                <div class="col-md-4">
+                                <div class="col-6 col-md-4">
                                     <div class="balance-box">
-                                        <div class="small-muted">Doanh thu đã lọc</div>
-                                        <div id="filteredRevenue" class="h4 balance-positive">0 ₫</div>
+                                        <div class="small-muted">Thu Tiền mặt đã lọc</div>
+                                        <div id="filteredRevenueCash" class="h4 balance-cash">0 ₫</div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-6 col-md-4">
+                                    <div class="balance-box">
+                                        <div class="small-muted">Thu Chuyển khoản đã lọc</div>
+                                        <div id="filteredRevenueTransfer" class="h4 balance-transfer">0 ₫</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
                                     <div class="balance-box">
                                         <div class="small-muted">Chi tiêu đã lọc</div>
                                         <div id="filteredExpense" class="h4 balance-negative">0 ₫</div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-6 col-md-6">
                                     <div class="balance-box">
                                         <div class="small-muted">Số Dư đã lọc</div>
                                         <div id="filteredBalance" class="h4">0 ₫</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-6">
+                                    <div class="balance-box">
+                                        <div class="small-muted">Dư Tiền mặt đã lọc</div>
+                                        <div id="filteredBalanceCash" class="h4">0 ₫</div>
                                     </div>
                                 </div>
                             </div>
@@ -380,10 +414,25 @@
                             <label class="form-label fw-bold">Ngày</label>
                             <input type="date" id="modalEntryDate" class="form-control" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold" id="modalAmountLabel"></label>
-                            <input type="text" id="modalAmount" class="form-control" required>
+                        
+                        <div id="revenueFields" style="display: none;">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><i class="fas fa-money-bill-wave me-1 text-warning"></i> Thu Tiền mặt (VND)</label>
+                                    <input type="text" id="modalAmountCash" class="form-control currency-input" value="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><i class="fas fa-exchange-alt me-1 text-primary"></i> Thu Chuyển khoản (VND)</label>
+                                    <input type="text" id="modalAmountTransfer" class="form-control currency-input" value="0">
+                                </div>
+                            </div>
                         </div>
+
+                        <div class="mb-3" id="expenseField" style="display: none;">
+                            <label class="form-label fw-bold" id="modalAmountLabel"></label>
+                            <input type="text" id="modalAmount" class="form-control currency-input" required>
+                        </div>
+                        
                         <div class="mb-3">
                             <label class="form-label fw-bold">Chi tiết Giao dịch</label>
                             <textarea id="modalDetails" class="form-control" rows="3"></textarea>
@@ -420,13 +469,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <script>
-    /**
-     * Sổ Thu Chi Hàng Ngày - Firebase Edition
-     *
-     * Phiên bản này đã được cập nhật để lưu từng giao dịch một cách riêng biệt
-     * trong Firebase, cho phép hiển thị chi tiết cụ thể và thêm bộ lọc ngày.
-     */
-
     // Cấu hình Firebase của bạn
     const firebaseConfig = {
       apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
@@ -454,12 +496,18 @@
     const modalSubmitBtn = document.getElementById('modalSubmitBtn');
     const transactionTypeEl = document.getElementById('transactionType');
     const modalEntryDateEl = document.getElementById('modalEntryDate');
-    const modalAmountEl = document.getElementById('modalAmount');
+    const modalAmountEl = document.getElementById('modalAmount'); // Expense Amount
+    const modalAmountCashEl = document.getElementById('modalAmountCash'); // NEW Cash Amount
+    const modalAmountTransferEl = document.getElementById('modalAmountTransfer'); // NEW Transfer Amount
     const modalDetailsEl = document.getElementById('modalDetails');
     const historyBodyEl = document.getElementById('historyBody');
-    const totalRevenueEl = document.getElementById('totalRevenue');
+    // Overall Totals
+    const totalRevenueCashEl = document.getElementById('totalRevenueCash');
+    const totalRevenueTransferEl = document.getElementById('totalRevenueTransfer');
     const totalExpenseEl = document.getElementById('totalExpense');
     const totalBalanceEl = document.getElementById('totalBalance');
+    const totalBalanceCashEl = document.getElementById('totalBalanceCash');
+
     const sortOrderEl = document.getElementById('sortOrder');
     const reportViewEl = document.getElementById('reportView');
     const reportTitleEl = document.getElementById('reportTitle');
@@ -469,15 +517,21 @@
     const detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
     const detailsModalBodyEl = document.getElementById('detailsModalBody');
     
-    // NEW UI Elements for Date Filter
+    // NEW UI Elements for Modal
+    const revenueFieldsEl = document.getElementById('revenueFields'); // NEW Revenue Fields Container
+    const expenseFieldEl = document.getElementById('expenseField'); // Existing Expense Field Container
+
+    // NEW UI Elements for Date Filter (UPDATED)
     const toggleDateFilterBtn = document.getElementById('toggleDateFilterBtn'); // Nút Ẩn/Hiện
     const dateFilterControlsEl = document.getElementById('dateFilterControls'); // Khối điều khiển
-    const startDateFilterEl = document.getElementById('startDateFilter');
-    const endDateFilterEl = document.getElementById('endDateFilter');
+    const specificDateFilterEl = document.getElementById('specificDateFilter'); // CHANGED ID
     const applyDateFilterBtn = document.getElementById('applyDateFilterBtn');
-    const filteredRevenueEl = document.getElementById('filteredRevenue');
+    // Filtered Totals
+    const filteredRevenueCashEl = document.getElementById('filteredRevenueCash');
+    const filteredRevenueTransferEl = document.getElementById('filteredRevenueTransfer');
     const filteredExpenseEl = document.getElementById('filteredExpense');
     const filteredBalanceEl = document.getElementById('filteredBalance');
+    const filteredBalanceCashEl = document.getElementById('filteredBalanceCash');
 
 
     // --- Core Functions for Firebase ---
@@ -509,17 +563,24 @@
 
     /**
      * Adds a new transaction entry.
+     * Use this to add a single transaction (Revenue or Expense).
      */
-    async function addEntry(date, revenue = 0, expense = 0, details = '') {
+    async function addSingleEntry(date, revenue = 0, expense = 0, details = '', paymentMethod = null) {
         if (!date) return;
         
-        const transactionRef = recordsRef.child(date).child('transactions').push();
-        await transactionRef.set({
+        const transactionData = {
             revenue: Number(revenue || 0),
             expense: Number(expense || 0),
             details: details,
             timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
+        };
+        
+        if (revenue > 0 && paymentMethod) {
+            transactionData.paymentMethod = paymentMethod; // 'cash' or 'transfer'
+        }
+
+        const transactionRef = recordsRef.child(date).child('transactions').push();
+        await transactionRef.set(transactionData);
     }
 
     /**
@@ -533,20 +594,37 @@
     
     /**
      * Edits a single transaction.
+     * UPDATED to handle paymentMethod
      */
-    async function editTransaction(date, transactionId, currentRev, currentExp, currentDetails) {
-        const newRev = prompt('Sửa doanh thu:', currentRev);
+    async function editTransaction(date, transactionId, currentRev, currentExp, currentDetails, currentPaymentMethod) {
+        const isRevenue = currentRev > 0;
+        
+        const newRev = isRevenue ? prompt('Sửa doanh thu:', currentRev) : currentRev;
         if (newRev === null) return;
-        const newExp = prompt('Sửa chi tiêu:', currentExp);
+        const newExp = !isRevenue ? prompt('Sửa chi tiêu:', currentExp) : currentExp;
         if (newExp === null) return;
         const newDetails = prompt('Sửa chi tiết:', currentDetails);
         if (newDetails === null) return;
         
+        let newPaymentMethod = currentPaymentMethod;
+        if (isRevenue) {
+            let method = prompt('Sửa hình thức thu (cash/transfer):', currentPaymentMethod || 'cash');
+            if (method === null) return;
+            newPaymentMethod = method.toLowerCase() === 'transfer' ? 'transfer' : 'cash';
+        }
+
         const updates = {
             revenue: Number(newRev || 0),
             expense: Number(newExp || 0),
             details: newDetails
         };
+        if (isRevenue) {
+            updates.paymentMethod = newPaymentMethod;
+        } else {
+            // Ensure paymentMethod is removed or undefined for expenses
+            updates.paymentMethod = null;
+        }
+        
         await recordsRef.child(date).child('transactions').child(transactionId).update(updates);
     }
     
@@ -564,56 +642,13 @@
         await recordsRef.remove();
     }
     
-    function exportCsv(records) {
-        const rows = [['Ngày', 'Doanh thu (VND)', 'Chi tiêu (VND)', 'Số dư (VND)', 'Chi tiết Chi tiêu']];
-        Object.values(records).sort((a, b) => a.date.localeCompare(b.date)).forEach(r => {
-            const detailsList = r.transactions ? Object.values(r.transactions).map(t => t.details).join(', ') : '';
-            rows.push([formatDate(r.date), r.revenue, r.expense, r.net, detailsList]);
-        });
-        const csv = rows.map(r => r.map(String).map(c => /[,"\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c).join(',')).join('\n');
-        downloadFile(csv, 'finance_records.csv', 'text/csv;charset=utf-8;');
-    }
-
-    function exportJson(records) {
-        const json = JSON.stringify(records, null, 2);
-        downloadFile(json, 'finance_records.json', 'application/json');
-    }
-
-    function downloadFile(content, filename, type) {
-        const blob = new Blob([content], { type });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        URL.revokeObjectURL(url);
-        a.remove();
-    }
-
-    async function importJsonFile(file) {
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-            try {
-                const obj = JSON.parse(ev.target.result);
-                if (!confirm('Import sẽ ghi đè/ghép với dữ liệu hiện tại trên Firebase. Bạn muốn tiếp tục?')) return;
-                
-                // For simplicity, this import function will not merge transactions.
-                // It will overwrite existing dates with new data.
-                await recordsRef.set(obj);
-                alert('Import hoàn tất!');
-            } catch (err) {
-                alert('File JSON không hợp lệ.');
-            }
-        };
-        reader.readAsText(file);
-    }
-    
     async function addSampleData() {
         if (!confirm('Bạn có muốn thêm dữ liệu mẫu để thử nghiệm không? Dữ liệu này sẽ được trộn với dữ liệu hiện có.')) return;
         
         const sampleTransactions = {};
         const detailsList = ["Ăn trưa", "Cà phê", "Mua sắm quần áo", "Tiền xăng", "Đi chợ", "Xem phim", "Phí dịch vụ", "Tiền điện", "Tiền nước", "Tiền internet"];
+        const paymentMethods = ['cash', 'transfer'];
+        
         const startDate = new Date();
         startDate.setMonth(startDate.getMonth() - 3);
         const today = new Date();
@@ -626,15 +661,18 @@
                 sampleTransactions[dateStr] = {};
             }
 
-            // Always add a revenue transaction
-            const dailyRevenue = Math.floor(Math.random() * 5000000) + 500000; // Random revenue from 500,000 to 5,500,000 VND
-            const revenueId = `trans-rev-${dateStr}`;
-            sampleTransactions[dateStr][revenueId] = {
-                revenue: dailyRevenue,
-                expense: 0,
-                details: "Thu nhập hàng ngày", // Add a detail for sample revenue
-                timestamp: currentDate.getTime() + Math.floor(Math.random() * 1000) // Ensure it's the first transaction
-            };
+            // Always add a revenue transaction (split into cash/transfer)
+            for (let method of paymentMethods) {
+                const dailyRevenue = Math.floor(Math.random() * 2000000) + 200000; // Random revenue up to 2.2M VND
+                const revenueId = `trans-rev-${dateStr}-${method}`;
+                sampleTransactions[dateStr][revenueId] = {
+                    revenue: dailyRevenue,
+                    expense: 0,
+                    details: method === 'cash' ? "Thu nhập tiền mặt" : "Thu nhập chuyển khoản",
+                    timestamp: currentDate.getTime() + Math.floor(Math.random() * 1000),
+                    paymentMethod: method
+                };
+            }
 
             const numExpenses = Math.floor(Math.random() * 4) + 1; // 1-4 expense transactions per day
             
@@ -646,7 +684,7 @@
                 sampleTransactions[dateStr][transactionId] = {
                     revenue: 0,
                     expense: amount,
-                    details: details, // Details for expense only
+                    details: details,
                     timestamp: currentDate.getTime() + Math.floor(Math.random() * 86400000)
                 };
             }
@@ -655,7 +693,7 @@
         
         const updates = {};
         for (const date in sampleTransactions) {
-            // This is a simple merge. In a real app, you might want more complex merging logic.
+            // This is a simple merge.
             const existingTransactions = window.cachedRecords && window.cachedRecords[date] && window.cachedRecords[date].transactions ? window.cachedRecords[date].transactions : {};
             updates[`${date}/transactions`] = { ...existingTransactions, ...sampleTransactions[date] };
         }
@@ -664,56 +702,75 @@
     }
     
     /**
-     * Calculates total revenue, expense, and balance within a date range.
+     * Calculates total revenue, expense, and balance for a SPECIFIC DATE.
+     * UPDATED for single date logic.
      */
-    function calculateFilteredTotals(records, startDateStr, endDateStr) {
-        let filteredRevenue = 0;
+    function calculateFilteredTotals(records, specificDateStr) {
+        let filteredRevenueCash = 0;
+        let filteredRevenueTransfer = 0;
         let filteredExpense = 0;
         
-        // YYYY-MM-DD format comparison works best with strings
-        if (!startDateStr && !endDateStr) {
-            return { revenue: 0, expense: 0, net: 0 };
+        if (!specificDateStr) {
+            return { revenueCash: 0, revenueTransfer: 0, expense: 0, net: 0, netCash: 0 };
         }
         
-        for (const dateKey in records) {
-            const date = dateKey; // date is in YYYY-MM-DD format
-            
-            const isAfterStart = !startDateStr || date >= startDateStr;
-            const isBeforeEnd = !endDateStr || date <= endDateStr;
-            
-            if (isAfterStart && isBeforeEnd) {
-                const dailyRecord = records[dateKey];
-                if (dailyRecord.transactions) {
-                    Object.values(dailyRecord.transactions).forEach(trans => {
-                        filteredRevenue += Number(trans.revenue || 0);
-                        filteredExpense += Number(trans.expense || 0);
-                    });
+        const dailyRecord = records[specificDateStr];
+
+        if (dailyRecord && dailyRecord.transactions) {
+            Object.values(dailyRecord.transactions).forEach(trans => {
+                const revenue = Number(trans.revenue || 0);
+                const expense = Number(trans.expense || 0);
+                
+                if (revenue > 0) {
+                    if (trans.paymentMethod === 'transfer') {
+                        filteredRevenueTransfer += revenue;
+                    } else {
+                        // Default to cash if paymentMethod is missing or not 'transfer'
+                        filteredRevenueCash += revenue;
+                    }
+                } else if (expense > 0) {
+                    filteredExpense += expense;
                 }
-            }
+            });
         }
         
-        const filteredNet = filteredRevenue - filteredExpense;
-        return { revenue: filteredRevenue, expense: filteredExpense, net: filteredNet };
+        const filteredNet = (filteredRevenueCash + filteredRevenueTransfer) - filteredExpense;
+        const filteredNetCash = filteredRevenueCash - filteredExpense; // Cash Balance is Cash Revenue minus All Expense
+        
+        return { 
+            revenueCash: filteredRevenueCash, 
+            revenueTransfer: filteredRevenueTransfer, 
+            expense: filteredExpense, 
+            net: filteredNet, 
+            netCash: filteredNetCash 
+        };
     }
 
     /**
      * Updates the UI for the date range totals section.
+     * UPDATED to use specificDateFilterEl.
      */
     function updateFilteredTotalsUI(records) {
-        const startDate = startDateFilterEl.value;
-        const endDate = endDateFilterEl.value;
+        const specificDate = specificDateFilterEl.value;
 
         // Do not update if filter is hidden
         if (dateFilterControlsEl.style.display === 'none') {
             return;
         }
 
-        const totals = calculateFilteredTotals(records, startDate, endDate);
+        const totals = calculateFilteredTotals(records, specificDate);
         
-        filteredRevenueEl.innerText = formatVND(totals.revenue);
+        filteredRevenueCashEl.innerText = formatVND(totals.revenueCash);
+        filteredRevenueTransferEl.innerText = formatVND(totals.revenueTransfer);
         filteredExpenseEl.innerText = formatVND(totals.expense);
+        
+        // Total Balance
         filteredBalanceEl.innerText = formatVND(totals.net);
         filteredBalanceEl.className = `h4 ${totals.net >= 0 ? 'balance-positive' : 'balance-negative'}`;
+        
+        // Cash Balance
+        filteredBalanceCashEl.innerText = formatVND(totals.netCash);
+        filteredBalanceCashEl.className = `h4 ${totals.netCash >= 0 ? 'balance-positive' : 'balance-negative'}`;
     }
 
 
@@ -724,40 +781,64 @@
         
         // Transform the nested data for rendering and aggregation
         const dailyAggregatedRecords = {};
-        let totalRev = 0, totalExp = 0;
+        let totalRevCash = 0, totalRevTransfer = 0, totalExp = 0;
         
         for (const dateKey in records) {
             const dailyRecord = records[dateKey];
-            let dailyRevenue = 0;
+            let dailyRevenueCash = 0;
+            let dailyRevenueTransfer = 0;
             let dailyExpense = 0;
             
             if (dailyRecord.transactions) {
                 Object.values(dailyRecord.transactions).forEach(trans => {
-                    dailyRevenue += Number(trans.revenue || 0);
-                    dailyExpense += Number(trans.expense || 0);
+                    const revenue = Number(trans.revenue || 0);
+                    const expense = Number(trans.expense || 0);
+                    
+                    if (revenue > 0) {
+                         if (trans.paymentMethod === 'transfer') {
+                            dailyRevenueTransfer += revenue;
+                        } else {
+                            dailyRevenueCash += revenue;
+                        }
+                    } else if (expense > 0) {
+                        dailyExpense += expense;
+                    }
                 });
             }
             
+            const dailyTotalRevenue = dailyRevenueCash + dailyRevenueTransfer;
+            const dailyNet = dailyTotalRevenue - dailyExpense;
+            const dailyNetCash = dailyRevenueCash - dailyExpense; // Cash Balance is Cash Revenue - All Expense
+            
             dailyAggregatedRecords[dateKey] = {
                 date: dateKey,
-                revenue: dailyRevenue,
+                revenue: dailyTotalRevenue,
+                revenueCash: dailyRevenueCash,
+                revenueTransfer: dailyRevenueTransfer,
                 expense: dailyExpense,
-                net: dailyRevenue - dailyExpense,
-                // Add transactions for details button
+                net: dailyNet,
+                netCash: dailyNetCash,
                 transactions: dailyRecord.transactions
             };
             
-            totalRev += dailyRevenue;
+            totalRevCash += dailyRevenueCash;
+            totalRevTransfer += dailyRevenueTransfer;
             totalExp += dailyExpense;
         }
         
         // Update totals for All Data
-        totalRevenueEl.innerText = formatVND(totalRev);
+        totalRevenueCashEl.innerText = formatVND(totalRevCash);
+        totalRevenueTransferEl.innerText = formatVND(totalRevTransfer);
         totalExpenseEl.innerText = formatVND(totalExp);
-        const totalBal = totalRev - totalExp;
+
+        const totalBal = (totalRevCash + totalRevTransfer) - totalExp;
         totalBalanceEl.innerText = formatVND(totalBal);
         totalBalanceEl.className = `h4 ${totalBal >= 0 ? 'balance-positive' : 'balance-negative'}`;
         
+        const totalBalCash = totalRevCash - totalExp;
+        totalBalanceCashEl.innerText = formatVND(totalBalCash);
+        totalBalanceCashEl.className = `h4 ${totalBalCash >= 0 ? 'balance-positive' : 'balance-negative'}`;
+
         // Update Filtered Totals if the filter control panel is visible
         if (dateFilterControlsEl.style.display !== 'none') {
             updateFilteredTotalsUI(records);
@@ -832,7 +913,7 @@
                         </button>
                     </td>
                     <td data-label="Hành động:" class="action-cell">
-                        <button type="button" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="handleDelete('${key}')">
+                        <button type="button" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="window.handleDelete('${key}')">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
@@ -877,6 +958,7 @@
                             <tr>
                                 <th>Thời gian</th>
                                 <th>Số tiền</th>
+                                <th>Hình thức</th>
                                 <th>Chi tiết</th>
                                 <th>Hành động</th>
                             </tr>
@@ -888,15 +970,21 @@
                 const amount = isExpense ? trans.expense : trans.revenue;
                 const amountClass = isExpense ? 'text-danger' : 'text-success';
                 const type = isExpense ? 'Chi tiêu' : 'Doanh thu';
+                const method = trans.paymentMethod ? (trans.paymentMethod === 'cash' ? '<span class="badge bg-warning text-dark">Tiền mặt</span>' : '<span class="badge bg-primary">Chuyển khoản</span>') : '';
                 const time = trans.timestamp ? new Date(trans.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'}) : 'N/A';
                 
+                // Prepare details string for edit
+                const detailsForEdit = trans.details.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                const paymentMethodForEdit = trans.paymentMethod || 'cash';
+
                 htmlContent += `
                     <tr>
                         <td>${time}</td>
                         <td class="${amountClass}">${formatVND(amount)} (${type})</td>
+                        <td>${method}</td>
                         <td>${trans.details}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-primary" onclick="window.editTransaction('${date}', '${id}', ${trans.revenue}, ${trans.expense}, '${trans.details.replace(/'/g, "\\'").replace(/"/g, '\\"')}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="window.editTransaction('${date}', '${id}', ${trans.revenue}, ${trans.expense}, '${detailsForEdit}', '${paymentMethodForEdit}')"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-sm btn-outline-danger" onclick="window.deleteTransaction('${date}', '${id}')"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     </tr>
@@ -909,7 +997,7 @@
         detailsModal.show();
     }
 
-    // New function to aggregate data by month or quarter
+    // Function to aggregate data by month or quarter
     function aggregateByPeriod(records, period) {
         const aggregated = {};
         for (const date in records) {
@@ -944,28 +1032,82 @@
             await deleteDay(date);
         }
     };
-    window.editTransaction = editTransaction;
+    window.editTransaction = editTransaction; 
     window.deleteTransaction = deleteTransaction;
+
+    // --- Utility functions for Export/Import (kept basic) ---
+    // NOTE: CSV and JSON export logic is kept simple and might not reflect the cash/transfer split perfectly in the export file structure without further updates.
+    function downloadFile(filename, text) {
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+
+    function exportJson(data) {
+        const json = JSON.stringify(data, null, 2);
+        downloadFile(`records_${new Date().toISOString().slice(0, 10)}.json`, json);
+        alert('Dữ liệu đã được xuất ra JSON.');
+    }
+    
+    function exportCsv(dailyAggregatedRecords) {
+        let csv = 'Ngày,Doanh thu,Chi tiêu,Số dư\n';
+        const sortedKeys = Object.keys(dailyAggregatedRecords).sort();
+        
+        sortedKeys.forEach(date => {
+            const r = dailyAggregatedRecords[date];
+            csv += `${formatDate(date)},${r.revenue},${r.expense},${r.net}\n`;
+        });
+        downloadFile(`records_${new Date().toISOString().slice(0, 10)}.csv`, csv);
+        alert('Dữ liệu đã được xuất ra CSV.');
+    }
+
+    function importJsonFile(file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (!confirm('Bạn có chắc chắn muốn nhập dữ liệu này? Dữ liệu hiện tại trên Firebase có thể bị ghi đè hoặc trộn lẫn.')) return;
+
+                // Simple merge logic: overwrite day-level entries
+                await recordsRef.update(importedData); 
+                alert('Dữ liệu đã được nhập thành công!');
+            } catch (err) {
+                alert('Lỗi khi đọc file JSON: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+    // ------------------------------------------------------------------------
 
     // --- Event Listeners & Init ---
     (function init() {
         // Set today's date
         const today = new Date().toISOString().slice(0, 10);
         modalEntryDateEl.value = today;
-        endDateFilterEl.value = today; // Set default end date to today
+        specificDateFilterEl.value = today; // Set default specific date
 
-        // Show modal for Revenue
+        // Show modal for Revenue (UPDATED)
         addRevenueBtn.addEventListener('click', () => {
-            modalTitle.innerText = "Thêm Giao Dịch Thu";
-            modalAmountLabel.innerText = "Số tiền Thu (VND)";
+            modalTitle.innerText = "Thêm Giao Dịch Thu (Tiền mặt & Chuyển khoản)";
             modalSubmitBtn.innerText = "Thêm Giao Dịch Thu";
             transactionTypeEl.value = "revenue";
-            modalAmountEl.value = "";
+            modalAmountEl.value = "0"; // Reset Expense field
+            modalAmountCashEl.value = "0"; // Reset Cash field
+            modalAmountTransferEl.value = "0"; // Reset Transfer field
             modalDetailsEl.value = "";
+            
+            revenueFieldsEl.style.display = 'block'; // Show revenue fields
+            expenseFieldEl.style.display = 'none'; // Hide expense field
+            modalAmountEl.required = false;
+            
             addTransactionModal.show();
         });
 
-        // Show modal for Expense
+        // Show modal for Expense (UPDATED)
         addExpenseBtn.addEventListener('click', () => {
             modalTitle.innerText = "Thêm Giao Dịch Chi";
             modalAmountLabel.innerText = "Số tiền Chi (VND)";
@@ -973,29 +1115,55 @@
             transactionTypeEl.value = "expense";
             modalAmountEl.value = "";
             modalDetailsEl.value = "";
+            
+            revenueFieldsEl.style.display = 'none'; // Hide revenue fields
+            expenseFieldEl.style.display = 'block'; // Show expense field
+            modalAmountEl.required = true;
+            
             addTransactionModal.show();
         });
         
-        // Handle form submission from the modal
+        // Handle form submission from the modal (UPDATED)
         addTransactionForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const date = modalEntryDateEl.value;
-            // Sanitize the input value by removing thousands separators before converting to a number
-            const amount = Number(modalAmountEl.value.replace(/\./g, '') || 0);
             const details = modalDetailsEl.value.trim();
             const type = transactionTypeEl.value;
             
             if (type === "revenue") {
-                addEntry(date, amount, 0, details);
+                const amountCash = Number(modalAmountCashEl.value.replace(/\./g, '') || 0);
+                const amountTransfer = Number(modalAmountTransferEl.value.replace(/\./g, '') || 0);
+
+                if (amountCash > 0) {
+                    addSingleEntry(date, amountCash, 0, details || "Thu nhập tiền mặt", 'cash');
+                }
+                if (amountTransfer > 0) {
+                    addSingleEntry(date, amountTransfer, 0, details || "Thu nhập chuyển khoản", 'transfer');
+                }
+                
+                if (amountCash <= 0 && amountTransfer <= 0) {
+                    alert("Vui lòng nhập số tiền Thu Tiền mặt hoặc Thu Chuyển khoản.");
+                    return;
+                }
             } else {
-                addEntry(date, 0, amount, details);
+                // For Expense
+                const amount = Number(modalAmountEl.value.replace(/\./g, '') || 0);
+                if (amount > 0) {
+                    addSingleEntry(date, 0, amount, details);
+                } else {
+                    alert("Vui lòng nhập số tiền Chi tiêu.");
+                    return;
+                }
             }
             
             addTransactionModal.hide();
         });
         
-        // Add event listener for number formatting
-        modalAmountEl.addEventListener('input', formatNumberInput);
+        // Add event listener for number formatting to ALL currency inputs
+        document.querySelectorAll('.currency-input').forEach(input => {
+            input.addEventListener('input', formatNumberInput);
+        });
+
 
         // Event listeners for exports/imports
         document.getElementById('exportCsv').addEventListener('click', async () => {
@@ -1059,10 +1227,13 @@
             } else {
                 dateFilterControlsEl.style.display = 'none';
                 // Khi ẩn đi, xóa kết quả đã lọc
-                filteredRevenueEl.innerText = formatVND(0);
+                filteredRevenueCashEl.innerText = formatVND(0);
+                filteredRevenueTransferEl.innerText = formatVND(0);
                 filteredExpenseEl.innerText = formatVND(0);
                 filteredBalanceEl.innerText = formatVND(0);
                 filteredBalanceEl.className = `h4`; 
+                filteredBalanceCashEl.innerText = formatVND(0);
+                filteredBalanceCashEl.className = `h4`; 
             }
         });
         
@@ -1070,7 +1241,7 @@
         applyDateFilterBtn.addEventListener('click', () => {
             updateFilteredTotalsUI(window.cachedRecords || {});
         });
-
+        
         // Listen for data changes on Firebase
         recordsRef.on('value', (snapshot) => {
             const records = snapshot.val() || {};
