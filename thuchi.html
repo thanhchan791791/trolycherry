@@ -85,7 +85,8 @@
             padding: 0.3rem 0.6rem;
         }
         .balance-box {
-            background-color: var(--secondary-color);
+            background-color: var(--card-bg); /* Use white background for filtered totals */
+            border: 1px solid var(--border-color);
             border-radius: 1.25rem;
             padding: 1.5rem;
             text-align: center;
@@ -97,7 +98,7 @@
         }
         .balance-box:hover {
             transform: scale(1.03);
-            background-color: #d1d8ec;
+            box-shadow: 0 5px 15px var(--shadow-light);
         }
         .balance-box .small-muted {
             font-size: 0.9rem;
@@ -117,6 +118,11 @@
             background-color: #f0f4fa;
             border-radius: 1.5rem;
             padding: 1.5rem;
+        }
+        /* Style for the overall totals box (different background) */
+        .overall-totals .balance-box {
+            background-color: var(--secondary-color); /* Retain secondary color for overall totals */
+            border: none;
         }
         .table-fixed {
             max-height: 500px;
@@ -241,7 +247,8 @@
                     <hr class="text-secondary-subtle my-4">
 
                     <div class="total-summary text-center">
-                        <div class="row g-3">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-chart-pie me-2"></i> Tổng hợp (Tất cả dữ liệu)</h5>
+                        <div class="row g-3 overall-totals">
                             <div class="col-md-4">
                                 <div class="balance-box">
                                     <div class="small-muted">Tổng Doanh thu</div>
@@ -261,7 +268,50 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+
+                        <hr class="text-secondary-subtle my-4">
+                        <button id="toggleDateFilterBtn" class="btn btn-sm btn-outline-primary mb-3">
+                            <i class="fas fa-calendar-check me-2"></i> **Thống kê theo Ngày Cụ thể**
+                        </button>
+
+                        <div id="dateFilterControls" style="display: none;">
+                            <h5 class="fw-bold mb-3 text-start"><i class="fas fa-sliders-h me-2"></i> Chọn Phạm vi Ngày</h5>
+                            <div class="row g-3 align-items-end mb-4">
+                                <div class="col-6 col-md-4">
+                                    <label for="startDateFilter" class="form-label small-muted mb-1">Từ ngày</label>
+                                    <input type="date" id="startDateFilter" class="form-control" />
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label for="endDateFilter" class="form-label small-muted mb-1">Đến ngày</label>
+                                    <input type="date" id="endDateFilter" class="form-control" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <button id="applyDateFilterBtn" class="btn btn-primary w-100"><i class="fas fa-filter me-1"></i> Lọc & Hiển thị</button>
+                                </div>
+                            </div>
+
+                            <div id="filteredTotals" class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="balance-box">
+                                        <div class="small-muted">Doanh thu đã lọc</div>
+                                        <div id="filteredRevenue" class="h4 balance-positive">0 ₫</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="balance-box">
+                                        <div class="small-muted">Chi tiêu đã lọc</div>
+                                        <div id="filteredExpense" class="h4 balance-negative">0 ₫</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="balance-box">
+                                        <div class="small-muted">Số Dư đã lọc</div>
+                                        <div id="filteredBalance" class="h4">0 ₫</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
 
                     <div class="mt-4 d-flex flex-wrap gap-2">
                         <button id="exportCsv" class="btn btn-sm btn-outline-success btn-sm-custom"><i class="fas fa-file-csv me-1"></i> CSV</button>
@@ -374,7 +424,7 @@
      * Sổ Thu Chi Hàng Ngày - Firebase Edition
      *
      * Phiên bản này đã được cập nhật để lưu từng giao dịch một cách riêng biệt
-     * trong Firebase, cho phép hiển thị chi tiết cụ thể.
+     * trong Firebase, cho phép hiển thị chi tiết cụ thể và thêm bộ lọc ngày.
      */
 
     // Cấu hình Firebase của bạn
@@ -418,6 +468,17 @@
     const addSampleBtn = document.getElementById('addSampleBtn');
     const detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
     const detailsModalBodyEl = document.getElementById('detailsModalBody');
+    
+    // NEW UI Elements for Date Filter
+    const toggleDateFilterBtn = document.getElementById('toggleDateFilterBtn'); // Nút Ẩn/Hiện
+    const dateFilterControlsEl = document.getElementById('dateFilterControls'); // Khối điều khiển
+    const startDateFilterEl = document.getElementById('startDateFilter');
+    const endDateFilterEl = document.getElementById('endDateFilter');
+    const applyDateFilterBtn = document.getElementById('applyDateFilterBtn');
+    const filteredRevenueEl = document.getElementById('filteredRevenue');
+    const filteredExpenseEl = document.getElementById('filteredExpense');
+    const filteredBalanceEl = document.getElementById('filteredBalance');
+
 
     // --- Core Functions for Firebase ---
     function formatVND(n) {
@@ -571,7 +632,7 @@
             sampleTransactions[dateStr][revenueId] = {
                 revenue: dailyRevenue,
                 expense: 0,
-                details: "", // No details for revenue
+                details: "Thu nhập hàng ngày", // Add a detail for sample revenue
                 timestamp: currentDate.getTime() + Math.floor(Math.random() * 1000) // Ensure it's the first transaction
             };
 
@@ -594,10 +655,65 @@
         
         const updates = {};
         for (const date in sampleTransactions) {
-            updates[date + '/transactions'] = { ...(window.cachedRecords[date]?.transactions || {}), ...sampleTransactions[date] };
+            // This is a simple merge. In a real app, you might want more complex merging logic.
+            const existingTransactions = window.cachedRecords && window.cachedRecords[date] && window.cachedRecords[date].transactions ? window.cachedRecords[date].transactions : {};
+            updates[`${date}/transactions`] = { ...existingTransactions, ...sampleTransactions[date] };
         }
         await recordsRef.update(updates);
         alert('Dữ liệu mẫu đã được thêm thành công!');
+    }
+    
+    /**
+     * Calculates total revenue, expense, and balance within a date range.
+     */
+    function calculateFilteredTotals(records, startDateStr, endDateStr) {
+        let filteredRevenue = 0;
+        let filteredExpense = 0;
+        
+        // YYYY-MM-DD format comparison works best with strings
+        if (!startDateStr && !endDateStr) {
+            return { revenue: 0, expense: 0, net: 0 };
+        }
+        
+        for (const dateKey in records) {
+            const date = dateKey; // date is in YYYY-MM-DD format
+            
+            const isAfterStart = !startDateStr || date >= startDateStr;
+            const isBeforeEnd = !endDateStr || date <= endDateStr;
+            
+            if (isAfterStart && isBeforeEnd) {
+                const dailyRecord = records[dateKey];
+                if (dailyRecord.transactions) {
+                    Object.values(dailyRecord.transactions).forEach(trans => {
+                        filteredRevenue += Number(trans.revenue || 0);
+                        filteredExpense += Number(trans.expense || 0);
+                    });
+                }
+            }
+        }
+        
+        const filteredNet = filteredRevenue - filteredExpense;
+        return { revenue: filteredRevenue, expense: filteredExpense, net: filteredNet };
+    }
+
+    /**
+     * Updates the UI for the date range totals section.
+     */
+    function updateFilteredTotalsUI(records) {
+        const startDate = startDateFilterEl.value;
+        const endDate = endDateFilterEl.value;
+
+        // Do not update if filter is hidden
+        if (dateFilterControlsEl.style.display === 'none') {
+            return;
+        }
+
+        const totals = calculateFilteredTotals(records, startDate, endDate);
+        
+        filteredRevenueEl.innerText = formatVND(totals.revenue);
+        filteredExpenseEl.innerText = formatVND(totals.expense);
+        filteredBalanceEl.innerText = formatVND(totals.net);
+        filteredBalanceEl.className = `h4 ${totals.net >= 0 ? 'balance-positive' : 'balance-negative'}`;
     }
 
 
@@ -634,6 +750,19 @@
             totalRev += dailyRevenue;
             totalExp += dailyExpense;
         }
+        
+        // Update totals for All Data
+        totalRevenueEl.innerText = formatVND(totalRev);
+        totalExpenseEl.innerText = formatVND(totalExp);
+        const totalBal = totalRev - totalExp;
+        totalBalanceEl.innerText = formatVND(totalBal);
+        totalBalanceEl.className = `h4 ${totalBal >= 0 ? 'balance-positive' : 'balance-negative'}`;
+        
+        // Update Filtered Totals if the filter control panel is visible
+        if (dateFilterControlsEl.style.display !== 'none') {
+            updateFilteredTotalsUI(records);
+        }
+
 
         let dataToRender = {};
         tableHeaderEl.innerHTML = '';
@@ -720,13 +849,6 @@
             }
             historyBodyEl.appendChild(tr);
         });
-
-        // Update totals
-        totalRevenueEl.innerText = formatVND(totalRev);
-        totalExpenseEl.innerText = formatVND(totalExp);
-        const totalBal = totalRev - totalExp;
-        totalBalanceEl.innerText = formatVND(totalBal);
-        totalBalanceEl.className = `h4 ${totalBal >= 0 ? 'balance-positive' : 'balance-negative'}`;
     }
 
     // Function to show transaction details in modal
@@ -828,7 +950,9 @@
     // --- Event Listeners & Init ---
     (function init() {
         // Set today's date
-        modalEntryDateEl.value = new Date().toISOString().slice(0, 10);
+        const today = new Date().toISOString().slice(0, 10);
+        modalEntryDateEl.value = today;
+        endDateFilterEl.value = today; // Set default end date to today
 
         // Show modal for Revenue
         addRevenueBtn.addEventListener('click', () => {
@@ -924,6 +1048,27 @@
         });
         reportViewEl.addEventListener('change', () => {
             renderAll(window.cachedRecords || {});
+        });
+
+        // NEW Event Listener: Toggle Date Filter Controls
+        toggleDateFilterBtn.addEventListener('click', () => {
+            if (dateFilterControlsEl.style.display === 'none') {
+                dateFilterControlsEl.style.display = 'block';
+                // Khi hiển thị, tự động cập nhật thống kê theo ngày mặc định (hoặc ngày đã chọn)
+                updateFilteredTotalsUI(window.cachedRecords || {});
+            } else {
+                dateFilterControlsEl.style.display = 'none';
+                // Khi ẩn đi, xóa kết quả đã lọc
+                filteredRevenueEl.innerText = formatVND(0);
+                filteredExpenseEl.innerText = formatVND(0);
+                filteredBalanceEl.innerText = formatVND(0);
+                filteredBalanceEl.className = `h4`; 
+            }
+        });
+        
+        // NEW Event Listener: Apply Date Filter
+        applyDateFilterBtn.addEventListener('click', () => {
+            updateFilteredTotalsUI(window.cachedRecords || {});
         });
 
         // Listen for data changes on Firebase
