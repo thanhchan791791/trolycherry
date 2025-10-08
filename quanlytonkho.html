@@ -13,8 +13,8 @@
         :root {
             --primary-color: #007aff; /* Blue iOS */
             --primary-light: #007aff20;
-            --secondary-color: #ff9500; /* Orange iOS */
-            --danger-color: #ff3b30; /* Red iOS */
+            --secondary-color: #ff9500; /* Orange iOS - Dùng cho nút Sửa */
+            --danger-color: #ff3b30; /* Red iOS - Dùng cho nút Xóa */
             --info-color: #34c759; /* Green iOS */
 
             /* Light Mode */
@@ -228,6 +228,44 @@
         .list-item-content { flex-grow: 1; }
         .list-item-content b { font-weight: 600; font-size: 17px; }
         .list-item-content small { display: block; color: var(--text-secondary); font-size: 13px; margin-top: 2px; }
+
+        /* Nút Tùy Chỉnh trong List Item (Đã thêm: chỉ dùng ICON) */
+        .list-item-actions {
+            display: flex;
+            gap: 10px;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+
+        /* Chỉnh lại nút link trong list-item-actions để trông gọn gàng hơn */
+        .list-item-actions .btn-link {
+            padding: 5px; /* Giảm padding để nút nhỏ gọn hơn */
+            width: 35px; /* Chiều rộng cố định cho nút tròn nhỏ */
+            height: 35px; /* Chiều cao cố định cho nút tròn nhỏ */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%; /* Làm cho nút trông tròn */
+            font-weight: 500;
+            color: white; /* Đổi màu chữ/icon thành trắng để nổi trên nền màu */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-item-actions .btn-link i {
+            font-size: 16px; /* Kích thước icon chuẩn */
+            margin: 0;
+        }
+
+        /* Màu riêng cho nút Sửa (Edit - Orange) */
+        .list-item-actions .btn-link.btn-edit {
+            background-color: var(--secondary-color);
+        }
+
+        /* Màu riêng cho nút Xóa (Delete - Red) */
+        .list-item-actions .btn-link.btn-delete {
+            background-color: var(--danger-color);
+        }
+
 
         /* Swipe Delete (iOS-like) */
         .swipe-container {
@@ -580,7 +618,7 @@
         alert(`Đã thêm: ${name} (Tồn kho: ${initialQuantity} kg/lít)`);
     }
 
-    // Cập nhật Render Ingredients - Thêm giao diện Swipe/Card
+    // Cập nhật Render Ingredients - Thêm nút ICON Sửa và Xóa chuẩn iOS
     function renderIngredients() {
         const list = document.getElementById('ingredients-list'); list.innerHTML = '';
         if (ingredients.length === 0) { list.innerHTML = `<li class="list-item"><small>Chưa có nguyên liệu nào.</small></li>`; return; }
@@ -593,23 +631,52 @@
             // Dùng template string để tạo cấu trúc Card và Swipe
             li.innerHTML = `
                 <div class="swipe-content">
-                    <div class="swipe-main" onclick="alert('Chi tiết/Sửa: ${item.name}')">
+                    <div class="swipe-main">
                         <div class="list-item-content">
                             <b>${item.name}</b>
                             <small>Tồn kho: ${item.currentQuantity} kg/lít | Tối thiểu: ${item.minQuantity} kg/lít</small>
                         </div>
-                        <i class="fas fa-chevron-right" style="color: var(--text-secondary);"></i>
+                        <div class="list-item-actions">
+                            <button class="btn-link btn-edit" onclick="updateQuantity(${i})" title="Sửa">
+                                <i class="fas fa-pencil-alt"></i> 
+                            </button>
+                            <button class="btn-link btn-delete" onclick="deleteIngredient(${i})" title="Xóa">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="swipe-action">
-                        <button class="btn-link" onclick="deleteIngredient(${i})">
-                            <i class="fas fa-trash"></i> Xóa
-                        </button>
-                    </div>
+                    
                 </div>
             `;
             list.appendChild(li);
         });
     }
+
+    // Hàm MỚI: Cập nhật số lượng tồn kho
+    function updateQuantity(i) {
+        const ingredient = ingredients[i];
+        const newQuantityStr = prompt(`Nhập số lượng tồn kho MỚI (kg/lít) cho: ${ingredient.name}`, ingredient.currentQuantity);
+
+        if (newQuantityStr === null || newQuantityStr.trim() === '') return;
+
+        const newQuantity = parseFloat(newQuantityStr);
+
+        if (isNaN(newQuantity) || newQuantity < 0) {
+            alert('Số lượng nhập vào không hợp lệ. Vui lòng nhập một số dương.');
+            return;
+        }
+
+        ingredient.currentQuantity = newQuantity;
+        saveData();
+        renderIngredients();
+        updateStockSelect();
+        renderIngredientsSummary();
+        alert(`Đã cập nhật tồn kho cho ${ingredient.name} thành: ${newQuantity} kg/lít.`);
+    }
+
+    // Thêm hàm updateQuantity vào global scope
+    window.updateQuantity = updateQuantity;
+
 
     // Thêm hàm hiển thị tóm tắt (Mục tiêu: Đưa tóm tắt cảnh báo lên Tab Home)
     function renderIngredientsSummary() {
@@ -715,7 +782,7 @@
     }
 
     function deleteIngredient(i) {
-        if (confirm(`Xóa nguyên liệu ${ingredients[i].name}?`)) {
+        if (confirm(`Xóa nguyên liệu ${ingredients[i].name}? Thao tác này sẽ XÓA VĨNH VIỄN nguyên liệu và KHÔNG thể hoàn tác!`)) {
             ingredients.splice(i, 1);
             saveData();
             renderIngredients();
@@ -774,6 +841,7 @@
     window.addIngredient = addIngredient;
     window.logUsage = logUsage;
     window.deleteIngredient = deleteIngredient;
+    // window.updateQuantity đã được thêm ở trên
 </script>
 </body>
 </html>
