@@ -763,8 +763,7 @@
                     </table>
                 </div>
                 <div class="bill-summary">
-                    <p><span>Tổng tiền (Chưa VAT):</span> <span id="billTotalPrice"></span></p>
-                    <p><span>VAT (8%):</span> <span id="billVatPrice"></span></p>
+                    <p><span>Tổng tiền:</span> <span id="billTotalPrice"></span></p>
                     <p><span>Thanh toán:</span> <span id="billTotalPaid" class="bill-total-price"></span></p>
                     
                     <div class="bill-qr-container">
@@ -839,15 +838,15 @@
         const orderSearchInput = document.getElementById('orderSearchInput');
         
        // Modal elements
-const paymentModal = document.getElementById('paymentModal');
-const closeButton = document.querySelector('.close-button');
-const billTableInfo = document.getElementById('billTableInfo');
-const billDate = document.getElementById('billDate');
-const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
+        const paymentModal = document.getElementById('paymentModal');
+        const closeButton = document.querySelector('.close-button');
+        const billTableInfo = document.getElementById('billTableInfo');
+        const billDate = document.getElementById('billDate');
+        const billTime = document.getElementById('billTime'); 
         const billId = document.getElementById('billId');
         const billDetailsBody = document.getElementById('billDetailsBody');
         const billTotalPrice = document.getElementById('billTotalPrice');
-        const billVatPrice = document.getElementById('billVatPrice');
+        // const billVatPrice = document.getElementById('billVatPrice'); // Đã xóa khỏi HTML, không cần DOM
         const billTotalPaid = document.getElementById('billTotalPaid');
         const confirmPaymentButton = document.getElementById('confirmPaymentButton');
         const printBillButton = document.getElementById('printBillButton'); 
@@ -1415,7 +1414,7 @@ function renderTableSentOrders() {
             });
         }
         // >> END: HÀM KIỂM TRA CHECKOUT ĐÃ CẬP NHẬT
-// >> HÀM SHOW PAYMENT ĐÃ CHỈNH SỬA LẠI LOGIC CHỐT ĐƠN VÀ DÙNG ASYNC/AWAIT (CHỈ LẤY KITCHEN_BAR_ORDERS) <<
+// >> HÀM SHOW PAYMENT ĐÃ CHỈNH SỬA LẠI LOGIC CHỐT ĐƠN VÀ DÙNG ASYNC/AWAIT (BỎ VAT) <<
 async function showPaymentModal(tableId, tableName) {
     const now = new Date();
     paymentModal.style.display = 'flex';
@@ -1476,7 +1475,7 @@ async function showPaymentModal(tableId, tableName) {
                                     sourceOrderId: orderId
                                 };
                             }
-                            // Cộng dồn vào tổng tiền chưa VAT
+                            // Cộng dồn vào tổng tiền
                             totalAmount += (itemPrice * itemQuantity);
                         }
                     }
@@ -1487,6 +1486,10 @@ async function showPaymentModal(tableId, tableName) {
 
     // 2. Bắt đầu hiển thị hóa đơn sau khi đã tổng hợp xong
     let billItemsHtml = '';
+    
+    // Tổng tiền thanh toán chính là tổng tiền chưa thuế vì ta không tính VAT
+    const finalTotal = totalAmount; 
+    
     if (hasCompletedItemsToPay) {
         // Biến này sẽ chứa các món đã được cộng dồn, dùng để lưu vào payment_history
         const finalItemsForBill = []; 
@@ -1521,8 +1524,8 @@ async function showPaymentModal(tableId, tableName) {
             tableName: tableName,
             finalItemsForBill: finalItemsForBill, // Đã được cộng dồn
             orderIdsToDelete: Array.from(orderIdsForDeletion), // Danh sách OrderID cần xóa
-            totalAmount: totalAmount,
-            // (VAT và FinalTotal sẽ được tính lại bên dưới)
+            totalAmount: totalAmount, // Tổng tiền không thuế
+            finalTotal: finalTotal, // Tổng tiền thanh toán (bằng TotalAmount)
             billId: newBillRef.key
         };
         
@@ -1533,26 +1536,12 @@ async function showPaymentModal(tableId, tableName) {
 
     billDetailsBody.innerHTML = billItemsHtml;
     
-    // START: TÍNH VAT VÀ TỔNG CỘNG
-    const vatRate = 0.08; 
-    const vatAmount = totalAmount * vatRate;
-    const finalTotal = totalAmount + vatAmount;
-    // END: TÍNH VAT VÀ TỔNG CỘNG
-
     billTotalPrice.textContent = totalAmount.toLocaleString('vi-VN') + '₫';
-    billVatPrice.textContent = vatAmount.toLocaleString('vi-VN') + '₫';
     billTotalPaid.textContent = finalTotal.toLocaleString('vi-VN') + '₫';
     
-    // Cập nhật giá trị vào tempPaymentData
-    if(window.tempPaymentData) {
-        window.tempPaymentData.vatAmount = vatAmount;
-        window.tempPaymentData.finalTotal = finalTotal;
-    }
-
     // --- Cập nhật VietQR ---
     const acqId = "970422"; // MB Bank Napas acqId
     const accountNo = "0909650816";
-    // accountName = "TRAN VU NGOC THANH"; (Không dùng trong URL)
     
     let tableCode = tableName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase(); 
     let fullBillCode = billId.textContent ? billId.textContent : ''; 
@@ -1592,7 +1581,7 @@ async function showPaymentModal(tableId, tableName) {
             return `HD${year}${month}${day}${hour}${minute}${second}`;
         }
         
- // >> CODE SỬA HÀM confirmPayment (hoặc processPayment)
+ // >> CODE SỬA HÀM confirmPayment (BỎ VAT)
 async function confirmPayment(tableId, tableName) {
     // 1. Lấy dữ liệu đã được tính toán trong showPaymentModal
     const paymentData = window.tempPaymentData;
@@ -1607,8 +1596,7 @@ async function confirmPayment(tableId, tableName) {
         finalItemsForBill, 
         orderIdsToDelete, // Danh sách Order ID cần xóa
         totalAmount, 
-        vatAmount, 
-        finalTotal, 
+        finalTotal, // Đã là TotalAmount vì không có VAT
         billId: billKey
     } = paymentData;
 
@@ -1632,8 +1620,8 @@ async function confirmPayment(tableId, tableName) {
         timestamp: paymentTimestamp,
         items: finalItemsForBill, // Đã được gom nhóm và tính toán
         totalAmount: totalAmount,
-        vatAmount: vatAmount,
-        finalTotal: finalTotal
+        // vatAmount: 0, // Bỏ hẳn hoặc gán = 0 nếu cần schema
+        finalTotal: finalTotal // Bằng totalAmount
     };
 
     // 5. Cập nhật trạng thái bàn về 'available' sau khi đã thanh toán
