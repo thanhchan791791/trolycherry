@@ -141,10 +141,14 @@
         .dark {
             --text-color-rgb: 242, 242, 247;
             --primary-ios-rgb: 10, 132, 255;
+            --cash-color: #30D158; /* Green for Cash in Dark Mode */
+            --transfer-color: #FF9F0A; /* Orange for Transfer in Dark Mode */
         }
         :root {
             --text-color-rgb: 28, 28, 30;
             --primary-ios-rgb: 0, 122, 255;
+            --cash-color: #34C759; /* Green for Cash in Light Mode */
+            --transfer-color: #FF9500; /* Orange for Transfer in Light Mode */
         }
 
         /* Fix for input date height */
@@ -187,16 +191,28 @@
         
         <section class="mb-8 space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-4">
             <div class="card-ios p-4 text-center animated-item" data-delay="0.1">
-                <h4 class="text-base font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu hôm nay</h4>
-                <p id="dailyRevenue" class="text-2xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
+                <h4 class="text-sm font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu hôm nay</h4>
+                <p id="dailyRevenue" class="text-xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
+                <div class="mt-2 text-xs opacity-70 flex justify-between">
+                    <span style="color: var(--cash-color);">Tiền mặt: <strong id="dailyCash">0₫</strong></span>
+                    <span style="color: var(--transfer-color);">C.Khoản: <strong id="dailyTransfer">0₫</strong></span>
+                </div>
             </div>
             <div class="card-ios p-4 text-center animated-item" data-delay="0.2">
-                <h4 class="text-base font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu tuần này</h4>
-                <p id="weeklyRevenue" class="text-2xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
+                <h4 class="text-sm font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu tuần này</h4>
+                <p id="weeklyRevenue" class="text-xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
+                <div class="mt-2 text-xs opacity-70 flex justify-between">
+                    <span style="color: var(--cash-color);">Tiền mặt: <strong id="weeklyCash">0₫</strong></span>
+                    <span style="color: var(--transfer-color);">C.Khoản: <strong id="weeklyTransfer">0₫</strong></span>
+                </div>
             </div>
             <div class="card-ios p-4 text-center animated-item" data-delay="0.3">
-                <h4 class="text-base font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu tháng này</h4>
-                <p id="monthlyRevenue" class="text-2xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
+                <h4 class="text-sm font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu tháng này</h4>
+                <p id="monthlyRevenue" class="text-xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
+                <div class="mt-2 text-xs opacity-70 flex justify-between">
+                    <span style="color: var(--cash-color);">Tiền mặt: <strong id="monthlyCash">0₫</strong></span>
+                    <span style="color: var(--transfer-color);">C.Khoản: <strong id="monthlyTransfer">0₫</strong></span>
+                </div>
             </div>
         </section>
 
@@ -229,9 +245,19 @@
                 </button>
             </div>
             
-            <div id="filteredRevenueBox" class="card-ios mt-4 p-4 text-center transition-all duration-300" style="display: none;">
-                <h4 class="text-base font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu đã lọc</h4>
-                <p id="filteredRevenue" class="text-2xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
+            <div id="filteredRevenueBox" class="card-ios mt-4 p-4 transition-all duration-300" style="display: none;">
+                <h4 class="text-base font-medium text-center opacity-80" style="color: var(--primary-ios);">Doanh thu đã lọc</h4>
+                <p id="filteredRevenue" class="text-2xl font-bold text-center mt-1 mb-3" style="color: var(--secondary-ios);">0₫</p>
+                <div class="text-sm opacity-90 flex justify-around border-t pt-3" style="border-color: rgba(var(--text-color-rgb), 0.1);">
+                    <div class="text-center">
+                        <span class="font-medium block" style="color: var(--cash-color);">Tiền mặt</span>
+                        <strong id="filteredCash" class="font-bold text-lg">0₫</strong>
+                    </div>
+                    <div class="text-center">
+                        <span class="font-medium block" style="color: var(--transfer-color);">Chuyển khoản</span>
+                        <strong id="filteredTransfer" class="font-bold text-lg">0₫</strong>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -281,7 +307,7 @@
                         <tr class="text-left text-sm font-medium opacity-70 border-b" style="border-color: rgba(var(--text-color-rgb), 0.1);">
                             <th class="py-3 px-2 md:px-4">Mã HĐ</th>
                             <th class="py-3 px-2 md:px-4 hidden sm:table-cell">Ngày & Giờ</th>
-                            <th class="py-3 px-2 md:px-4">Tổng tiền</th>
+                            <th class="py-3 px-2 md:px-4">Hình thức</th> <th class="py-3 px-2 md:px-4">Tổng tiền</th>
                             <th class="py-3 px-2 md:px-4"></th>
                         </tr>
                     </thead>
@@ -306,7 +332,7 @@
             <div id="modalContentDetails" class="space-y-3 pb-4">
                 <p class="text-sm opacity-70"><strong>Mã HĐ:</strong> <span id="modalBillId" class="font-semibold" style="color: var(--primary-ios);"></span></p>
                 <p class="text-sm opacity-70"><strong>Ngày:</strong> <span id="modalDate" class="font-semibold"></span></p>
-                <p class="text-sm opacity-70"><strong>Tổng tiền:</strong> <span id="modalTotal" class="font-bold text-lg" style="color: var(--danger-ios);"></span></p>
+                <p class="text-sm opacity-70"><strong>Hình thức:</strong> <span id="modalPaymentMethod" class="font-semibold"></span></p> <p class="text-sm opacity-70"><strong>Tổng tiền:</strong> <span id="modalTotal" class="font-bold text-lg" style="color: var(--danger-ios);"></span></p>
                 <p class="text-sm font-semibold mt-4">Các món đã mua:</p>
                 <ul id="modalItemsList" class="divide-y" style="border-color: rgba(var(--text-color-rgb), 0.05);"></ul>
             </div>
@@ -337,13 +363,23 @@
 
         // DOM elements
         const dailyRevenueEl = document.getElementById('dailyRevenue');
+        const dailyCashEl = document.getElementById('dailyCash');
+        const dailyTransferEl = document.getElementById('dailyTransfer');
         const weeklyRevenueEl = document.getElementById('weeklyRevenue');
+        const weeklyCashEl = document.getElementById('weeklyCash');
+        const weeklyTransferEl = document.getElementById('weeklyTransfer');
         const monthlyRevenueEl = document.getElementById('monthlyRevenue');
+        const monthlyCashEl = document.getElementById('monthlyCash');
+        const monthlyTransferEl = document.getElementById('monthlyTransfer');
+
         const startDateInput = document.getElementById('startDate');
         const endDateInput = document.getElementById('endDate');
         const filterStatsButton = document.getElementById('filterStatsButton');
         const filteredRevenueBox = document.getElementById('filteredRevenueBox');
         const filteredRevenueEl = document.getElementById('filteredRevenue');
+        const filteredCashEl = document.getElementById('filteredCash'); // New
+        const filteredTransferEl = document.getElementById('filteredTransfer'); // New
+
         const revenueChartCanvas = document.getElementById('revenueChart');
         const topSellingFoodsListEl = document.getElementById('topSellingFoodsList');
         const topSellingDrinksListEl = document.getElementById('topSellingDrinksList');
@@ -352,6 +388,7 @@
         const closeModalButton = orderModal.querySelector('.close-button');
         const modalBillIdEl = document.getElementById('modalBillId');
         const modalDateEl = document.getElementById('modalDate');
+        const modalPaymentMethodEl = document.getElementById('modalPaymentMethod'); // New
         const modalTotalEl = document.getElementById('modalTotal');
         const modalItemsListEl = document.getElementById('modalItemsList');
         const noOrderData = document.getElementById('noOrderData');
@@ -363,11 +400,9 @@
         const billSearchInput = document.getElementById('billSearchInput');
         const clearSearchButton = document.getElementById('clearSearchButton');
         
-        // ********** START: Thay đổi cho yêu cầu mới **********
         const showAllOrdersButton = document.getElementById('showAllOrdersButton');
         const billDateFilterInput = document.getElementById('billDateFilterInput');
         const TODAY = new Date().toISOString().slice(0, 10);
-        // ********** END: Thay đổi cho yêu cầu mới **********
 
         let revenueChartInstance = null;
         let paymentsCache = []; // Cache dữ liệu thanh toán
@@ -427,25 +462,24 @@
             });
         }
         
-        // --- 3. FIREBASE DATA FETCHING (Giữ nguyên logic của bạn) ---
+        // --- 3. FIREBASE DATA FETCHING (Cập nhật để chuẩn hóa paymentMethod) ---
 
         function fetchPayments() {
             return new Promise((resolve, reject) => {
-                // Kiểm tra cache trước
                 if (paymentsCache.length > 0) {
                     return resolve(paymentsCache);
                 }
                 
-                // Lắng nghe một lần từ Firebase (Once), sau đó lưu vào cache
                 database.ref('payment_history').once('value', (snapshot) => {
                     const payments = [];
                     snapshot.forEach(childSnapshot => {
                         const payment = childSnapshot.val();
                         payments.push({
                             key: childSnapshot.key,
-                            // Đảm bảo billId luôn tồn tại để tìm kiếm
                             billId: payment.billId || childSnapshot.key.substring(1, 7).toUpperCase(), 
                             ...payment,
+                            // Gán giá trị mặc định nếu không có, và chuẩn hóa chữ cái đầu
+                            paymentMethod: (payment.paymentMethod || 'Tiền mặt').charAt(0).toUpperCase() + (payment.paymentMethod || 'Tiền mặt').slice(1).toLowerCase(), 
                             date: new Date(payment.timestamp).toISOString().slice(0, 10)
                         });
                     });
@@ -456,7 +490,7 @@
             });
         }
         
-        // --- 4. DATA RENDERING FUNCTIONS (Cập nhật DOM và Animations) ---
+        // --- 4. DATA RENDERING FUNCTIONS (Cập nhật logic tính toán) ---
 
         function updateChartColors() {
             const isDark = document.body.classList.contains('dark');
@@ -476,6 +510,7 @@
         }
         
         async function update30DayChart() {
+            // ... (Giữ nguyên logic biểu đồ)
             const now = new Date();
             const today = now.toISOString().slice(0, 10);
             const daysAgo = (days) => {
@@ -516,7 +551,7 @@
                         data: data,
                         backgroundColor: chartColor,
                         borderColor: chartColor,
-                        borderRadius: 6, // Bo tròn thanh bar
+                        borderRadius: 6,
                         borderWidth: 1,
                     }]
                 },
@@ -524,9 +559,9 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: {
-                        duration: 1000, // Easing mượt
+                        duration: 1000,
                         easing: 'easeInOutCubic',
-                        delay: (context) => context.dataIndex * 50 // Animate từng thanh
+                        delay: (context) => context.dataIndex * 50
                     },
                     plugins: {
                         tooltip: {
@@ -571,7 +606,26 @@
             });
         }
         
-        // Tái sử dụng logic cũ cho các phần thống kê tổng hợp (chỉ thay đổi cách hiển thị DOM)
+        // Hàm tính toán Cash và Transfer từ một mảng payments
+        function calculateRevenueByMethod(payments) {
+            const result = payments.reduce((acc, p) => {
+                const total = p.finalTotal || 0;
+                if (p.paymentMethod === 'Tiền mặt') {
+                    acc.cash += total;
+                } else if (p.paymentMethod === 'Chuyển khoản') {
+                    acc.transfer += total;
+                } else {
+                    // Nếu paymentMethod không rõ, gộp vào tiền mặt
+                    acc.cash += total; 
+                }
+                acc.total = acc.cash + acc.transfer;
+                return acc;
+            }, { total: 0, cash: 0, transfer: 0 });
+            
+            return result;
+        }
+
+
         async function updateSummaryStats() {
             const now = new Date();
             const today = now.toISOString().slice(0, 10);
@@ -583,22 +637,41 @@
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
             
             const payments = await fetchPayments();
-            const dailyTotal = payments.filter(p => p.date === today).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
-            const weeklyTotal = payments.filter(p => p.date >= startOfWeek).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
-            const monthlyTotal = payments.filter(p => p.date >= startOfMonth).reduce((sum, p) => sum + (p.finalTotal || 0), 0);
 
-            dailyRevenueEl.textContent = dailyTotal.toLocaleString('vi-VN') + '₫';
-            weeklyRevenueEl.textContent = weeklyTotal.toLocaleString('vi-VN') + '₫';
-            monthlyRevenueEl.textContent = monthlyTotal.toLocaleString('vi-VN') + '₫';
+            // Lọc và tính toán cho Ngày
+            const dailyPayments = payments.filter(p => p.date === today);
+            const dailyStats = calculateRevenueByMethod(dailyPayments);
+
+            // Lọc và tính toán cho Tuần
+            const weeklyPayments = payments.filter(p => p.date >= startOfWeek);
+            const weeklyStats = calculateRevenueByMethod(weeklyPayments);
+
+            // Lọc và tính toán cho Tháng
+            const monthlyPayments = payments.filter(p => p.date >= startOfMonth);
+            const monthlyStats = calculateRevenueByMethod(monthlyPayments);
+
+
+            // Cập nhật DOM - Tổng cộng
+            dailyRevenueEl.textContent = dailyStats.total.toLocaleString('vi-VN') + '₫';
+            weeklyRevenueEl.textContent = weeklyStats.total.toLocaleString('vi-VN') + '₫';
+            monthlyRevenueEl.textContent = monthlyStats.total.toLocaleString('vi-VN') + '₫';
+            
+            // Cập nhật DOM - Chi tiết
+            dailyCashEl.textContent = dailyStats.cash.toLocaleString('vi-VN') + '₫';
+            dailyTransferEl.textContent = dailyStats.transfer.toLocaleString('vi-VN') + '₫';
+            weeklyCashEl.textContent = weeklyStats.cash.toLocaleString('vi-VN') + '₫';
+            weeklyTransferEl.textContent = weeklyStats.transfer.toLocaleString('vi-VN') + '₫';
+            monthlyCashEl.textContent = monthlyStats.cash.toLocaleString('vi-VN') + '₫';
+            monthlyTransferEl.textContent = monthlyStats.transfer.toLocaleString('vi-VN') + '₫';
         }
 
         async function updateTopSellingItems() {
+            // ... (Giữ nguyên logic top bán chạy)
             const payments = await fetchPayments();
             
             const foodSales = {};
             const drinkSales = {};
             
-            // Ví dụ: danh sách đồ uống để phân loại (Bạn có thể cập nhật danh sách này)
             const drinksList = ["coca", "trà đào", "nước cam", "bia sài gòn", "7 up", "pepsi", "trà sữa"]; 
 
             payments.forEach(payment => {
@@ -607,7 +680,6 @@
                         const itemName = item.name.toLowerCase().trim();
                         const quantity = item.quantity;
                         
-                        // Phân loại đơn giản
                         if (drinksList.some(drink => itemName.includes(drink))) {
                             if (drinkSales[itemName]) {
                                 drinkSales[itemName] += quantity;
@@ -659,7 +731,6 @@
             orderHistoryTableBody.innerHTML = '';
             
             if (paymentsToRender.length === 0) {
-                // Hiển thị thông báo phù hợp
                 if (billSearchInput.value.trim() !== '' || billDateFilterInput.value.trim() !== '') {
                     noFilteredData.style.display = 'block';
                     noOrderData.style.display = 'none';
@@ -675,16 +746,23 @@
 
             paymentsToRender.forEach(payment => {
                 const row = document.createElement('tr');
-                // Sử dụng Date object để đảm bảo format chính xác
                 const dateObj = new Date(payment.timestamp);
                 const formattedDate = dateObj.toLocaleDateString('vi-VN') + ' ' + dateObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
                 const formattedTotal = payment.finalTotal.toLocaleString('vi-VN') + '₫';
                 
+                // Xác định màu cho hình thức thanh toán
+                let methodColor = 'var(--text-color)';
+                if (payment.paymentMethod === 'Tiền mặt') {
+                    methodColor = 'var(--cash-color)';
+                } else if (payment.paymentMethod === 'Chuyển khoản') {
+                    methodColor = 'var(--transfer-color)';
+                }
+
                 row.className = 'list-row';
                 row.innerHTML = `
                     <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-medium" style="color: var(--primary-ios);">${payment.billId}</td>
                     <td class="py-3 px-2 md:px-4 text-xs md:text-sm hidden sm:table-cell opacity-70">${formattedDate}</td>
-                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-semibold" style="color: var(--danger-ios);">${formattedTotal}</td>
+                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-semibold" style="color: ${methodColor};">${payment.paymentMethod}</td> <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-semibold" style="color: var(--danger-ios);">${formattedTotal}</td>
                     <td class="py-3 px-2 md:px-4 text-right">
                         <button class="view-details-btn btn-ios text-sm font-semibold px-3 py-1 rounded-full text-white" 
                                 data-key="${payment.key}"
@@ -703,7 +781,6 @@
             let paymentsToDisplay = payments;
 
             if (targetDate) {
-                // Lọc theo ngày cụ thể (mặc định là ngày hôm nay)
                 paymentsToDisplay = payments.filter(p => p.date === targetDate);
             }
             
@@ -711,22 +788,17 @@
             
             renderOrderRows(sortedPayments);
             
-            // Đặt giá trị cho bộ lọc ngày nếu đang lọc theo ngày cụ thể
             if (targetDate) {
                 billDateFilterInput.value = targetDate;
             } else {
-                billDateFilterInput.value = ''; // Xóa nếu đang xem tất cả
+                billDateFilterInput.value = '';
             }
             
-            // Đảm bảo ô tìm kiếm mã HĐ trống
             billSearchInput.value = '';
             clearSearchButton.classList.add('hidden');
         }
         
-        // ********** START: Thay đổi cho yêu cầu mới **********
-        
         function showAllOrders() {
-            // Hiển thị tất cả đơn hàng (không lọc theo ngày)
             billDateFilterInput.value = '';
             billSearchInput.value = '';
             clearSearchButton.classList.add('hidden');
@@ -737,60 +809,44 @@
 
         function filterOrders() {
             const searchTerm = billSearchInput.value.trim().toLowerCase();
-            const filterDate = billDateFilterInput.value; // Dạng YYYY-MM-DD
+            const filterDate = billDateFilterInput.value;
             
-            // Cập nhật nút xóa tìm kiếm
             clearSearchButton.classList.toggle('hidden', searchTerm === '');
 
             let filtered = paymentsCache;
 
-            // 1. Lọc theo ngày trước (nếu có)
             if (filterDate) {
                 filtered = filtered.filter(payment => payment.date === filterDate);
             }
             
-            // 2. Lọc theo mã hóa đơn (nếu có)
             if (searchTerm !== '') {
                 filtered = filtered.filter(payment => 
                     (payment.billId && payment.billId.toLowerCase().includes(searchTerm))
                 );
             }
 
-            // Sắp xếp kết quả lọc theo thời gian
             const sortedFiltered = filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
             renderOrderRows(sortedFiltered);
         }
         
-        // --- 5. EVENT HANDLERS & MODALS ---
+        // --- 5. EVENT HANDLERS & MODALS (Cập nhật modal và lọc theo khoảng thời gian) ---
         
-        // Lắng nghe sự kiện gõ phím trên ô tìm kiếm
         billSearchInput.addEventListener('input', filterOrders);
         
-        // Lắng nghe sự kiện click nút xóa
         clearSearchButton.addEventListener('click', () => {
             billSearchInput.value = '';
-            filterOrders(); // Gọi hàm lọc để hiển thị lại danh sách
+            filterOrders();
             billSearchInput.focus();
         });
 
-        // Lắng nghe sự kiện thay đổi ngày
-        billDateFilterInput.addEventListener('change', () => {
-             // Khi thay đổi ngày, gọi filterOrders để áp dụng cả tìm kiếm mã nếu có
-             // Nếu ô tìm kiếm mã trống, filterOrders sẽ lọc theo ngày và hiển thị kết quả
-             filterOrders();
-        });
+        billDateFilterInput.addEventListener('change', filterOrders);
         
-        // Lắng nghe nút "Xem tất cả đơn"
         showAllOrdersButton.addEventListener('click', showAllOrders);
-
-        // ********** END: Thay đổi cho yêu cầu mới **********
-
 
         orderHistoryTableBody.addEventListener('click', async (event) => {
             if (event.target.classList.contains('view-details-btn')) {
                 const orderKey = event.target.dataset.key;
-                // Sử dụng paymentsCache để tránh gọi lại fetchPayments nếu đã có dữ liệu
                 const selectedPayment = paymentsCache.find(p => p.key === orderKey);
                 
                 if (selectedPayment) {
@@ -802,8 +858,9 @@
         });
 
         function showOrderDetails(payment) {
-            modalBillIdEl.textContent = payment.billId; // billId đã được làm sạch trong fetchPayments
+            modalBillIdEl.textContent = payment.billId;
             modalDateEl.textContent = new Date(payment.timestamp).toLocaleString('vi-VN');
+            modalPaymentMethodEl.textContent = payment.paymentMethod; // Thêm trường mới
             modalTotalEl.textContent = payment.finalTotal.toLocaleString('vi-VN') + '₫';
             
             modalItemsListEl.innerHTML = '';
@@ -819,13 +876,11 @@
                 });
             }
             
-            // Hiển thị modal với animation
             orderModal.classList.add('open', 'opacity-100', 'pointer-events-auto');
             orderModal.classList.remove('opacity-0', 'pointer-events-none');
         }
         
         function hideModal() {
-            // Ẩn modal với animation
             orderModal.classList.add('opacity-0', 'pointer-events-none');
             orderModal.classList.remove('open', 'opacity-100', 'pointer-events-auto');
         }
@@ -833,28 +888,31 @@
         closeModalButton.addEventListener('click', hideModal);
 
         window.addEventListener('click', (event) => {
-            // Đóng modal khi click ra bên ngoài
             if (event.target === orderModal) {
                 hideModal();
             }
         });
 
+        // Cập nhật logic lọc theo khoảng thời gian
         filterStatsButton.addEventListener('click', async () => {
             const startDate = startDateInput.value;
             const endDate = endDateInput.value;
             
             if (startDate && endDate) {
-                // Tận dụng cache
                 const payments = await fetchPayments(); 
                 const filteredPayments = payments.filter(p => p.date >= startDate && p.date <= endDate);
-                const totalRevenue = filteredPayments.reduce((sum, p) => sum + (p.finalTotal || 0), 0);
                 
-                filteredRevenueEl.textContent = totalRevenue.toLocaleString('vi-VN') + '₫';
+                const stats = calculateRevenueByMethod(filteredPayments);
+
+                filteredRevenueEl.textContent = stats.total.toLocaleString('vi-VN') + '₫';
+                filteredCashEl.textContent = stats.cash.toLocaleString('vi-VN') + '₫'; // Cập nhật tiền mặt
+                filteredTransferEl.textContent = stats.transfer.toLocaleString('vi-VN') + '₫'; // Cập nhật chuyển khoản
+                
                 filteredRevenueBox.style.display = 'block';
-                filteredRevenueBox.classList.add('active'); // Thêm hiệu ứng load
+                filteredRevenueBox.classList.add('active'); 
                 
             } else {
-                showCustomAlert('Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.'); // Thay alert()
+                showCustomAlert('Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.'); 
             }
         });
         
@@ -862,18 +920,14 @@
         
         document.addEventListener('DOMContentLoaded', () => {
             loadTheme();
-            // Tải dữ liệu
             updateSummaryStats();
             update30DayChart();
             updateTopSellingItems();
             
-            // Đảm bảo dữ liệu được cache trước khi render/filter
             fetchPayments().then(() => {
-                // Mặc định hiển thị đơn hàng ngày hôm nay
                 updateOrderHistory(TODAY); 
             });
             
-            // Kích hoạt animations scroll sau khi dữ liệu tải xong
             setupScrollAnimations();
         });
     </script>
