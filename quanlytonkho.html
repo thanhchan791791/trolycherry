@@ -383,7 +383,7 @@
                     <select id="stock-ingredient-select"></select>
                 </div>
                 <div class="form-group">
-                    <label for="usage-quantity">Số Lượng Đã Lấy Ra (kg/lít):</label>
+                    <label for="usage-quantity">Số Lượng Đã Lấy Ra (kg/lít/con):</label>
                     <input type="number" id="usage-quantity" min="0" value="0" required>
                 </div>
                 <button class="btn btn-primary" onclick="logUsage()">
@@ -429,11 +429,11 @@
                         <input type="text" id="ingredient-name" placeholder="Ví dụ: Đường, Sữa bột..." required>
                     </div>
                     <div class="form-group">
-                        <label for="initial-quantity-add">Số Lượng Khởi Tạo (kg/lít):</label>
+                        <label for="initial-quantity-add">Số Lượng Khởi Tạo (kg/lít/con):</label>
                         <input type="number" id="initial-quantity-add" min="0" value="0" required>
                     </div>
                     <div class="form-group">
-                        <label for="min-quantity-add">Số Lượng Tối Thiểu Cảnh Báo (kg/lít):</label>
+                        <label for="min-quantity-add">Số Lượng Tối Thiểu Cảnh Báo (kg/lít/con):</label>
                         <input type="number" id="min-quantity-add" min="0" value="0" required>
                     </div>
                     <button class="btn btn-primary" onclick="addIngredient()">
@@ -615,7 +615,7 @@
         document.getElementById('ingredient-name').value = '';
         document.getElementById('initial-quantity-add').value = 0;
         document.getElementById('min-quantity-add').value = 0;
-        alert(`Đã thêm: ${name} (Tồn kho: ${initialQuantity} kg/lít)`);
+        alert(`Đã thêm: ${name} (Tồn kho: ${initialQuantity} kg/lít/con)`);
     }
 
     // Cập nhật Render Ingredients - Thêm nút ICON Sửa và Xóa chuẩn iOS
@@ -634,7 +634,7 @@
                     <div class="swipe-main">
                         <div class="list-item-content">
                             <b>${item.name}</b>
-                            <small>Tồn kho: ${item.currentQuantity} kg/lít | Tối thiểu: ${item.minQuantity} kg/lít</small>
+                            <small>Tồn kho: ${item.currentQuantity} kg/lít/con | Tối thiểu: ${item.minQuantity} kg/lít/con</small>
                         </div>
                         <div class="list-item-actions">
                             <button class="btn-link btn-edit" onclick="updateQuantity(${i})" title="Sửa">
@@ -655,7 +655,7 @@
     // Hàm MỚI: Cập nhật số lượng tồn kho
     function updateQuantity(i) {
         const ingredient = ingredients[i];
-        const newQuantityStr = prompt(`Nhập số lượng tồn kho MỚI (kg/lít) cho: ${ingredient.name}`, ingredient.currentQuantity);
+        const newQuantityStr = prompt(`Nhập số lượng tồn kho MỚI (kg/lít/con) cho: ${ingredient.name}`, ingredient.currentQuantity);
 
         if (newQuantityStr === null || newQuantityStr.trim() === '') return;
 
@@ -671,7 +671,7 @@
         renderIngredients();
         updateStockSelect();
         renderIngredientsSummary();
-        alert(`Đã cập nhật tồn kho cho ${ingredient.name} thành: ${newQuantity} kg/lít.`);
+        alert(`Đã cập nhật tồn kho cho ${ingredient.name} thành: ${newQuantity} kg/lít/con.`);
     }
 
     // Thêm hàm updateQuantity vào global scope
@@ -741,11 +741,13 @@
 
         let ing = ingredients[idx];
 
+        // START MODIFICATION: Kiểm tra số lượng sử dụng lớn hơn tồn kho
         if (ing.currentQuantity < usageQuantity) {
-             if (!confirm(`Tồn kho chỉ còn ${ing.currentQuantity} kg/lít, bạn chắc chắn muốn trừ ${usageQuantity} kg/lít? Tồn kho sẽ về 0.`)) {
-                 return;
-             }
+             alert(`Không thể ghi nhận sử dụng. Số lượng ${usageQuantity} kg/lít/con lớn hơn tồn kho hiện tại (${ing.currentQuantity} kg/lít/con) cho nguyên liệu: ${ing.name}.`);
+             return;
         }
+        // END MODIFICATION
+
         ing.currentQuantity = Math.max(0, ing.currentQuantity - usageQuantity);
 
         saveData();
@@ -769,15 +771,15 @@
 
         if (remainingStock <= minQ) {
              if (window.navigator && window.navigator.vibrate) window.navigator.vibrate([100, 50, 100]);
-             message = `<b>CẢNH BÁO TỒN KHO THẤP!</b>\n- Ngày: ${dateStr}\n- Thời gian: ${timeStr}\n- Nguyên liệu: <b>${ing.name}</b>\n- Số lượng vừa lấy ra: ${usageQuantity} kg/lít\n- Tồn kho còn lại: <b>${remainingStock} kg/lít</b>\n- Mức tối thiểu: ${minQ} kg/lít\n\n<b>Vui lòng nhập thêm!</b>`;
+             message = `<b>CẢNH BÁO TỒN KHO THẤP!</b>\n- Ngày: ${dateStr}\n- Thời gian: ${timeStr}\n- Nguyên liệu: <b>${ing.name}</b>\n- Số lượng vừa lấy ra: ${usageQuantity} kg/lít/con\n- Tồn kho còn lại: <b>${remainingStock} kg/lít/con</b>\n- Mức tối thiểu: ${minQ} kg/lít/con\n\n<b>Vui lòng nhập thêm!</b>`;
         }
         else if (remainingStock <= threshold) {
-             message = `<b>CẢNH BÁO SẮP HẾT!</b>\n- Ngày: ${dateStr}\n- Thời gian: ${timeStr}\n- Nguyên liệu: <b>${ing.name}</b>\n- Số lượng vừa lấy ra: ${usageQuantity} kg/lít\n- Tồn kho còn lại: ${remainingStock} kg/lít\n- Mức tối thiểu: ${minQ} kg/lít\n\nLưu ý: Nguyên liệu đang sắp hết, vui lòng chuẩn bị nhập thêm.`;
+             message = `<b>CẢNH BÁO SẮP HẾT!</b>\n- Ngày: ${dateStr}\n- Thời gian: ${timeStr}\n- Nguyên liệu: <b>${ing.name}</b>\n- Số lượng vừa lấy ra: ${usageQuantity} kg/lít/con\n- Tồn kho còn lại: ${remainingStock} kg/lít/con\n- Mức tối thiểu: ${minQ} kg/lít/con\n\nLưu ý: Nguyên liệu đang sắp hết, vui lòng chuẩn bị nhập thêm.`;
         }
 
         if (message) sendTelegramNotification(message);
 
-        alert(`Đã ghi nhận sử dụng ${usageQuantity} kg/lít ${ing.name}. Tồn kho còn lại: ${remainingStock} kg/lít.`);
+        alert(`Đã ghi nhận sử dụng ${usageQuantity} kg/lít/con ${ing.name}. Tồn kho còn lại: ${remainingStock} kg/lít/con.`);
         document.getElementById('usage-quantity').value = 0;
     }
 
@@ -824,8 +826,8 @@
             const logTime = new Date(log.timestamp).toLocaleTimeString('vi-VN');
             li.innerHTML = `
                 <div class="list-item-content">
-                    <b><span class="${statusClass}">${status}</span>: Lấy ra ${log.usageQuantity} kg/lít cho ${log.name}</b>
-                    <small class="log-info">Tồn còn: ${log.remainingQuantity} kg/lít | Lúc ${logTime}</small>
+                    <b><span class="${statusClass}">${status}</span>: Lấy ra ${log.usageQuantity} kg/lít/con cho ${log.name}</b>
+                    <small class="log-info">Tồn còn: ${log.remainingQuantity} kg/lít/con | Lúc ${logTime}</small>
                 </div>
                 <small style="font-size: 11px; color: var(--text-secondary);">${logDate}</small>
             `;
