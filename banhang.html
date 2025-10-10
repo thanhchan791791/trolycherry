@@ -714,7 +714,7 @@
                     <h2>Quản lý Bàn</h2>
                 </div>
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <input type="text" id="tableNameInput" placeholder="Tên bàn (ví dụ: Bàn 1, VIP 2)" style="flex-grow: 1;">
+                    <input type="text" id="tableNameInput" placeholder="Tên bàn (ví dụ: Bàn 1, 12)" style="flex-grow: 1;">
                     <button id="addTableButton" class="add-button">Thêm bàn</button>
                 </div>
                 <div id="tablesList" class="tables-list-container"></div>
@@ -854,11 +854,11 @@
         const database = firebase.database();
         
         // Telegram Bot Configuration
-        const TELEGRAM_BOT_TOKEN = "7807531189:AAGhMQ9jjew7Q9ywMDSTaGDy4Ns6XtPQUrI";
+        const TELEGRAM_BOT_TOKEN = "7807531189:AAGhMQ9jjewT9ywMDSTaGDy4Ns6XtPQUrI";
         const TELEGRAM_CHAT_ID = "-4954039835";
         
         // --- NEW CONFIGURATION ---
-        const OPEN_CASH_URL = "http://192.168.156.102:5000/opencash"; // Địa chỉ mở két tiền
+        const OPEN_CASH_URL = "http://192.168.156.210:5000/opencash"; // Địa chỉ mở két tiền
         // --- END NEW CONFIGURATION ---
 
         // DOM elements
@@ -890,7 +890,7 @@
         const billId = document.getElementById('billId');
         const billDetailsBody = document.getElementById('billDetailsBody');
         const billTotalPrice = document.getElementById('billTotalPrice');
-        const billTotalPaid = document.getElementById('billTotalPaid');
+        const billTotalPaid = document = document.getElementById('billTotalPaid');
         const confirmPaymentButton = document.getElementById('confirmPaymentButton');
         const printBillButton = document.getElementById('printBillButton'); 
         
@@ -1461,7 +1461,7 @@ function renderTableSentOrders() {
             });
         }
         // >> END: HÀM KIỂM TRA CHECKOUT ĐÃ CẬP NHẬT
-// >> HÀM showPaymentModal ĐÃ CHỈNH SỬA LẠI LOGIC CHỐT ĐƠN VÀ THAY NÚT CONFIRM (BỎ VAT) <<
+// >> HÀM showPaymentModal ĐÃ CHỈNH SỬA LẠI LOGIC CHỐT ĐƠN VÀ THAY NÚT CONFIRM (THAY ĐỔI PHỤ THU VIP) <<
 async function showPaymentModal(tableId, tableName) {
     const now = new Date();
     paymentModal.style.display = 'flex';
@@ -1490,7 +1490,7 @@ async function showPaymentModal(tableId, tableName) {
             const orderId = orderSnapshot.key;
             const order = orderSnapshot.val();
             
-            // Thêm OrderId vào danh sách xóa (kể cả những đơn có món chưa hoàn thành, vì ta cần xóa toàn bộ đơn liên quan đến bàn)
+            // Thêm OrderId vào danh sách xóa 
             orderIdsForDeletion.add(orderId); 
 
             if (order.items) {
@@ -1534,20 +1534,50 @@ async function showPaymentModal(tableId, tableName) {
     // 2. Bắt đầu hiển thị hóa đơn sau khi đã tổng hợp xong
     let billItemsHtml = '';
     
-    // Tổng tiền thanh toán chính là tổng tiền chưa thuế vì ta không tính VAT
-    const finalTotal = totalAmount; 
+    // Biến này sẽ chứa các món đã được cộng dồn, dùng để lưu vào payment_history
+    const finalItemsForBill = []; 
     
     if (hasCompletedItemsToPay) {
-        // Biến này sẽ chứa các món đã được cộng dồn, dùng để lưu vào payment_history
-        const finalItemsForBill = []; 
         
-        Object.values(combinedCompletedItems).forEach((item, index) => {
+        // --- START: LOGIC PHỤ THU VIP ĐÃ CHỈNH SỬA ---
+        let vipSurcharge = 0;
+        if (tableName === 'VIP 1' || tableName === 'VIP 2') {
+            // Đã thay đổi phí phụ thu từ 500000 thành 500 theo yêu cầu
+            vipSurcharge = 500000; 
+            totalAmount += vipSurcharge; 
+            
+            // Thêm mục Phụ thu vào finalItemsForBill để lưu vào payment_history
+            finalItemsForBill.push({
+                id: 'surcharge-vip',
+                name: 'Phòng VIP', // Đổi tên hiển thị
+                price: vipSurcharge,
+                quantity: 1,
+                type: 'surcharge',
+                subTotal: vipSurcharge
+            });
+            
+            // Thêm mục Phụ thu vào hiển thị hóa đơn (Đưa lên đầu bill)
+            billItemsHtml += `
+                <tr>
+                    <td class="item-name" style="text-align: left; font-weight: 700; color: var(--ios-red);">1. Phòng VIP</td>
+                    <td class="item-qty" style="text-align: center;"> </td>
+                    <td class="item-price" style="text-align: right; font-weight: 700; color: var(--ios-red);"> </td>
+                    <td class="item-total" style="text-align: right; font-weight: 700; color: var(--ios-red);">${vipSurcharge.toLocaleString('vi-VN')}</td>
+                </tr>
+            `;
+        }
+        // --- END: LOGIC PHỤ THU VIP ĐÃ CHỈNH SỬA ---
+
+        let itemIndex = (tableName === 'VIP 1' || tableName === 'VIP 2') ? 1 : 0; // Bắt đầu index từ 1 nếu có VIP
+
+        Object.values(combinedCompletedItems).forEach((item) => {
+            itemIndex++; // Tăng index cho các món đã gọi
             const itemPrice = item.price; 
             const itemTotal = itemPrice * item.quantity;
             
             // Chuẩn bị item để lưu vào payment_history
             finalItemsForBill.push({
-                id: `aggregated-${index}`,
+                id: `aggregated-${itemIndex}`,
                 name: item.name,
                 price: item.price,
                 quantity: item.quantity,
@@ -1557,21 +1587,24 @@ async function showPaymentModal(tableId, tableName) {
             
             billItemsHtml += `
                 <tr>
-                    <td class="item-name" style="text-align: left;">${index + 1}. ${item.name}</td>
+                    <td class="item-name" style="text-align: left;">${itemIndex}. ${item.name}</td>
                     <td class="item-qty" style="text-align: center;">${item.quantity}</td>
                     <td class="item-price" style="text-align: right;">${itemPrice.toLocaleString('vi-VN')}</td>
                     <td class="item-total" style="text-align: right;">${itemTotal.toLocaleString('vi-VN')}</td>
                 </tr>
             `;
         });
-
+        
+        // Tổng tiền thanh toán chính là tổng tiền chưa thuế (đã bao gồm phụ thu nếu có)
+        const finalTotal = totalAmount; 
+        
         // Lưu trữ dữ liệu cần thiết cho hàm processPayment
         window.tempPaymentData = {
             tableId: tableId,
             tableName: tableName,
-            finalItemsForBill: finalItemsForBill, // Đã được cộng dồn
+            finalItemsForBill: finalItemsForBill, // Đã bao gồm phụ thu nếu có
             orderIdsToDelete: Array.from(orderIdsForDeletion), // Danh sách OrderID cần xóa
-            totalAmount: totalAmount, // Tổng tiền không thuế
+            totalAmount: totalAmount, // Tổng tiền đã bao gồm phụ thu
             finalTotal: finalTotal, // Tổng tiền thanh toán (bằng TotalAmount)
             billId: newBillRef.key
         };
@@ -1584,7 +1617,7 @@ async function showPaymentModal(tableId, tableName) {
     billDetailsBody.innerHTML = billItemsHtml;
     
     billTotalPrice.textContent = totalAmount.toLocaleString('vi-VN') + '₫';
-    billTotalPaid.textContent = finalTotal.toLocaleString('vi-VN') + '₫';
+    billTotalPaid.textContent = totalAmount.toLocaleString('vi-VN') + '₫'; // totalAmount đã bao gồm phụ thu nếu có
     
     // --- Cập nhật VietQR ---
     const acqId = "970422"; // MB Bank Napas acqId
@@ -1597,7 +1630,7 @@ async function showPaymentModal(tableId, tableName) {
 
     if (totalAmount > 0) {
         // Cập nhật lại URL VietQR với tổng số tiền và nội dung chuyển khoản
-        qrUrl = `https://img.vietqr.io/image/${acqId}-${accountNo}-compact.png?amount=${Math.round(finalTotal)}&addInfo=${encodeURIComponent(transferContent)}`;
+        qrUrl = `https://img.vietqr.io/image/${acqId}-${accountNo}-compact.png?amount=${Math.round(totalAmount)}&addInfo=${encodeURIComponent(transferContent)}`;
         vietQrCode.src = qrUrl;
     } else {
         // Đặt QR code mặc định nếu tổng tiền = 0
@@ -1649,7 +1682,7 @@ function handlePaymentMethodSelection(method) {
     processPayment(tableId, tableName, method); // Truyền thêm method
 }
 
- // >> CODE SỬA HÀM confirmPayment (Đổi tên thành processPayment và nhận thêm paymentMethod)
+ // >> CODE SỬA HÀM confirmPayment (Đổi tên thành processPayment và nhận thêm paymentMethod - Đã bao gồm logic Phụ thu VIP)
 async function processPayment(tableId, tableName, paymentMethod) {
     // 1. Lấy dữ liệu đã được tính toán trong showPaymentModal
     const paymentData = window.tempPaymentData;
@@ -1664,7 +1697,7 @@ async function processPayment(tableId, tableName, paymentMethod) {
         finalItemsForBill, 
         orderIdsToDelete, // Danh sách Order ID cần xóa
         totalAmount, 
-        finalTotal, // Đã là TotalAmount vì không có VAT
+        finalTotal, // Đã là TotalAmount (và đã bao gồm phụ thu VIP nếu có)
         billId: billKey
     } = paymentData;
 
@@ -1686,8 +1719,8 @@ async function processPayment(tableId, tableName, paymentMethod) {
         tableId: tableId,
         tableName: tableName,
         timestamp: paymentTimestamp,
-        items: finalItemsForBill, // Đã được gom nhóm và tính toán
-        totalAmount: totalAmount,
+        items: finalItemsForBill, // Đã được gom nhóm, tính toán và bao gồm Phụ thu VIP nếu có
+        totalAmount: totalAmount, // Đã bao gồm Phụ thu VIP nếu có
         finalTotal: finalTotal, // Bằng totalAmount
         paymentMethod: paymentMethod // << TRƯỜNG MỚI ĐÃ THÊM
     };
@@ -1716,7 +1749,6 @@ async function processPayment(tableId, tableName, paymentMethod) {
             });
         }
         // --- END: THÊM LỆNH MỞ KÉT TIỀN ---
-        
     }).catch(error => {
         console.error("Lỗi khi thanh toán:", error);
     });
