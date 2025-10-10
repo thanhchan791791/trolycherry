@@ -256,6 +256,7 @@
                 <th>Tên</th>
                 <th>SĐT</th>
                 <th>Số người</th>
+                <th>Loại bàn</th>
                 <th>Ngày/Giờ</th>
                 <th>Ghi chú</th>
                 <th>Ngày tạo</th>
@@ -344,11 +345,19 @@
     // Helper function to format date (Giữ nguyên)
     function formatDateTime(timestamp) {
         if (!timestamp) return "N/A";
-        return new Date(timestamp).toLocaleString("vi-VN", {
+        // Chuyển đổi timestamp thành Date object, nếu là ISO string thì parse, nếu là number thì coi là milliseconds
+        const date = (typeof timestamp === 'string' && timestamp.includes('T')) 
+            ? new Date(timestamp) 
+            : new Date(timestamp);
+
+        if (isNaN(date)) return "N/A"; // Xử lý trường hợp date không hợp lệ
+        
+        return date.toLocaleString("vi-VN", {
             hour: '2-digit', minute: '2-digit', 
             day: '2-digit', month: '2-digit', year: 'numeric'
         });
     }
+
 
     // ======================================
     // ====== BOOKINGS (Cập nhật UI) ========
@@ -379,7 +388,15 @@
             }
             
             // Sắp xếp phụ: khách đặt trước (createdAt nhỏ hơn) lên trước (a - b)
-            return (a.createdAt || 0) - (b.createdAt || 0);
+            // Cần chuyển đổi ISO string hoặc number sang milliseconds nếu chưa phải.
+            const timeA = (typeof a.createdAt === 'string' && a.createdAt.includes('T')) 
+                ? new Date(a.createdAt).getTime() 
+                : (a.createdAt || 0);
+            const timeB = (typeof b.createdAt === 'string' && b.createdAt.includes('T')) 
+                ? new Date(b.createdAt).getTime() 
+                : (b.createdAt || 0);
+
+            return timeA - timeB;
         });
         // --- KẾT THÚC LOGIC SẮP XẾP ---
 
@@ -392,7 +409,7 @@
         bookingsCardList.innerHTML = "";
         
         if (data.length === 0) {
-            bookingsTableBody.insertAdjacentHTML("beforeend", '<tr><td colspan="7" class="text-center">Không có dữ liệu đặt bàn.</td></tr>');
+            bookingsTableBody.insertAdjacentHTML("beforeend", '<tr><td colspan="8" class="text-center">Không có dữ liệu đặt bàn.</td></tr>');
             bookingsCardList.insertAdjacentHTML("beforeend", '<div class="text-center text-muted p-5">Không có dữ liệu đặt bàn.</div>');
             return;
         }
@@ -401,6 +418,7 @@
             const status = item.status || "Chưa gọi";
             const badgeClass = status === "Đã gọi" ? "ios-badge-success" : "ios-badge-warning";
             const isDisabled = status === "Đã gọi" ? "disabled" : "";
+            const tableType = item.tableType || "Bàn thường"; // Lấy loại bàn
 
             // --- Table Row (Desktop) ---
             const row = `
@@ -408,7 +426,7 @@
                     <td>${item.name || ""}</td>
                     <td>${item.phone || ""}</td>
                     <td>${item.people || ""}</td>
-                    <td>${item.time || ""} - ${item.date || ""}</td>
+                    <td>${tableType}</td> <td>${item.time || ""} - ${item.date || ""}</td>
                     <td>${item.message || ""}</td>
                     <td>${formatDateTime(item.createdAt)}</td>
                     <td>
@@ -435,14 +453,17 @@
                     </div>
                     
                     <div class="row g-1 mb-2">
-                        <div class="col-8 d-flex align-items-center">
+                        <div class="col-12 d-flex align-items-center mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1 text-muted"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-5.65-5.65A19.79 19.79 0 0 1 2 4.18a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2 1.5 1.5 0 0 0 .5 1.5l-1.5 3c.5.5 1 1 1.5 1.5l3-1.5a1.5 1.5 0 0 0 1.5.5h3a2 2 0 0 1 2 2v3z"></path></svg>
                             <strong class="text-break">${item.phone || "N/A"}</strong>
                         </div>
-                        <div class="col-4 text-end">
-                            <small class="text-muted">👥</small>
-                            <strong style="font-size: 1.1rem;">${item.people || "1"}</strong>
+                        <div class="col-6">
+                            <small class="text-muted">👥 Số người:</small>
+                            <span class="d-block fw-bold">${item.people || "1"}</span>
                         </div>
+                        <div class="col-6 text-end">
+                            <small class="text-muted">🍽 Loại bàn:</small>
+                            <span class="d-block fw-bold text-danger">${tableType}</span> </div>
                     </div>
 
                     <hr class="my-2">
@@ -521,7 +542,15 @@
         
        allContacts.sort((a, b) => {
             // b.createdAt - a.createdAt: Đảm bảo dữ liệu có thời gian lớn hơn (mới hơn) nằm ở vị trí đầu tiên.
-            return (b.createdAt || 0) - (a.createdAt || 0); 
+            // Cần chuyển đổi ISO string hoặc number sang milliseconds nếu chưa phải.
+            const timeA = (typeof a.createdAt === 'string' && a.createdAt.includes('T')) 
+                ? new Date(a.createdAt).getTime() 
+                : (a.createdAt || 0);
+            const timeB = (typeof b.createdAt === 'string' && b.createdAt.includes('T')) 
+                ? new Date(b.createdAt).getTime() 
+                : (b.createdAt || 0);
+
+            return timeB - timeA; 
         });
         // --------------------------------------------------------------------
 
