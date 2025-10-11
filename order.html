@@ -1422,46 +1422,65 @@ closeComboModal.onclick = () => {
         // >> KẾT THÚC CHỈNH SỬA: HIỂN THỊ CHI TIẾT COMBO TRONG ORDER SUMMARY
         
        // --- Functionality to send new orders ---
+// --- Functionality to send new orders (Đã sửa lỗi hiển thị đơn đã gửi) ---
 sendOrderButton.addEventListener('click', () => {
     if (Object.keys(currentOrderItems).length === 0) {
         alert("Vui lòng thêm món vào order trước khi gửi.");
         return;
     }
 
-    const newOrderRef = database.ref(`orders/${currentTableId}`).push();
+    const newOrderRef = database.ref('kitchen_bar_orders').push(); // Tạo ID mới tại đây
     const orderId = newOrderRef.key;
-    const timestamp = Date.now();
+    const timestamp = new Date().toISOString();
     const updates = {};
     
     const itemsForFirebase = {};
     const itemsForTelegram = [];
-    const itemsForPrint = []; // << Dữ liệu mới theo yêu cầu
+    const itemsForPrint = []; 
 
+    let hasFood = false;
+    let hasDrink = false;
     let message = `📣 *ORDER MỚI - BÀN ${currentTableNameValue}* 📣\n\n`;
 
     for (const menuId in currentOrderItems) {
         const item = currentOrderItems[menuId];
         
-        // Dữ liệu cho Firebase
+        if (item.type === 'food') hasFood = true;
+        if (item.type === 'drink') hasDrink = true;
+        
+        // 1. Dữ liệu cho Firebase (kitchen_bar_orders)
+        // LƯU Ý: Phải dùng tên gốc đã có chi tiết combo
         itemsForFirebase[menuId] = {
-            name: item.name,
+            itemName: item.name, 
             price: item.price,
             type: item.type,
             quantity: item.quantity,
-            status: 'pending' // Trạng thái ban đầu
+            status: 'pending' 
         };
         
-        // Dữ liệu cho Telegram
+        // 2. Dữ liệu cho Telegram
         itemsForTelegram.push(`- ${item.name} x ${item.quantity}`);
         
-        // **********************************************
-        // LOGIC CHUẨN HÓA CHO MÁY IN (THEO YÊU CẦU CỦA BẠN)
+        // 3. Dữ liệu cho máy in (theo cấu trúc đơn giản mới)
         itemsForPrint.push({
-            name: item.name, // Tên món đã bao gồm chi tiết combo nếu có
+            name: item.name, 
             qty: item.quantity
         });
-        // **********************************************
     }
+
+    // Xác định order type
+    let orderType = 'mixed';
+    if (hasFood && !hasDrink) orderType = 'food';
+    else if (!hasFood && hasDrink) orderType = 'drink';
+
+    // Cấu trúc Order cho Bếp/Bar (Kitchen_bar_orders)
+    const kitchenBarOrder = {
+        tableId: currentTableId,
+        tableName: currentTableNameValue,
+        timestamp: timestamp,
+        type: orderType, 
+        items: itemsForFirebase
+    };
 
     // Cấu trúc Payload chuẩn hóa cho máy in
     const printPayload = {
@@ -1469,20 +1488,8 @@ sendOrderButton.addEventListener('click', () => {
         items: itemsForPrint
     };
 
-    // Ghi log để kiểm tra payload
-    console.log("Payload gửi đến máy in (chuẩn hóa):", JSON.stringify(printPayload, null, 2));
-
-
     // 1. Cập nhật Firebase
-    const newOrder = {
-        orderId: orderId,
-        timestamp: timestamp,
-        items: itemsForFirebase,
-        tableId: currentTableId,
-        tableName: currentTableNameValue,
-        status: 'pending' 
-    };
-    updates[`orders/${currentTableId}/${orderId}`] = newOrder;
+    updates[`kitchen_bar_orders/${orderId}`] = kitchenBarOrder; // << ĐƯỜNG DẪN CHÍNH XÁC
     updates[`tables/${currentTableId}/status`] = 'occupied';
     
     database.ref().update(updates).then(() => {
@@ -1496,7 +1503,7 @@ sendOrderButton.addEventListener('click', () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(printPayload) // << Payload đã được chuẩn hóa
+            body: JSON.stringify(printPayload) 
         }).then(response => {
             if (!response.ok) {
                 console.error("Lỗi khi gửi order đến máy in:", response.statusText);
@@ -1510,7 +1517,8 @@ sendOrderButton.addEventListener('click', () => {
         // 4. Reset UI
         currentOrderItems = {};
         updateOrderSummary();
-        renderTableSentOrders(); // Tải lại danh sách đơn đã gửi
+        // >> GỌI LẠI HÀM RENDER ĐƠN ĐÃ GỬI để hiển thị đơn vừa tạo <<
+        renderTableSentOrders(); 
         alert(`Đã gửi order mới cho bàn ${currentTableNameValue}!`);
     }).catch(error => {
         console.error("Lỗi khi gửi order lên Firebase:", error);
