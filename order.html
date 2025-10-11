@@ -186,7 +186,7 @@
             transition: border-color 0.3s;
         }
 
-        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+        input[type="text"]:focus, input[type="number"]:focus, select[type="focus"] {
             border-color: var(--ios-blue);
             outline: none;
             box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
@@ -437,13 +437,26 @@
         }
         
         .order-summary-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            
+            align-items: flex-start; /* Căn trên cùng */
             padding: 8px 0;
             border-bottom: 1px solid var(--ios-separator); /* Separator mỏng */
         }
         
+        .order-summary-item-content {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        .order-details-combo {
+            font-size: 0.9em;
+            color: var(--secondary-color);
+            margin-top: 5px;
+            padding-left: 10px;
+            white-space: pre-wrap; /* Giữ định dạng xuống dòng */
+        }
+
         .quantity-controls button {
             background-color: #F7F7F7;
             border: 1px solid #ccc;
@@ -485,6 +498,58 @@
             text-align: center;
             position: relative;
         }
+        
+        /* Modal Mẹt Combo mới */
+        #comboModal .modal-content {
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        .combo-selection-container {
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        .combo-selection-container h4 {
+            color: var(--ios-red);
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 1.2em;
+        }
+
+        .combo-item-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            background-color: var(--ios-system-fill);
+            border-radius: 8px;
+        }
+
+        .combo-item {
+            background-color: var(--card-bg);
+            border: 1px solid var(--ios-separator);
+            border-radius: 8px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            font-weight: 500;
+        }
+
+        .combo-item.selected {
+            background-color: var(--ios-blue);
+            color: white;
+            border-color: var(--ios-blue);
+        }
+        
+        .combo-item.selected:hover {
+            background-color: #0071E3;
+        }
+
+        .combo-item:hover {
+            background-color: var(--ios-light-gray);
+        }
+        /* End Modal Mẹt Combo */
         
         .close-button {
             position: absolute;
@@ -780,6 +845,25 @@
         </div>
     </div>
     
+    <div id="comboModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeComboModal">&times;</span>
+            <h2 id="comboModalTitle">Chọn món cho Mẹt Combo</h2>
+            <p style="font-style: italic; color: var(--ios-red); font-weight: 500;">Vui lòng chọn đủ số lượng món</p>
+            
+            <div class="combo-selection-container">
+                <h4 id="meatSelectionTitle">Chọn Món Thịt (<span id="meatCount">0</span>/<span id="requiredMeat">0</span>)</h4>
+                <div id="meatList" class="combo-item-list">
+                    </div>
+
+                <h4 id="vegSelectionTitle">Chọn Món Rau (<span id="vegCount">0</span>/<span id="requiredVeg">0</span>)</h4>
+                <div id="vegList" class="combo-item-list">
+                    </div>
+            </div>
+            
+            <button id="confirmComboButton" class="add-button" style="width: 100%; margin-top: 20px;" disabled>Xác nhận</button>
+        </div>
+    </div>
     <div class="nav-buttons">
         <button class="nav-button active" data-section="tables">
             <i class="fas fa-utensils"></i>
@@ -803,7 +887,7 @@
         };
         
         // >> DÒNG THÊM MỚI: API ENDPOINT CHO MÁY IN <<
-        const PRINT_API_ENDPOINT = "http://192.168.156.102:5000/print";
+        const PRINT_API_ENDPOINT = "http://192.168.156.210:5000/print";
         // ---------------------------------------------
 
         // Initialize Firebase
@@ -834,11 +918,11 @@
         const orderSearchInput = document.getElementById('orderSearchInput');
         
        // Modal elements
-const paymentModal = document.getElementById('paymentModal');
-const closeButton = document.querySelector('.close-button');
-const billTableInfo = document.getElementById('billTableInfo');
-const billDate = document.getElementById('billDate');
-const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
+        const paymentModal = document.getElementById('paymentModal');
+        const closeButton = document.querySelector('.close-button');
+        const billTableInfo = document.getElementById('billTableInfo');
+        const billDate = document.getElementById('billDate');
+        const billTime = document.getElementById('billTime'); 
         const billId = document.getElementById('billId');
         const billDetailsBody = document.getElementById('billDetailsBody');
         const billTotalPrice = document.getElementById('billTotalPrice');
@@ -852,8 +936,41 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
 
         let currentTableId = null;
         let currentTableNameValue = '';
-        let currentOrderItems = {}; // { menuId: { name, price, type, quantity } }
+        // Cập nhật: currentOrderItems có thể chứa thêm trường 'customizations'
+        let currentOrderItems = {}; // { menuId: { name, price, type, quantity, customizations } }
         let allMenuItems = [];
+        
+        // START: COMBO MODAL VARIABLES
+        const comboModal = document.getElementById('comboModal');
+        const closeComboModal = document.getElementById('closeComboModal');
+        const confirmComboButton = document.getElementById('confirmComboButton');
+        const comboModalTitle = document.getElementById('comboModalTitle');
+        const meatList = document.getElementById('meatList');
+        const vegList = document.getElementById('vegList');
+        const meatCountSpan = document.getElementById('meatCount');
+        const vegCountSpan = document.getElementById('vegCount');
+        const requiredMeatSpan = document.getElementById('requiredMeat');
+        const requiredVegSpan = document.getElementById('requiredVeg');
+        
+        // Lưu trữ item combo đang được chọn (base menuId, name, price, type)
+        let currentComboItem = null; 
+        let selectedMeatItems = new Set();
+        let selectedVegItems = new Set();
+        let requiredMeat = 0;
+        let requiredVeg = 0;
+
+        // Dữ liệu mẫu cho combo (Bạn cần thay đổi theo thực tế của nhà hàng)
+        const meuComboItems = {
+            meat: [
+                'Thịt Heo Rừng Hấp', 'Thịt Ba Chỉ Cuốn', 'Gà Nướng Mật Ong', 
+                'Thịt Bò Xào Sả Ớt', 'Sườn Heo Nướng'
+            ],
+            veg: [
+                'Lòng Gà Xào Măng', 'Trứng Chiên Cuộn', 'Canh Chua Cá Lóc', 
+                'Gỏi Ngó Sen Tôm Thịt', 'Rau Luộc Thập Cẩm'
+            ]
+        };
+        // END: COMBO MODAL VARIABLES
 
         // >> START: CODE MỚI CHO REAL-TIME LISTENER
         let activeListeners = [];
@@ -868,6 +985,14 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
             activeListeners = [];
         }
         // << END: CODE MỚI CHO REAL-TIME LISTENER
+        
+        // Hàm chuẩn hóa chuỗi (bỏ dấu, khoảng trắng, chuyển về thường)
+        function normalizeString(str) {
+            if (!str) return '';
+            return str.toLowerCase()
+                      .replace(/ /g, '')
+                      .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
 
         // --- Telegram Notification Function ---
         function sendTelegramMessage(message) {
@@ -949,7 +1074,6 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
                         tableOrderView.style.display = 'grid';
                         loadAllMenuItems();
                         renderTableSentOrders();
-                        updateOrderSummary();
                         updateCheckoutButtonVisibility();
                     });
                     
@@ -1010,6 +1134,17 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
                 div.setAttribute('data-type', item.type);
                 div.setAttribute('data-name', item.name);
                 div.setAttribute('data-price', item.price);
+                
+                // Logic phát hiện Combo (Đã tinh chỉnh lại để đảm bảo tính chính xác)
+                const normalizedName = normalizeString(item.name);
+                
+                // *** Vui lòng kiểm tra tên món trong Firebase của bạn, ví dụ: "Mẹt 4 Món" hoặc "Mẹt 5 Món" ***
+                if (normalizedName.includes('met5mon')) {
+                     div.setAttribute('data-combo', '5');
+                } else if (normalizedName.includes('met4mon')) {
+                     div.setAttribute('data-combo', '4');
+                }
+                
                 div.innerHTML = `
                     <h4>${item.name}</h4>
                     <p>${parseFloat(item.price).toLocaleString('vi-VN')}₫</p>
@@ -1066,15 +1201,162 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
             const name = item.getAttribute('data-name');
             const price = parseFloat(item.getAttribute('data-price'));
             const type = item.getAttribute('data-type');
+            
+            // Lấy thuộc tính combo đã được đặt trong renderMenuForOrder
+            const isCombo = item.hasAttribute('data-combo'); 
+            
+            currentComboItem = { menuId, name, price, type };
 
-            if (currentOrderItems[menuId]) {
-                currentOrderItems[menuId].quantity += 1;
+            if (isCombo) {
+                const comboType = item.getAttribute('data-combo'); // '5' hoặc '4'
+                
+                // Thiết lập số lượng món cần chọn
+                if (comboType === '5') {
+                    requiredMeat = 3;
+                    requiredVeg = 2;
+                } else if (comboType === '4') {
+                    requiredMeat = 2;
+                    requiredVeg = 2;
+                }
+                
+                // Reset lựa chọn cũ
+                selectedMeatItems.clear();
+                selectedVegItems.clear();
+                
+                showComboModal(name, requiredMeat, requiredVeg);
             } else {
-                currentOrderItems[menuId] = { name, price, type, quantity: 1 };
+                // Xử lý món đơn bình thường: Không có customizations
+                addToOrder(menuId, name, price, type, 1);
+            }
+        }
+        
+        // START: COMBO MODAL LOGIC
+        function showComboModal(comboName, meatReq, vegReq) {
+            comboModalTitle.textContent = `Chọn món cho ${comboName}`;
+            requiredMeatSpan.textContent = meatReq;
+            requiredVegSpan.textContent = vegReq;
+            requiredMeat = meatReq;
+            requiredVeg = vegReq;
+
+            // Render danh sách món
+            renderComboList(meatList, meuComboItems.meat, 'meat');
+            renderComboList(vegList, meuComboItems.veg, 'veg');
+            
+            updateComboCounts();
+            comboModal.style.display = 'flex';
+        }
+
+        function renderComboList(container, items, itemType) {
+            container.innerHTML = '';
+            items.forEach(itemName => {
+                const div = document.createElement('div');
+                div.classList.add('combo-item');
+                div.textContent = itemName;
+                div.setAttribute('data-name', itemName);
+                div.setAttribute('data-type', itemType);
+                
+                // Khôi phục trạng thái đã chọn nếu có
+                const selectedSet = itemType === 'meat' ? selectedMeatItems : selectedVegItems;
+                if (selectedSet.has(itemName)) {
+                    div.classList.add('selected');
+                }
+                
+                div.addEventListener('click', handleComboItemClick);
+                container.appendChild(div);
+            });
+        }
+
+        function handleComboItemClick(event) {
+            const item = event.currentTarget;
+            const itemName = item.getAttribute('data-name');
+            const itemType = item.getAttribute('data-type');
+            
+            const isSelected = item.classList.contains('selected');
+
+            if (itemType === 'meat') {
+                if (isSelected) {
+                    selectedMeatItems.delete(itemName);
+                    item.classList.remove('selected');
+                } else if (selectedMeatItems.size < requiredMeat) {
+                    selectedMeatItems.add(itemName);
+                    item.classList.add('selected');
+                }
+            } else if (itemType === 'veg') {
+                if (isSelected) {
+                    selectedVegItems.delete(itemName);
+                    item.classList.remove('selected');
+                } else if (selectedVegItems.size < requiredVeg) {
+                    selectedVegItems.add(itemName);
+                    item.classList.add('selected');
+                }
+            }
+            
+            updateComboCounts();
+        }
+        
+        function updateComboCounts() {
+            meatCountSpan.textContent = selectedMeatItems.size;
+            vegCountSpan.textContent = selectedVegItems.size;
+            
+            const isMeatFull = selectedMeatItems.size === requiredMeat;
+            const isVegFull = selectedVegItems.size === requiredVeg;
+            
+            confirmComboButton.disabled = !(isMeatFull && isVegFull);
+        }
+
+   confirmComboButton.addEventListener('click', () => {
+    // Xây dựng chuỗi chi tiết combo theo định dạng [Nhóm: Món1, Món2]
+    const meatDetails = selectedMeatItems.size > 0 ? `[Thịt: ${[...selectedMeatItems].join(', ')}]` : '';
+    const vegDetails = selectedVegItems.size > 0 ? `[Rau: ${[...selectedVegItems].join(', ')}]` : '';
+    
+    // Tách món canh ra khỏi danh sách rau (Giả định món canh có chữ 'Canh' trong tên)
+    const selectedCanh = [...selectedVegItems].filter(name => name.toLowerCase().includes('canh'));
+    const remainingVeg = [...selectedVegItems].filter(name => !name.toLowerCase().includes('canh'));
+    
+    // Cập nhật chuỗi rau và chuỗi canh
+    const canhDetails = selectedCanh.length > 0 ? `[Canh: ${selectedCanh.join(', ')}]` : '';
+    const finalVegDetails = remainingVeg.length > 0 ? `[Rau: ${remainingVeg.join(', ')}]` : '';
+
+    // Thêm món combo chính vào order, gộp tất cả chi tiết
+    const parts = [currentComboItem.name, canhDetails, meatDetails, finalVegDetails].filter(p => p !== '').join(' ');
+    const comboNameWithDetails = parts.trim().replace(/\s+/g, ' '); 
+
+    // Tạo ID duy nhất cho món combo có kèm chi tiết để phân biệt
+    const comboDetailId = `${currentComboItem.menuId}_${[...selectedMeatItems, ...selectedVegItems].join('_').replace(/[^a-zA-Z0-9]/g, '')}`;
+    
+    addToOrder(comboDetailId, comboNameWithDetails, currentComboItem.price, currentComboItem.type, 1);
+    comboModal.style.display = 'none';
+
+    // Xóa lựa chọn cũ
+    selectedMeatItems.clear();
+    selectedVegItems.clear();
+});
+
+closeComboModal.onclick = () => {
+    selectedMeatItems.clear();
+    selectedVegItems.clear();
+    comboModal.style.display = 'none';
+};
+        closeComboModal.onclick = () => comboModal.style.display = 'none';
+        // END: COMBO MODAL LOGIC
+        
+        function addToOrder(menuId, name, price, type, quantity) {
+             // Thêm món đơn (không có customizations)
+             if (currentOrderItems[menuId]) {
+                currentOrderItems[menuId].quantity += quantity;
+            } else {
+                currentOrderItems[menuId] = { 
+                    name, 
+                    price, 
+                    type, 
+                    quantity,
+                    customizations: {} // << THÊM TRƯỜNG RỖNG CHO MÓN ĐƠN
+                };
             }
             updateOrderSummary();
         }
 
+        // >> CHỈNH SỬA: HIỂN THỊ CHI TIẾT COMBO TRONG ORDER SUMMARY
         function updateOrderSummary() {
             let total = 0;
             currentOrderSummary.innerHTML = '';
@@ -1085,16 +1367,35 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
                 return;
             }
 
-            orderedItems.forEach(item => {
+            Object.keys(currentOrderItems).forEach(menuId => {
+                const item = currentOrderItems[menuId];
+                
+                let detailsHtml = '';
+                let displayedName = item.name;
+                
+                if (item.customizations && Object.keys(item.customizations).length > 0) {
+                    const allCustomizations = [
+                        ...(item.customizations.meat || []),
+                        ...(item.customizations.veg || [])
+                    ];
+                    
+                    if (allCustomizations.length > 0) {
+                        detailsHtml = `<p class="order-details-combo">(Chi tiết: ${allCustomizations.join(', ')})</p>`;
+                    }
+                }
+                
                 const div = document.createElement('div');
                 div.classList.add('order-summary-item');
                 div.innerHTML = `
-                    <span>${item.name}</span>
-                    <div class="quantity-controls">
-                        <span>x${item.quantity}</span>
-                        <span>${(item.price * item.quantity).toLocaleString('vi-VN')}₫</span>
-                        <button class="decrement-btn" data-name="${item.name}">-</button>
+                    <div class="order-summary-item-content">
+                        <span style="max-width: 60%;">${displayedName}</span>
+                        <div class="quantity-controls">
+                            <span>x${item.quantity}</span>
+                            <span>${(item.price * item.quantity).toLocaleString('vi-VN')}₫</span>
+                            <button class="decrement-btn" data-id="${menuId}">-</button>
+                        </div>
                     </div>
+                    ${detailsHtml}
                 `;
                 currentOrderSummary.appendChild(div);
                 total += item.price * item.quantity;
@@ -1107,126 +1408,116 @@ const billTime = document.getElementById('billTime'); // << DÒNG THÊM MỚI
 
             currentOrderSummary.querySelectorAll('.decrement-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
-                    const itemName = event.target.getAttribute('data-name');
-                    // Tìm menuId dựa trên tên món (cần tìm lại key)
-                    const menuId = Object.keys(currentOrderItems).find(key => currentOrderItems[key].name === itemName);
+                    const itemId = event.target.getAttribute('data-id');
 
-                    if (currentOrderItems[menuId] && currentOrderItems[menuId].quantity > 1) {
-                        currentOrderItems[menuId].quantity -= 1;
-                    } else if (currentOrderItems[menuId]) {
-                        delete currentOrderItems[menuId];
+                    if (currentOrderItems[itemId] && currentOrderItems[itemId].quantity > 1) {
+                        currentOrderItems[itemId].quantity -= 1;
+                    } else if (currentOrderItems[itemId]) {
+                        delete currentOrderItems[itemId];
                     }
                     updateOrderSummary();
                 });
             });
         }
+        // >> KẾT THÚC CHỈNH SỬA: HIỂN THỊ CHI TIẾT COMBO TRONG ORDER SUMMARY
         
-        // >> START: HÀM GỬI ORDER ĐÃ CẬP NHẬT LƯU GIÁ VÀO BẾP VÀ BÀN VÀ THÊM PRINT
-        sendOrderButton.addEventListener('click', () => {
-            if (Object.keys(currentOrderItems).length === 0) {
-                alert("Đơn hàng rỗng. Vui lòng chọn món.");
-                return;
-            }
+       // --- Functionality to send new orders ---
+sendOrderButton.addEventListener('click', () => {
+    if (Object.keys(currentOrderItems).length === 0) {
+        alert("Vui lòng thêm món vào order trước khi gửi.");
+        return;
+    }
 
-            const timestamp = new Date().toISOString();
-            const tableOrderRef = database.ref('tables').child(currentTableId).child('sentOrders').push();
+    const newOrderRef = database.ref(`orders/${currentTableId}`).push();
+    const orderId = newOrderRef.key;
+    const timestamp = Date.now();
+    const updates = {};
+    
+    const itemsForFirebase = {};
+    const itemsForTelegram = [];
+    const itemsForPrint = []; // << Dữ liệu mới theo yêu cầu
 
-            database.ref(`tables/${currentTableId}`).update({ status: 'occupied' });
+    let message = `📣 *ORDER MỚI - BÀN ${currentTableNameValue}* 📣\n\n`;
 
-            const itemsForSentList = {};
-            const updates = {};
-            
-            // Dữ liệu cho máy in
-            const printItems = [];
-            
-            Object.keys(currentOrderItems).forEach(menuId => {
-                const item = currentOrderItems[menuId];
-                
-                if (!updates[`kitchen_bar_orders/${tableOrderRef.key}`]) {
-                    updates[`kitchen_bar_orders/${tableOrderRef.key}`] = {
-                        tableId: currentTableId,
-                        tableName: currentTableNameValue,
-                        timestamp: timestamp,
-                        type: item.type, 
-                        items: {}
-                    };
-                }
-                
-                // LƯU TRỮ GIÁ VÀO KITCHEN_BAR_ORDERS
-                updates[`kitchen_bar_orders/${tableOrderRef.key}`].items[menuId] = {
-                    itemName: item.name,
-                    quantity: item.quantity,
-                    type: item.type,
-                    status: 'pending',
-                    price: item.price // << LƯU GIÁ VÀO BẾP
-                };
-
-                // LƯU TRỮ GIÁ VÀO SENT ORDERS CỦA BÀN
-                itemsForSentList[menuId] = {
-                    name: item.name,
-                    price: item.price, // << LƯU GIÁ VÀO BÀN
-                    type: item.type,
-                    quantity: item.quantity,
-                    status: 'pending' 
-                };
-                
-                // Chuẩn bị dữ liệu cho máy in (Đúng cấu trúc [{'name': '...', 'qty': ...}])
-                printItems.push({
-                    name: item.name,
-                    qty: item.quantity
-                });
-            });
-            
-            updates[`tables/${currentTableId}/sentOrders/${tableOrderRef.key}`] = {
-                items: itemsForSentList,
-                timestamp: timestamp
-            };
-            
-            database.ref().update(updates).then(() => {
-                alert("Đơn hàng đã được gửi thành công!");
-                
-                // --- THÊM PHẦN GỌI API MÁY IN START ---
-                const printPayload = {
-                    table: currentTableNameValue,
-                    items: printItems
-                };
-                
-                fetch(PRINT_API_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(printPayload)
-                }).then(response => {
-                    if (response.ok) {
-                        console.log("Đã gửi lệnh in Order thành công.");
-                    } else {
-                        console.error("Lỗi khi gửi lệnh in Order:", response.statusText);
-                    }
-                }).catch(error => {
-                    console.error("Lỗi mạng khi gửi lệnh in Order:", error);
-                });
-                // --- THÊM PHẦN GỌI API MÁY IN END ---
-
-                let totalItems = 0;
-                let messageText = `<b>📝 Order mới từ: Bàn ${currentTableNameValue}</b>\n\n`;
-                
-                Object.values(currentOrderItems).forEach(item => {
-                    messageText += `• ${item.name} x ${item.quantity}\n`;
-                    totalItems += item.quantity;
-                });
-                
-                messageText += `\nTổng số món: ${totalItems}`;
-                messageText += `\nThời gian: ${new Date().toLocaleTimeString('vi-VN')}`;
-
-                sendTelegramMessage(messageText);
-
-                currentOrderItems = {}; 
-                updateOrderSummary();
-            });
+    for (const menuId in currentOrderItems) {
+        const item = currentOrderItems[menuId];
+        
+        // Dữ liệu cho Firebase
+        itemsForFirebase[menuId] = {
+            name: item.name,
+            price: item.price,
+            type: item.type,
+            quantity: item.quantity,
+            status: 'pending' // Trạng thái ban đầu
+        };
+        
+        // Dữ liệu cho Telegram
+        itemsForTelegram.push(`- ${item.name} x ${item.quantity}`);
+        
+        // **********************************************
+        // LOGIC CHUẨN HÓA CHO MÁY IN (THEO YÊU CẦU CỦA BẠN)
+        itemsForPrint.push({
+            name: item.name, // Tên món đã bao gồm chi tiết combo nếu có
+            qty: item.quantity
         });
-        // >> END: HÀM GỬI ORDER ĐÃ CẬP NHẬT LƯU GIÁ VÀO BẾP VÀ BÀN VÀ THÊM PRINT
+        // **********************************************
+    }
 
+    // Cấu trúc Payload chuẩn hóa cho máy in
+    const printPayload = {
+        table: currentTableNameValue,
+        items: itemsForPrint
+    };
+
+    // Ghi log để kiểm tra payload
+    console.log("Payload gửi đến máy in (chuẩn hóa):", JSON.stringify(printPayload, null, 2));
+
+
+    // 1. Cập nhật Firebase
+    const newOrder = {
+        orderId: orderId,
+        timestamp: timestamp,
+        items: itemsForFirebase,
+        tableId: currentTableId,
+        tableName: currentTableNameValue,
+        status: 'pending' 
+    };
+    updates[`orders/${currentTableId}/${orderId}`] = newOrder;
+    updates[`tables/${currentTableId}/status`] = 'occupied';
+    
+    database.ref().update(updates).then(() => {
+        // 2. Gửi thông báo Telegram
+        message += itemsForTelegram.join('\n');
+        sendTelegramMessage(message);
+
+        // 3. Gửi order đến API máy in
+        fetch(PRINT_API_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(printPayload) // << Payload đã được chuẩn hóa
+        }).then(response => {
+            if (!response.ok) {
+                console.error("Lỗi khi gửi order đến máy in:", response.statusText);
+            } else {
+                console.log("Order đã được gửi thành công đến máy in.");
+            }
+        }).catch(error => {
+            console.error("Lỗi mạng khi gửi order đến máy in:", error);
+        });
+
+        // 4. Reset UI
+        currentOrderItems = {};
+        updateOrderSummary();
+        renderTableSentOrders(); // Tải lại danh sách đơn đã gửi
+        alert(`Đã gửi order mới cho bàn ${currentTableNameValue}!`);
+    }).catch(error => {
+        console.error("Lỗi khi gửi order lên Firebase:", error);
+        alert("Lỗi: Không thể gửi order.");
+    });
+});
+        // >> END: HÀM GỬI ORDER (ĐÃ CHỈNH SỬA GỬI ĐÚNG CẤU TRÚC JSON IN ẤN)
 
    
 // Hàm khởi tạo Listener phụ cho trạng thái món ăn (theo dõi trạng thái trên kitchen_bar_orders)
@@ -1250,9 +1541,19 @@ function startKitchenOrderListener(orderId, sentOrderItems) {
             const statusText = currentStatus === 'completed' ? 'Đã xong' : 'Đang làm';
             const statusClass = currentStatus === 'completed' ? 'completed' : 'pending';
             
+            // Hiển thị tên món + chi tiết combo trong danh sách đơn đã gửi
+            let nameDisplay = item.itemName || item.name;
+            if (item.customizations && (item.customizations.meat || item.customizations.veg)) {
+                 const allCustomizations = [
+                    ...(item.customizations.meat || []),
+                    ...(item.customizations.veg || [])
+                ];
+                 nameDisplay += ` (${allCustomizations.join(', ')})`;
+            }
+
             itemsListHtml += `
                 <li style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px dotted var(--ios-separator);">
-                    <span>${item.name} x ${item.quantity}</span>
+                    <span style="max-width: 70%;">${nameDisplay} x ${item.quantity}</span>
                     <span class="status ${statusClass}">${statusText}</span>
                 </li>`;
         });
@@ -1307,7 +1608,8 @@ function renderTableSentOrders() {
                         price: item.price,
                         type: item.type,
                         quantity: item.quantity,
-                        status: item.status // Lấy status trực tiếp từ kitchen order item
+                        status: item.status, // Lấy status trực tiếp từ kitchen order item
+                        customizations: item.customizations || {} // Lấy customizations
                     };
                 });
             }
@@ -1398,7 +1700,7 @@ async function showPaymentModal(tableId, tableName) {
     paymentModal.style.display = 'flex';
     billTableInfo.textContent = tableName;
     billDate.textContent = now.toLocaleDateString('vi-VN');
-    billTime.textContent = now.toLocaleTimeString('vi-VN'); // << DÒNG THÊM MỚI
+    billTime.textContent = now.toLocaleTimeString('vi-VN'); 
     billId.textContent = generateBillId();
     billDetailsBody.innerHTML = '';
     
@@ -1460,7 +1762,9 @@ async function showPaymentModal(tableId, tableName) {
                     // CHỈ TÍNH CÁC MÓN CÓ TRẠNG THÁI 'completed' TỪ KITCHEN_BAR_ORDERS
                     if (kitchenItem && kitchenItem.status === 'completed') {
                         hasCompletedItemsToPay = true;
-                        const itemNameKey = item.name; 
+                        
+                        // Lấy key duy nhất cho món đã hoàn thành (bao gồm cả customizations)
+                        const itemNameKey = item.name + (item.customizations ? JSON.stringify(item.customizations) : ''); 
                         const itemPrice = parseFloat(item.price);
                         
                         if (itemPrice > 0) {
@@ -1470,7 +1774,8 @@ async function showPaymentModal(tableId, tableName) {
                                 combinedCompletedItems[itemNameKey] = { 
                                     name: item.name, 
                                     quantity: item.quantity,
-                                    price: itemPrice // Lấy giá đã lưu trong Order
+                                    price: itemPrice, // Lấy giá đã lưu trong Order
+                                    customizations: item.customizations || {} // Lấy customizations
                                 };
                             }
                         }
@@ -1492,14 +1797,36 @@ async function showPaymentModal(tableId, tableName) {
             const itemTotal = itemPrice * item.quantity;
             totalAmount += itemTotal;
             
+            // Xử lý hiển thị chi tiết Combo trên Hóa đơn thanh toán
+            let displayedName = item.name;
+            let detailsHtml = '';
+
+            if (item.customizations && Object.keys(item.customizations).length > 0) {
+                 const allCustomizations = [
+                    ...(item.customizations.meat || []),
+                    ...(item.customizations.veg || [])
+                ];
+                 detailsHtml = allCustomizations.join(', ');
+            }
+            
             billItemsHtml += `
                 <tr>
-                    <td class="item-name" style="text-align: left;">${index + 1}. ${item.name}</td>
+                    <td class="item-name" style="text-align: left;">${index + 1}. ${displayedName}</td>
                     <td class="item-qty" style="text-align: center;">${item.quantity}</td>
                     <td class="item-price" style="text-align: right;">${itemPrice.toLocaleString('vi-VN')}</td>
                     <td class="item-total" style="text-align: right;">${itemTotal.toLocaleString('vi-VN')}</td>
                 </tr>
             `;
+
+            // Nếu là Combo, thêm dòng chi tiết dưới dạng GHI CHÚ
+            if (detailsHtml) {
+                 billItemsHtml += `
+                    <tr>
+                        <td class="item-name" colspan="4" style="text-align: left; font-size: 0.9em; padding-left: 20px; font-style: italic; color: #555;">(Chi tiết: ${detailsHtml})</td>
+                    </tr>
+                 `;
+            }
+            
         });
     } else {
          billItemsHtml = '<tr><td colspan="4" style="text-align: center; font-style: italic;">Chưa có món nào được Bếp/Bar hoàn thành.</td></tr>';
@@ -1576,15 +1903,17 @@ async function confirmPayment(tableId, tableName) {
                         const itemPrice = parseFloat(item.price);
                         
                         if (itemPrice > 0) {
-                            // Tổng hợp món cho Hóa đơn (payment_history)
-                            const itemNameKey = item.name;
+                             // Tổng hợp món cho Hóa đơn (payment_history)
+                            const itemNameKey = item.name + (item.customizations ? JSON.stringify(item.customizations) : '');
+                            
                             if (itemsForBill[itemNameKey]) {
                                 itemsForBill[itemNameKey].quantity += item.quantity;
                             } else {
                                 itemsForBill[itemNameKey] = {
                                     name: item.name,
                                     quantity: item.quantity,
-                                    price: itemPrice
+                                    price: itemPrice,
+                                    customizations: item.customizations || {}
                                 };
                             }
                             totalAmount += itemPrice * item.quantity;
@@ -1660,8 +1989,9 @@ async function confirmPayment(tableId, tableName) {
         
         closeButton.onclick = () => paymentModal.style.display = 'none';
         window.onclick = (event) => {
-            if (event.target == paymentModal) {
+            if (event.target == paymentModal || event.target == comboModal) {
                 paymentModal.style.display = 'none';
+                comboModal.style.display = 'none';
             }
         };
 
