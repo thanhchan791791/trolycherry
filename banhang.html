@@ -701,6 +701,11 @@
             }
         }
         /* END: UI nâng cấp */
+        
+        /* Thêm CSS ẩn các phần không mong muốn */
+        .hidden-in-order {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -728,25 +733,25 @@
                             <button id="backToTables" class="remove-button" style="background-color: var(--ios-blue);"><i class="fas fa-arrow-left"></i> Quay lại</button>
                         </div>
                     </div>
-
-                    <div class="card">
+                    
+                    <div class="card hidden-in-order" id="searchSection">
                         <h3>Tìm kiếm món</h3>
                         <input type="text" id="orderSearchInput" placeholder="Tìm kiếm món ăn, thức uống...">
                     </div>
                     
-                    <div class="card">
+                    <div class="card hidden-in-order" id="foodMenuSection">
                         <h3>Menu Đồ ăn</h3>
                         <div id="foodMenuOrderList" class="menu-list"></div>
                     </div>
 
-                    <div class="card">
+                    <div class="card hidden-in-order" id="drinkMenuSection">
                         <h3>Menu Thức uống</h3>
                         <div id="drinkMenuOrderList" class="menu-list"></div>
                     </div>
-                </div>
+                    </div>
 
                 <div class="column-right">
-                    <div class="card">
+                    <div class="card hidden-in-order" id="currentOrderSection">
                         <h3>Order hiện tại</h3>
                         <div id="currentOrderSummary" class="order-summary">
                             <p>Chọn món từ menu để thêm vào order.</p>
@@ -758,7 +763,7 @@
                         <ul id="sentOrdersList" class="list"></ul>
                         <button id="checkoutButton" class="checkout-table-btn" style="width: 100%; margin-top: 15px; display: none; background-color: var(--ios-red);">Thanh toán</button>
                     </div>
-                </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -881,6 +886,12 @@
         const checkoutButton = document.getElementById('checkoutButton');
         const orderSearchInput = document.getElementById('orderSearchInput');
         
+        // Các phần cần ẩn (MỚI)
+        const searchSection = document.getElementById('searchSection');
+        const foodMenuSection = document.getElementById('foodMenuSection');
+        const drinkMenuSection = document.getElementById('drinkMenuSection');
+        const currentOrderSection = document.getElementById('currentOrderSection');
+       
        // Modal elements
         const paymentModal = document.getElementById('paymentModal');
         const closeBillModal = document.getElementById('closeBillModal'); // Đổi tên
@@ -959,8 +970,12 @@
                     cleanupListeners(); 
                     tableViewList.style.display = 'block';
                     tableOrderView.style.display = 'none';
-                    // KHÔNG CẦN GỌI renderTables() Ở ĐÂY, vì listener chính đã được thiết lập ở DOMContentLoaded
-                    // Khi checkout thành công, lệnh renderTables() ở confirmPayment đã gọi lại list
+                    
+                    // HIỂN THỊ lại các phần đã bị ẩn
+                    searchSection.classList.remove('hidden-in-order');
+                    foodMenuSection.classList.remove('hidden-in-order');
+                    drinkMenuSection.classList.remove('hidden-in-order');
+                    currentOrderSection.classList.remove('hidden-in-order');
                 }
             });
         });
@@ -1042,10 +1057,16 @@
                     currentTableName.textContent = `Bàn: ${currentTableNameValue}`;
                     tableViewList.style.display = 'none';
                     tableOrderView.style.display = 'grid';
-                    loadAllMenuItems();
+                    // loadAllMenuItems(); // Bỏ load menu nếu không hiển thị
                     renderTableSentOrders();
                     updateOrderSummary();
                     updateCheckoutButtonVisibility();
+                    
+                    // ẨN CÁC PHẦN THEO YÊU CẦU
+                    searchSection.classList.add('hidden-in-order');
+                    foodMenuSection.classList.add('hidden-in-order');
+                    drinkMenuSection.classList.add('hidden-in-order');
+                    currentOrderSection.classList.add('hidden-in-order');
                 });
                 
                 const checkoutBtn = card.querySelector('.checkout-table-btn');
@@ -1060,6 +1081,12 @@
             cleanupListeners(); // Dọn dẹp listener khi quay lại danh sách bàn
             tableViewList.style.display = 'block';
             tableOrderView.style.display = 'none';
+            
+            // HIỂN THỊ lại các phần khi quay lại danh sách bàn (Dù trong màn hình danh sách chúng không được dùng)
+            searchSection.classList.remove('hidden-in-order');
+            foodMenuSection.classList.remove('hidden-in-order');
+            drinkMenuSection.classList.remove('hidden-in-order');
+            currentOrderSection.classList.remove('hidden-in-order');
         });
 
         checkoutButton.addEventListener('click', () => {
