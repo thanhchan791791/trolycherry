@@ -706,6 +706,23 @@
         .hidden-in-order {
             display: none !important;
         }
+
+        /* CSS MỚI cho khu vực bàn */
+        .table-area {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--ios-light-gray); /* Nền nhẹ cho khu vực */
+            border-radius: 10px;
+            border: 1px solid var(--ios-separator);
+        }
+        .table-area h2 {
+            margin-bottom: 10px;
+            color: var(--ios-blue);
+            font-weight: 700;
+            font-size: 1.3em;
+            border-bottom: 2px solid var(--ios-separator);
+            padding-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -716,13 +733,26 @@
         <div id="tables" class="content-section active">
             <div id="tableViewList" class="card">
                 <div class="card-header">
-                    <h2>Quản lý Bàn</h2>
+                    <h2>Quản lý Bán hàng</h2>
                 </div>
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <input type="text" id="tableNameInput" placeholder="Tên bàn (ví dụ: Bàn 1, 12)" style="flex-grow: 1;">
+                    <input type="text" id="tableNameInput" placeholder="Tên bàn (ví dụ: Bàn 1, VIP 1)" style="flex-grow: 1;">
                     <button id="addTableButton" class="add-button">Thêm bàn</button>
                 </div>
-                <div id="tablesList" class="tables-list-container"></div>
+
+                <div class="table-area">
+                    <h2>Bàn Bình Thường</h2>
+                    <div id="normalTablesList" class="tables-list-container">
+                        </div>
+                </div>
+
+                <div class="table-area">
+                    <h2>Phòng VIP</h2>
+                    <div id="vipTablesList" class="tables-list-container">
+                        </div>
+                </div>
+                
+                <div id="tablesList" style="display: none;"></div> 
             </div>
             
             <div id="tableOrderView" class="table-view">
@@ -871,7 +901,11 @@
         const sections = document.querySelectorAll('.content-section');
         const tableNameInput = document.getElementById('tableNameInput');
         const addTableButton = document.getElementById('addTableButton');
-        const tablesList = document.getElementById('tablesList');
+        const tablesList = document.getElementById('tablesList'); // Vẫn giữ biến này nhưng không dùng để render trực tiếp
+        
+        // NEW DOM elements for categorized lists
+        const normalTablesList = document.getElementById('normalTablesList');
+        const vipTablesList = document.getElementById('vipTablesList');
         
         // New elements for table view
         const tableViewList = document.getElementById('tableViewList');
@@ -998,7 +1032,9 @@
 
        // BỎ LISTENER FIREBASE RA KHỎI HÀM NÀY ĐỂ TRÁNH LẶP LẠI (FIX LỖI HIỂN THỊ 2 LẦN)
        async function renderTables(snapshot) {
-            tablesList.innerHTML = '';
+            // Xóa nội dung cũ
+            normalTablesList.innerHTML = '';
+            vipTablesList.innerHTML = '';
             
             const tablesData = [];
             snapshot.forEach((childSnapshot) => {
@@ -1048,7 +1084,14 @@
                         <button class="checkout-table-btn remove-button" data-table-id="${tableId}" data-table-name="${tableName}" style="display: ${currentStatus === 'available' ? 'none' : 'inline-block'};">Thanh toán</button>
                     </div>
                 `;
-                tablesList.appendChild(card);
+                
+                // PHÂN LOẠI BÀN VÀ THÊM VÀO KHU VỰC TƯƠNG ỨNG
+                if (tableName.toUpperCase().includes('VIP')) {
+                    vipTablesList.appendChild(card);
+                } else {
+                    normalTablesList.appendChild(card);
+                }
+
 
                 card.querySelector('.select-table-btn').addEventListener('click', () => {
                     currentTableId = tableId;
@@ -1057,16 +1100,16 @@
                     currentTableName.textContent = `Bàn: ${currentTableNameValue}`;
                     tableViewList.style.display = 'none';
                     tableOrderView.style.display = 'grid';
-                    // loadAllMenuItems(); // Bỏ load menu nếu không hiển thị
+                    loadAllMenuItems(); // Đã thêm lại loadAllMenuItems
                     renderTableSentOrders();
                     updateOrderSummary();
                     updateCheckoutButtonVisibility();
                     
-                    // ẨN CÁC PHẦN THEO YÊU CẦU
-                    searchSection.classList.add('hidden-in-order');
-                    foodMenuSection.classList.add('hidden-in-order');
-                    drinkMenuSection.classList.add('hidden-in-order');
-                    currentOrderSection.classList.add('hidden-in-order');
+                    // HIỂN THỊ CÁC PHẦN ĐÃ BỊ ẨN
+                    searchSection.classList.remove('hidden-in-order');
+                    foodMenuSection.classList.remove('hidden-in-order');
+                    drinkMenuSection.classList.remove('hidden-in-order');
+                    currentOrderSection.classList.remove('hidden-in-order');
                 });
                 
                 const checkoutBtn = card.querySelector('.checkout-table-btn');
