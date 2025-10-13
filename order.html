@@ -848,7 +848,6 @@
             </div>
             <div class="button-group-bill">
                 <button id="printBillButton" class="print-button">In Hóa đơn</button> 
-                <button id="confirmPaymentButton" class="pay-button">Xác nhận thanh toán</button>
             </div>
         </div>
     </div>
@@ -1074,16 +1073,13 @@ const meuComboItems = {
             const statusClass = table.status === 'available' ? 'available' : 'occupied';
             
             // **DÒNG SỬA: Thêm nút Thanh toán vào HTML nếu bàn đang occupied**
-            const checkoutButtonHTML = table.status === 'occupied' ? 
-                `<button class="checkout-table-btn remove-button" data-table-id="${tableId}" data-table-name="${table.name}">Thanh toán</button>` : '';
-
+          // Đã bỏ nút Thanh toán
             card.innerHTML = `
                 <h3>${table.name}</h3>
                 <span class="status ${statusClass}">${statusText}</span>
                 <div class="btn-group">
                     <button class="select-table-btn add-button" data-table-id="${tableId}" data-table-name="${table.name}">Chọn bàn</button>
-                    ${checkoutButtonHTML}
-                </div>
+                    </div>
             `;
 
             // **DÒNG THÊM MỚI: LOGIC PHÂN LOẠI BÀN**
@@ -1111,11 +1107,11 @@ const meuComboItems = {
                 updateCheckoutButtonVisibility();
             });
             
-            // Thêm event listeners cho nút Thanh toán
-            const checkoutBtn = card.querySelector('.checkout-table-btn');
-            if (checkoutBtn) {
-                checkoutBtn.addEventListener('click', () => showPaymentModal(tableId, table.name));
-            }
+            // // Thêm event listeners cho nút Thanh toán
+            // const checkoutBtn = card.querySelector('.checkout-table-btn');
+            // if (checkoutBtn) {
+            //     checkoutBtn.addEventListener('click', () => showPaymentModal(tableId, table.name));
+            // }
             // --------------------------------------------------------
         });
     });
