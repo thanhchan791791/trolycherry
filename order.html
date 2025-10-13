@@ -745,13 +745,21 @@
             <h1>Hệ thống quản lý nhà hàng 🍽️</h1>
         </div>
         <div id="tables" class="content-section active">
-            <div id="tableViewList" class="card">
-                <div class="card-header">
-                    <h2>Quản lý Bàn</h2>
-                </div>
-               
-                <div id="tablesList" class="tables-list-container"></div>
-            </div>
+             <div id="tableViewList" class="card">
+        <div class="card-header">
+            <h2>Quản lý Bàn</h2>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <h3 style="margin-bottom: 8px; color: var(--ios-blue);">Bàn thường</h3>
+            <div id="regularTablesList" class="tables-list-container"></div>
+        </div>
+        <div>
+            <h3 style="margin-bottom: 8px; color: var(--ios-red);">Phòng VIP</h3>
+            <div id="vipTablesList" class="tables-list-container"></div>
+        </div>
+        </div>
+    
             
             <div id="tableOrderView" class="table-view">
                 <div class="column-left">
@@ -903,8 +911,8 @@
         const sections = document.querySelectorAll('.content-section');
         const tableNameInput = document.getElementById('tableNameInput');
 
-        const tablesList = document.getElementById('tablesList');
-        
+ const regularTablesList = document.getElementById('regularTablesList');
+        const vipTablesList = document.getElementById('vipTablesList');        
         // New elements for table view
         const tableViewList = document.getElementById('tableViewList');
         const tableOrderView = document.getElementById('tableOrderView');
@@ -1046,49 +1054,72 @@ const meuComboItems = {
       
 
         function renderTables() {
-            tablesList.innerHTML = '';
-            // Lắng nghe thay đổi trên tất cả các bàn
-            database.ref('tables').on('value', (snapshot) => {
-                tablesList.innerHTML = '';
-                snapshot.forEach((childSnapshot) => {
-                    const table = childSnapshot.val();
-                    const tableId = childSnapshot.key;
-                    
-                    const card = document.createElement('div');
-                    card.classList.add('table-card');
-                    
-                    const statusText = table.status === 'available' ? 'Có sẵn' : 'Đang sử dụng';
-                    const statusClass = table.status === 'available' ? 'available' : 'occupied';
-                    
-                    card.innerHTML = `
-                        <h3>${table.name}</h3>
-                        <span class="status ${statusClass}">${statusText}</span>
-                        <div class="btn-group">
-                            <button class="select-table-btn add-button" data-table-id="${tableId}" data-table-name="${table.name}">Chọn bàn</button>
-                            
-                        </div>
-                    `;
-                    tablesList.appendChild(card);
+    // **DÒNG SỬA: Xóa nội dung cũ trong cả hai khu vực mới**
+    regularTablesList.innerHTML = ''; 
+    vipTablesList.innerHTML = ''; 
+    
+    // Lắng nghe thay đổi trên tất cả các bàn
+    database.ref('tables').on('value', (snapshot) => {
+        // Cần xóa nội dung lại sau khi có snapshot mới để cập nhật
+        regularTablesList.innerHTML = ''; 
+        vipTablesList.innerHTML = ''; 
+        
+        snapshot.forEach((childSnapshot) => {
+            const table = childSnapshot.val();
+            const tableId = childSnapshot.key;
+            
+            const card = document.createElement('div');
+            card.classList.add('table-card');
+            const statusText = table.status === 'available' ? 'Có sẵn' : 'Đang sử dụng';
+            const statusClass = table.status === 'available' ? 'available' : 'occupied';
+            
+            // **DÒNG SỬA: Thêm nút Thanh toán vào HTML nếu bàn đang occupied**
+            const checkoutButtonHTML = table.status === 'occupied' ? 
+                `<button class="checkout-table-btn remove-button" data-table-id="${tableId}" data-table-name="${table.name}">Thanh toán</button>` : '';
 
-                    card.querySelector('.select-table-btn').addEventListener('click', () => {
-                        currentTableId = tableId;
-                        currentTableNameValue = table.name;
-                        currentOrderItems = {};
-                        currentTableName.textContent = `Bàn: ${currentTableNameValue}`;
-                        tableViewList.style.display = 'none';
-                        tableOrderView.style.display = 'grid';
-                        loadAllMenuItems();
-                        renderTableSentOrders();
-                        updateCheckoutButtonVisibility();
-                    });
-                    
-                    const checkoutBtn = card.querySelector('.checkout-table-btn');
-                    if (checkoutBtn) {
-                        checkoutBtn.addEventListener('click', () => showPaymentModal(tableId, table.name));
-                    }
-                });
+            card.innerHTML = `
+                <h3>${table.name}</h3>
+                <span class="status ${statusClass}">${statusText}</span>
+                <div class="btn-group">
+                    <button class="select-table-btn add-button" data-table-id="${tableId}" data-table-name="${table.name}">Chọn bàn</button>
+                    ${checkoutButtonHTML}
+                </div>
+            `;
+
+            // **DÒNG THÊM MỚI: LOGIC PHÂN LOẠI BÀN**
+            let targetList;
+            // Giả định tên bàn VIP bắt đầu bằng 'VIP' (không phân biệt chữ hoa/thường)
+            if (table.name && table.name.toUpperCase().startsWith('VIP')) {
+                targetList = vipTablesList;
+            } else {
+                targetList = regularTablesList;
+            }
+            
+            // **DÒNG SỬA: Gắn card vào danh sách phù hợp**
+            targetList.appendChild(card); 
+
+            // Thêm event listeners cho nút Chọn bàn
+            card.querySelector('.select-table-btn').addEventListener('click', () => {
+                currentTableId = tableId;
+                currentTableNameValue = table.name;
+                currentOrderItems = {};
+                currentTableName.textContent = `Bàn: ${currentTableNameValue}`;
+                tableViewList.style.display = 'none';
+                tableOrderView.style.display = 'grid';
+                loadAllMenuItems();
+                renderTableSentOrders();
+                updateCheckoutButtonVisibility();
             });
-        }
+            
+            // Thêm event listeners cho nút Thanh toán
+            const checkoutBtn = card.querySelector('.checkout-table-btn');
+            if (checkoutBtn) {
+                checkoutBtn.addEventListener('click', () => showPaymentModal(tableId, table.name));
+            }
+            // --------------------------------------------------------
+        });
+    });
+}
         
         // --- Table Order View ---
         backToTables.addEventListener('click', () => {
