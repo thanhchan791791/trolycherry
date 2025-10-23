@@ -1,0 +1,1034 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quản lý nghỉ phép - Admin</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary-color: #1976d2;
+      --secondary-color: #42a5f5;
+      --background-light: #e3f2fd;
+      --background-gradient: linear-gradient(135deg, #e3f2fd, #f1f8e9);
+      --card-bg: #ffffff;
+      --text-dark: #333;
+      --text-muted: #777;
+      --border-color: #e0e0e0;
+      --success-color: #2e7d32;
+      --danger-color: #c62828;
+      --warning-color: #ff8f00;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: var(--background-gradient);
+      padding: 10px;
+      color: var(--text-dark);
+      margin: 0;
+    }
+
+    .container {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+      max-width: 1000px;
+      margin: auto;
+      border: 1px solid var(--border-color);
+      min-height: calc(100vh - 20px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-section {
+      text-align: center;
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    h2, h3 {
+      color: var(--primary-color);
+      font-weight: 700;
+    }
+
+    h2 i {
+      color: var(--secondary-color);
+    }
+
+    .btn-group-main {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn-group-main .btn {
+      font-size: 14px;
+      padding: 12px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-group-main .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary { background-color: #42a5f5; border-color: #42a5f5; }
+    .btn-primary:hover { background-color: #2196f3; border-color: #2196f3; }
+    .btn-success { background-color: #66bb6a; border-color: #66bb6a; }
+    .btn-success:hover { background-color: #4caf50; border-color: #4caf50; }
+    .btn-secondary { background-color: #90a4ae; border-color: #90a4ae; }
+    .btn-secondary:hover { background-color: #78909c; border-color: #78909c; }
+    .btn-warning { background-color: #ffca28; border-color: #ffca28; color: #424242; }
+    .btn-warning:hover { background-color: #ffc107; border-color: #ffc107; }
+
+    #pendingCounter {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #fff;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-color);
+      text-align: center;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    #pendingCount {
+      background: #ffc107;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 8px;
+      margin-left: 8px;
+    }
+
+    .request-list-container {
+      flex: 1;
+      min-height: 200px;
+    }
+
+    .request-card {
+      background: #fafafa;
+      border: 1px solid #e1eaf5;
+      border-left: 6px solid #42a5f5;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      position: relative;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .request-card:hover {
+      background-color: #eef7ff;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .request-card h5 {
+      margin: 0 0 5px;
+      font-size: 16px;
+      color: #1565c0;
+      font-weight: 700;
+    }
+
+    .request-card .shift,
+    .request-card .dates,
+    .request-card .reason {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.5;
+    }
+    
+    .request-card .dates { font-weight: 500; }
+    .request-card .reason { font-style: italic; color: #777; margin-top: 5px; }
+    
+    .status-action {
+      margin-top: 10px;
+      text-align: right;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .text-success { color: var(--success-color) !important; }
+    .text-danger { color: var(--danger-color) !important; }
+    .text-warning { color: var(--warning-color) !important; }
+
+    .pulse-text {
+      font-size: 13px;
+      font-style: italic;
+      color: var(--warning-color);
+      text-align: right;
+      animation: pulse 1.6s infinite;
+      margin-top: 5px;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.03); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.8; }
+    }
+
+    /* Floating Week Schedule */
+    #weekScheduleContainer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #e3f2fd;
+      border-top: 2px solid #bbdefb;
+      padding: 15px 25px;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+      z-index: 999;
+      max-height: 40vh;
+      overflow-y: auto;
+      transition: all 0.5s ease;
+    }
+
+    #weekScheduleContainer.hidden {
+      transform: translateY(100%);
+      box-shadow: none;
+    }
+
+    #weekSchedule {
+      display: none;
+      margin-top: 15px;
+    }
+
+    #weekScheduleContainer h5 {
+      margin-bottom: 10px;
+      color: #0d47a1;
+      font-weight: 700;
+    }
+
+    #weekSchedule .request-card {
+      background: #f0f8ff;
+      border-left: 6px solid #64b5f6;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 10px 15px;
+    }
+
+    #weekSchedule .request-card h5 {
+      font-size: 15px;
+      margin-bottom: 5px;
+      color: #1976d2;
+    }
+
+    .name-tag {
+      background-color: #e1f5fe;
+      border: 1px solid #bbdefb;
+      padding: 4px 10px;
+      border-radius: 8px;
+      margin: 3px;
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #0d47a1;
+    }
+    
+    #toggleWeekScheduleBtn {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      background: linear-gradient(145deg, #e1f5fe, #b3e5fc);
+      color: #0d47a1;
+      border: none;
+      border-radius: 30px;
+      box-shadow: 0 4px 12px rgba(179, 229, 252, 0.5);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    #toggleWeekScheduleBtn:hover {
+      background: linear-gradient(145deg, #81d4fa, #4fc3f7);
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(79, 195, 247, 0.6);
+      transform: translateY(-2px);
+      cursor: pointer;
+    }
+
+    #toggleWeekScheduleBtn:active {
+      transform: scale(0.96);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Popups */
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .popup-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .popup-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    
+    .popup-overlay.show .popup-content {
+      transform: scale(1);
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .popup-buttons button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      min-width: 120px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .popup-buttons button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .approve-btn { background-color: #4caf50; color: white; }
+    .approve-btn:hover { background-color: #43a047; }
+    .reject-btn { background-color: #e57373; color: white; }
+    .reject-btn:hover { background-color: #ef5350; }
+
+    #popupDanhSach .popup-content,
+    #popupDaXuLy .popup-content {
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 25px;
+    }
+
+    #danhSachNhanVienContent,
+    #daXuLyList {
+      overflow-y: auto;
+      flex: 1;
+      padding-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      display: none;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    #toast.show {
+      display: block;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nhanvien-table {
+      background-color: #f7fcff;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .nhanvien-table thead {
+      background: linear-gradient(to right, #64b5f6, #42a5f5);
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .nhanvien-table td,
+    .nhanvien-table th { vertical-align: middle; }
+    .nhanvien-table tbody tr:hover { background-color: #e3f2fd; transition: background 0.2s ease; }
+    
+    .nhanvien-header {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1565c0;
+      margin: 20px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 576px) {
+      .container { padding: 15px; }
+      h2 { font-size: 22px; }
+      h3 { font-size: 18px; }
+
+      .btn-group-main {
+        grid-template-columns: 1fr;
+      }
+
+      .request-card h5 { font-size: 15px; }
+      .request-card .dates, .request-card .reason { font-size: 12px; }
+
+      .popup-content { padding: 20px; }
+      .popup-buttons { flex-direction: column; gap: 10px; }
+      .popup-buttons button { width: 100%; }
+
+      #weekScheduleContainer { padding: 10px 15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-section">
+      <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+        <h2 class="mb-0"><i class="fa-solid fa-shield-halved"></i> Quản lý nghỉ phép</h2>
+        <div id="pendingCounter" class="bg-warning text-white rounded-pill px-3 py-1 shadow-sm d-flex align-items-center gap-1">
+          📥 <span id="pendingCount">0</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="btn-group-main">
+      <button class="btn btn-primary" onclick="hienDanhSachNhanVien()">
+        <i class="fa fa-users"></i> Danh sách nhân viên
+      </button>
+      <button class="btn btn-success" onclick="hienFormNhanVien()">
+        <i class="fa fa-plus"></i> Thêm nhân viên
+      </button>
+      <button class="btn btn-secondary" onclick="hienDanhSachDaXuLy()">
+        <i class="fa fa-check-double"></i> Yêu cầu đã xử lý
+      </button>
+      <button class="btn btn-warning" onclick="guiLichNghiTelegram()">
+        <i class="fa-brands fa-telegram"></i> Gửi lịch nghỉ
+      </button>
+    </div>
+
+    <div class="request-list-container">
+      <h3 class="text-center mb-3">Yêu cầu đang chờ duyệt</h3>
+      <div id="requestList">
+        <p class='text-center text-muted'>Không có yêu cầu nghỉ nào.</p>
+      </div>
+    </div>
+  </div>
+
+  <button id="toggleWeekScheduleBtn" onclick="toggleWeekSchedule()">Hiện lịch</button>
+  <div id="weekScheduleContainer" class="hidden">
+    <h5>🗓️ Lịch nghỉ tuần tới (Đã duyệt)</h5>
+    <div id="weekSchedule"></div>
+  </div>
+
+  <div id="actionPopup" class="popup-overlay">
+    <div class="popup-content">
+      <p>Bạn muốn xử lý yêu cầu này?</p>
+      <div class="popup-buttons">
+        <button id="approveBtn" class="approve-btn"><i class="fa fa-check"></i> Duyệt</button>
+        <button id="rejectBtn" class="reject-btn"><i class="fa fa-times"></i> Từ chối</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="popupDaXuLy" class="popup-overlay">
+    <div class="popup-content">
+      <h5 class="mb-3"><i class="fa fa-list-check"></i> Danh sách yêu cầu đã xử lý</h5>
+      <div id="daXuLyList"></div>
+      <div class="popup-buttons" style="border-top: 1px solid #eee; padding-top: 12px;">
+        <button class="reject-btn" onclick="anDanhSachDaXuLy()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="popupNhanVien" class="popup-overlay">
+    <div class="popup-content" style="width: 360px; max-width: 90%;">
+      <h5>➕ Thêm Nhân Viên</h5>
+      <input type="text" id="tenNhanVienMoi" class="form-control mt-3" placeholder="Tên nhân viên" />
+      <select id="caLamMoi" class="form-select mt-3">
+        <option value="">-- Chọn ca làm --</option>
+        <option value="Ca sáng">Ca sáng</option>
+        <option value="Spa">Spa</option>
+        <option value="Petdog">Petdog</option>
+        <option value="Ca tối">Ca tối</option>
+      </select>
+      <div class="popup-buttons mt-4">
+        <button class="approve-btn" onclick="luuNhanVienMoi()">Lưu</button>
+        <button class="reject-btn" onclick="anFormNhanVien()">Huỷ</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="popupDanhSach" class="popup-overlay">
+    <div class="popup-content">
+      <h5 class="mb-3"><i class="fa fa-user-group"></i> Danh sách nhân viên</h5>
+      <div id="danhSachNhanVienContent"></div>
+      <div class="popup-buttons mt-3" style="border-top: 1px solid #eee; padding-top: 12px;">
+        <button class="reject-btn" onclick="anDanhSachNhanVien()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmDeletePopup" class="popup-overlay">
+    <div class="popup-content">
+      <p>Bạn có chắc chắn muốn xoá nhân viên này?</p>
+      <div class="popup-buttons">
+        <button class="approve-btn" onclick="confirmDelete()">Xoá</button>
+        <button class="reject-btn" onclick="anXacNhanXoa()">Huỷ</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getDatabase, ref, onValue, update, set, remove, get } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+ const firebaseConfig = {
+  apiKey: "AIzaSyAMycdJcRR1Kl53wrJQbQ9dw-xSfpOym_4",
+  authDomain: "lichnghi2.firebaseapp.com",
+  databaseURL: "https://lichnghi2-default-rtdb.firebaseio.com/",
+  projectId: "lichnghi2",
+  storageBucket: "lichnghi2.firebasestorage.app",
+  messagingSenderId: "534827443513",
+  appId: "1:534827443513:web:003b8b9d8132f9e6cc74e8",
+  measurementId: "G-SHSCW5H652"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    window.hienFormNhanVien = () => {
+      document.getElementById("popupNhanVien").classList.add("show");
+    };
+
+    window.anFormNhanVien = () => {
+      document.getElementById("popupNhanVien").classList.remove("show");
+      document.getElementById("tenNhanVienMoi").value = "";
+      document.getElementById("caLamMoi").value = "";
+    };
+
+    window.luuNhanVienMoi = async () => {
+      const ten = document.getElementById("tenNhanVienMoi").value.trim();
+      const ca = document.getElementById("caLamMoi").value;
+      if (ten === "" || ca === "") {
+        showToast("❗ Vui lòng nhập đầy đủ thông tin.");
+        return;
+      }
+      try {
+        const id = Date.now();
+        await set(ref(db, `nhanvien/${id}`), {
+          ten: ten,
+          calam: ca,
+          createdAt: new Date().toISOString()
+        });
+        showToast("✅ Đã thêm nhân viên thành công.");
+        anFormNhanVien();
+        loadDanhSachNhanVien();
+      } catch (error) {
+        console.error(error);
+        showToast("❌ Lỗi khi lưu nhân viên.");
+      }
+    };
+
+    // Xử lý danh sách nhân viên
+    const danhSachNhanVienContent = document.getElementById("danhSachNhanVienContent");
+    window.hienDanhSachNhanVien = () => {
+      loadDanhSachNhanVien();
+      document.getElementById("popupDanhSach").classList.add("show");
+    };
+
+    window.anDanhSachNhanVien = () => {
+      document.getElementById("popupDanhSach").classList.remove("show");
+    };
+
+    let idNhanVienCanXoa = null;
+    window.xoaNhanVien = (id) => {
+      idNhanVienCanXoa = id;
+      document.getElementById("confirmDeletePopup").classList.add("show");
+    };
+
+    window.anXacNhanXoa = () => {
+      document.getElementById("confirmDeletePopup").classList.remove("show");
+      idNhanVienCanXoa = null;
+    };
+
+    window.confirmDelete = async () => {
+      try {
+        await remove(ref(db, `nhanvien/${idNhanVienCanXoa}`));
+        showToast("🗑️ Đã xoá nhân viên.");
+        loadDanhSachNhanVien();
+      } catch (err) {
+        console.error(err);
+        showToast("❌ Lỗi khi xoá.");
+      } finally {
+        anXacNhanXoa();
+      }
+    };
+
+    function loadDanhSachNhanVien() {
+      onValue(ref(db, "nhanvien/"), snapshot => {
+        const data = snapshot.val();
+        danhSachNhanVienContent.innerHTML = "";
+
+        if (!data) {
+          danhSachNhanVienContent.innerHTML = "<p class='text-muted text-center'>Không có nhân viên nào.</p>";
+          return;
+        }
+
+        const groupByShift = {};
+        for (const id in data) {
+          const nv = data[id];
+          if (!groupByShift[nv.calam]) groupByShift[nv.calam] = [];
+          groupByShift[nv.calam].push({ id, ...nv });
+        }
+
+        const order = ["Ca sáng", "Spa", "Petdog", "Ca tối"];
+        const shifts = Object.keys(groupByShift).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+
+        shifts.forEach(shift => {
+          const title = document.createElement("div");
+          title.className = "nhanvien-header";
+          title.innerHTML = `<i class="fa-solid fa-clock"></i> ${shift}`;
+          danhSachNhanVienContent.appendChild(title);
+
+          const tableWrapper = document.createElement("div");
+          tableWrapper.className = "table-responsive nhanvien-table";
+          tableWrapper.innerHTML = `
+            <table class="table table-bordered table-hover table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width: 5%">#</th>
+                  <th>Tên nhân viên</th>
+                  <th style="width: 80px">Xoá</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${groupByShift[shift].map((nv, index) => `
+                  <tr>
+                    <td>${index + 1}</td>
+                    <td><i class="fa fa-user text-warning me-1"></i> ${nv.ten}</td>
+                    <td class="text-center">
+                      <button class="btn btn-sm btn-outline-danger" onclick="xoaNhanVien(${nv.id})">
+                        <i class="fa fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>`;
+          danhSachNhanVienContent.appendChild(tableWrapper);
+        });
+      }, { onlyOnce: true });
+    }
+
+    const requestList = document.getElementById("requestList");
+    let currentRequests = [];
+    let currentShift = "";
+
+    window.showActionPopup = (requests, shift) => {
+      currentRequests = requests;
+      currentShift = shift;
+      document.getElementById("actionPopup").classList.add("show");
+    };
+
+    document.getElementById("approveBtn").addEventListener("click", async () => {
+      for (const { date, id } of currentRequests) {
+        await update(ref(db, `lichnghi/${date}/${currentShift}/${id}`), { status: "đã duyệt" });
+      }
+      document.getElementById("actionPopup").classList.remove("show");
+      showToast("✅ Đã duyệt thành công.");
+      loadRequests();
+    });
+
+    document.getElementById("rejectBtn").addEventListener("click", async () => {
+      for (const { date, id } of currentRequests) {
+        await update(ref(db, `lichnghi/${date}/${currentShift}/${id}`), { status: "từ chối" });
+      }
+      document.getElementById("actionPopup").classList.remove("show");
+      showToast("❌ Đã từ chối yêu cầu.");
+      loadRequests();
+    });
+
+    function formatVietnameseDate(dateStr) {
+      const date = new Date(dateStr);
+      const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+      const dayName = days[date.getDay()];
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      return `${dayName}, ${day}/${month}`;
+    }
+
+    function loadRequests(showProcessed = false) {
+      onValue(ref(db, "lichnghi/"), (snapshot) => {
+        const data = snapshot.val();
+        requestList.innerHTML = "";
+        const pendingCountEl = document.getElementById("pendingCount");
+        let pendingCount = 0;
+        const entries = [];
+
+        if (!data) {
+          requestList.innerHTML = "<p class='text-center text-muted'>Không có yêu cầu nghỉ nào.</p>";
+          pendingCountEl.textContent = 0;
+          return;
+        }
+
+        summarizeNextWeek(data);
+
+        for (const date in data) {
+          for (const shift in data[date]) {
+            for (const id in data[date][shift]) {
+              const req = data[date][shift][id];
+              const status = req.status || "chờ duyệt";
+              const isProcessed = status === "đã duyệt" || status === "từ chối";
+              if (!showProcessed && isProcessed) continue;
+              if (showProcessed && status === "chờ duyệt") continue;
+
+              const formattedDate = formatVietnameseDate(date);
+              const key = `${req.name}|${shift}|${status}|${req.reason || "-"}`;
+              const existing = entries.find((e) => e.key === key);
+              if (existing) {
+                existing.requests.push({ date, id });
+                existing.dates.push(formattedDate);
+              } else {
+                entries.push({
+                  key, name: req.name, shift, status, reason: req.reason || "-", dates: [formattedDate], requests: [{ date, id }],
+                });
+              }
+            }
+          }
+        }
+        
+        const pendingEntries = entries.filter(e => e.status === "chờ duyệt");
+        const processedEntries = entries.filter(e => e.status !== "chờ duyệt");
+
+        if (pendingEntries.length > 0) {
+          requestList.innerHTML = `<h5 class="text-center text-info mb-3">Yêu cầu đang chờ duyệt</h5>`;
+          for (const entry of pendingEntries) {
+              const { name, shift, status, reason, dates, requests } = entry;
+              const card = document.createElement("div");
+              card.className = "request-card";
+              card.innerHTML = `
+                <h5>${name} <span class="shift">(${shift})</span></h5>
+                <div class="dates">📅 ${dates.sort().join(", ")}</div>
+                ${reason && reason.trim() !== "-" ? `<div class="reason">📝 Lí do - ${reason}</div>` : ""}
+                <div class="pulse-text">Ấn vào để duyệt hoặc từ chối</div>
+              `;
+              card.addEventListener("click", () => showActionPopup(requests, shift));
+              requestList.appendChild(card);
+              pendingCount++;
+          }
+        } else if (!showProcessed) {
+          requestList.innerHTML = "<p class='text-center text-muted'>Không có yêu cầu nghỉ nào đang chờ.</p>";
+        }
+
+        pendingCountEl.textContent = pendingCount;
+      });
+    }
+
+    function summarizeNextWeek(data) {
+      const weekSchedule = document.getElementById("weekSchedule");
+      weekSchedule.innerHTML = "";
+
+      const today = new Date();
+      const nextWeek = {};
+      const weekdayLabels = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() + ((8 - today.getDay()) % 7));
+
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + i);
+        const dateKey = date.toISOString().split("T")[0];
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const weekday = weekdayLabels[date.getDay()];
+        nextWeek[dateKey] = { label: `${weekday} (${day}/${month})`, names: [] };
+      }
+
+      for (const date in data) {
+        if (!nextWeek[date]) continue;
+        for (const shift in data[date]) {
+          for (const id in data[date][shift]) {
+            const req = data[date][shift][id];
+            if (req.status === "đã duyệt") {
+              nextWeek[date].names.push(`${req.name} (${shift})`);
+            }
+          }
+        }
+      }
+
+      for (const date in nextWeek) {
+        if (nextWeek[date].names.length === 0) continue;
+        const dayCard = document.createElement("div");
+        dayCard.className = "request-card";
+        dayCard.innerHTML = `
+          <h5>${nextWeek[date].label}</h5>
+          ${nextWeek[date].names.map(name => `<div class="name-tag">${name}</div>`).join("")}`;
+        weekSchedule.appendChild(dayCard);
+      }
+    }
+
+    loadRequests();
+
+    const popupDaXuLy = document.getElementById("popupDaXuLy");
+    const daXuLyList = document.getElementById("daXuLyList");
+
+    window.hienDanhSachDaXuLy = () => {
+      daXuLyList.innerHTML = "<p class='text-center text-muted'>Đang tải...</p>";
+      popupDaXuLy.classList.add("show");
+
+      onValue(ref(db, "lichnghi/"), snapshot => {
+        const data = snapshot.val();
+        daXuLyList.innerHTML = "";
+
+        if (!data) {
+          daXuLyList.innerHTML = "<p class='text-center text-muted'>Không có yêu cầu nào.</p>";
+          return;
+        }
+
+        const entries = [];
+
+        for (const date in data) {
+          for (const shift in data[date]) {
+            for (const id in data[date][shift]) {
+              const req = data[date][shift][id];
+              const status = req.status;
+              if (status !== "đã duyệt" && status !== "từ chối") continue;
+
+              const key = `${req.name}|${shift}|${status}|${req.reason || "-"}`;
+              const formattedDate = formatVietnameseDate(date);
+
+              const existing = entries.find(e => e.key === key);
+              if (existing) {
+                existing.requests.push({ date, id });
+                existing.dates.push(formattedDate);
+              } else {
+                entries.push({
+                  key, name: req.name, shift, status, reason: req.reason || "-", dates: [formattedDate], requests: [{ date, id }]
+                });
+              }
+            }
+          }
+        }
+
+        for (const entry of entries) {
+          const { name, shift, status, reason, dates, requests } = entry;
+          const statusHTML = status === "đã duyệt"
+            ? `<i class="fa-solid fa-circle-check text-success" title="Đã duyệt"></i>`
+            : `<i class="fa-solid fa-circle-xmark text-danger" title="Từ chối"></i>`;
+
+          const card = document.createElement("div");
+          card.className = "request-card";
+          card.innerHTML = `
+            <h5>${name} <span class="shift">(${shift})</span></h5>
+            <div class="dates">📅 ${dates.sort().join("<br>")}</div>
+            <div class="reason">📝 ${reason}</div>
+            <div class="status-action">${statusHTML}</div>
+          `;
+          card.addEventListener("click", () => {
+            popupDaXuLy.classList.remove("show");
+            showActionPopup(requests, shift);
+          });
+          daXuLyList.appendChild(card);
+        }
+
+        if (entries.length === 0) {
+          daXuLyList.innerHTML = "<p class='text-center text-muted'>Không có yêu cầu nào đã xử lý.</p>";
+        }
+      }, { onlyOnce: true });
+    };
+
+    window.anDanhSachDaXuLy = () => {
+      popupDaXuLy.classList.remove("show");
+    };
+
+    window.guiLichNghiTelegram = async () => {
+      try {
+        const snapshot = await get(ref(db, "lichnghi/"));
+        const data = snapshot.val();
+
+        if (!data) {
+          showToast("📭 Không có lịch nghỉ để gửi.");
+          return;
+        }
+
+        const today = new Date();
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() + ((8 - today.getDay()) % 7));
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+
+        const formatDate = (date) => {
+          const day = String(date.getDate()).padStart(2, "0");
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          return `${day}/${month}`;
+        };
+
+        const weekLabel = `${formatDate(weekStart)} → ${formatDate(weekEnd)}`;
+        const updatedAt = `${formatDate(today)} – ${today.getHours().toString().padStart(2, "0")}:${today.getMinutes().toString().padStart(2, "0")}`;
+        const weekdayLabels = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+        const nextWeek = {};
+        const futureDates = [];
+
+        for (let i = 0; i < 7; i++) {
+          const date = new Date(weekStart);
+          date.setDate(weekStart.getDate() + i);
+          const key = date.toISOString().split("T")[0];
+          const label = `*${weekdayLabels[date.getDay()]} – ${formatDate(date)}*`;
+          nextWeek[key] = { label, names: [] };
+        }
+
+        for (const date in data) {
+          const currentDate = new Date(date);
+          for (const shift in data[date]) {
+            for (const id in data[date][shift]) {
+              const req = data[date][shift][id];
+              if (req.status === "đã duyệt") {
+                const line = `${req.name} — ${shift}`;
+                if (nextWeek[date]) {
+                  nextWeek[date].names.push(line);
+                } else if (currentDate > weekEnd) {
+                  const label = `${weekdayLabels[currentDate.getDay()]} – ${formatDate(currentDate)}`;
+                  futureDates.push({ raw: date, display: label, name: line });
+                }
+              }
+            }
+          }
+        }
+
+        let message = `*📅 LỊCH NGHỈ DỰ KIẾN TUẦN: ${weekLabel}*\n`;
+        message += `Được cập nhật lúc: __${updatedAt}__\n\n`;
+        message += `──────────────────────────────\n`;
+
+        let hasData = false;
+        for (const date in nextWeek) {
+          if (nextWeek[date].names.length > 0) {
+            hasData = true;
+            message += `${nextWeek[date].label}\n`;
+            nextWeek[date].names.forEach(name => {
+              message += `• ${name}\n`;
+            });
+            message += `\n`;
+          }
+        }
+
+        if (!hasData) {
+          message += `_Chưa có ai đăng ký nghỉ tuần tới._\n\n`;
+        }
+
+        if (futureDates.length > 0) {
+          message += `──────────────────────────────\n`;
+          message += `*Tạm ứng lịch tuần tới:*\n`;
+          futureDates.sort((a, b) => new Date(a.raw) - new Date(b.raw));
+          futureDates.forEach(f => {
+            message += `• ${f.display}: ${f.name}\n`;
+          });
+          message += `\n`;
+        }
+
+        message += `*Lưu ý:* Vui lòng kiểm tra lại lịch trước khi sắp xếp ca trực.`;
+
+        const token = "7807531189:AAGhMQ9jjew7Q9ywMDSTaGDy4Ns6XtPQUrI";
+        const chatId = "-4716169472";
+        const url = `https://api.telegram.org/bot${token}/sendMessage`;
+
+        await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: "Markdown"
+          })
+        });
+
+        showToast("📨 Đã gửi lịch nghỉ lên Telegram.");
+      } catch (err) {
+        console.error(err);
+        showToast("❌ Gửi thất bại.");
+      }
+    };
+
+    let isWeekScheduleVisible = false;
+
+    window.toggleWeekSchedule = () => {
+      const scheduleContainer = document.getElementById("weekScheduleContainer");
+      const schedule = document.getElementById("weekSchedule");
+      const toggleBtn = document.getElementById("toggleWeekScheduleBtn");
+
+      isWeekScheduleVisible = !isWeekScheduleVisible;
+
+      scheduleContainer.classList.toggle("hidden", !isWeekScheduleVisible);
+      schedule.style.display = isWeekScheduleVisible ? "block" : "none";
+      toggleBtn.textContent = isWeekScheduleVisible ? "Ẩn lịch" : "Hiện lịch";
+    };
+
+    document.addEventListener("click", function (e) {
+      const popup = document.getElementById("actionPopup");
+      const content = popup.querySelector(".popup-content");
+      if (popup.classList.contains("show") && e.target === popup) {
+        popup.classList.remove("show");
+      }
+    });
+  </script>
+</body>
+</html>
