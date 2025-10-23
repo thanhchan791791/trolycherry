@@ -319,10 +319,10 @@
        // --- Role-Based Access Control (RBAC) Setup - UPDATED PERMISSIONS ---
 const PERMISSIONS = {
     // 1. Cập nhật phân quyền cho Admin: Thêm 'order' và 'menu_management'
-    'admin': ['order', 'sales', 'stats', 'revenue_expense', 'inventory', 'kitchen_bar', 'personnel', 'menu_management', 'table_booking'], // THÊM QUYỀN MỚI
+    'admin': ['revenue_expense', 'stats', 'inventory', 'personnel', 'menu_management', 'table_booking','lichnghi','order','kitchen_bar','lichnghi','sales'], // THÊM QUYỀN MỚI
     // 2. Cập nhật phân quyền cho Waiter: Chỉ có 'order'
     'waiter': ['order'], 
-    'cashier': ['sales', 'stats', 'revenue_expense', 'table_booking'], // THÊM QUYỀN MỚI
+    'cashier': ['sales', 'kitchen_bar', 'revenue_expense', 'stats'], // THÊM QUYỀN MỚI
     'kitchen_bar_staff': ['inventory', 'kitchen_bar'], 
     'accountant': ['stats', 'revenue_expense', 'personnel'],
     // THÊM VAI TRÒ MỚI: RECEPTIONIST
@@ -340,6 +340,15 @@ const PERMISSIONS = {
     { id: 'inventory', name: 'Tồn kho', icon: 'fas fa-boxes', color: '#AF52DE', view: renderInventoryView, file: 'quanlytonkho.html' }, // Purple
     { id: 'kitchen_bar', name: 'Bếp & Bar', icon: 'fas fa-cookie-bite', color: '#FF3B30', view: renderKitchenBarView, file: 'bepbar.html' }, // Red
     { id: 'personnel', name: 'Nhân sự', icon: 'fas fa-users', color: '#5856D6', view: renderPersonnelView }, // Indigo
+    {
+  id: 'lichnghi',
+  name: 'Lịch nghỉ',
+  icon: 'fas fa-calendar-alt', // Icon lịch
+  color: '#34C759', // Xanh lá nhẹ (bạn có thể đổi)
+  view: renderLichnghiView ,
+  file: 'lichnghi.html'
+},
+
     // CHỨC NĂNG MỚI ĐƯỢC THÊM VÀO ĐÂY
     { id: 'menu_management', name: 'Quản lý Menu', icon: 'fas fa-clipboard-list', color: '#9400D3', view: renderMenuView, file: 'menu.html' }, // Dark Violet
 ];
@@ -611,6 +620,9 @@ const PERMISSIONS = {
 
         function renderInventoryView() {
             renderIframeView(getFile('inventory'), getName('inventory')); // quanlytonkho.html
+        }
+ function renderLichnghiView() {
+            renderIframeView(getFile('lichnghi'), getName('lichnghi')); // quanlytonkho.html
         }
 
         function renderKitchenBarView() {
