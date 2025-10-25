@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chỉnh Sửa Trạng Thái Thực Đơn - iOS Switch</title>
+    <title>Chỉnh Sửa Trạng Thái Thực Đơn - iOS Switch (SD)</title>
     
     <style>
         /* ========================================= */
@@ -37,7 +37,7 @@
             }
         }
 
-        body {
+        .sd-body { /* Đổi: body -> .sd-body */
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Roboto, sans-serif;
             margin: 0;
             padding-top: 110px;
@@ -49,14 +49,14 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        body::-webkit-scrollbar {
+        .sd-body::-webkit-scrollbar {
             display: none;
         }
 
         /* ========================================= */
         /* II. HEADER & SEARCH BAR */
         /* ========================================= */
-        .fixed-top-area {
+        .sd-fixed-top-area { /* Đổi: .fixed-top-area -> .sd-fixed-top-area */
             position: fixed;
             top: 0;
             left: 0;
@@ -69,24 +69,24 @@
             padding: 12px 12px 8px 12px;
         }
         @media (prefers-color-scheme: dark) {
-            .fixed-top-area {
+            .sd-fixed-top-area {
                 background-color: rgba(44, 44, 46, 0.95);
                 border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             }
         }
         
-        .header {
+        .sd-header { /* Đổi: .header -> .sd-header */
             text-align: center;
             margin-bottom: 10px;
         }
-        .header h1 {
+        .sd-header h1 {
             font-size: 17px;
             font-weight: 700;
             color: var(--ios-blue);
             margin: 0;
         }
 
-        .search-container {
+        .sd-search-container { /* Đổi: .search-container -> .sd-search-container */
             position: relative;
         }
         #search-input {
@@ -109,7 +109,7 @@
             outline: none;
             box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3);
         }
-        .search-container::before {
+        .sd-search-container::before {
             content: "🔍";
             position: absolute;
             left: 10px;
@@ -127,11 +127,11 @@
             padding: 12px;
         }
         
-        .menu-category {
+        .sd-menu-category { /* Đổi: .menu-category -> .sd-menu-category */
             margin-bottom: 20px;
         }
 
-        .menu-category h2 {
+        .sd-menu-category h2 {
             font-size: 22px;
             font-weight: 700;
             color: var(--ios-text-primary);
@@ -139,11 +139,11 @@
             padding-left: 5px;
         }
         
-        .menu-category.filtered h2 {
+        .sd-menu-category.sd-filtered h2 { /* Đổi: .filtered -> .sd-filtered */
             display: none;
         }
         
-        .menu-item-card {
+        .sd-menu-item-card { /* Đổi: .menu-item-card -> .sd-menu-item-card */
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -161,21 +161,21 @@
             transform: translateY(15px);
         }
         
-        .menu-item-card:active {
+        .sd-menu-item-card:active {
             transform: scale(0.98); 
             box-shadow: 0 2px 6px var(--ios-shadow-color);
         }
         
-        .menu-item-card.hidden {
+        .sd-menu-item-card.sd-hidden { /* Đổi: .hidden -> .sd-hidden */
             display: none;
         }
 
-        .item-details {
+        .sd-item-details { /* Đổi: .item-details -> .sd-item-details */
             flex-grow: 1;
             padding-right: 15px;
         }
 
-        .item-details strong {
+        .sd-item-details strong {
             font-size: 17px;
             font-weight: 600;
             color: var(--ios-text-primary);
@@ -183,7 +183,7 @@
             line-height: 1.3;
         }
 
-        .item-details span {
+        .sd-item-details span {
             font-size: 15px;
             color: var(--ios-text-secondary);
             display: block;
@@ -193,20 +193,20 @@
         /* ========================================= */
         /* IV. IOS TOGGLE SWITCH (Nút Gạt) */
         /* ========================================= */
-        .ios-switch-container {
+        .sd-ios-switch-container { /* Đổi: .ios-switch-container -> .sd-ios-switch-container */
             position: relative;
             display: inline-block;
             width: 51px; /* Chiều rộng chuẩn iOS */
             height: 31px; /* Chiều cao chuẩn iOS */
         }
 
-        .ios-switch {
+        .sd-ios-switch { /* Đổi: .ios-switch -> .sd-ios-switch */
             opacity: 0;
             width: 0;
             height: 0;
         }
 
-        .slider {
+        .sd-slider { /* Đổi: .slider -> .sd-slider */
             position: absolute;
             cursor: pointer;
             top: 0;
@@ -220,7 +220,7 @@
         }
         
         /* Núm gạt (thumb) */
-        .slider:before {
+        .sd-slider:before {
             position: absolute;
             content: "";
             height: 27px; /* Kích thước thumb */
@@ -234,27 +234,27 @@
         }
 
         /* BẬT - Màu xanh lá */
-        .ios-switch:checked + .slider {
+        .sd-ios-switch:checked + .sd-slider {
             background-color: var(--ios-green);
         }
 
         /* BẬT - Gạt thumb sang phải */
-        .ios-switch:checked + .slider:before {
+        .sd-ios-switch:checked + .sd-slider:before {
             transform: translateX(20px);
         }
         
         /* Trạng thái loading/disabled */
-        .ios-switch-container.disabled .slider {
+        .sd-ios-switch-container.sd-disabled .sd-slider { /* Đổi: .disabled -> .sd-disabled */
             opacity: 0.6;
             pointer-events: none;
         }
         
         /* Hiệu ứng Glow/Flash khi cập nhật (Áp dụng cho container) */
-        .ios-switch-container.glow-green {
+        .sd-ios-switch-container.sd-glow-green { /* Đổi: .glow-green -> .sd-glow-green */
             box-shadow: 0 0 10px var(--ios-green), 0 0 20px rgba(52, 199, 89, 0.4);
             border-radius: 31px;
         }
-        .ios-switch-container.glow-red {
+        .sd-ios-switch-container.sd-glow-red { /* Đổi: .glow-red -> .sd-glow-red */
             box-shadow: 0 0 10px var(--ios-red), 0 0 20px rgba(255, 59, 48, 0.4);
             border-radius: 31px;
         }
@@ -262,7 +262,7 @@
         /* ========================================= */
         /* V. HUD NOTIFICATION */
         /* ========================================= */
-        .update-message {
+        .sd-update-message { /* Đổi: .update-message -> .sd-update-message */
             position: fixed;
             top: 50%;
             left: 50%;
@@ -284,23 +284,23 @@
             transition: opacity 0.3s var(--ios-ease), transform 0.3s var(--ios-ease);
         }
 
-        .update-message.visible {
+        .sd-update-message.sd-visible { /* Đổi: .visible -> .sd-visible */
             opacity: 1;
             visibility: visible;
             transform: translate(-50%, -50%);
         }
         
-        .update-message .icon {
+        .sd-update-message .sd-icon { /* Đổi: .icon -> .sd-icon */
             font-size: 36px;
             display: block;
             margin-bottom: 5px;
         }
         
-        .update-message strong {
+        .sd-update-message strong {
             font-weight: 700;
         }
         
-        .no-results {
+        .sd-no-results { /* Đổi: .no-results -> .sd-no-results */
             text-align: center;
             padding: 20px;
             font-style: italic;
@@ -312,21 +312,18 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
-<body>
-
-    <div class="fixed-top-area">
-        <div class="header">
+<body class="sd-body"> <div class="sd-fixed-top-area">
+        <div class="sd-header">
             <h1>🍽️ Chỉnh Sửa Thực Đơn</h1>
         </div>
-        <div class="search-container">
+        <div class="sd-search-container">
             <input type="text" id="search-input" placeholder="Tìm kiếm món ăn, đồ uống...">
         </div>
     </div>
     
-    <div id="menu-container" class="loading">Đang tải dữ liệu...</div>
-    <div id="no-results" class="no-results">Không tìm thấy món ăn nào phù hợp.</div>
+    <div id="menu-container" class="sd-loading">Đang tải dữ liệu...</div> <div id="no-results" class="sd-no-results">Không tìm thấy món ăn nào phù hợp.</div>
     
-    <div id="update-message" class="update-message"></div>
+    <div id="update-message" class="sd-update-message"></div>
 
     <script>
         // =========================================
@@ -361,24 +358,24 @@
             const statusText = newStatus === 'available' ? 'CÒN MÓN' : 'HẾT MÓN';
             const icon = newStatus === 'available' ? '✅' : '❌';
             
-            updateMessage.innerHTML = `<span class="icon">${icon}</span><strong>${statusText}</strong><br/>${itemName}`;
-            updateMessage.className = `update-message visible ${type}`;
+            updateMessage.innerHTML = `<span class="sd-icon">${icon}</span><strong>${statusText}</strong><br/>${itemName}`; // Đổi class: .icon -> .sd-icon
+            updateMessage.className = `sd-update-message sd-visible ${type}`; // Đổi class: .update-message, .visible -> .sd-update-message, .sd-visible
             
             setTimeout(() => {
-                updateMessage.classList.remove('visible');
+                updateMessage.classList.remove('sd-visible');
             }, 1800); 
         }
 
         // 2. Hàm cập nhật trạng thái lên Firebase
         function updateStatus(category, itemKey, itemName, newStatus, switchElement) {
             const path = `${category}/${itemKey}/status`;
-            const containerElement = switchElement.closest('.ios-switch-container');
-            
+            const containerElement = switchElement.closest('.sd-ios-switch-container'); // Đổi class
+
             // ❌ NGĂN CHẶN NHẤN LẶP LẠI: Vô hiệu hóa switch ngay lập tức
-            containerElement.classList.add('disabled');
+            containerElement.classList.add('sd-disabled'); // Đổi class
             
             // Thêm hiệu ứng flash glow
-            const glowClass = newStatus === 'available' ? 'glow-green' : 'glow-red';
+            const glowClass = newStatus === 'available' ? 'sd-glow-green' : 'sd-glow-red'; // Đổi class
             containerElement.classList.add(glowClass);
 
             menuRef.child(path).set(newStatus)
@@ -391,7 +388,7 @@
                         containerElement.classList.remove(glowClass);
                         
                         // ✅ KÍCH HOẠT LẠI NÚT
-                        containerElement.classList.remove('disabled');
+                        containerElement.classList.remove('sd-disabled'); // Đổi class
 
                         // Cập nhật trạng thái trong dữ liệu local
                         if (allMenuData[category] && allMenuData[category][itemKey]) {
@@ -408,7 +405,7 @@
                     switchElement.checked = newStatus !== 'available'; // New status là 'available', thì checked = false
                     
                     // ✅ KÍCH HOẠT LẠI NÚT
-                    containerElement.classList.remove('disabled');
+                    containerElement.classList.remove('sd-disabled'); // Đổi class
                 });
         }
 
@@ -417,21 +414,21 @@
             const isAvailable = item.status === 'available';
             
             const itemDiv = document.createElement('div');
-            itemDiv.className = 'menu-item-card';
+            itemDiv.className = 'sd-menu-item-card'; // Đổi class
             itemDiv.setAttribute('data-key', key); 
             itemDiv.setAttribute('data-name', item.name.toLowerCase()); 
 
             itemDiv.innerHTML = `
-                <div class="item-details">
+                <div class="sd-item-details">
                     <strong>${item.name}</strong> 
                     <span>${item.price.toLocaleString('vi-VN')} VNĐ</span>
                 </div>
-                <div class="ios-switch-container">
-                    <input type="checkbox" id="switch-${key}" class="ios-switch" ${isAvailable ? 'checked' : ''}>
-                    <label for="switch-${key}" class="slider"></label>
+                <div class="sd-ios-switch-container">
+                    <input type="checkbox" id="switch-${key}" class="sd-ios-switch" ${isAvailable ? 'checked' : ''}>
+                    <label for="switch-${key}" class="sd-slider"></label>
                 </div>
-            `;
-            
+            `; // Đổi class
+
             // Tương tác khi gạt switch
             const switchElement = itemDiv.querySelector(`#switch-${key}`);
             switchElement.addEventListener('change', (event) => {
@@ -460,7 +457,7 @@
                     const categoryName = category === 'food' ? 'Món Ăn 🍽️' : 'Đồ Uống 🍹';
                     
                     const categoryDiv = document.createElement('div');
-                    categoryDiv.className = 'menu-category';
+                    categoryDiv.className = 'sd-menu-category'; // Đổi class
                     categoryDiv.id = `category-${category}`;
                     categoryDiv.innerHTML = `<h2>${categoryName}</h2>`;
 
@@ -491,31 +488,31 @@
         // 5. Hàm lọc món ăn theo từ khóa (REAL-TIME FILTER)
         function filterItems() {
             const query = searchInput.value.toLowerCase().trim();
-            const categories = document.querySelectorAll('.menu-category');
+            const categories = document.querySelectorAll('.sd-menu-category'); // Đổi class
             
             let visibleCount = 0;
 
             categories.forEach(categoryDiv => {
                 let categoryVisibleCount = 0;
-                categoryDiv.classList.remove('filtered'); 
+                categoryDiv.classList.remove('sd-filtered'); // Đổi class
                 
-                const items = categoryDiv.querySelectorAll('.menu-item-card');
+                const items = categoryDiv.querySelectorAll('.sd-menu-item-card'); // Đổi class
                 items.forEach(card => {
                     const itemName = card.getAttribute('data-name');
                     
                     if (itemName.includes(query) || query === '') {
-                        card.classList.remove('hidden');
+                        card.classList.remove('sd-hidden'); // Đổi class
                         card.style.display = 'flex'; 
                         categoryVisibleCount++;
                         visibleCount++;
                     } else {
-                        card.classList.add('hidden');
+                        card.classList.add('sd-hidden'); // Đổi class
                         card.style.display = 'none'; 
                     }
                 });
                 
                 if (categoryVisibleCount === 0 && items.length > 0) {
-                     categoryDiv.classList.add('filtered');
+                     categoryDiv.classList.add('sd-filtered'); // Đổi class
                 }
             });
 
@@ -535,13 +532,13 @@
             if (menuData) {
                 allMenuData = menuData; // Lưu trữ dữ liệu
                 renderMenu(menuData);
-                menuContainer.classList.remove('loading');
+                menuContainer.classList.remove('sd-loading');
             } else {
-                menuContainer.innerHTML = '<p class="loading" style="color:var(--ios-text-secondary);">Không tìm thấy dữ liệu thực đơn.</p>';
+                menuContainer.innerHTML = '<p class="sd-loading" style="color:var(--ios-text-secondary);">Không tìm thấy dữ liệu thực đơn.</p>';
             }
         }, (error) => {
             console.error("Lỗi đọc dữ liệu từ Firebase: ", error);
-            menuContainer.innerHTML = `<p class="loading error">❌ Lỗi: Không thể tải dữ liệu thực đơn.</p>`;
+            menuContainer.innerHTML = `<p class="sd-loading sd-error">❌ Lỗi: Không thể tải dữ liệu thực đơn.</p>`;
         });
     </script>
 </body>
