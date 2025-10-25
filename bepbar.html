@@ -32,6 +32,8 @@
             --ios-card-bg: #FFFFFF; /* Card background */
             --default-transition: all 0.25s ease-in-out;
             --fast-transition: all 0.15s ease-out;
+            --ios-indigo: #5856D6; /* NEW: Màu cho số lượng */
+            --ios-yellow: #FFCC00; /* NEW: Màu cho chỉnh sửa */
         }
 
         /* 3. iOS Card Style */
@@ -60,7 +62,6 @@
         }
 
         .ios-button-complete {
-            /* Override style cũ bằng style mới */
             background-color: var(--ios-green);
             color: white;
             padding: 12px 16px; 
@@ -75,7 +76,7 @@
             background-color: #2CA94D;
         }
         
-        /* Nút Xóa (MỚI) */
+        /* Nút Xóa Đơn Hàng */
         .ios-button-delete {
             background-color: var(--ios-red);
             color: white;
@@ -89,6 +90,22 @@
         .ios-button-delete:active {
             transform: scale(0.96); 
             background-color: #D62F26;
+        }
+        
+        /* Nút Chỉnh Sửa (MỚI) */
+        .ios-button-edit {
+            background-color: var(--ios-yellow);
+            color: #1C1C1E; /* iOS System Black */
+            padding: 12px 16px; 
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--fast-transition);
+            box-shadow: 0 4px 10px rgba(255, 204, 0, 0.4);
+        }
+        .ios-button-edit:active {
+            transform: scale(0.96); 
+            background-color: #D6A900;
         }
 
         /* 5. Segmented Control (Tabs) Style */
@@ -121,10 +138,8 @@
         /* 6. Order Card Specific Styles */
         .order-card {
             margin-bottom: 20px;
-            /* Thay thế class .card bằng .card-ios */
             @apply card-ios; 
-            /* Món ăn/uống item list */
-            --item-color: #5856D6; /* iOS Indigo cho số lượng */
+            --item-color: var(--ios-indigo); /* iOS Indigo cho số lượng */
         }
         
         /* Header Đơn hàng */
@@ -229,6 +244,47 @@
         .button-container > button {
             flex: 1; /* Chia đều không gian */
         }
+        
+        /* (MỚI) Style cho nút Edit Item trong Order Card */
+        .item-list-container li {
+            position: relative;
+        }
+        .edit-item-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--ios-blue);
+            font-size: 16px;
+            padding: 4px 8px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            opacity: 0.7;
+        }
+        .edit-item-btn:hover {
+            opacity: 1;
+        }
+        
+        /* NEW Modal for Item Edit */
+        #item-edit-modal-backdrop {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #item-edit-modal-backdrop.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #item-edit-modal-backdrop > div { 
+            transform: translateY(20px);
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            opacity: 0;
+            @apply card-ios;
+            border-radius: 20px; 
+            padding: 24px;
+        }
+        #item-edit-modal-backdrop.show > div {
+            transform: translateY(0);
+            opacity: 1;
+        }
 
 
     </style>
@@ -324,6 +380,40 @@
             </div>
         </div>
     </div>
+    
+    <div id="item-edit-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm hidden justify-center items-center z-50" onclick="if(event.target.id === 'item-edit-modal-backdrop') hideItemEditModal();">
+        <div class="w-11/12 max-w-sm" onclick="event.stopPropagation()">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Chỉnh Sửa Món</h3>
+            <p id="item-edit-name" class="mb-4 text-lg font-semibold text-gray-800"></p>
+            
+            <div class="mb-6 space-y-3">
+                <div class="flex justify-between items-center p-3 card-ios shadow-none border border-gray-200">
+                    <span class="text-gray-700 font-medium">Giảm Số Lượng Hiện Tại (<span id="current-quantity"></span>)</span>
+                    <div class="flex items-center space-x-2">
+                        <button id="decrease-btn" class="ios-button-delete !p-2 !rounded-lg !shadow-none !w-8 !h-8 disabled:opacity-50" disabled>
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" id="quantity-to-decrease" value="1" min="1" class="w-16 text-center border rounded-lg p-1 font-bold text-lg" onchange="validateDecreaseInput(this)">
+                        <button id="increase-btn" class="ios-button-complete !p-2 !rounded-lg !shadow-none !w-8 !h-8">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center p-3 card-ios shadow-none border border-red-300">
+                    <span class="text-red-600 font-medium">Xóa Hẳn Món Khỏi Đơn</span>
+                    <button id="delete-item-final-btn" class="ios-button-delete !py-2 !px-3 !shadow-none flex items-center text-sm">
+                        <i class="fas fa-trash-alt mr-2"></i> XÓA MÓN
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button id="item-edit-cancel" class="btn-ios bg-gray-300 text-gray-800" onclick="hideItemEditModal()">Trở lại</button> 
+                <button id="item-edit-confirm" class="btn-ios bg-blue-500 text-white">Xác nhận Giảm</button>
+            </div>
+        </div>
+    </div>
 
 
     <script>
@@ -350,7 +440,7 @@
             setTimeout(() => backdrop.classList.add('show'), 10); 
         }
 
-        // (MỚI) Hàm hiển thị modal xác nhận
+        // Hàm hiển thị modal xác nhận HỦY ĐƠN HÀNG
         function customConfirm(message, title, onConfirm) {
             const backdrop = document.getElementById('custom-modal-backdrop');
             document.getElementById('custom-modal-title').textContent = title;
@@ -359,15 +449,14 @@
             const okButton = document.getElementById('custom-modal-ok');
             const cancelButton = document.getElementById('custom-modal-cancel');
 
-            // Cấu hình cho Confirm
-            // ĐÃ SỬA: Thay 'Xóa' bằng 'Hủy' để đồng bộ với chức năng Hủy/Xóa đơn hàng
-            okButton.textContent = 'Hủy'; 
+            // Cấu hình cho Confirm Hủy Đơn Hàng
+            okButton.textContent = 'Hủy Đơn'; 
             okButton.className = 'ios-button-delete btn-ios';
             cancelButton.classList.remove('hidden');
             cancelButton.textContent = 'Trở lại';
             cancelButton.className = 'btn-ios bg-gray-300 text-gray-800';
 
-            // Logic khi nhấn Hủy (nút màu đỏ)
+            // Logic khi nhấn Hủy Đơn (nút màu đỏ)
             okButton.onclick = () => {
                 backdrop.classList.remove('show');
                 setTimeout(() => backdrop.classList.add('hidden'), 300); 
@@ -382,6 +471,177 @@
             
             backdrop.classList.remove('hidden');
             setTimeout(() => backdrop.classList.add('show'), 10); 
+        }
+        
+        // --- LOGIC CHỈNH SỬA TỪNG MÓN (MỚI) ---
+        let currentOrderKey = null;
+        let currentItemKey = null;
+        let currentItemName = null;
+        let currentQuantity = 0;
+        
+        const itemEditModalBackdrop = document.getElementById('item-edit-modal-backdrop');
+        const quantityToDecreaseInput = document.getElementById('quantity-to-decrease');
+        const decreaseBtn = document.getElementById('decrease-btn');
+        const increaseBtn = document.getElementById('increase-btn');
+        const confirmEditBtn = document.getElementById('item-edit-confirm');
+        const deleteItemFinalBtn = document.getElementById('delete-item-final-btn');
+        
+        function hideItemEditModal() {
+            itemEditModalBackdrop.classList.remove('show');
+            setTimeout(() => itemEditModalBackdrop.classList.add('hidden'), 300);
+            resetItemEditState();
+        }
+        
+        function resetItemEditState() {
+            currentOrderKey = null;
+            currentItemKey = null;
+            currentItemName = null;
+            currentQuantity = 0;
+            quantityToDecreaseInput.value = 1;
+        }
+        
+        function validateDecreaseInput(input) {
+            let value = parseInt(input.value);
+            if (isNaN(value) || value < 1) {
+                value = 1;
+            } else if (value > currentQuantity) {
+                value = currentQuantity;
+            }
+            input.value = value;
+            
+            decreaseBtn.disabled = (value <= 1);
+            increaseBtn.disabled = (value >= currentQuantity);
+            
+            // Cập nhật text nút confirm
+            confirmEditBtn.textContent = `Xác nhận Giảm ${value} Món`;
+        }
+
+        function showItemEditModal(orderKey, itemKey, itemName, quantity) {
+            currentOrderKey = orderKey;
+            currentItemKey = itemKey;
+            currentItemName = itemName;
+            currentQuantity = quantity;
+            
+            document.getElementById('item-edit-name').textContent = `${itemName} (ĐH ${orderKey.substring(0, 8)})`;
+            document.getElementById('current-quantity').textContent = quantity;
+            
+            // Reset và validate input
+            quantityToDecreaseInput.value = 1;
+            validateDecreaseInput(quantityToDecreaseInput);
+
+            // Gán lại logic cho các nút
+            increaseBtn.onclick = () => {
+                quantityToDecreaseInput.value = parseInt(quantityToDecreaseInput.value) + 1;
+                validateDecreaseInput(quantityToDecreaseInput);
+            };
+            decreaseBtn.onclick = () => {
+                quantityToDecreaseInput.value = parseInt(quantityToDecreaseInput.value) - 1;
+                validateDecreaseInput(quantityToDecreaseInput);
+            };
+
+            // Logic cho nút xác nhận Giảm
+            confirmEditBtn.onclick = () => {
+                const quantityToSubtract = parseInt(quantityToDecreaseInput.value);
+                if (quantityToSubtract > 0) {
+                    // Nếu số lượng cần giảm bằng với số lượng hiện tại, ta XÓA luôn món đó
+                    if (quantityToSubtract === currentQuantity) {
+                         confirmDeleteItem(currentOrderKey, currentItemKey, currentItemName, true);
+                    } else {
+                         updateItemQuantity(currentOrderKey, currentItemKey, currentItemName, currentQuantity - quantityToSubtract);
+                    }
+                }
+            };
+            
+            // Logic cho nút Xóa Hẳn Món
+            deleteItemFinalBtn.onclick = () => {
+                confirmDeleteItem(currentOrderKey, currentItemKey, currentItemName, false);
+            };
+
+            // Hiển thị modal
+            itemEditModalBackdrop.classList.remove('hidden');
+            setTimeout(() => itemEditModalBackdrop.classList.add('show'), 10);
+        }
+        
+        // Cập nhật số lượng món trong Firebase
+        async function updateItemQuantity(orderKey, itemKey, itemName, newQuantity) {
+             hideItemEditModal(); // Đóng modal chỉnh sửa
+             if (!database) {
+                customAlert(`Lỗi: Không thể kết nối đến cơ sở dữ liệu.`, 'Lỗi kết nối');
+                return;
+            }
+            
+            const ref = database.ref(`${KITCHEN_ORDERS_REF}/${orderKey}/items/${itemKey}/quantity`);
+            
+            try {
+                await ref.set(newQuantity);
+                customAlert(`Đã giảm số lượng món **${itemName}** xuống còn **${newQuantity}**!`, 'Cập nhật thành công');
+            } catch (error) {
+                console.error(`Lỗi khi cập nhật số lượng món ${itemKey}:`, error);
+                customAlert(`Lỗi hệ thống: Không thể giảm số lượng món.`, 'Lỗi');
+            }
+        }
+        
+        // Xóa hoàn toàn 1 món khỏi đơn hàng
+        async function deleteSingleItem(orderKey, itemKey, itemName) {
+            hideItemEditModal(); // Đóng modal chỉnh sửa
+            if (!database) {
+                customAlert(`Lỗi: Không thể kết nối đến cơ sở dữ liệu.`, 'Lỗi kết nối');
+                return;
+            }
+            
+            const ref = database.ref(`${KITCHEN_ORDERS_REF}/${orderKey}/items/${itemKey}`);
+            
+            try {
+                await ref.remove();
+                customAlert(`Đã **XÓA** món **${itemName}** khỏi đơn hàng.`, 'Đã Xóa Món');
+            } catch (error) {
+                console.error(`Lỗi khi xóa món ${itemKey}:`, error);
+                customAlert(`Lỗi hệ thống: Không thể xóa món.`, 'Lỗi');
+            }
+        }
+        
+        // Modal xác nhận XÓA MÓN
+        function confirmDeleteItem(orderKey, itemKey, itemName, isFromReduceQuantity) {
+            hideItemEditModal(); // Tạm đóng modal chỉnh sửa
+            
+            const message = isFromReduceQuantity
+                ? `Bạn có chắc chắn muốn **XÓA HOÀN TOÀN** món **${itemName}** này (vì số lượng giảm về 0) không?`
+                : `Bạn có chắc chắn muốn **XÓA HOÀN TOÀN** món **${itemName}** này khỏi đơn hàng không? Hành động này không thể hoàn tác.`;
+            
+            // Sử dụng customConfirm nhưng thay đổi logic nút OK/Cancel cho phù hợp
+            const backdrop = document.getElementById('custom-modal-backdrop');
+            document.getElementById('custom-modal-title').textContent = 'Xác nhận Xóa Món';
+            document.getElementById('custom-modal-message').innerHTML = message;
+            
+            const okButton = document.getElementById('custom-modal-ok');
+            const cancelButton = document.getElementById('custom-modal-cancel');
+
+            // Cấu hình cho Confirm Xóa Món
+            okButton.textContent = 'Xóa Món'; 
+            okButton.className = 'ios-button-delete btn-ios';
+            cancelButton.classList.remove('hidden');
+            cancelButton.textContent = 'Trở lại';
+            cancelButton.className = 'btn-ios bg-gray-300 text-gray-800';
+
+            // Logic khi nhấn Xóa Món (nút màu đỏ)
+            okButton.onclick = () => {
+                backdrop.classList.remove('show');
+                setTimeout(() => backdrop.classList.add('hidden'), 300); 
+                deleteSingleItem(orderKey, itemKey, itemName);
+            };
+
+            // Logic khi nhấn Trở lại (nút xám)
+            cancelButton.onclick = () => {
+                backdrop.classList.remove('show');
+                setTimeout(() => backdrop.classList.add('hidden'), 300);
+                // Mở lại modal chỉnh sửa nếu đang trong quy trình giảm số lượng
+                if (isFromReduceQuantity) {
+                    showItemEditModal(orderKey, itemKey, itemName, currentQuantity); 
+                }
+            };
+            
+            backdrop.classList.remove('hidden');
+            setTimeout(() => backdrop.classList.add('show'), 10);
         }
 
         // --- View Toggle Logic (Đã cập nhật) ---
@@ -422,7 +682,6 @@
 
         /**
          * Chuyển đổi timestamp sang định dạng ngày giờ dễ đọc
-         * (Unchanged)
          */
         function formatTimestamp(timestamp) {
             if (!timestamp) return "Không rõ thời gian";
@@ -431,9 +690,6 @@
 
             if (isNaN(date.getTime())) return "Không rõ thời gian";
 
-            // Cộng thêm 7 tiếng để chuẩn giờ VN (Giả định Firebase timestamp là UTC)
-            // LƯU Ý: Tuy nhiên, format ISO string của date.toString() đã tự dùng múi giờ local của trình duyệt. 
-            // Ta dùng cách đơn giản hơn để chỉ lấy giờ/phút/giây
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');
             const seconds = String(date.getSeconds()).padStart(2, '0');
@@ -447,7 +703,6 @@
         
         /**
          * Kiểm tra thời gian chờ để ưu tiên (ví dụ: > 15 phút thì ưu tiên)
-         * (Unchanged)
          */
         function isHighPriority(timestamp) {
             const fifteenMinutes = 15 * 60 * 1000;
@@ -460,10 +715,7 @@
 
         /**
          * Cập nhật trạng thái của TẤT CẢ các món đang pending trong một đơn hàng thành "completed"
-         * (Unchanged)
          */
-        // Mã Đã Sửa (Khoảng dòng 430)
-        // Thêm tham số itemType vào hàm
         async function completeOrder(orderKey, itemType) { 
             if (!database) {
                 customAlert(`Lỗi: Không thể kết nối đến cơ sở dữ liệu. Vui lòng kiểm tra cấu hình Firebase.`, 'Lỗi kết nối');
@@ -511,7 +763,7 @@
             }
         }
         
-        // (MỚI) Hàm XÓA toàn bộ đơn hàng (cả food và drink)
+        // Hàm XÓA toàn bộ đơn hàng (cả food và drink)
         async function deleteOrder(orderKey, tableName) {
             if (!database) {
                 customAlert(`Lỗi: Không thể kết nối đến cơ sở dữ liệu. Vui lòng kiểm tra cấu hình Firebase.`, 'Lỗi kết nối');
@@ -525,12 +777,14 @@
                 await ref.remove();
                 
                 // Tùy chọn: Thêm animation fade out cho card trước khi xóa khỏi DOM
-                const card = document.getElementById(`order-card-${orderKey}`);
-                if (card) {
-                     card.style.opacity = 0;
-                     card.style.transform = 'translateY(-20px)';
-                     setTimeout(() => card.remove(), 500); 
-                }
+                const cardKitchen = document.getElementById(`order-card-${orderKey}_food`);
+                const cardBar = document.getElementById(`order-card-${orderKey}_drink`);
+                
+                [cardKitchen, cardBar].filter(c => c).forEach(card => {
+                    card.style.opacity = 0;
+                    card.style.transform = 'translateY(-20px)';
+                    setTimeout(() => card.remove(), 500); 
+                });
 
                 customAlert(`Đơn hàng **${tableName}** đã được **HỦY** khỏi hệ thống.`, 'Đã Hủy');
 
@@ -540,11 +794,11 @@
             }
         }
         
-        // (MỚI) Hàm hiển thị popup xác nhận xóa
+        // Hàm hiển thị popup xác nhận hủy ĐƠN HÀNG
         function showDeleteConfirmation(orderKey, tableName) {
              const message = `Bạn có chắc chắn muốn **HỦY HOÀN TOÀN** đơn hàng **${tableName}** này khỏi hệ thống không? Hành động này không thể hoàn tác.`;
              customConfirm(message, 'Xác nhận Hủy Đơn Hàng', () => {
-                 // Nếu người dùng xác nhận (ấn nút Hủy màu đỏ), gọi hàm xóa
+                 // Nếu người dùng xác nhận (ấn nút Hủy Đơn màu đỏ), gọi hàm xóa
                  deleteOrder(orderKey, tableName);
              });
         }
@@ -692,11 +946,12 @@
         
         /**
          * Tạo thẻ (card) hiển thị toàn bộ đơn hàng đang chờ
-         * (ĐÃ CẬP NHẬT PHẦN BUTTON)
+         * (ĐÃ CẬP NHẬT PHẦN LIST ITEMS để thêm nút EDIT)
          */
         function createOrderCard(orderKey, tableName, items, cardType, createdAt, index) {
             const card = document.createElement('div');
-            card.id = `order-card-${orderKey}`;
+            // Cập nhật ID để phân biệt card Bếp và Bar cho cùng 1 orderKey
+            card.id = `order-card-${orderKey}_${cardType}`; 
             
             // Xác định class ưu tiên dựa trên thời gian
             const priorityClass = createdAt && isHighPriority(createdAt) ? 'priority-high' : '';
@@ -710,10 +965,16 @@
             const typeColorClass = cardType === 'food' ? 'order-header-food' : 'order-header-drink';
             const icon = cardType === 'food' ? 'fas fa-utensils' : 'fas fa-glass-martini-alt';
 
-            // Tạo danh sách các món
+            // Tạo danh sách các món (CÓ THÊM NÚT EDIT)
             const itemsHtml = items.map(item => `
                 <li class="flex justify-between items-center text-gray-700 py-2 border-b border-gray-100 last:border-b-0">
-                    <span class="font-medium text-base">${item.itemName}</span>
+                    <div class="flex items-center space-x-2">
+                         <button class="edit-item-btn" 
+                                onclick="showItemEditModal('${orderKey}', '${item.itemKey}', '${item.itemName.replace(/'/g, "\\'")}', ${item.quantity})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <span class="font-medium text-base">${item.itemName}</span>
+                    </div>
                     <span class="text-xl font-extrabold">${item.quantity}</span>
                 </li>
             `).join('');
@@ -745,7 +1006,7 @@
                     
                     <button onclick="completeOrder('${orderKey}', '${cardType}')" 
                             class="ios-button-complete btn-ios flex items-center justify-center">
-                        <i class="fas fa-check mr-2"></i> HOÀN THÀNH
+                        <i class="fas fa-check mr-2"></i> HOÀN THÀNH TẤT CẢ
                     </button>
                 </div>
             `;
@@ -754,7 +1015,7 @@
         }
 
         /**
-         * Tạo thẻ (card) hiển thị các món đã hoàn thành trong một đơn hàng (NEW)
+         * Tạo thẻ (card) hiển thị các món đã hoàn thành trong một đơn hàng
          */
         function createHistoryCard(orderKey, tableName, items, createdAt, index) {
             const card = document.createElement('div');
