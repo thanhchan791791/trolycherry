@@ -2,178 +2,260 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Theo Dõi Trạng Thái Bàn - iOS Inspired</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theo Dõi Trạng Thái Bàn - Realtime</title>
+    <!-- Load Tailwind CSS CDN for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom Font - SF Pro Display Simulation */
+        /*
+         * --- iOS STYLE BASE ---
+         * Font: San Francisco (SF Pro Display) or system fallback
+         * Dark Mode: Automatic using prefers-color-scheme
+         */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Helvetica Neue', sans-serif;
-            background-color: #F2F2F7; /* iOS Background */
-            color: #1C1C1E; /* iOS Dark Text */
-        }
-        
-        /* iOS-like soft shadow */
-        .shadow-ios {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.05);
+        :root {
+            /* iOS Light Mode Colors */
+            --background-primary: #f2f2f7; /* Lighter than white for depth */
+            --background-secondary: #ffffff; /* Card/Container background */
+            --text-primary: #1c1c1e;
+            --accent-blue: #007aff;
+            --accent-orange: #ff9500;
         }
 
-        /* Style for the interactive table card (iOS Press Effect) */
+        @media (prefers-color-scheme: dark) {
+            /* iOS Dark Mode Colors */
+            :root {
+                --background-primary: #000000;
+                --background-secondary: #1c1c1e;
+                --text-primary: #ffffff;
+                /* Accent colors remain vibrant */
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 'Inter', sans-serif;
+            background-color: var(--background-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* --- Custom Animations (for smooth iOS-like appearance) --- */
+
+        /* Keyframes for soft fade/slide in */
+        @keyframes fadeInSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Keyframes for Modal entry */
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* --- Element Styles --- */
+
+        /* 1. iOS Card Style (Floating, Large Radius) */
+        .ios-card {
+            border-radius: 20px; /* Large rounded corners (16-24px) */
+            background-color: var(--background-secondary);
+            /* Soft, lifted shadow for floating effect */
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); 
+            transition: all 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67); /* Smooth transition */
+            padding: 24px; /* Standard iOS spacing */
+        }
+
+        /* 2. Interactive Table Card (Hover/Tap Effects) */
         .table-card {
             cursor: pointer;
-            transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1);
             user-select: none;
-            will-change: transform;
+        }
+        .table-card:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* Lift slightly on hover */
+            transform: translateY(-2px);
         }
         .table-card:active {
-            transform: scale(0.95); /* Gentle press effect */
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transform: scale(0.97); /* iOS tap effect */
+            box-shadow: none; /* Shadow disappears on press */
         }
 
-        /* Modal backdrop style for iOS-like blur */
+        /* 3. iOS Button Styling (Shared for all primary buttons) */
+        .ios-button {
+            border-radius: 12px;
+            font-weight: 600;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+        }
+        .ios-button:active {
+            transform: scale(0.97);
+            box-shadow: none;
+        }
+
+        /* 4. Modal Backdrop (Glassmorphism/Blur Effect) */
         .modal-backdrop {
             display: flex;
-            backdrop-filter: blur(8px); /* Subtle glass effect on backdrop */
-        }
-        
-        /* Custom iOS Gradient Button */
-        .btn-ios-gradient {
-            background-image: linear-gradient(135deg, #007AFF, #5856D6); /* Blue-to-Purple Gradient */
-            transition: background-image 0.2s;
-        }
-        .btn-ios-gradient:hover {
-            opacity: 0.9;
+            animation: modalFadeIn 0.3s ease-out;
+            /* iOS Control Center Blur Effect */
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            background-color: rgba(0, 0, 0, 0.4);
         }
 
-        /* Modal Slide-in Animation */
-        #table-modal {
-            transition: opacity 0.3s ease-in-out;
-        }
-        .modal-slide-in {
-            opacity: 1;
-        }
-        .modal-slide-out {
-            opacity: 0;
-        }
-        
-        /* Modal Content Slide for iOS Feel */
+        /* 5. Modal Content Styling */
         #modal-content {
-            transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), opacity 0.3s ease-in-out;
-        }
-        .modal-slide-enter {
-            transform: translateY(100vh);
-            opacity: 0.5;
-        }
-        .modal-slide-enter-active {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        /* Header/Footer Blur */
-        .blur-header-footer {
-            backdrop-filter: blur(20px);
-            background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent white */
-            border-color: rgba(0, 0, 0, 0.05); /* Light border */
+            border-radius: 32px; /* Extra large radius for modal */
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: scale(0.95);
+            animation: fadeInSlideUp 0.3s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         
-        /* iOS Chip/Badge Styling */
-        .status-chip {
-             display: inline-flex;
-             align-items: center;
-             padding: 4px 10px;
-             font-size: 0.75rem; /* text-xs */
-             font-weight: 600; /* semibold */
-             border-radius: 9999px; /* rounded-full */
-             transition: background-color 0.2s;
+        @media (prefers-color-scheme: dark) {
+             #modal-content {
+                background-color: rgba(28, 28, 30, 0.9); /* Semi-transparent dark gray */
+            }
         }
-        .status-chip.pending {
-            background-color: #FF3B301A; /* Red 10% opacity */
-            color: #FF3B30; /* iOS Red */
+
+        /* 6. List/Order Item Styling */
+        .ios-list-item {
+            background-color: var(--background-secondary);
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: none;
+            border: 1px solid rgba(0, 0, 0, 0.05); /* Very subtle border */
+            transition: all 0.2s ease;
         }
-        .status-chip.done {
-            background-color: #34C7591A; /* Green 10% opacity */
-            color: #34C759; /* iOS Green */
+        @media (prefers-color-scheme: dark) {
+             .ios-list-item {
+                border: 1px solid rgba(255, 255, 255, 0.1); 
+            }
         }
+        
     </style>
 </head>
 <body class="min-h-screen">
+
     <div class="container mx-auto p-4 md:p-8">
-        <header class="text-center pt-8 pb-6 mb-6 bg-white shadow-ios rounded-3xl">
-            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-800">
-                <span class="text-[#007AFF]">Realtime</span> Status Bàn
+        <!-- Header (iOS Title Bar style) -->
+        <header class="py-4 mb-6">
+            <h1 class="text-3xl font-bold text-left md:text-4xl text-primary">
+                Trạng Thái <span class="text-red-600">Bàn</span>
             </h1>
-            <p class="text-gray-500 mt-2 font-medium text-sm">Nhấp vào bàn để xem thông tin hoặc đặt món</p>
+            <p class="text-sm text-gray-500 mt-1">Quản lý Realtime</p>
         </header>
 
+        <!-- Loading Indicator -->
         <div id="loading" class="text-center p-8 text-gray-500">
-            <svg class="animate-spin h-8 w-8 text-[#007AFF] mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-8 w-8 text-accent-blue mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="color: var(--accent-blue);">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="mt-3 font-medium">Đang kết nối tới Firebase...</p>
+            <p class="mt-3 text-sm">Đang kết nối tới Firebase...</p>
         </div>
 
-        <div id="tables-container" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            </div>
+        <!-- Tables Grid Container -->
+        <!-- Use iOS-style 16px gap -->
+        <div id="tables-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"> 
+            <!-- Table cards will be inserted here by JavaScript -->
+        </div>
 
-        <div id="error-message" class="hidden text-center p-6 mt-6 bg-[#FF3B301A] border border-[#FF3B30] text-[#FF3B30] rounded-xl font-medium" role="alert">
-            <p class="font-bold text-lg">Lỗi Kết Nối</p>
-            <p>Không thể tải dữ liệu bàn. Vui lòng kiểm tra console log để biết chi tiết.</p>
+        <!-- Error Message -->
+        <div id="error-message" class="hidden text-center p-4 mt-6 ios-card bg-red-50" role="alert">
+            <p class="font-bold text-red-600">Lỗi Kết Nối</p>
+            <p class="text-sm text-red-700">Không thể tải dữ liệu bàn. Vui lòng kiểm tra console log.</p>
         </div>
     </div>
 
-    <div id="table-modal" class="fixed inset-0 bg-gray-900/40 z-50 hidden items-end justify-center modal-slide-out modal-backdrop p-0" onclick="handleModalBackdropClick(event)">
-        <div id="modal-content" class="bg-white rounded-t-3xl shadow-2xl w-full max-w-full lg:max-w-4xl max-h-[90vh] overflow-hidden transform transition-all duration-300 flex flex-col modal-slide-enter">
-            <div id="modal-header" class="p-4 border-b border-gray-100 flex justify-between items-center blur-header-footer flex-shrink-0">
-                <h3 id="modal-table-name" class="text-xl font-bold text-slate-800">Thông tin Bàn</h3>
-                <button onclick="closeTableModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none p-1 rounded-full bg-gray-100 hover:bg-gray-200 active:scale-95 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <!-- Modal Popup for Table Actions and Orders (Start) -->
+    <!-- Apply modal-backdrop class for blur effect -->
+    <div id="table-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4"> 
+        <!-- Modal size adjusted for mobile/tablet viewing -->
+        <!-- Tailwind classes adapted for new iOS style and animation -->
+        <div id="modal-content" class="w-full max-w-4xl h-[90vh] overflow-hidden flex flex-col">
+            
+            <!-- Modal Header (Slightly opaque background for depth) -->
+            <div id="modal-header" class="p-4 border-b border-gray-200 flex justify-between items-center flex-shrink-0 bg-white/70" 
+                 style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+                <h3 id="modal-table-name" class="text-xl font-bold text-primary">Thông tin Bàn</h3>
+                <!-- Close Button (iOS style) -->
+                <button onclick="closeTableModal()" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 ios-button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             
-            <div id="modal-body-container" class="flex-grow overflow-y-auto">
-
-                <div id="main-actions-section" class="p-5 space-y-4">
-                    <button id="btn-order" data-table-name="" class="w-full py-4 px-4 rounded-xl text-lg font-bold text-white btn-ios-gradient transition duration-150 shadow-lg shadow-blue-500/30 active:scale-[0.98]">
+            <!-- Modal Body Container (Content Area) -->
+            <div id="modal-body-container" class="flex-grow overflow-y-auto p-4 space-y-4">
+                
+                <!-- 1. Main Action Buttons Section (View 1: Default/Orders List) -->
+                <div id="main-actions-section" class="space-y-4">
+                    <!-- iOS Accent Blue Button -->
+                    <button id="btn-order" data-table-name="" class="ios-button w-full py-3 text-lg font-semibold text-white" 
+                            style="background-color: var(--accent-blue); box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);">
                         &#x1F37D; Đặt Món (Mở Menu tại chỗ)
                     </button>
-                    <button id="btn-view-orders" class="w-full py-4 px-4 rounded-xl text-lg font-bold text-slate-800 bg-gray-200 hover:bg-gray-300 transition duration-150 shadow-md active:scale-[0.98]">
+                    <!-- iOS Accent Orange Button -->
+                    <button id="btn-view-orders" class="ios-button w-full py-3 text-lg font-semibold text-white" 
+                            style="background-color: var(--accent-orange); box-shadow: 0 4px 10px rgba(255, 149, 0, 0.3);">
                         &#x1F4DC; Xem Món Đã Order
                     </button>
                     
-                    <div id="ordered-items-display" class="hidden mt-4 p-5 border border-gray-200 rounded-xl max-h-96 overflow-y-auto bg-white shadow-inner">
-                        <p class="font-bold text-xl border-b pb-3 mb-4 text-slate-700 flex justify-between items-center">
+                    <!-- Ordered Items Display (Card style) -->
+                    <div id="ordered-items-display" class="hidden mt-4 ios-card p-4">
+                        <p class="font-bold text-lg border-b pb-3 mb-3 text-primary flex justify-between items-center">
                             Danh sách Món Đã Order 
-                            <span id="order-status-indicator" class="text-base font-medium status-chip pending"></span>
+                            <span id="order-status-indicator" class="text-sm font-normal text-red-600"></span>
                         </p>
-                        <ul id="order-list" class="space-y-3 text-base">
-                            </ul>
+                        <!-- Updated list style to use ios-list-item for smooth appearance -->
+                        <ul id="order-list" class="space-y-2 text-sm divide-y divide-gray-100"> 
+                            <!-- Items populated by JS -->
+                        </ul>
                     </div>
                 </div>
 
-                <div id="iframe-section" class="hidden w-full h-full flex flex-col absolute inset-0">
-                    <div class="p-3 border-b border-gray-100 bg-white flex items-center flex-shrink-0">
-                        <button id="btn-back-to-actions" class="px-3 py-1.5 mr-3 text-sm font-semibold text-[#007AFF] bg-white rounded-lg active:scale-95 transition border border-[#007AFF]/30">
-                            &larr; Quay Lại
+                <!-- 2. Menu Iframe Section (View 2: Iframe Menu) -->
+                <div id="iframe-section" class="hidden w-full h-full flex flex-col absolute inset-0 rounded-[32px] overflow-hidden">
+                    <div class="p-3 border-b border-gray-200 flex items-center flex-shrink-0 bg-white/80" 
+                        style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+                        <!-- iOS Back Button (Chevron style) -->
+                        <button id="btn-back-to-actions" class="flex items-center text-sm font-medium text-accent-blue ios-button p-1 -ml-1">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 2.5;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                            Quay Lại
                         </button>
-                        <span class="font-bold text-base text-slate-800">Đặt Món cho Bàn <span id="iframe-table-name" class="text-[#007AFF]"></span></span>
+                        <span class="font-bold text-base text-primary mx-auto pr-8">Đặt Món (Bàn <span id="iframe-table-name"></span>)</span>
                     </div>
-                    <iframe id="menu-iframe" src="" class="flex-grow w-full border-0"></iframe>
+                    <!-- The iframe loads the menu URL -->
+                    <!-- Removed border and added background for seamless look -->
+                    <iframe id="menu-iframe" src="" class="flex-grow w-full border-0 bg-white"></iframe> 
                 </div>
 
             </div>
             
-            <div id="modal-footer" class="p-4 border-t border-gray-100 text-right blur-header-footer flex-shrink-0">
-                <button onclick="closeTableModal()" class="px-5 py-2 text-base font-semibold text-[#007AFF] bg-gray-100 rounded-xl hover:bg-gray-200 active:scale-95 transition">Đóng</button>
+            <!-- Modal Footer (Only shown in Main Action View) -->
+            <div id="modal-footer" class="p-4 border-t border-gray-200 text-right flex-shrink-0 bg-white/70"
+                 style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+                <!-- iOS Tertiary Button -->
+                <button onclick="closeTableModal()" class="ios-button px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 shadow-sm">Đóng</button>
             </div>
         </div>
     </div>
+    <!-- Modal Popup (End) -->
+
+
+    <!-- Firebase SDK Imports (type="module" is required) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
         // Your web app's Firebase configuration (using the configuration provided by the user)
+        // ** DO NOT MODIFY THIS BLOCK **
         const firebaseConfig = {
             apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
             authDomain: "chitieu-7263e.firebaseapp.com",
@@ -192,7 +274,8 @@
         // --- GLOBAL STATE & CONSTANTS ---
         let allTablesData = {};
         let allOrders = {};
-        const MENU_URL = "https://thanhchan791791.github.io/member/menu/";
+        // UPDATED: Sử dụng địa chỉ IP và cổng cục bộ theo yêu cầu.
+        const MENU_BASE_URL = "http://192.168.156.106:5000/?table="; 
 
         // References to DOM elements
         const tablesContainer = document.getElementById('tables-container');
@@ -224,19 +307,16 @@
          * @param {string} tableName - The user-friendly name of the table.
          */
         function showActionButtonsView(tableName) {
+            // Revert modal size for action view
+            modalContent.classList.remove('max-w-4xl', 'h-[90vh]');
+            modalContent.classList.add('max-w-md', 'h-auto', 'max-h-[90vh]'); // Set back to smaller width
+
             // Update header and view visibility
             modalTableName.textContent = `Thao tác với Bàn: ${tableName}`;
             iframeSection.classList.add('hidden');
             mainActionsSection.classList.remove('hidden');
             orderedItemsDisplay.classList.add('hidden'); 
             modalFooter.classList.remove('hidden');
-
-            // Revert modal size for action view
-            modalContent.classList.remove('lg:max-w-4xl');
-            modalContent.classList.add('lg:max-w-lg'); // Set back to smaller width on desktop
-
-            // Ensure iframe is clear
-            menuIframe.src = ''; 
         }
 
         /**
@@ -245,48 +325,43 @@
          * @param {string} tableName - The user-friendly name of the table.
          */
         function showMenuIframeView(tableId, tableName) {
+            // Adjust modal size for iframe view
+            modalContent.classList.remove('max-w-md', 'h-auto');
+            modalContent.classList.add('max-w-4xl', 'h-[90vh]'); // Set to larger size
+
             // Update header and view visibility
             modalTableName.textContent = `Đặt Món cho Bàn: ${tableName}`;
             iframeTableNameSpan.textContent = tableName;
 
-            // Load URL into iframe
-            menuIframe.src = `${MENU_URL}?table=${tableId}&name=${tableName}`; 
+            // Đảm bảo tên bàn có khoảng trắng (ví dụ: "VIP 1") được mã hóa thành "VIP%201"
+            const encodedTableName = encodeURIComponent(tableName);
+            
+            // Load URL với tham số tên bàn đã được mã hóa
+            const menuUrlWithTable = `${MENU_BASE_URL}${encodedTableName}`;
+            menuIframe.src = menuUrlWithTable; 
+            console.log("Loading Menu URL:", menuUrlWithTable);
 
             // Swap views
             mainActionsSection.classList.add('hidden');
             iframeSection.classList.remove('hidden');
             modalFooter.classList.add('hidden'); // Hide footer close button
-
-            // Adjust modal size for iframe view
-            modalContent.classList.remove('lg:max-w-lg');
-            modalContent.classList.add('lg:max-w-4xl'); // Set to larger size on desktop
         }
 
 
         /**
-         * Closes the action modal with iOS-like slide-out animation.
+         * Closes the action modal.
          */
         window.closeTableModal = () => {
-            modalContent.classList.add('modal-slide-enter');
-            modalContent.classList.remove('modal-slide-enter-active');
-            tableModal.classList.add('modal-slide-out');
-            tableModal.classList.remove('modal-slide-in');
+            // Remove animation class before hiding
+            tableModal.classList.remove('modal-backdrop');
+            modalContent.style.animation = 'none';
 
+            // Wait a moment for the reverse animation (optional, but good for cleanup)
             setTimeout(() => {
                 tableModal.classList.add('hidden');
-                tableModal.classList.remove('modal-backdrop');
-                menuIframe.src = ''; // Clean up iframe source to stop video/audio if any
-                modalContent.classList.remove('modal-slide-enter'); // Clean up class for next time
-            }, 300); // Match transition duration
-        };
-
-        /**
-         * Handles click outside the modal content to close it.
-         */
-        window.handleModalBackdropClick = (event) => {
-            if (event.target === tableModal) {
-                closeTableModal();
-            }
+                modalContent.style.animation = ''; // Reset animation style
+                menuIframe.src = ''; // Clean up iframe source
+            }, 100); 
         };
         
         /**
@@ -300,11 +375,25 @@
             let totalPrice = 0;
             let hasPending = false;
             let foundOrder = false;
+            
+            // Normalize tableName for case-insensitive matching
+            const normalizedTableName = tableName.toLowerCase();
 
             // Iterate through all top-level orders
             Object.entries(allOrders).forEach(([orderKey, orderValue]) => {
-                // Check if this order belongs to the clicked table
-                if (orderValue.tableId === tableId && orderValue.items) {
+                
+                // *** LOGIC ĐỐI SÁNH ĐƠN HÀNG (QUAN TRỌNG) ***
+                // Kiểm tra orderValue.tableId (ID Firebase) HOẶC orderValue.tableName (tên thân thiện) 
+                // có khớp với ID hoặc Tên thân thiện của bàn đang được xem hay không.
+                const orderTableId = orderValue.tableId || '';
+                const orderTableName = (orderValue.tableName || '').toLowerCase();
+                
+                const isMatch = (
+                    orderTableId === tableId || 
+                    orderTableName === normalizedTableName
+                );
+
+                if (isMatch && orderValue.items) {
                     foundOrder = true;
                     // Iterate through the items of this specific order
                     Object.values(orderValue.items).forEach(item => {
@@ -312,28 +401,49 @@
                         totalPrice += itemTotal;
                         totalItemsCount += (item.quantity || 1);
                         
+                        const status = (item.status || 'pending').toLowerCase(); // Default to pending
+                        
                         // Check for pending status to flag the order
-                        if (item.status === 'pending') {
+                        if (status === 'pending') {
                             hasPending = true;
                         }
                         
                         // Formatting price
                         const formattedPrice = (item.price || 0).toLocaleString('vi-VN');
                         
-                        // LOGIC FIX: Coi mọi trạng thái KHÔNG PHẢI 'pending' là 'done'
-                        const isPending = item.status === 'pending';
-                        const statusClass = isPending ? 'status-chip pending' : 'status-chip done';
-                        const statusText = isPending ? 'Đang Chờ' : 'Đã Xong';
+                        // Sử dụng tên trạng thái tiếng Việt
+                        let statusText = '';
+                        let statusClass = '';
+                        
+                        switch (status) {
+                            case 'pending':
+                                statusText = 'Chưa Xong';
+                                statusClass = 'bg-red-500 text-white';
+                                break;
+                            case 'done':
+                            case 'served':
+                            case 'completed': 
+                                statusText = 'Đã Xong';
+                                statusClass = 'bg-green-500 text-white';
+                                break;
+                            default:
+                                statusText = 'Không rõ';
+                                statusClass = 'bg-gray-300 text-gray-800';
+                                break;
+                        }
 
                         const itemHtml = `
-                            <li class="flex justify-between items-start py-2 border-b border-gray-100 last:border-b-0">
-                                <div class="flex-1 min-w-0 pr-3">
-                                    <span class="font-medium text-slate-800">${item.itemName || 'Món không tên'}</span>
-                                    <span class="block text-xs text-gray-400 italic font-normal">${item.type || 'Khác'}</span>
+                            <li class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                                <div class="flex-1 min-w-0">
+                                    <span class="font-medium text-primary">${item.itemName || 'Món không tên'}</span>
+                                    <span class="block text-xs text-gray-500 italic">(${item.type || 'Khác'})</span>
                                 </div>
                                 <div class="flex flex-col items-end pl-3">
-                                    <span class="text-base font-semibold text-slate-700">${item.quantity || 1} x ${formattedPrice} VNĐ</span>
-                                    <span class="${statusClass} mt-1">${statusText}</span>
+                                    <span class="text-sm font-semibold">${item.quantity || 1} x ${formattedPrice} VNĐ</span>
+                                    <!-- Hiển thị trạng thái tiếng Việt -->
+                                    <span class="text-xs font-medium uppercase mt-1 px-2 py-0.5 rounded-full ${statusClass}">
+                                        ${statusText}
+                                    </span>
                                 </div>
                             </li>
                         `;
@@ -344,40 +454,40 @@
 
             // Update status indicator and summary
             if (hasPending) {
-                orderStatusIndicator.textContent = 'Có món Đang Chờ';
-                orderStatusIndicator.classList.remove('done', 'bg-gray-300', 'text-gray-700');
-                orderStatusIndicator.classList.add('pending');
+                orderStatusIndicator.textContent = '(Có món Chưa Xong)';
+                orderStatusIndicator.classList.remove('text-green-600');
+                orderStatusIndicator.classList.add('text-red-600');
             } else if (foundOrder) {
-                orderStatusIndicator.textContent = 'Tất cả đã Xong';
-                orderStatusIndicator.classList.remove('pending', 'bg-gray-300', 'text-gray-700');
-                orderStatusIndicator.classList.add('done');
+                orderStatusIndicator.textContent = '(Tất cả đã Xong)';
+                orderStatusIndicator.classList.remove('text-red-600');
+                orderStatusIndicator.classList.add('text-green-600');
             } else {
-                 orderStatusIndicator.textContent = 'Chưa có Order';
-                 orderStatusIndicator.classList.remove('pending', 'done');
-                 orderStatusIndicator.classList.add('bg-gray-300', 'text-gray-700');
+                 // Nếu không tìm thấy đơn hàng nào
+                 orderStatusIndicator.textContent = '';
+                 orderStatusIndicator.classList.remove('text-red-600', 'text-green-600');
             }
 
 
             if (totalItemsCount === 0) {
-                orderList.innerHTML = '<p class="text-center italic text-gray-400 p-4">Bàn này chưa có món nào được đặt.</p>';
-                orderedItemsDisplay.classList.remove('hidden'); // Show empty state
+                orderList.innerHTML = '<p class="text-center italic text-gray-500 p-4 text-sm">Bàn này chưa có món nào được đặt.</p>';
             } else {
-                // Add total summary
+                // Add total summary (iOS style: bold, distinct color)
                 const summaryHtml = `
-                    <li class="mt-4 pt-3 border-t-2 border-gray-200 flex justify-between items-center font-extrabold text-xl text-[#007AFF]">
+                    <li class="mt-4 pt-3 border-t-2 border-gray-300 flex justify-between items-center font-extrabold text-base" style="color: var(--accent-blue);">
                         <span>TỔNG CỘNG (${totalItemsCount} món)</span>
                         <span>${totalPrice.toLocaleString('vi-VN')} VNĐ</span>
                     </li>
                 `;
                 orderList.insertAdjacentHTML('beforeend', summaryHtml);
-                orderedItemsDisplay.classList.remove('hidden');
             }
 
+            // Show the order list section
+            orderedItemsDisplay.classList.remove('hidden');
         }
 
 
         /**
-         * Opens the modal for a specific table with iOS-like slide-in animation.
+         * Opens the modal for a specific table.
          * @param {string} tableId - The Firebase key of the table.
          * @param {string} tableName - The user-friendly name of the table (e.g., "B1").
          */
@@ -390,40 +500,33 @@
             btnOrder.setAttribute('data-table-name', tableName);
             btnViewOrders.setAttribute('data-table-id', tableId);
 
-            // Show the modal backdrop and trigger animation
-            tableModal.classList.remove('hidden', 'modal-slide-out');
-            tableModal.classList.add('modal-backdrop', 'modal-slide-in');
-            
-            // Trigger content slide-up after backdrop is visible
-            setTimeout(() => {
-                modalContent.classList.remove('modal-slide-enter');
-                modalContent.classList.add('modal-slide-enter-active');
-            }, 10); // Small delay to ensure display:flex is applied
+            // Show the modal backdrop and trigger iOS animation
+            tableModal.classList.remove('hidden');
+            tableModal.classList.add('modal-backdrop');
+            modalContent.style.animation = 'fadeInSlideUp 0.3s forwards cubic-bezier(0.2, 0.8, 0.2, 1)';
         };
 
         // --- EVENT LISTENERS FOR MODAL BUTTONS ---
 
         // 1. Order Button: Displays the menu iframe
-        btnOrder.addEventListener('click', (event) => {
-            
-            const tableId = event.currentTarget.getAttribute('data-table-id');
-            const tableName = event.currentTarget.getAttribute('data-table-name');
+        btnOrder.addEventListener('click', () => {
+            const tableId = btnOrder.getAttribute('data-table-id');
+            const tableName = btnOrder.getAttribute('data-table-name');
             showMenuIframeView(tableId, tableName);
         });
 
         // 2. View Orders Button: Displays the order list
         btnViewOrders.addEventListener('click', (event) => {
-            
             const tableId = event.currentTarget.getAttribute('data-table-id');
             const tableName = allTablesData[tableId]?.name || `[ID: ${tableId}]`;
             displayTableOrders(tableId, tableName);
         });
 
         // 3. Back Button (Quay Lại): Returns from iframe to action buttons
-        btnBackToActions.addEventListener('click', (event) => {
-            
+        btnBackToActions.addEventListener('click', () => {
             const tableName = btnOrder.getAttribute('data-table-name');
             showActionButtonsView(tableName);
+            menuIframe.src = ''; // Clear iframe content
         });
 
         // --- FIREBASE LISTENERS ---
@@ -438,7 +541,7 @@
             
             const tableEntries = tablesData ? Object.entries(tablesData) : [];
             
-            // Sort tables alphabetically by name (e.g., B1, B2, B3)
+            // Sort tables alphabetically by name (e.g., B1, B2, VIP 1, VIP 2)
             tableEntries.sort(([, a], [, b]) => {
                 const nameA = a.name || "";
                 const nameB = b.name || "";
@@ -446,54 +549,67 @@
             });
 
             if (tableEntries.length === 0) {
-                 tablesContainer.innerHTML = '<p class="text-center col-span-full text-gray-500 p-10 font-medium">Không tìm thấy dữ liệu bàn nào.</p>';
+                 tablesContainer.innerHTML = '<p class="text-center col-span-full text-gray-500 p-10 ios-card">Không tìm thấy dữ liệu bàn nào.</p>';
                  return;
             }
 
-            tableEntries.forEach(([key, table]) => {
+            tableEntries.forEach(([key, table], index) => {
                 const name = table.name || `[ID: ${key}]`;
                 const status = (table.status || 'unknown').toLowerCase();
                 
                 let statusText = '';
-                let bgColor = 'bg-white';
-                let accentColor = 'text-gray-500';
-                let statusBadgeColor = 'bg-gray-300 text-gray-700';
-                let icon = '&#x2753;'; // Question mark
+                let statusColorClass = 'bg-gray-400';
+                let icon = ''; 
+                let innerTextColor = 'text-primary';
+                let animationStyle = `animation: fadeInSlideUp 0.3s ease-out forwards; animation-delay: ${index * 0.05}s; opacity: 0;`;
 
                 switch (status) {
                     case 'occupied':
                         statusText = 'Đang có Khách';
-                        accentColor = 'text-[#FF3B30]'; // iOS Red
-                        statusBadgeColor = 'bg-[#FF3B301A] text-[#FF3B30]';
+                        statusColorClass = 'bg-red-500 text-white';
                         icon = '&#x1F6D1;'; // Red sign
+                        innerTextColor = 'text-white';
                         break;
                     case 'available':
                         statusText = 'Sẵn sàng';
-                        accentColor = 'text-[#34C759]'; // iOS Green
-                        statusBadgeColor = 'bg-[#34C7591A] text-[#34C759]';
+                        statusColorClass = 'bg-green-500 text-white';
                         icon = '&#x2705;'; // Check mark
+                        innerTextColor = 'text-white';
                         break;
                     default:
                         statusText = 'Không rõ';
-                        accentColor = 'text-gray-500';
-                        statusBadgeColor = 'bg-gray-300 text-gray-700';
+                        statusColorClass = 'bg-gray-300 text-gray-800';
                         icon = '&#x2753;'; // Question mark
+                        innerTextColor = 'text-primary';
                         break;
+                }
+                
+                // Construct inner content with appropriate colors
+                let contentColorClass = innerTextColor;
+                let titleColorClass = innerTextColor;
+
+                // Adjust text colors for contrast on colored backgrounds
+                if (status === 'occupied' || status === 'available') {
+                    contentColorClass = 'text-white/90';
+                    titleColorClass = 'text-white';
+                } else {
+                    contentColorClass = 'text-gray-500';
+                    titleColorClass = 'text-primary';
                 }
 
                 // Add the onclick handler to call openTableModal with key (ID) and name
                 const cardHtml = `
                     <button onclick="openTableModal('${key}', '${name}')" 
-                            class="table-card p-5 rounded-2xl shadow-ios ${bgColor} text-slate-800">
+                            class="table-card p-4 h-36 flex flex-col justify-between ios-card ${statusColorClass}" 
+                            style="${animationStyle}">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-3xl font-extrabold ${accentColor}">${name}</h2>
-                            <span class="text-3xl leading-none">${icon}</span>
+                            <h2 class="text-3xl font-bold ${titleColorClass}">${name}</h2>
+                            <span class="text-4xl leading-none">${icon}</span>
                         </div>
-                        <div class="mt-4 pt-3">
-                            <p class="text-sm text-gray-500 font-medium">Trạng thái:</p>
-                            <span class="text-base font-semibold status-chip ${statusBadgeColor} mt-1">${statusText}</span>
+                        <div class="border-t border-opacity-30 pt-3">
+                            <p class="text-xs font-semibold ${contentColorClass} opacity-80">Trạng thái:</p>
+                            <p class="text-lg font-extrabold uppercase ${titleColorClass}">${statusText}</p>
                         </div>
-                        <p class="text-xs text-gray-400 mt-2 truncate font-light">ID: ${key}</p>
                     </button>
                 `;
                 
@@ -541,11 +657,14 @@
                 if (snapshot.exists()) {
                     allOrders = snapshot.val();
                     console.log("Firebase Order Data Received:", allOrders);
-                    // Re-render orders if the modal is open and showing the order list
-                    const tableId = btnViewOrders.getAttribute('data-table-id');
-                    if (tableId && !orderedItemsDisplay.classList.contains('hidden')) {
-                         const tableName = allTablesData[tableId]?.name || `[ID: ${tableId}]`;
-                         displayTableOrders(tableId, tableName);
+                    // Khi dữ liệu order thay đổi, nếu modal đang mở, cập nhật lại danh sách order
+                    const currentTableId = btnViewOrders.getAttribute('data-table-id');
+                    if (tableModal.classList.contains('modal-backdrop') && currentTableId) {
+                        const currentTableName = btnOrder.getAttribute('data-table-name');
+                        // Chỉ cập nhật nếu đang ở chế độ xem đơn hàng (đảm bảo orderedItemsDisplay không ẩn)
+                        if (!orderedItemsDisplay.classList.contains('hidden')) {
+                            displayTableOrders(currentTableId, currentTableName);
+                        }
                     }
                 } else {
                     allOrders = {};
