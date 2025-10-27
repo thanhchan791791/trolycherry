@@ -383,17 +383,17 @@
     
     <div id="item-edit-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm hidden justify-center items-center z-50" onclick="if(event.target.id === 'item-edit-modal-backdrop') hideItemEditModal();">
         <div class="w-11/12 max-w-sm" onclick="event.stopPropagation()">
-            <h3 class="text-xl font-bold mb-4 text-gray-800">Chỉnh Sửa Món</h3>
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Chỉnh Sửa Số Lượng Món</h3>
             <p id="item-edit-name" class="mb-4 text-lg font-semibold text-gray-800"></p>
             
             <div class="mb-6 space-y-3">
                 <div class="flex justify-between items-center p-3 card-ios shadow-none border border-gray-200">
-                    <span class="text-gray-700 font-medium">Giảm Số Lượng Hiện Tại (<span id="current-quantity"></span>)</span>
+                    <span class="text-gray-700 font-medium">Số Lượng Mới</span>
                     <div class="flex items-center space-x-2">
                         <button id="decrease-btn" class="ios-button-delete !p-2 !rounded-lg !shadow-none !w-8 !h-8 disabled:opacity-50" disabled>
                             <i class="fas fa-minus"></i>
                         </button>
-                        <input type="number" id="quantity-to-decrease" value="1" min="1" class="w-16 text-center border rounded-lg p-1 font-bold text-lg" onchange="validateDecreaseInput(this)">
+                        <input type="number" id="new-quantity-input" value="1" min="0" class="w-16 text-center border rounded-lg p-1 font-bold text-lg" onchange="validateNewQuantityInput(this)">
                         <button id="increase-btn" class="ios-button-complete !p-2 !rounded-lg !shadow-none !w-8 !h-8">
                             <i class="fas fa-plus"></i>
                         </button>
@@ -401,7 +401,7 @@
                 </div>
                 
                 <div class="flex justify-between items-center p-3 card-ios shadow-none border border-red-300">
-                    <span class="text-red-600 font-medium">Xóa Hẳn Món Khỏi Đơn</span>
+                    <span class="text-red-600 font-medium">Xóa Hẳn Món Khỏi Đơn (SL = 0)</span>
                     <button id="delete-item-final-btn" class="ios-button-delete !py-2 !px-3 !shadow-none flex items-center text-sm">
                         <i class="fas fa-trash-alt mr-2"></i> XÓA MÓN
                     </button>
@@ -410,7 +410,7 @@
 
             <div class="flex justify-end space-x-3">
                 <button id="item-edit-cancel" class="btn-ios bg-gray-300 text-gray-800" onclick="hideItemEditModal()">Trở lại</button> 
-                <button id="item-edit-confirm" class="btn-ios bg-blue-500 text-white">Xác nhận Giảm</button>
+                <button id="item-edit-confirm" class="btn-ios bg-blue-500 text-white">Xác nhận Cập nhật</button>
             </div>
         </div>
     </div>
@@ -473,86 +473,95 @@
             setTimeout(() => backdrop.classList.add('show'), 10); 
         }
         
-        // --- LOGIC CHỈNH SỬA TỪNG MÓN (MỚI) ---
+        // --- LOGIC CHỈNH SỬA TỪNG MÓN (ĐÃ SỬA: NHẬP SỐ LƯỢNG MỚI) ---
         let currentOrderKey = null;
         let currentItemKey = null;
         let currentItemName = null;
-        let currentQuantity = 0;
-        
+        let originalQuantity = 0; // Đổi tên biến để rõ hơn
+
         const itemEditModalBackdrop = document.getElementById('item-edit-modal-backdrop');
-        const quantityToDecreaseInput = document.getElementById('quantity-to-decrease');
+        // Đổi ID từ quantity-to-decrease thành new-quantity-input
+        const newQuantityInput = document.getElementById('new-quantity-input');
         const decreaseBtn = document.getElementById('decrease-btn');
         const increaseBtn = document.getElementById('increase-btn');
         const confirmEditBtn = document.getElementById('item-edit-confirm');
         const deleteItemFinalBtn = document.getElementById('delete-item-final-btn');
-        
+
         function hideItemEditModal() {
             itemEditModalBackdrop.classList.remove('show');
             setTimeout(() => itemEditModalBackdrop.classList.add('hidden'), 300);
             resetItemEditState();
         }
-        
+
         function resetItemEditState() {
             currentOrderKey = null;
             currentItemKey = null;
             currentItemName = null;
-            currentQuantity = 0;
-            quantityToDecreaseInput.value = 1;
+            originalQuantity = 0;
+            newQuantityInput.value = 1;
         }
         
-        function validateDecreaseInput(input) {
+        // Hàm Validate cho Input Số Lượng MỚI
+        function validateNewQuantityInput(input) {
             let value = parseInt(input.value);
-            if (isNaN(value) || value < 1) {
-                value = 1;
-            } else if (value > currentQuantity) {
-                value = currentQuantity;
+            // Số lượng mới không được nhỏ hơn 0
+            if (isNaN(value) || value < 0) {
+                value = 0;
             }
             input.value = value;
+
+            decreaseBtn.disabled = (value <= 0);
             
-            decreaseBtn.disabled = (value <= 1);
-            increaseBtn.disabled = (value >= currentQuantity);
-            
-            // Cập nhật text nút confirm
-            confirmEditBtn.textContent = `Xác nhận Giảm ${value} Món`;
+            // Cập nhật text nút confirm:
+            if (value === 0) {
+                 confirmEditBtn.textContent = 'Xác nhận Xóa Món';
+                 confirmEditBtn.className = 'ios-button-delete btn-ios';
+            } else {
+                 confirmEditBtn.textContent = `Xác nhận Cập nhật (${value} Món)`;
+                 confirmEditBtn.className = 'btn-ios bg-blue-500 text-white';
+            }
         }
 
         function showItemEditModal(orderKey, itemKey, itemName, quantity) {
             currentOrderKey = orderKey;
             currentItemKey = itemKey;
             currentItemName = itemName;
-            currentQuantity = quantity;
-            
-            document.getElementById('item-edit-name').textContent = `${itemName} (ĐH ${orderKey.substring(0, 8)})`;
-            document.getElementById('current-quantity').textContent = quantity;
-            
-            // Reset và validate input
-            quantityToDecreaseInput.value = 1;
-            validateDecreaseInput(quantityToDecreaseInput);
+            originalQuantity = quantity; // Lưu lại số lượng gốc
 
-            // Gán lại logic cho các nút
+            document.getElementById('item-edit-name').textContent = `${itemName} (Hiện tại: ${quantity}, ĐH ${orderKey.substring(0, 8)})`;
+            
+            // Đặt giá trị mặc định cho input là số lượng HIỆN TẠI
+            newQuantityInput.value = quantity;
+            validateNewQuantityInput(newQuantityInput);
+
+            // Gán lại logic cho các nút +/-
             increaseBtn.onclick = () => {
-                quantityToDecreaseInput.value = parseInt(quantityToDecreaseInput.value) + 1;
-                validateDecreaseInput(quantityToDecreaseInput);
+                newQuantityInput.value = parseInt(newQuantityInput.value) + 1;
+                validateNewQuantityInput(newQuantityInput);
             };
             decreaseBtn.onclick = () => {
-                quantityToDecreaseInput.value = parseInt(quantityToDecreaseInput.value) - 1;
-                validateDecreaseInput(quantityToDecreaseInput);
+                newQuantityInput.value = parseInt(newQuantityInput.value) - 1;
+                validateNewQuantityInput(newQuantityInput);
             };
 
-            // Logic cho nút xác nhận Giảm
+            // Logic cho nút xác nhận CẬP NHẬT
             confirmEditBtn.onclick = () => {
-                const quantityToSubtract = parseInt(quantityToDecreaseInput.value);
-                if (quantityToSubtract > 0) {
-                    // Nếu số lượng cần giảm bằng với số lượng hiện tại, ta XÓA luôn món đó
-                    if (quantityToSubtract === currentQuantity) {
-                         confirmDeleteItem(currentOrderKey, currentItemKey, currentItemName, true);
-                    } else {
-                         updateItemQuantity(currentOrderKey, currentItemKey, currentItemName, currentQuantity - quantityToSubtract);
-                    }
+                const newQuantity = parseInt(newQuantityInput.value);
+                
+                if (newQuantity === originalQuantity) {
+                    hideItemEditModal();
+                    customAlert('Số lượng không thay đổi.', 'Thông báo');
+                    return;
+                }
+                
+                if (newQuantity > 0) {
+                    updateItemQuantity(currentOrderKey, currentItemKey, currentItemName, newQuantity);
+                } else { // newQuantity = 0
+                    confirmDeleteItem(currentOrderKey, currentItemKey, currentItemName, true); // Dùng logic xác nhận xóa món
                 }
             };
             
-            // Logic cho nút Xóa Hẳn Món
+            // Logic cho nút Xóa Hẳn Món (Xóa món bất kể input là bao nhiêu)
             deleteItemFinalBtn.onclick = () => {
                 confirmDeleteItem(currentOrderKey, currentItemKey, currentItemName, false);
             };
@@ -561,8 +570,8 @@
             itemEditModalBackdrop.classList.remove('hidden');
             setTimeout(() => itemEditModalBackdrop.classList.add('show'), 10);
         }
-        
-        // Cập nhật số lượng món trong Firebase
+
+        // Cập nhật số lượng món trong Firebase (Đã sửa message)
         async function updateItemQuantity(orderKey, itemKey, itemName, newQuantity) {
              hideItemEditModal(); // Đóng modal chỉnh sửa
              if (!database) {
@@ -574,10 +583,10 @@
             
             try {
                 await ref.set(newQuantity);
-                customAlert(`Đã giảm số lượng món **${itemName}** xuống còn **${newQuantity}**!`, 'Cập nhật thành công');
+                customAlert(`Đã cập nhật món **${itemName}** lên **${newQuantity}**!`, 'Cập nhật thành công');
             } catch (error) {
                 console.error(`Lỗi khi cập nhật số lượng món ${itemKey}:`, error);
-                customAlert(`Lỗi hệ thống: Không thể giảm số lượng món.`, 'Lỗi');
+                customAlert(`Lỗi hệ thống: Không thể cập nhật số lượng món.`, 'Lỗi');
             }
         }
         
@@ -600,12 +609,12 @@
             }
         }
         
-        // Modal xác nhận XÓA MÓN
+        // Modal xác nhận XÓA MÓN (Đã sửa message)
         function confirmDeleteItem(orderKey, itemKey, itemName, isFromReduceQuantity) {
             hideItemEditModal(); // Tạm đóng modal chỉnh sửa
             
             const message = isFromReduceQuantity
-                ? `Bạn có chắc chắn muốn **XÓA HOÀN TOÀN** món **${itemName}** này (vì số lượng giảm về 0) không?`
+                ? `Bạn có chắc chắn muốn **XÓA HOÀN TOÀN** món **${itemName}** này vì đã đặt số lượng mới là **0** không?`
                 : `Bạn có chắc chắn muốn **XÓA HOÀN TOÀN** món **${itemName}** này khỏi đơn hàng không? Hành động này không thể hoàn tác.`;
             
             // Sử dụng customConfirm nhưng thay đổi logic nút OK/Cancel cho phù hợp
@@ -634,9 +643,9 @@
             cancelButton.onclick = () => {
                 backdrop.classList.remove('show');
                 setTimeout(() => backdrop.classList.add('hidden'), 300);
-                // Mở lại modal chỉnh sửa nếu đang trong quy trình giảm số lượng
+                // Mở lại modal chỉnh sửa nếu đang trong quy trình đặt SL mới = 0
                 if (isFromReduceQuantity) {
-                    showItemEditModal(orderKey, itemKey, itemName, currentQuantity); 
+                    showItemEditModal(orderKey, itemKey, itemName, originalQuantity); 
                 }
             };
             
