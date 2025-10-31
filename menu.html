@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chỉnh Sửa Trạng Thái Thực Đơn - iOS Switch (SD)</title>
+    <title>Chỉnh Sửa & Quản Lý Thực Đơn</title>
     
     <style>
         /* ========================================= */
@@ -18,6 +19,7 @@
             --ios-blue: #007AFF;
             --ios-green: #34C759; /* Màu xanh lá bật */
             --ios-red: #FF3B30; 
+            --ios-yellow: #FFCC00; /* Màu vàng cho nút sửa */
             --ios-gray-off: #78788029; /* Màu xám tắt (rgba) */
             --ios-shadow-color: rgba(0, 0, 0, 0.08);
             --ios-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
@@ -37,7 +39,7 @@
             }
         }
 
-        .sd-body { /* Đổi: body -> .sd-body */
+        .sd-body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Roboto, sans-serif;
             margin: 0;
             padding-top: 110px;
@@ -56,7 +58,7 @@
         /* ========================================= */
         /* II. HEADER & SEARCH BAR */
         /* ========================================= */
-        .sd-fixed-top-area { /* Đổi: .fixed-top-area -> .sd-fixed-top-area */
+        .sd-fixed-top-area {
             position: fixed;
             top: 0;
             left: 0;
@@ -75,8 +77,10 @@
             }
         }
         
-        .sd-header { /* Đổi: .header -> .sd-header */
-            text-align: center;
+        .sd-header {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
             margin-bottom: 10px;
         }
         .sd-header h1 {
@@ -84,9 +88,27 @@
             font-weight: 700;
             color: var(--ios-blue);
             margin: 0;
+            flex-grow: 1; 
+            text-align: center; 
+        }
+        
+        /* NEW: Nút thêm */
+        .sd-add-btn {
+            background: none;
+            border: none;
+            color: var(--ios-blue);
+            font-size: 30px;
+            font-weight: 300;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 5px;
+            transition: opacity 0.2s;
+        }
+        .sd-add-btn:active {
+            opacity: 0.7;
         }
 
-        .sd-search-container { /* Đổi: .search-container -> .sd-search-container */
+        .sd-search-container {
             position: relative;
         }
         #search-input {
@@ -127,7 +149,7 @@
             padding: 12px;
         }
         
-        .sd-menu-category { /* Đổi: .menu-category -> .sd-menu-category */
+        .sd-menu-category {
             margin-bottom: 20px;
         }
 
@@ -139,11 +161,11 @@
             padding-left: 5px;
         }
         
-        .sd-menu-category.sd-filtered h2 { /* Đổi: .filtered -> .sd-filtered */
+        .sd-menu-category.sd-filtered h2 {
             display: none;
         }
         
-        .sd-menu-item-card { /* Đổi: .menu-item-card -> .sd-menu-item-card */
+        .sd-menu-item-card {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -154,25 +176,21 @@
             border-radius: 16px;
             box-shadow: 0 4px 10px var(--ios-shadow-color);
             
-            cursor: pointer;
+            cursor: default; 
             transition: all 0.25s var(--ios-ease), opacity 0.3s, transform 0.3s;
             
             opacity: 0; 
             transform: translateY(15px);
         }
         
-        .sd-menu-item-card:active {
-            transform: scale(0.98); 
-            box-shadow: 0 2px 6px var(--ios-shadow-color);
-        }
-        
-        .sd-menu-item-card.sd-hidden { /* Đổi: .hidden -> .sd-hidden */
+        .sd-menu-item-card.sd-hidden {
             display: none;
         }
 
-        .sd-item-details { /* Đổi: .item-details -> .sd-item-details */
+        .sd-item-details {
             flex-grow: 1;
             padding-right: 15px;
+            user-select: none; 
         }
 
         .sd-item-details strong {
@@ -193,44 +211,44 @@
         /* ========================================= */
         /* IV. IOS TOGGLE SWITCH (Nút Gạt) */
         /* ========================================= */
-        .sd-ios-switch-container { /* Đổi: .ios-switch-container -> .sd-ios-switch-container */
+        .sd-ios-switch-container {
             position: relative;
             display: inline-block;
-            width: 51px; /* Chiều rộng chuẩn iOS */
-            height: 31px; /* Chiều cao chuẩn iOS */
+            width: 51px;
+            height: 31px;
         }
 
-        .sd-ios-switch { /* Đổi: .ios-switch -> .sd-ios-switch */
+        .sd-ios-switch {
             opacity: 0;
             width: 0;
             height: 0;
         }
 
-        .sd-slider { /* Đổi: .slider -> .sd-slider */
+        .sd-slider {
             position: absolute;
             cursor: pointer;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: var(--ios-gray-off); /* Màu nền xám khi TẮT */
-            transition: background-color 0.4s var(--ios-ease); /* Transition mượt */
-            border-radius: 31px; /* Bo tròn */
-            pointer-events: all; /* Cho phép tương tác */
+            background-color: var(--ios-gray-off);
+            transition: background-color 0.4s var(--ios-ease);
+            border-radius: 31px;
+            pointer-events: all;
         }
         
         /* Núm gạt (thumb) */
         .sd-slider:before {
             position: absolute;
             content: "";
-            height: 27px; /* Kích thước thumb */
+            height: 27px;
             width: 27px;
             left: 2px;
             bottom: 2px;
             background-color: white;
             transition: transform 0.4s var(--ios-ease), box-shadow 0.4s var(--ios-ease);
             border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Shadow nhẹ cho thumb */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         /* BẬT - Màu xanh lá */
@@ -244,25 +262,70 @@
         }
         
         /* Trạng thái loading/disabled */
-        .sd-ios-switch-container.sd-disabled .sd-slider { /* Đổi: .disabled -> .sd-disabled */
+        .sd-ios-switch-container.sd-disabled .sd-slider {
             opacity: 0.6;
             pointer-events: none;
         }
         
         /* Hiệu ứng Glow/Flash khi cập nhật (Áp dụng cho container) */
-        .sd-ios-switch-container.sd-glow-green { /* Đổi: .glow-green -> .sd-glow-green */
+        .sd-ios-switch-container.sd-glow-green {
             box-shadow: 0 0 10px var(--ios-green), 0 0 20px rgba(52, 199, 89, 0.4);
             border-radius: 31px;
         }
-        .sd-ios-switch-container.sd-glow-red { /* Đổi: .glow-red -> .sd-glow-red */
+        .sd-ios-switch-container.sd-glow-red {
             box-shadow: 0 0 10px var(--ios-red), 0 0 20px rgba(255, 59, 48, 0.4);
             border-radius: 31px;
         }
 
         /* ========================================= */
-        /* V. HUD NOTIFICATION */
+        /* V. CONTROL BUTTONS (EDIT & DELETE) */
         /* ========================================= */
-        .sd-update-message { /* Đổi: .update-message -> .sd-update-message */
+        .sd-item-controls { 
+            display: flex;
+            align-items: center;
+            gap: 5px; /* Khoảng cách giữa các control */
+        }
+        
+        .sd-control-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s var(--ios-ease), opacity 0.2s;
+            outline: none;
+            flex-shrink: 0; 
+        }
+        
+        .sd-control-btn.sd-edit-btn {
+            color: var(--ios-blue); /* Màu xanh dương cho nút sửa */
+            font-size: 20px;
+        }
+        
+        .sd-control-btn.sd-delete-btn {
+            color: var(--ios-red); 
+            font-size: 24px;
+        }
+        
+        .sd-control-btn:active {
+            transform: scale(0.85);
+            opacity: 0.8;
+        }
+        
+        .sd-control-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        /* ========================================= */
+        /* VI. HUD NOTIFICATION & NO RESULTS */
+        /* ========================================= */
+        .sd-update-message {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -284,13 +347,13 @@
             transition: opacity 0.3s var(--ios-ease), transform 0.3s var(--ios-ease);
         }
 
-        .sd-update-message.sd-visible { /* Đổi: .visible -> .sd-visible */
+        .sd-update-message.sd-visible {
             opacity: 1;
             visibility: visible;
             transform: translate(-50%, -50%);
         }
         
-        .sd-update-message .sd-icon { /* Đổi: .icon -> .sd-icon */
+        .sd-update-message .sd-icon {
             font-size: 36px;
             display: block;
             margin-bottom: 5px;
@@ -300,37 +363,225 @@
             font-weight: 700;
         }
         
-        .sd-no-results { /* Đổi: .no-results -> .sd-no-results */
+        .sd-no-results {
             text-align: center;
             padding: 20px;
             font-style: italic;
             color: var(--ios-text-secondary);
             display: none; 
         }
+
+        /* ========================================= */
+        /* VII. ADD/EDIT ITEM MODAL */
+        /* ========================================= */
+        .sd-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sd-modal-content {
+            background-color: var(--ios-card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s var(--ios-ease);
+        }
+        
+        .sd-modal-overlay.sd-active .sd-modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .sd-modal-content h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            color: var(--ios-text-primary);
+        }
+
+        .sd-modal-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--ios-text-secondary);
+        }
+
+        .sd-modal-form input[type="text"], 
+        .sd-modal-form input[type="number"],
+        .sd-modal-form select {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border: 1px solid #D1D1D6;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            color: var(--ios-text-primary);
+            background-color: var(--ios-bg-light);
+            transition: border-color 0.2s;
+        }
+        
+        .sd-modal-form input:focus,
+        .sd-modal-form select:focus {
+            outline: none;
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+        }
+        
+        /* Ẩn/Hiện trường Nhóm Món và Category khi Sửa */
+        .sd-hidden-field {
+            display: none;
+        }
+        #item-category-container.sd-disabled,
+        #item-group-container.sd-disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .sd-modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .sd-modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin: 0 5px;
+        }
+        
+        .sd-modal-buttons button:first-child {
+            margin-left: 0;
+        }
+        .sd-modal-buttons button:last-child {
+            margin-right: 0;
+        }
+
+        #add-item-submit {
+            background-color: var(--ios-blue);
+            color: white;
+        }
+        
+        /* Màu cho nút Cập Nhật khi ở chế độ Edit */
+        .sd-edit-mode #add-item-submit {
+            background-color: var(--ios-yellow);
+            color: var(--ios-text-primary);
+        }
+
+        #add-item-cancel {
+            background-color: #E5E5EA;
+            color: var(--ios-text-primary);
+        }
+        
+        .sd-modal-buttons button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .sd-modal-form input[type="text"], 
+            .sd-modal-form input[type="number"],
+            .sd-modal-form select {
+                border: 1px solid #48484A;
+                background-color: var(--ios-card-bg);
+                color: var(--ios-text-primary);
+            }
+            #add-item-cancel {
+                background-color: #48484A;
+                color: var(--ios-text-primary);
+            }
+            .sd-edit-mode #add-item-submit {
+                background-color: var(--ios-yellow);
+                color: black;
+            }
+        }
     </style>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
-<body class="sd-body"> <div class="sd-fixed-top-area">
+<body class="sd-body">
+    <div class="sd-fixed-top-area">
         <div class="sd-header">
+            <button class="sd-add-btn" id="open-add-modal" aria-label="Thêm món ăn/đồ uống">+</button> 
             <h1>🍽️ Chỉnh Sửa Thực Đơn</h1>
+            <span style="width: 40px;"></span>
         </div>
         <div class="sd-search-container">
             <input type="text" id="search-input" placeholder="Tìm kiếm món ăn, đồ uống...">
         </div>
     </div>
     
-    <div id="menu-container" class="sd-loading">Đang tải dữ liệu...</div> <div id="no-results" class="sd-no-results">Không tìm thấy món ăn nào phù hợp.</div>
+    <div id="menu-container" class="sd-loading">Đang tải dữ liệu...</div>
+    <div id="no-results" class="sd-no-results">Không tìm thấy món ăn nào phù hợp.</div>
     
     <div id="update-message" class="sd-update-message"></div>
+    
+    <div id="add-item-modal" class="sd-modal-overlay">
+        <div class="sd-modal-content">
+            <h3 id="modal-title">Thêm Món Mới vào Thực Đơn</h3>
+            <form id="add-item-form" class="sd-modal-form">
+                <input type="hidden" id="edit-item-key">
+                <input type="hidden" id="edit-item-old-category">
+                <input type="hidden" id="edit-item-old-group">
+                
+                <label for="item-name">Tên Món Ăn/Đồ Uống</label>
+                <input type="text" id="item-name" placeholder="Ví dụ: Cà Phê Sữa Đá" required>
+                
+                <div id="item-category-container">
+                    <label for="item-category">Loại (Category)</label>
+                    <select id="item-category" required>
+                        <option value="" disabled selected>Chọn loại</option>
+                        <option value="food">Món Ăn</option>
+                        <option value="drink">Đồ Uống</option>
+                    </select>
+                </div>
+                
+                <div id="item-group-container" class="sd-hidden-field">
+                    <label for="item-group">Nhóm Món (Group)</label>
+                    <select id="item-group" required>
+                        <option value="" disabled selected>Vui lòng chọn nhóm</option>
+                        </select>
+                </div>
+
+                <label for="item-price">Giá (VNĐ)</label>
+                <input type="number" id="item-price" placeholder="Ví dụ: 25000" min="1000" required>
+                
+                <div class="sd-modal-buttons">
+                    <button type="button" id="add-item-cancel">Hủy</button>
+                    <button type="submit" id="add-item-submit">Thêm Món</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         // =========================================
         // JAVASCRIPT & FIREBASE LOGIC
         // =========================================
         
-        // 1. Cấu hình Firebase
+        // 1. Cấu hình Firebase (Thay thế bằng cấu hình thực tế của bạn)
         const firebaseConfig = {
             apiKey: "AIzaSyAV7r-rjXo6U62LX1AA7c7DAHb8GhOOOsg",
             authDomain: "saigon-dalat.firebaseapp.com",
@@ -345,52 +596,81 @@
         const app = firebase.initializeApp(firebaseConfig);
         const database = app.database();
         const menuRef = database.ref('menu'); 
+        const menuGroupsRef = database.ref('menuGroups');
 
         const menuContainer = document.getElementById('menu-container');
         const updateMessage = document.getElementById('update-message');
         const searchInput = document.getElementById('search-input');
         const noResultsMessage = document.getElementById('no-results');
         
+        // Modal Elements
+        const addItemModal = document.getElementById('add-item-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const openAddModalBtn = document.getElementById('open-add-modal');
+        const addItemCancelBtn = document.getElementById('add-item-cancel');
+        const addItemForm = document.getElementById('add-item-form');
+        const submitBtn = document.getElementById('add-item-submit');
+        
+        // Form Fields
+        const itemNameInput = document.getElementById('item-name');
+        const itemPriceInput = document.getElementById('item-price');
+        const itemCategoryContainer = document.getElementById('item-category-container');
+        const itemCategorySelect = document.getElementById('item-category');
+        const itemGroupContainer = document.getElementById('item-group-container');
+        const itemGroupSelect = document.getElementById('item-group');
+        const editItemKeyInput = document.getElementById('edit-item-key');
+        const editItemOldCategoryInput = document.getElementById('edit-item-old-category');
+        const editItemOldGroupInput = document.getElementById('edit-item-old-group');
+
         let allMenuData = {}; 
+        let allMenuGroups = {}; 
+        let isEditMode = false; // Trạng thái: Thêm (false) hay Sửa (true)
 
         // Hàm hiển thị thông báo HUD
-        function showMessage(itemName, newStatus, type) {
+        function showMessage(text, type, icon) {
+            updateMessage.innerHTML = `<span class="sd-icon">${icon}</span><strong>${text}</strong>`;
+            updateMessage.className = `sd-update-message sd-visible ${type}`;
+            
+            setTimeout(() => {
+                updateMessage.classList.remove('sd-visible');
+            }, 1800); 
+        }
+        
+        function showStatusMessage(itemName, newStatus, type) {
             const statusText = newStatus === 'available' ? 'CÒN MÓN' : 'HẾT MÓN';
             const icon = newStatus === 'available' ? '✅' : '❌';
             
-            updateMessage.innerHTML = `<span class="sd-icon">${icon}</span><strong>${statusText}</strong><br/>${itemName}`; // Đổi class: .icon -> .sd-icon
-            updateMessage.className = `sd-update-message sd-visible ${type}`; // Đổi class: .update-message, .visible -> .sd-update-message, .sd-visible
+            updateMessage.innerHTML = `<span class="sd-icon">${icon}</span><strong>${statusText}</strong><br/>${itemName}`;
+            updateMessage.className = `sd-update-message sd-visible ${type}`;
             
             setTimeout(() => {
                 updateMessage.classList.remove('sd-visible');
             }, 1800); 
         }
 
-        // 2. Hàm cập nhật trạng thái lên Firebase
+        // 2. Hàm cập nhật trạng thái lên Firebase (Không thay đổi)
         function updateStatus(category, itemKey, itemName, newStatus, switchElement) {
-            const path = `${category}/${itemKey}/status`;
-            const containerElement = switchElement.closest('.sd-ios-switch-container'); // Đổi class
-
-            // ❌ NGĂN CHẶN NHẤN LẶP LẠI: Vô hiệu hóa switch ngay lập tức
-            containerElement.classList.add('sd-disabled'); // Đổi class
+            const updates = {};
+            updates[`menu/${category}/${itemKey}/status`] = newStatus;
             
-            // Thêm hiệu ứng flash glow
-            const glowClass = newStatus === 'available' ? 'sd-glow-green' : 'sd-glow-red'; // Đổi class
+            const containerElement = switchElement.closest('.sd-ios-switch-container');
+            const itemCard = switchElement.closest('.sd-menu-item-card');
+            const controls = itemCard.querySelector('.sd-item-controls');
+
+            controls.querySelectorAll('button, input').forEach(el => el.disabled = true);
+            containerElement.classList.add('sd-disabled');
+            
+            const glowClass = newStatus === 'available' ? 'sd-glow-green' : 'sd-glow-red';
             containerElement.classList.add(glowClass);
 
-            menuRef.child(path).set(newStatus)
+            database.ref().update(updates)
                 .then(() => {
-                    console.log(`Cập nhật thành công: ${itemName} -> ${newStatus}`);
-                    showMessage(itemName, newStatus, 'success'); 
+                    showStatusMessage(itemName, newStatus, 'success'); 
                     
-                    // Cập nhật giao diện sau khi Firebase thành công
                     setTimeout(() => {
                         containerElement.classList.remove(glowClass);
-                        
-                        // ✅ KÍCH HOẠT LẠI NÚT
-                        containerElement.classList.remove('sd-disabled'); // Đổi class
-
-                        // Cập nhật trạng thái trong dữ liệu local
+                        controls.querySelectorAll('button, input').forEach(el => el.disabled = false);
+                        containerElement.classList.remove('sd-disabled');
                         if (allMenuData[category] && allMenuData[category][itemKey]) {
                             allMenuData[category][itemKey].status = newStatus;
                         }
@@ -398,24 +678,72 @@
                 })
                 .catch(error => {
                     console.error("Lỗi cập nhật trạng thái: ", error);
-                    showMessage(itemName, newStatus, 'error'); 
+                    showStatusMessage(`${itemName}<br/>Lỗi Cập Nhật`, newStatus, 'error'); 
                     containerElement.classList.remove(glowClass);
-                    
-                    // Xử lý khi lỗi: Đưa switch trở lại trạng thái cũ
-                    switchElement.checked = newStatus !== 'available'; // New status là 'available', thì checked = false
-                    
-                    // ✅ KÍCH HOẠT LẠI NÚT
-                    containerElement.classList.remove('sd-disabled'); // Đổi class
+                    switchElement.checked = newStatus !== 'available';
+                    controls.querySelectorAll('button, input').forEach(el => el.disabled = false);
+                    containerElement.classList.remove('sd-disabled');
+                });
+        }
+        
+        // 3. Hàm xóa món ăn khỏi Firebase
+        function deleteItem(category, itemKey, itemName, itemCard) {
+            if (!confirm(`Bạn có chắc chắn muốn XÓA món "${itemName}" khỏi thực đơn không?`)) {
+                return;
+            }
+            
+            const updates = {};
+            updates[`menu/${category}/${itemKey}`] = null; 
+            
+            // Tìm và xóa khỏi menuGroups
+            if (allMenuGroups[category]) {
+                for (const groupKey in allMenuGroups[category]) {
+                    if (allMenuGroups[category][groupKey] && allMenuGroups[category][groupKey][itemKey]) {
+                        updates[`menuGroups/${category}/${groupKey}/${itemKey}`] = null;
+                        break; 
+                    }
+                }
+            }
+
+            const controls = itemCard.querySelector('.sd-item-controls');
+            controls.style.opacity = '0.5';
+            controls.querySelectorAll('button, input').forEach(el => el.disabled = true);
+            itemCard.style.cursor = 'wait';
+
+            database.ref().update(updates)
+                .then(() => {
+                    showMessage(`Đã XÓA<br/>${itemName}`, 'success', '🗑️'); 
+                    itemCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease, height 0.3s ease, margin 0.3s ease';
+                    itemCard.style.opacity = '0';
+                    itemCard.style.transform = 'translateY(-10px)';
+                    itemCard.style.height = '0';
+                    itemCard.style.marginBottom = '0';
+
+                    setTimeout(() => {
+                        itemCard.remove();
+                        if (allMenuData[category] && allMenuData[category][itemKey]) {
+                            delete allMenuData[category][itemKey];
+                            filterItems(); 
+                        }
+                    }, 350); 
+                })
+                .catch(error => {
+                    console.error("Lỗi xóa món ăn: ", error);
+                    showMessage(`Lỗi XÓA<br/>${itemName}`, 'error', '⚠️');
+                    controls.style.opacity = '1';
+                    controls.querySelectorAll('button, input').forEach(el => el.disabled = false);
+                    itemCard.style.cursor = 'default';
                 });
         }
 
-        // 3. Hàm tạo HTML cho một mục menu (Sử dụng iOS Switch)
+        // 4. Hàm tạo HTML cho món ăn (Cập nhật thêm nút Edit)
         function createMenuItemHTML(category, key, item) {
             const isAvailable = item.status === 'available';
             
             const itemDiv = document.createElement('div');
-            itemDiv.className = 'sd-menu-item-card'; // Đổi class
+            itemDiv.className = 'sd-menu-item-card';
             itemDiv.setAttribute('data-key', key); 
+            itemDiv.setAttribute('data-category', category); // Thêm category
             itemDiv.setAttribute('data-name', item.name.toLowerCase()); 
 
             itemDiv.innerHTML = `
@@ -423,30 +751,42 @@
                     <strong>${item.name}</strong> 
                     <span>${item.price.toLocaleString('vi-VN')} VNĐ</span>
                 </div>
-                <div class="sd-ios-switch-container">
-                    <input type="checkbox" id="switch-${key}" class="sd-ios-switch" ${isAvailable ? 'checked' : ''}>
-                    <label for="switch-${key}" class="sd-slider"></label>
+                <div class="sd-item-controls">
+                    <button class="sd-control-btn sd-edit-btn" aria-label="Sửa món ăn">✏️</button>
+                    <div class="sd-ios-switch-container">
+                        <input type="checkbox" id="switch-${key}" class="sd-ios-switch" ${isAvailable ? 'checked' : ''}>
+                        <label for="switch-${key}" class="sd-slider"></label>
+                    </div>
+                    <button class="sd-control-btn sd-delete-btn" aria-label="Xóa món ăn">🗑️</button>
                 </div>
-            `; // Đổi class
+            `;
 
-            // Tương tác khi gạt switch
             const switchElement = itemDiv.querySelector(`#switch-${key}`);
             switchElement.addEventListener('change', (event) => {
                 const isChecked = event.target.checked;
                 const newStatus = isChecked ? 'available' : 'sold-out';
-                
-                // Trạng thái hiện tại (trước khi gạt) được lấy từ dữ liệu local để xử lý lỗi
-                const currentStatus = allMenuData[category][key].status;
                 const itemName = allMenuData[category][key].name;
-
-                // Cập nhật lên Firebase
                 updateStatus(category, key, itemName, newStatus, switchElement);
+            });
+            
+            const editButton = itemDiv.querySelector('.sd-edit-btn');
+            editButton.addEventListener('click', (event) => {
+                event.stopPropagation(); 
+                openEditModal(category, key);
+            });
+            
+            const deleteButton = itemDiv.querySelector('.sd-delete-btn');
+            deleteButton.addEventListener('click', (event) => {
+                event.stopPropagation(); 
+                const itemName = allMenuData[category][key].name;
+                deleteItem(category, key, itemName, itemDiv);
             });
 
             return itemDiv;
         }
+        
+        // ... (renderMenu và filterItems giữ nguyên) ...
 
-        // 4. Hàm hiển thị toàn bộ menu (Stagger Animation)
         function renderMenu(menuData) {
             menuContainer.innerHTML = ''; 
             const itemCards = [];
@@ -457,24 +797,27 @@
                     const categoryName = category === 'food' ? 'Món Ăn 🍽️' : 'Đồ Uống 🍹';
                     
                     const categoryDiv = document.createElement('div');
-                    categoryDiv.className = 'sd-menu-category'; // Đổi class
+                    categoryDiv.className = 'sd-menu-category';
                     categoryDiv.id = `category-${category}`;
                     categoryDiv.innerHTML = `<h2>${categoryName}</h2>`;
 
+                    let categoryHasItems = false;
                     for (const itemKey in categoryData) {
                         if (categoryData.hasOwnProperty(itemKey)) {
+                            categoryHasItems = true;
                             const item = categoryData[itemKey];
                             const itemHTML = createMenuItemHTML(category, itemKey, item);
                             categoryDiv.appendChild(itemHTML);
                             itemCards.push(itemHTML); 
                         }
                     }
-
-                    menuContainer.appendChild(categoryDiv);
+                    
+                    if (categoryHasItems) {
+                        menuContainer.appendChild(categoryDiv);
+                    }
                 }
             }
             
-            // Stagger Animation (Fade-in từ dưới lên)
             itemCards.forEach((card, index) => {
                 setTimeout(() => {
                     card.style.opacity = 1;
@@ -484,35 +827,37 @@
             
             filterItems();
         }
-        
-        // 5. Hàm lọc món ăn theo từ khóa (REAL-TIME FILTER)
+
         function filterItems() {
             const query = searchInput.value.toLowerCase().trim();
-            const categories = document.querySelectorAll('.sd-menu-category'); // Đổi class
+            const categories = document.querySelectorAll('.sd-menu-category');
             
             let visibleCount = 0;
 
             categories.forEach(categoryDiv => {
                 let categoryVisibleCount = 0;
-                categoryDiv.classList.remove('sd-filtered'); // Đổi class
+                const items = categoryDiv.querySelectorAll('.sd-menu-item-card');
                 
-                const items = categoryDiv.querySelectorAll('.sd-menu-item-card'); // Đổi class
+                let categoryHasItems = items.length > 0;
+
                 items.forEach(card => {
                     const itemName = card.getAttribute('data-name');
                     
                     if (itemName.includes(query) || query === '') {
-                        card.classList.remove('sd-hidden'); // Đổi class
+                        card.classList.remove('sd-hidden');
                         card.style.display = 'flex'; 
                         categoryVisibleCount++;
                         visibleCount++;
                     } else {
-                        card.classList.add('sd-hidden'); // Đổi class
+                        card.classList.add('sd-hidden');
                         card.style.display = 'none'; 
                     }
                 });
                 
-                if (categoryVisibleCount === 0 && items.length > 0) {
-                     categoryDiv.classList.add('sd-filtered'); // Đổi class
+                if (categoryVisibleCount === 0 && categoryHasItems) {
+                     categoryDiv.classList.add('sd-filtered');
+                } else {
+                     categoryDiv.classList.remove('sd-filtered');
                 }
             });
 
@@ -526,20 +871,281 @@
         searchInput.addEventListener('input', filterItems);
 
 
-        // 6. Đọc dữ liệu từ Firebase Realtime Database
+        // 5. Đọc dữ liệu từ Firebase Realtime Database
         menuRef.on('value', (snapshot) => {
             const menuData = snapshot.val();
             if (menuData) {
-                allMenuData = menuData; // Lưu trữ dữ liệu
+                allMenuData = menuData;
                 renderMenu(menuData);
                 menuContainer.classList.remove('sd-loading');
             } else {
                 menuContainer.innerHTML = '<p class="sd-loading" style="color:var(--ios-text-secondary);">Không tìm thấy dữ liệu thực đơn.</p>';
             }
         }, (error) => {
-            console.error("Lỗi đọc dữ liệu từ Firebase: ", error);
+            console.error("Lỗi đọc dữ liệu menu: ", error);
             menuContainer.innerHTML = `<p class="sd-loading sd-error">❌ Lỗi: Không thể tải dữ liệu thực đơn.</p>`;
         });
+        
+        menuGroupsRef.on('value', (snapshot) => {
+            const groupsData = snapshot.val();
+            if (groupsData) {
+                allMenuGroups = groupsData;
+            } else {
+                allMenuGroups = {};
+                console.warn("Không tìm thấy dữ liệu nhóm món.");
+            }
+        }, (error) => {
+            console.error("Lỗi đọc dữ liệu nhóm món: ", error);
+        });
+
+
+        /* ========================================= */
+        /* 6. LOGIC THÊM/SỬA MÓN MỚI */
+        /* ========================================= */
+
+        // Hàm chuyển key nhóm thành dạng dễ đọc
+        function formatGroupKey(key) {
+            // Chỉ là ví dụ, bạn có thể tạo một đối tượng map nếu có nhiều nhóm
+            if (key === 'monLau') return 'Món Lẩu';
+            if (key === 'monChinh') return 'Món Chính';
+            if (key === 'nuocEp') return 'Nước Ép';
+            if (key === 'coCon') return 'Có Cồn';
+            if (key === 'giaiKhat') return 'Giải Khát';
+            if (key === 'monRau') return 'Món Rau';
+            return key.charAt(0).toUpperCase() + key.slice(1);
+        }
+        
+        // Hàm tìm key nhóm hiện tại của món ăn
+        function findItemGroupKey(category, itemKey) {
+            if (allMenuGroups[category]) {
+                for (const groupKey in allMenuGroups[category]) {
+                    if (allMenuGroups[category][groupKey] && allMenuGroups[category][groupKey][itemKey]) {
+                        return groupKey;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Hàm điền các nhóm món vào ô select dựa trên category
+        function populateGroupOptions(category, selectedGroupKey = null) {
+            itemGroupSelect.innerHTML = '<option value="" disabled selected>Vui lòng chọn nhóm</option>';
+            
+            const groups = allMenuGroups[category];
+            if (groups) {
+                for (const key in groups) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = formatGroupKey(key); 
+                    if (key === selectedGroupKey) {
+                        option.selected = true;
+                    }
+                    itemGroupSelect.appendChild(option);
+                }
+                itemGroupContainer.classList.remove('sd-hidden-field');
+                itemGroupSelect.required = true;
+            } else {
+                itemGroupContainer.classList.add('sd-hidden-field');
+                itemGroupSelect.required = false;
+            }
+        }
+
+        // Sự kiện thay đổi Category
+        itemCategorySelect.addEventListener('change', (event) => {
+            const category = event.target.value;
+            populateGroupOptions(category);
+        });
+
+        // Hàm mở Modal ở chế độ Thêm
+        openAddModalBtn.addEventListener('click', () => {
+            isEditMode = false;
+            addItemForm.reset(); 
+            modalTitle.textContent = 'Thêm Món Mới vào Thực Đơn';
+            submitBtn.textContent = 'Thêm Món';
+            addItemForm.classList.remove('sd-edit-mode');
+            
+            // Bật lại các trường
+            itemCategoryContainer.classList.remove('sd-disabled');
+            itemGroupContainer.classList.add('sd-hidden-field');
+            itemGroupSelect.required = false;
+
+            addItemModal.style.display = 'flex';
+            setTimeout(() => {
+                addItemModal.classList.add('sd-active');
+            }, 10);
+        });
+
+        // Hàm mở Modal ở chế độ Sửa
+        function openEditModal(category, itemKey) {
+            isEditMode = true;
+            addItemForm.reset(); 
+            modalTitle.textContent = 'Sửa Thông Tin Món Ăn';
+            submitBtn.textContent = 'Cập Nhật';
+            addItemForm.classList.add('sd-edit-mode');
+            
+            const item = allMenuData[category][itemKey];
+            const currentGroupKey = findItemGroupKey(category, itemKey);
+            
+            // Điền dữ liệu vào các trường ẩn
+            editItemKeyInput.value = itemKey;
+            editItemOldCategoryInput.value = category;
+            editItemOldGroupInput.value = currentGroupKey || '';
+
+            // Điền dữ liệu vào form
+            itemNameInput.value = item.name;
+            itemPriceInput.value = item.price;
+            
+            // Chọn Category (Disabled)
+            itemCategorySelect.value = category;
+            itemCategoryContainer.classList.add('sd-disabled');
+
+            // Chọn Group
+            populateGroupOptions(category, currentGroupKey);
+            itemGroupContainer.classList.remove('sd-disabled');
+
+            addItemModal.style.display = 'flex';
+            setTimeout(() => {
+                addItemModal.classList.add('sd-active');
+            }, 10);
+        }
+
+        // Hàm đóng Modal
+        function hideModal() {
+            addItemModal.classList.remove('sd-active');
+            setTimeout(() => {
+                addItemModal.style.display = 'none';
+            }, 300);
+        }
+        
+        addItemCancelBtn.addEventListener('click', hideModal);
+
+        // Đóng Modal khi click ra ngoài
+        addItemModal.addEventListener('click', (event) => {
+            if (event.target === addItemModal) {
+                hideModal();
+            }
+        });
+        
+        // HÀM CHÍNH: CẬP NHẬT MÓN (Dùng cho cả Thêm và Sửa)
+
+        // Hàm thêm món mới
+        function addNewItem(name, category, groupKey, price) {
+            submitBtn.disabled = true;
+            
+            const newItem = {
+                name: name.trim(),
+                price: parseInt(price),
+                status: 'available',
+                // Tùy chọn: imageUrl: 'img2/default.webp', description: 'Món mới'
+            };
+            
+            // 1. Đẩy món mới vào /menu/[category] (phần chính)
+            const newRef = menuRef.child(category).push(newItem);
+            const itemKey = newRef.key;
+            
+            // 2. Cập nhật đồng thời vào /menuGroups/[category]/[groupKey]
+            const updates = {};
+            updates[`menuGroups/${category}/${groupKey}/${itemKey}`] = {
+                name: newItem.name,
+                price: newItem.price
+            };
+
+            database.ref().update(updates)
+            .then(() => {
+                showMessage(`Đã Thêm Món<br/>${name}`, 'success', '✨');
+                hideModal();
+                // Reset form state
+                itemGroupContainer.classList.add('sd-hidden-field');
+            })
+            .catch(error => {
+                console.error("Lỗi khi thêm món mới: ", error);
+                showMessage(`Lỗi Thêm Món<br/>${name}`, 'error', '⚠️');
+            })
+            .finally(() => {
+                 submitBtn.disabled = false;
+                 addItemForm.reset(); 
+            });
+        }
+        
+        // HÀM MỚI: Cập nhật thông tin món ăn
+        function updateItem(itemKey, oldCategory, oldGroupKey, newName, newPrice, newGroupKey) {
+            submitBtn.disabled = true;
+            
+            const updates = {};
+            
+            const newPriceInt = parseInt(newPrice);
+            
+            // 1. Cập nhật trong /menu (Chỉ cần cập nhật name và price)
+            updates[`menu/${oldCategory}/${itemKey}/name`] = newName.trim();
+            updates[`menu/${oldCategory}/${itemKey}/price`] = newPriceInt;
+            
+            // 2. Cập nhật/Di chuyển trong /menuGroups
+            
+            // Nếu nhóm cũ khác nhóm mới (cần di chuyển)
+            if (oldGroupKey !== newGroupKey) {
+                // Xóa khỏi nhóm cũ
+                if (oldGroupKey) {
+                    updates[`menuGroups/${oldCategory}/${oldGroupKey}/${itemKey}`] = null;
+                }
+                
+                // Thêm vào nhóm mới
+                updates[`menuGroups/${oldCategory}/${newGroupKey}/${itemKey}`] = {
+                    name: newName.trim(),
+                    price: newPriceInt
+                };
+            } else {
+                // Chỉ cập nhật name và price trong nhóm cũ
+                updates[`menuGroups/${oldCategory}/${oldGroupKey}/${itemKey}/name`] = newName.trim();
+                updates[`menuGroups/${oldCategory}/${oldGroupKey}/${itemKey}/price`] = newPriceInt;
+            }
+
+            database.ref().update(updates)
+                .then(() => {
+                    showMessage(`Đã Cập Nhật<br/>${newName}`, 'success', '✅');
+                    hideModal();
+                })
+                .catch(error => {
+                    console.error("Lỗi khi cập nhật món: ", error);
+                    showMessage(`Lỗi Cập Nhật<br/>${newName}`, 'error', '⚠️');
+                })
+                .finally(() => {
+                     submitBtn.disabled = false;
+                });
+        }
+
+        // Xử lý Submit Form (Dùng chung cho cả Thêm và Sửa)
+        addItemForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            
+            const name = itemNameInput.value;
+            const price = itemPriceInput.value;
+            const category = itemCategorySelect.value;
+            const groupKey = itemGroupSelect.value;
+            
+            if (!name || !price || !category) {
+                alert("Vui lòng điền đầy đủ Tên Món, Giá và Loại.");
+                return;
+            }
+            
+            // Kiểm tra Group Key có được chọn không nếu container hiển thị
+            if (!itemGroupContainer.classList.contains('sd-hidden-field') && !groupKey) {
+                alert("Vui lòng chọn Nhóm Món.");
+                return;
+            }
+
+            if (isEditMode) {
+                const itemKey = editItemKeyInput.value;
+                const oldCategory = editItemOldCategoryInput.value;
+                const oldGroupKey = editItemOldGroupInput.value;
+                
+                updateItem(itemKey, oldCategory, oldGroupKey, name, price, groupKey);
+                
+            } else {
+                // Chế độ Thêm Mới
+                addNewItem(name, category, groupKey, price);
+            }
+        });
+
     </script>
 </body>
 </html>
