@@ -247,6 +247,15 @@
         .transfer-wallet-box .small-muted {
             color: rgba(255, 255, 255, 0.8);
         }
+        /* Style for Fund Wallet */
+        .fund-wallet-box {
+            background-color: #ff9800; /* Orange color for Fund */
+            color: white;
+            border: none;
+        }
+        .fund-wallet-box .small-muted {
+            color: rgba(255, 255, 255, 0.8);
+        }
     </style>
 </head>
 <body>
@@ -310,6 +319,17 @@
                                             <div id="totalWalletBalance" class="h4 text-white">0 ₫</div>
                                         </div>
                                         <button id="transferToWalletBtn" class="btn btn-sm btn-light btn-sm-custom ms-2"><i class="fas fa-exchange-alt me-1"></i> Quản lý Ví</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="balance-box fund-wallet-box">
+                                    <div class="d-flex justify-content-between align-items-center w-100">
+                                        <div class="text-start">
+                                            <div class="small-muted">Ví Quỹ</div>
+                                            <div id="totalFundBalance" class="h4 text-white">0 ₫</div>
+                                        </div>
+                                        <button id="fundToWalletBtn" class="btn btn-sm btn-light btn-sm-custom ms-2"><i class="fas fa-piggy-bank me-1"></i> Quản lý Quỹ</button>
                                     </div>
                                 </div>
                             </div>
@@ -566,6 +586,124 @@
         </div>
     </div>
 
+    <div class="modal fade" id="fundModal" tabindex="-1" aria-labelledby="fundModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title" id="fundModalLabel"><i class="fas fa-piggy-bank me-2"></i> Quản Lý Ví Quỹ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="fundTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="fund-in-tab" data-bs-toggle="tab" data-bs-target="#fund-in-pane" type="button" role="tab" aria-controls="fund-in-pane" aria-selected="true"><i class="fas fa-arrow-down me-1"></i> Nạp Ví Quỹ</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="fund-expense-tab" data-bs-toggle="tab" data-bs-target="#fund-expense-pane" type="button" role="tab" aria-controls="fund-expense-pane" aria-selected="false"><i class="fas fa-arrow-up me-1"></i> Chi Ví Quỹ</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="fund-history-tab" data-bs-toggle="tab" data-bs-target="#fund-history-pane" type="button" role="tab" aria-controls="fund-history-pane" aria-selected="false"><i class="fas fa-history me-1"></i> Lịch sử Quỹ</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="fundTabContent">
+                        <div class="tab-pane fade show active" id="fund-in-pane" role="tabpanel" aria-labelledby="fund-in-tab" tabindex="0">
+                            <form id="fundInForm">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Ngày Nạp</label>
+                                    <input type="date" id="fundInDate" class="form-control" required>
+                                </div>
+                                <div class="mb-3 p-3 border rounded">
+                                    <p class="mb-1 small-muted">Số Dư Ví Chuyển Khoản Hiện Có (Giới hạn nạp):</p>
+                                    <h4 id="availableTransferBalanceForFund" class="balance-transfer fw-bold">0 ₫</h4>
+                                    <input type="hidden" id="hiddenAvailableTransferBalanceForFund" value="0">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Số Tiền Muốn Nạp vào Ví Quỹ (VND)</label>
+                                    <div class="input-group">
+                                        <input type="text" id="fundInAmount" class="form-control currency-input" required placeholder="Nhập số tiền">
+                                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Nạp theo %</button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item fund-percent-btn" data-percent="10">10%</a></li>
+                                            <li><a class="dropdown-item fund-percent-btn" data-percent="20">20%</a></li>
+                                            <li><a class="dropdown-item fund-percent-btn" data-percent="50">50%</a></li>
+                                            <li><a class="dropdown-item fund-percent-btn" data-percent="75">75%</a></li>
+                                            <li><a class="dropdown-item fund-percent-btn" data-percent="100">100%</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <div class="px-3 py-1 d-flex gap-2 align-items-center">
+                                                    <input type="number" id="customFundPercent" class="form-control form-control-sm" min="1" max="100" placeholder="Tùy chỉnh %">
+                                                    <button class="btn btn-sm btn-primary" type="button" id="applyCustomPercentBtn">Áp dụng</button>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="form-text text-muted" id="fundInPercentInfo">Hoặc nhập số tiền trực tiếp.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Chi tiết</label>
+                                    <textarea id="fundInDetails" class="form-control" rows="2">Chuyển tiền từ Ví Chuyển khoản sang Ví Quỹ</textarea>
+                                </div>
+                                <div class="modal-footer px-0 pb-0">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-warning text-white" id="fundInSubmitBtn"><i class="fas fa-paper-plane me-1"></i> Xác Nhận Nạp Quỹ</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="fund-expense-pane" role="tabpanel" aria-labelledby="fund-expense-tab" tabindex="0">
+                            <form id="fundExpenseForm">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Ngày Chi</label>
+                                    <input type="date" id="fundExpenseDate" class="form-control" required>
+                                </div>
+                                <div class="mb-3 p-3 border rounded">
+                                    <p class="mb-1 small-muted">Số Dư Ví Quỹ Hiện Có (Giới hạn chi):</p>
+                                    <h4 id="availableFundBalance" class="balance-fund fw-bold">0 ₫</h4>
+                                    <input type="hidden" id="hiddenAvailableFundBalance" value="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Số Tiền Muốn Chi từ Ví Quỹ (VND)</label>
+                                    <input type="text" id="fundExpenseAmount" class="form-control currency-input" required placeholder="Nhập số tiền chi">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Chi tiết Chi tiêu</label>
+                                    <textarea id="fundExpenseDetails" class="form-control" rows="2" required></textarea>
+                                </div>
+                                <div class="modal-footer px-0 pb-0">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-danger" id="fundExpenseSubmitBtn"><i class="fas fa-paper-plane me-1"></i> Xác Nhận Chi Quỹ</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="fund-history-pane" role="tabpanel" aria-labelledby="fund-history-tab" tabindex="0">
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-striped table-sm mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Ngày</th>
+                                            <th>Loại</th>
+                                            <th>Số Tiền</th>
+                                            <th>Chi tiết</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fundHistoryBody">
+                                        </tbody>
+                                </table>
+                            </div>
+                            <div id="noFundDataMessage" class="text-center text-muted p-4 d-none">
+                                <i class="fas fa-box-open fa-2x mb-2"></i>
+                                <p>Chưa có giao dịch nạp/chi quỹ nào.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
@@ -606,6 +744,8 @@
     const recordsRef = database.ref('daily_records');
     // Reference for Wallet Transfers
     const walletTransfersRef = database.ref('wallet_transfers');
+    // Reference for Fund Wallet Transfers
+    const fundTransfersRef = database.ref('fund_transfers');
 
 
     // UI Elements
@@ -630,6 +770,7 @@
     const totalBalanceEl = document.getElementById('totalBalance');
     const totalBalanceCashEl = document.getElementById('totalBalanceCash');
     const totalWalletBalanceEl = document.getElementById('totalWalletBalance'); // Wallet Balance
+    const totalFundBalanceEl = document.getElementById('totalFundBalance'); // Fund Wallet Balance
 
     const sortOrderEl = document.getElementById('sortOrder');
     const reportViewEl = document.getElementById('reportView');
@@ -655,7 +796,6 @@
     const filteredExpenseEl = document.getElementById('filteredExpense');
     const filteredBalanceEl = document.getElementById('filteredBalance');
     const filteredBalanceCashEl = document.getElementById('filteredBalanceCash');
-    // const filteredWalletBalanceEl = document.getElementById('filteredWalletBalance'); // REMOVED/HIDDEN
 
     // UI Elements for Transfer Modal
     const transferToWalletBtn = document.getElementById('transferToWalletBtn');
@@ -667,7 +807,7 @@
     const hiddenAvailableCashBalanceEl = document.getElementById('hiddenAvailableCashBalance');
     const transferAmountEl = document.getElementById('transferAmount');
     const transferDetailsEl = document.getElementById('transferDetails');
-    // Chi Ví (Wallet Expense) - NEW
+    // Chi Ví (Wallet Expense)
     const walletExpenseForm = document.getElementById('walletExpenseForm');
     const walletExpenseDateEl = document.getElementById('walletExpenseDate');
     const availableWalletBalanceEl = document.getElementById('availableWalletBalance');
@@ -678,6 +818,33 @@
     // UI for History Tab
     const transferHistoryBodyEl = document.getElementById('transferHistoryBody');
     const noTransferDataMessageEl = document.getElementById('noTransferDataMessage');
+    
+    // UI Elements for Fund Modal
+    const fundToWalletBtn = document.getElementById('fundToWalletBtn');
+    const fundModal = new bootstrap.Modal(document.getElementById('fundModal'));
+    // Nạp Quỹ (Fund In)
+    const fundInForm = document.getElementById('fundInForm');
+    const fundInDateEl = document.getElementById('fundInDate');
+    const availableTransferBalanceForFundEl = document.getElementById('availableTransferBalanceForFund');
+    const hiddenAvailableTransferBalanceForFundEl = document.getElementById('hiddenAvailableTransferBalanceForFund');
+    const fundInAmountEl = document.getElementById('fundInAmount'); // The main input field (now linked to percentage logic)
+    const fundInDetailsEl = document.getElementById('fundInDetails');
+    
+    // NEW: Percentage Controls for Fund In
+    const customFundPercentEl = document.getElementById('customFundPercent');
+    const applyCustomPercentBtnEl = document.getElementById('applyCustomPercentBtn');
+    const fundInPercentInfoEl = document.getElementById('fundInPercentInfo');
+
+    // Chi Quỹ (Fund Expense)
+    const fundExpenseForm = document.getElementById('fundExpenseForm');
+    const fundExpenseDateEl = document.getElementById('fundExpenseDate');
+    const availableFundBalanceEl = document.getElementById('availableFundBalance');
+    const hiddenAvailableFundBalanceEl = document.getElementById('hiddenAvailableFundBalance');
+    const fundExpenseAmountEl = document.getElementById('fundExpenseAmount');
+    const fundExpenseDetailsEl = document.getElementById('fundExpenseDetails');
+    // UI for Fund History Tab
+    const fundHistoryBodyEl = document.getElementById('fundHistoryBody');
+    const noFundDataMessageEl = document.getElementById('noFundDataMessage');
 
 
     // --- Core Functions for Firebase ---
@@ -722,7 +889,7 @@ function unformatVND(formattedString) {
      * @param {number} revenue - Revenue amount
      * @param {number} expense - Expense amount
      * @param {string} details - Transaction details
-     * @param {string} paymentMethod - 'cash', 'transfer', 'wallet_in', 'wallet_out_cash', 'wallet_expense' (NEW)
+     * @param {string} paymentMethod - 'cash', 'transfer', 'wallet_in', 'wallet_out_cash', 'wallet_expense', 'wallet_fund_out', 'fund_in', 'fund_expense' (UPDATED)
      */
     async function addSingleEntry(date, revenue = 0, expense = 0, details = '', paymentMethod = null) {
         if (!date) return;
@@ -735,8 +902,13 @@ function unformatVND(formattedString) {
             paymentMethod: paymentMethod // Store paymentMethod even if null
         };
         
-        // NEW LOGIC: Separate Wallet Transfers
-        if (['wallet_in', 'wallet_out_cash', 'wallet_expense'].includes(paymentMethod)) { // Added 'wallet_expense'
+        // NEW LOGIC: Separate Fund Wallet Transfers
+        if (['fund_in', 'fund_expense'].includes(paymentMethod)) { 
+            const fundRef = fundTransfersRef.push();
+            await fundRef.set(transactionData);
+        }
+        // Existing Logic: Separate Transfer Wallet Transfers (Updated to include wallet_fund_out)
+        else if (['wallet_in', 'wallet_out_cash', 'wallet_expense', 'wallet_fund_out'].includes(paymentMethod)) { // Added 'wallet_fund_out'
             const transferRef = walletTransfersRef.push();
             await transferRef.set(transactionData);
         } else {
@@ -757,14 +929,17 @@ function unformatVND(formattedString) {
 
     /**
      * Deletes a single transaction.
+     * @param {string} date - YYYY-MM-DD format (used for regular records)
+     * @param {string} transactionId - Firebase push key
+     * @param {string} sourceRef - 'records', 'wallet', or 'fund' (NEW)
      */
-    async function deleteTransaction(date, transactionId, isWalletTransfer = false) {
+    async function deleteTransaction(date, transactionId, sourceRef = 'records') {
         if (confirm('Bạn có chắc muốn xóa giao dịch này không?')) {
-            if (isWalletTransfer) {
-                // If it's a wallet transfer, delete from wallet_transfers
+            if (sourceRef === 'wallet') {
                 await walletTransfersRef.child(transactionId).remove();
+            } else if (sourceRef === 'fund') { // NEW
+                await fundTransfersRef.child(transactionId).remove();
             } else {
-                // Otherwise, delete from daily_records
                 await recordsRef.child(date).child('transactions').child(transactionId).remove();
             }
         }
@@ -779,8 +954,8 @@ function unformatVND(formattedString) {
         const isExpense = currentExp > 0;
         
         // Handle only Revenue/Expense for simplicity in this prompt
-        if (['wallet_in', 'wallet_out_cash', 'wallet_expense'].includes(currentPaymentMethod)) { // Updated check
-            alert('Giao dịch Nạp Ví/Chi Ví/Trừ Tiền mặt cần được xử lý riêng. Không thể chỉnh sửa ở đây.');
+        if (['wallet_in', 'wallet_out_cash', 'wallet_expense', 'wallet_fund_out', 'fund_in', 'fund_expense'].includes(currentPaymentMethod)) { // Updated check
+            alert('Giao dịch Ví Chuyển Khoản/Ví Quỹ cần được xử lý riêng. Không thể chỉnh sửa ở đây.');
             return;
         }
 
@@ -803,6 +978,7 @@ function unformatVND(formattedString) {
             expense: Number(newExp || 0),
             details: newDetails
         };
+
         if (isRevenue) {
             updates.paymentMethod = newPaymentMethod;
         } else {
@@ -813,53 +989,64 @@ function unformatVND(formattedString) {
         await recordsRef.child(date).child('transactions').child(transactionId).update(updates);
     }
     
-
     async function clearAll() {
         if (!confirm('Bạn có chắc muốn xóa tất cả dữ liệu trên Firebase? Thao tác này không thể hoàn tác.')) return;
         await recordsRef.remove();
-        await walletTransfersRef.remove(); // NEW: Clear wallet transfers
+        await walletTransfersRef.remove(); 
+        await fundTransfersRef.remove(); // NEW: Clear fund transfers
     }
-    
+
     async function addSampleData() {
         // ... (Keep existing addSampleData logic)
+        // NOTE: Does not include sample data for Fund Wallet for simplicity.
         if (!confirm('Bạn có muốn thêm dữ liệu mẫu để thử nghiệm không? Dữ liệu này sẽ được trộn với dữ liệu hiện có.')) return;
         
+        const detailsList = ["Ăn uống", "Đi chợ", "Di chuyển", "Tiền nhà", "Mua sắm", "Gửi tiết kiệm", "Vui chơi"];
         const sampleTransactions = {};
-        const detailsList = ["Ăn trưa", "Cà phê", "Mua sắm quần áo", "Tiền xăng", "Đi chợ", "Xem phim", "Phí dịch vụ", "Tiền điện", "Tiền nước", "Tiền internet"];
-        const paymentMethods = ['cash', 'transfer'];
         
-        const startDate = new Date();
-        startDate.setMonth(startDate.getMonth() - 3);
-        const today = new Date();
-        let currentDate = startDate;
-        
-        while (currentDate <= today) {
-            const dateStr = currentDate.toISOString().slice(0, 10);
-            
-            if (!sampleTransactions[dateStr]) {
-                sampleTransactions[dateStr] = {};
-            }
+        const days = 7; 
+        let currentDate = new Date();
+        currentDate.setDate(currentDate.getDate() - days);
 
-            // Always add a revenue transaction (split into cash/transfer)
-            for (let method of paymentMethods) {
-                const dailyRevenue = Math.floor(Math.random() * 2000000) + 200000; // Random revenue up to 2.2M VND
-                const revenueId = `trans-rev-${dateStr}-${method}`;
+        for (let i = 0; i < days; i++) {
+            const dateStr = currentDate.toISOString().slice(0, 10);
+            sampleTransactions[dateStr] = {};
+
+            // Add revenue transactions
+            const dailyRevenue = Math.floor(Math.random() * 5000000) + 500000;
+            const cashRevenue = Math.floor(dailyRevenue * (Math.random() * 0.5 + 0.3)); // 30-80% cash
+            const transferRevenue = dailyRevenue - cashRevenue;
+
+            // Cash Revenue
+            let method = 'cash';
+            let revenueId = `trans-rev-${dateStr}-${method}`;
+            sampleTransactions[dateStr][revenueId] = {
+                revenue: cashRevenue,
+                expense: 0,
+                details: "Thu nhập tiền mặt",
+                timestamp: currentDate.getTime() + Math.floor(Math.random() * 1000),
+                paymentMethod: method
+            };
+
+            // Transfer Revenue
+            if (transferRevenue > 0) {
+                method = 'transfer';
+                revenueId = `trans-rev-${dateStr}-${method}`;
                 sampleTransactions[dateStr][revenueId] = {
-                    revenue: dailyRevenue,
+                    revenue: transferRevenue,
                     expense: 0,
-                    details: method === 'cash' ? "Thu nhập tiền mặt" : "Thu nhập chuyển khoản",
+                    details: "Thu nhập chuyển khoản",
                     timestamp: currentDate.getTime() + Math.floor(Math.random() * 1000),
                     paymentMethod: method
                 };
             }
 
+            // Add expense transactions
             const numExpenses = Math.floor(Math.random() * 4) + 1; // 1-4 expense transactions per day
-            
-            for (let i = 0; i < numExpenses; i++) {
+            for (let j = 0; j < numExpenses; j++) {
                 const amount = Math.floor(Math.random() * 500000) + 10000;
                 const details = detailsList[Math.floor(Math.random() * detailsList.length)];
-                
-                const transactionId = `trans-exp-${dateStr}-${i}`;
+                const transactionId = `trans-exp-${dateStr}-${j}`;
                 sampleTransactions[dateStr][transactionId] = {
                     revenue: 0,
                     expense: amount,
@@ -867,48 +1054,58 @@ function unformatVND(formattedString) {
                     timestamp: currentDate.getTime() + Math.floor(Math.random() * 86400000)
                 };
             }
+
             currentDate.setDate(currentDate.getDate() + 1);
         }
-        
+
         const updates = {};
         for (const date in sampleTransactions) {
             // This is a simple merge.
             const existingTransactions = window.cachedRecords && window.cachedRecords[date] && window.cachedRecords[date].transactions ? window.cachedRecords[date].transactions : {};
             updates[`${date}/transactions`] = { ...existingTransactions, ...sampleTransactions[date] };
         }
+
         await recordsRef.update(updates);
+
         alert('Dữ liệu mẫu đã được thêm thành công!');
     }
-    
+
     /**
      * Calculates total revenue, expense, balance, cash balance, and wallet balance.
      * @param {object} records - The cached Firebase daily_records object.
      * @param {object} walletTransfers - The cached Firebase wallet_transfers object.
+     * @param {object} fundTransfers - The cached Firebase fund_transfers object. (NEW)
      * @param {string|null} specificDateStr - Optional date string to filter by.
      * @returns {object} Calculated totals.
      */
-    function calculateTotals(records, walletTransfers, specificDateStr = null) {
+    function calculateTotals(records, walletTransfers, fundTransfers, specificDateStr = null) {
         let totalRevenueCash = 0;
         let totalRevenueTransfer = 0;
         let totalExpense = 0;
-        
-        // Wallet Transfer components
-        let totalWalletIn = 0; 
-        let totalWalletOutCash = 0; 
-        let totalWalletExpense = 0; // NEW: Track expense from wallet
 
-        // 1. Process regular transactions from daily_records
-        const recordsToProcess = specificDateStr ? (records[specificDateStr] ? { [specificDateStr]: records[specificDateStr] } : {}) : records;
+        // Wallet Transfer Movements
+        let totalWalletIn = 0; // Cash -> Wallet (Revenue for Wallet)
+        let totalWalletOutCash = 0; // Cash -> Wallet (Expense for Cash)
+        let totalWalletExpense = 0; // Wallet -> Expense (Expense for Wallet/System)
+        let totalWalletFundOut = 0; // NEW: Wallet -> Fund (Expense for Wallet)
 
-        for (const dateKey in recordsToProcess) {
-            const dailyRecord = recordsToProcess[dateKey];
-            
+        // Fund Wallet Movements (NEW)
+        let totalFundIn = 0; // Wallet -> Fund (Revenue for Fund)
+        let totalFundExpense = 0; // Fund -> Expense (Expense for Fund/System)
+
+
+        // 1. Calculate Gross Revenue/Expense from daily_records (Regular transactions only)
+        for (const dateKey in records) {
+            // If filtering by a specific date, skip others
+            if (specificDateStr && dateKey !== specificDateStr) continue;
+
+            const dailyRecord = records[dateKey];
             if (dailyRecord.transactions) {
                 Object.values(dailyRecord.transactions).forEach(trans => {
                     const revenue = Number(trans.revenue || 0);
                     const expense = Number(trans.expense || 0);
                     const method = trans.paymentMethod;
-                    
+
                     if (revenue > 0) {
                         if (method === 'transfer') {
                             totalRevenueTransfer += revenue;
@@ -918,103 +1115,123 @@ function unformatVND(formattedString) {
                         }
                     } else if (expense > 0) {
                         totalExpense += expense;
-                    } 
+                    }
                 });
             }
         }
-        
-        // 2. Process Wallet Transfers (only for overall totals if no specific date filter)
-        // NOTE: The implementation excludes wallet transfers if a specific date is set,
-        // as per the existing requirement, even though a true filtered balance should account for transfers on that day.
+
+        // 2. Calculate Wallet/Fund Movements (Only for Grand Total, ignore if filtering by specific date on main view)
         if (!specificDateStr) {
+            // Wallet Transfers (Cash <> Wallet)
             for (const transKey in walletTransfers) {
                 const trans = walletTransfers[transKey];
                 if (trans.paymentMethod === 'wallet_in') {
                     totalWalletIn += Number(trans.revenue || 0);
                 } else if (trans.paymentMethod === 'wallet_out_cash') {
                     totalWalletOutCash += Number(trans.expense || 0);
-                } else if (trans.paymentMethod === 'wallet_expense') { // NEW
+                } else if (trans.paymentMethod === 'wallet_expense') { 
                     totalWalletExpense += Number(trans.expense || 0);
+                } else if (trans.paymentMethod === 'wallet_fund_out') { // NEW
+                    totalWalletFundOut += Number(trans.expense || 0);
+                }
+            }
+            
+            // NEW: Fund Transfers (Wallet <> Fund)
+            for (const transKey in fundTransfers) {
+                const trans = fundTransfers[transKey];
+                if (trans.paymentMethod === 'fund_in') {
+                    totalFundIn += Number(trans.revenue || 0);
+                } else if (trans.paymentMethod === 'fund_expense') { 
+                    totalFundExpense += Number(trans.expense || 0);
                 }
             }
         }
 
-        // Calculations
-        // totalRev/totalExp/totalNet are for the grand total *after* all money movements
-        const totalRev = totalRevenueCash + totalRevenueTransfer + totalWalletIn + totalWalletOutCash; // wallet_out_cash is rev for overall system balance, as it's a cash-to-wallet-transfer-out
-        const totalExp = totalExpense + totalWalletExpense + totalWalletOutCash; // totalWalletOutCash is both expense for the overall system & cash out. We treat it as EXPENSE for simplicity.
-        const totalNet = totalRev - totalExp; // Needs careful re-evaluation: cash + transfer - expense - wallet_expense
-
-        // Simpler, more accurate Net calculation:
+        // Calculations for Overall System Totals (Excluding internal transfers like wallet_in/out, fund_in/out)
+        // Gross Revenue/Expense only includes actual income and direct expense (Regular + Wallet Expense + Fund Expense)
         const totalGrossRevenue = totalRevenueCash + totalRevenueTransfer;
-        const totalGrossExpense = totalExpense + totalWalletExpense;
+        const totalGrossExpense = totalExpense + totalWalletExpense + totalFundExpense; // Added totalFundExpense
         const finalTotalNet = totalGrossRevenue - totalGrossExpense;
 
-        // Cash Balance = Cash Revenue - Regular Expense - Cash Out for Wallet (Transfer In) + Revenue from Wallet Expense (Transfer Out to Cash)
-        // NOTE: The previous logic for wallet expense created a *wallet_out_cash* revenue transaction.
-        // This is confusing. A wallet expense should simply be tracked as an expense, and a wallet transfer out (Nạp Ví) should be a cash expense.
-        
-        // Let's stick to the current payment methods and redefine the balances based on the *intent* of the original logic:
+        // Cash Balance = Cash Revenue - Regular Expense - Cash Out for Wallet (Transfer In)
+        const totalNetCash = totalRevenueCash - totalExpense - totalWalletOutCash;
 
-        // 1. Cash Balance = Regular Cash Revenue - Regular Expense - Cash Out for Wallet (Transfer In)
-        const totalNetCash = totalRevenueCash - totalExpense - totalWalletOutCash + 0; // The logic does not currently track 'cash in from wallet expense'
+        // Wallet Balance = Transfer Revenue + Wallet In (Cash to Wallet) - Wallet Expense (for System) - Wallet Fund Out (to Fund)
+        const totalWalletBalance = totalRevenueTransfer + totalWalletIn - totalWalletExpense - totalWalletFundOut;
 
-        // 2. Wallet Balance = Transfer Revenue + Wallet In (Transfer In) - Wallet Expense (Transfer Out or Direct Expense)
-        const totalWalletBalance = totalRevenueTransfer + totalWalletIn - totalWalletExpense;
+        // NEW: Fund Balance = Fund In (from Wallet) - Fund Expense (for System)
+        const totalFundBalance = totalFundIn - totalFundExpense; // NEW
 
-        return { 
-            revenueCash: totalRevenueCash, 
-            revenueTransfer: totalRevenueTransfer, 
-            expense: totalExpense, 
-            walletIn: totalWalletIn,
-            walletOutCash: totalWalletOutCash,
-            walletExpense: totalWalletExpense, // NEW
-            net: finalTotalNet, // Use the simpler, cleaner net total
-            netCash: totalNetCash,
-            walletBalance: totalWalletBalance
+        return {
+            revenueCash: totalRevenueCash,
+            revenueTransfer: totalRevenueTransfer,
+            expense: totalExpense, // Regular Expense from daily_records only
+            net: finalTotalNet, // Overall system balance (Gross Revenue - All Expenses)
+            netCash: totalNetCash, // Cash Balance
+            walletBalance: totalWalletBalance, // Wallet Balance
+            fundBalance: totalFundBalance, // NEW: Fund Balance
         };
     }
 
     /**
-     * Updates the UI for the date range totals section.
+     * Renders the Fund Wallet History tab inside the modal. (NEW)
      */
-    function updateFilteredTotalsUI(records, walletTransfers) {
-        const specificDate = specificDateFilterEl.value;
+    function renderFundHistory(fundTransfers) {
+        fundHistoryBodyEl.innerHTML = '';
+        const transfersArray = Object.entries(fundTransfers || {}).map(([id, trans]) => ({ id, ...trans }));
 
-        // Do not update if filter is hidden
-        if (dateFilterControlsEl.style.display === 'none') {
-            return;
+        // Filter and sort the desired entries: 'fund_in' (Nạp Ví Quỹ) and 'fund_expense' (Chi Ví Quỹ)
+        const sortedHistory = transfersArray 
+            .filter(t => t.paymentMethod === 'fund_in' || t.paymentMethod === 'fund_expense')
+            .sort((a, b) => b.timestamp - a.timestamp); // Sort newest first
+
+        if (sortedHistory.length === 0) {
+            noFundDataMessageEl.classList.remove('d-none');
+        } else {
+            noFundDataMessageEl.classList.add('d-none');
+            sortedHistory.forEach(trans => {
+                const tempDateKey = new Date(trans.timestamp).toISOString().slice(0, 10);
+                const time = new Date(trans.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+                let typeText, amountValue, amountClass;
+
+                if (trans.paymentMethod === 'fund_in') {
+                    typeText = '<span class="badge bg-warning text-white">Nạp Quỹ</span>';
+                    amountValue = trans.revenue;
+                    amountClass = 'balance-positive';
+                } else if (trans.paymentMethod === 'fund_expense') {
+                    typeText = '<span class="badge bg-danger">Chi Quỹ</span>';
+                    amountValue = trans.expense;
+                    amountClass = 'balance-negative';
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatDate(tempDateKey)}<br><small class="text-muted">${time}</small></td>
+                    <td>${typeText}</td>
+                    <td class="${amountClass}"><strong>${formatVND(amountValue)}</strong></td>
+                    <td>${trans.details}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" title="Xóa giao dịch này" 
+                            onclick="window.deleteTransaction('${tempDateKey}', '${trans.id}', 'fund')">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                fundHistoryBodyEl.appendChild(tr);
+            });
         }
-
-        // Pass null for walletTransfers here to exclude it from filtered totals as per requirement
-        const totals = calculateTotals(records, walletTransfers, specificDate); 
-        // Note: calculateTotals is designed to exclude walletTransfers if specificDateStr is not null, so this is correct.
-        
-        filteredRevenueCashEl.innerText = formatVND(totals.revenueCash);
-        filteredRevenueTransferEl.innerText = formatVND(totals.revenueTransfer);
-        filteredExpenseEl.innerText = formatVND(totals.expense);
-        
-        // Total Balance
-        const filteredNet = totals.revenueCash + totals.revenueTransfer - totals.expense;
-        filteredBalanceEl.innerText = formatVND(filteredNet);
-        filteredBalanceEl.className = `h4 ${filteredNet >= 0 ? 'balance-positive' : 'balance-negative'}`;
-        
-        // Cash Balance - Exclude wallet transfer logic since it's not supported in filtered view
-        const filteredNetCash = totals.revenueCash - totals.expense;
-        filteredBalanceCashEl.innerText = formatVND(filteredNetCash);
-        filteredBalanceCashEl.className = `h4 ${filteredNetCash >= 0 ? 'balance-positive' : 'balance-negative'}`;
     }
-    
+
     /**
-     * Renders the Wallet Transfer History tab inside the modal. (UPDATED)
+     * Renders the Wallet Transfer History tab inside the modal. (UPDATED to include Delete button)
      */
     function renderTransferHistory(walletTransfers) {
         transferHistoryBodyEl.innerHTML = '';
         const transfersArray = Object.entries(walletTransfers || {}).map(([id, trans]) => ({ id, ...trans }));
-        
-        // Filter and sort the desired entries: 'wallet_in' (Nạp Ví) and 'wallet_expense' (Chi Ví)
-        const sortedHistory = transfersArray
-            .filter(t => t.paymentMethod === 'wallet_in' || t.paymentMethod === 'wallet_expense')
+
+        // Filter and sort the desired entries: 'wallet_in' (Nạp Ví), 'wallet_expense' (Chi Ví), and 'wallet_fund_out' (NEW)
+        const sortedHistory = transfersArray 
+            .filter(t => t.paymentMethod === 'wallet_in' || t.paymentMethod === 'wallet_expense' || t.paymentMethod === 'wallet_fund_out') // Added 'wallet_fund_out'
             .sort((a, b) => b.timestamp - a.timestamp); // Sort newest first
 
         if (sortedHistory.length === 0) {
@@ -1024,32 +1241,31 @@ function unformatVND(formattedString) {
             sortedHistory.forEach(trans => {
                 const date = new Date(trans.timestamp).toISOString().slice(0, 10);
                 const time = new Date(trans.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
-                
-                let typeText, amountValue, amountClass, actionTitle;
-                
+                let typeText, amountValue, amountClass;
+
                 if (trans.paymentMethod === 'wallet_in') {
                     typeText = '<span class="badge bg-primary">Nạp Ví</span>';
                     amountValue = trans.revenue;
-                    amountClass = 'text-primary';
-                    actionTitle = 'Xóa giao dịch Nạp Ví này';
+                    amountClass = 'balance-positive';
                 } else if (trans.paymentMethod === 'wallet_expense') {
                     typeText = '<span class="badge bg-danger">Chi Ví</span>';
                     amountValue = trans.expense;
-                    amountClass = 'text-danger';
-                    actionTitle = 'Xóa giao dịch Chi Ví này';
+                    amountClass = 'balance-negative';
+                } else if (trans.paymentMethod === 'wallet_fund_out') { // NEW
+                    typeText = '<span class="badge bg-warning">Nạp Quỹ (Trừ Ví)</span>';
+                    amountValue = trans.expense;
+                    amountClass = 'balance-negative';
                 }
 
-                // IMPORTANT: The `wallet_out_cash` entry (for Nạp Ví) or the paired `wallet_out_cash` (for Chi Ví - if implemented that way) 
-                // is implicitly deleted when deleting the main entry. We only show one entry per action here.
-                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${formatDate(date)} <br><small class="text-muted">${time}</small></td>
+                    <td>${formatDate(date)}<br><small class="text-muted">${time}</small></td>
                     <td>${typeText}</td>
-                    <td><strong class="${amountClass}">${formatVND(amountValue)}</strong></td>
+                    <td class="${amountClass}"><strong>${formatVND(amountValue)}</strong></td>
                     <td>${trans.details}</td>
                     <td>
-                        <button type="button" class="btn btn-sm btn-outline-danger" title="${actionTitle}" onclick="window.deleteWalletTransferPair('${trans.id}')">
+                        <button class="btn btn-sm btn-outline-danger" title="Xóa giao dịch này" 
+                            onclick="window.deleteTransaction('${date}', '${trans.id}', 'wallet')">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
@@ -1059,20 +1275,72 @@ function unformatVND(formattedString) {
         }
     }
 
+    /**
+     * Updates the UI for the date range totals section.
+     */
+    function updateFilteredTotalsUI(records, walletTransfers, fundTransfers) {
+        const specificDate = specificDateFilterEl.value;
+        // Do not update if filter is hidden
+        if (dateFilterControlsEl.style.display === 'none') {
+            return;
+        }
+
+        // Note: calculateTotals is designed to exclude wallet/fundTransfers if specificDateStr is not null, so this is correct.
+        const totals = calculateTotals(records, walletTransfers, fundTransfers, specificDate); 
+
+        filteredRevenueCashEl.innerText = formatVND(totals.revenueCash);
+        filteredRevenueTransferEl.innerText = formatVND(totals.revenueTransfer);
+        filteredExpenseEl.innerText = formatVND(totals.expense);
+
+        // Total Balance
+        const filteredNet = totals.revenueCash + totals.revenueTransfer - totals.expense;
+        filteredBalanceEl.innerText = formatVND(filteredNet);
+        filteredBalanceEl.className = `h4 ${filteredNet >= 0 ? 'balance-positive' : 'balance-negative'}`;
+
+        // Cash Balance - Exclude wallet/fund transfer logic since it's not supported in filtered view
+        const filteredNetCash = totals.revenueCash - totals.expense;
+        filteredBalanceCashEl.innerText = formatVND(filteredNetCash);
+        filteredBalanceCashEl.className = `h4 ${filteredNetCash >= 0 ? 'balance-positive' : 'balance-negative'}`;
+    }
+    
+    // Function to calculate and update fundInAmount based on percentage (NEW)
+    function applyFundInPercentage(percent) {
+        percent = Number(percent);
+        if (isNaN(percent) || percent <= 0 || percent > 100) {
+            alert("Phần trăm không hợp lệ (phải từ 1 đến 100).");
+            return;
+        }
+        
+        const availableBalance = Number(hiddenAvailableTransferBalanceForFundEl.value);
+        const calculatedAmount = Math.floor(availableBalance * (percent / 100));
+        
+        // Update the input field with the calculated amount (raw number string) and dispatch input event for formatting
+        fundInAmountEl.value = calculatedAmount.toString();
+        fundInAmountEl.dispatchEvent(new Event('input')); 
+
+        fundInPercentInfoEl.textContent = `Đã tính ${percent}% của ${formatVND(availableBalance)} = ${formatVND(calculatedAmount)}.`;
+
+        // Close the dropdown after applying
+        const dropdownToggle = fundInAmountEl.parentElement.querySelector('.dropdown-toggle');
+        if (dropdownToggle) {
+            new bootstrap.Dropdown(dropdownToggle).hide();
+        }
+    }
+
 
     // --- UI Rendering ---
-    function renderAll(records, walletTransfers) {
+    function renderAll(records, walletTransfers, fundTransfers) {
         const viewMode = reportViewEl.value;
         const sortOrder = sortOrderEl.value;
-        
+
         // Calculate ALL totals
-        const allTotals = calculateTotals(records, walletTransfers);
-        
+        const allTotals = calculateTotals(records, walletTransfers, fundTransfers);
+
         // Update Overall Totals for All Data
         totalRevenueCashEl.innerText = formatVND(allTotals.revenueCash);
         totalRevenueTransferEl.innerText = formatVND(allTotals.revenueTransfer);
         totalExpenseEl.innerText = formatVND(allTotals.expense);
-
+        
         totalBalanceEl.innerText = formatVND(allTotals.net);
         totalBalanceEl.className = `h4 ${allTotals.net >= 0 ? 'balance-positive' : 'balance-negative'}`;
         
@@ -1082,6 +1350,10 @@ function unformatVND(formattedString) {
         // Update Overall Wallet Balance
         totalWalletBalanceEl.innerText = formatVND(allTotals.walletBalance);
         totalWalletBalanceEl.className = `h4 text-white`;
+        
+        // Update Overall Fund Wallet Balance
+        totalFundBalanceEl.innerText = formatVND(allTotals.fundBalance);
+        totalFundBalanceEl.className = `h4 text-white`;
 
 
         // Transform the nested data for rendering and aggregation (Daily Aggregation)
@@ -1091,17 +1363,15 @@ function unformatVND(formattedString) {
             let dailyRevenueCash = 0;
             let dailyRevenueTransfer = 0;
             let dailyExpense = 0;
-            
-            // NOTE: wallet_in/wallet_out_cash/wallet_expense transactions are NO LONGER processed here from daily_records.
+
             if (dailyRecord.transactions) {
                 Object.values(dailyRecord.transactions).forEach(trans => {
                     const revenue = Number(trans.revenue || 0);
                     const expense = Number(trans.expense || 0);
-                    
                     const method = trans.paymentMethod;
-                    
+
                     if (revenue > 0) {
-                         if (method === 'transfer') {
+                        if (method === 'transfer') {
                             dailyRevenueTransfer += revenue;
                         } else {
                             // Default to cash if paymentMethod is missing or not 'transfer'
@@ -1112,7 +1382,7 @@ function unformatVND(formattedString) {
                     }
                 });
             }
-            
+
             const dailyTotalRevenue = dailyRevenueCash + dailyRevenueTransfer;
             const dailyTotalExpense = dailyExpense;
             const dailyNet = dailyTotalRevenue - dailyTotalExpense;
@@ -1130,52 +1400,30 @@ function unformatVND(formattedString) {
 
         // Update Filtered Totals if the filter control panel is visible
         if (dateFilterControlsEl.style.display !== 'none') {
-            updateFilteredTotalsUI(records, walletTransfers);
+            updateFilteredTotalsUI(records, walletTransfers, fundTransfers);
         }
 
-        // Render Transfer History in modal
-        renderTransferHistory(walletTransfers);
-
-
-        let dataToRender = {};
-        tableHeaderEl.innerHTML = '';
-        
-        switch (viewMode) {
-            case 'day':
-                reportTitleEl.innerHTML = '<i class="fas fa-history me-2"></i> Lịch sử Giao dịch';
-                tableHeaderEl.innerHTML = `
-                    <th class="date-header">Ngày</th>
-                    <th>Doanh thu</th>
-                    <th>Chi tiêu</th>
-                    <th>Số dư</th>
-                    <th>Chi tiết</th>
-                    <th class="action-header">Hành động</th>
-                `;
-                dataToRender = dailyAggregatedRecords;
-                break;
-            case 'month':
-                reportTitleEl.innerHTML = '<i class="fas fa-calendar-alt me-2"></i> Báo cáo theo Tháng';
-                tableHeaderEl.innerHTML = `
-                    <th>Tháng</th>
-                    <th>Doanh thu</th>
-                    <th>Chi tiêu</th>
-                    <th>Số dư</th>
-                `;
-                dataToRender = aggregateByPeriod(dailyAggregatedRecords, 'month');
-                break;
-            case 'quarter':
-                reportTitleEl.innerHTML = '<i class="fas fa-chart-line me-2"></i> Báo cáo theo Quý';
-                tableHeaderEl.innerHTML = `
-                    <th>Quý</th>
-                    <th>Doanh thu</th>
-                    <th>Chi tiêu</th>
-                    <th>Số dư</th>
-                `;
-                dataToRender = aggregateByPeriod(dailyAggregatedRecords, 'quarter');
-                break;
+        // Group data based on view mode (Day, Month, Quarter)
+        let dataToRender = dailyAggregatedRecords;
+        if (viewMode === 'month' || viewMode === 'quarter') {
+            dataToRender = aggregateByPeriod(dailyAggregatedRecords, viewMode);
         }
 
         historyBodyEl.innerHTML = '';
+        reportTitleEl.innerHTML = `<i class="fas fa-history me-2"></i> Lịch sử Giao dịch (${viewMode === 'day' ? 'Hàng ngày' : viewMode === 'month' ? 'Theo Tháng' : 'Theo Quý'})`;
+        tableHeaderEl.innerHTML = viewMode === 'day' ? 
+            `<th class="date-header">Ngày</th>
+             <th>Doanh thu</th>
+             <th>Chi tiêu</th>
+             <th>Số dư</th>
+             <th>Chi tiết</th>
+             <th class="action-header">Hành động</th>` : 
+            `<th class="date-header">${viewMode === 'month' ? 'Tháng' : 'Quý'}</th>
+             <th>Doanh thu</th>
+             <th>Chi tiêu</th>
+             <th>Số dư</th>`;
+
+
         const keys = Object.keys(dataToRender).sort();
         if (sortOrder === 'desc') keys.reverse();
 
@@ -1205,13 +1453,13 @@ function unformatVND(formattedString) {
                         </button>
                     </td>
                     <td data-label="Hành động:" class="action-cell">
-                        <button type="button" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="window.handleDelete('${key}')">
+                        <button type="button" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="window.deleteDay('${key}')">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
                 `;
             } else {
-                 tr.innerHTML = `
+                tr.innerHTML = `
                     <td data-label="${viewMode === 'month' ? 'Tháng:' : 'Quý:'}"><strong>${key}</strong></td>
                     <td data-label="Doanh thu:">${formatVND(r.revenue)}</td>
                     <td data-label="Chi tiêu:">${formatVND(r.expense)}</td>
@@ -1228,21 +1476,12 @@ function unformatVND(formattedString) {
     async function handleShowDetails(date) {
         const snapshot = await recordsRef.child(date).child('transactions').get();
         const transactions = snapshot.val();
-        let htmlContent = `<p class="text-muted">Ngày: ${formatDate(date)}</p>`;
         
-        if (!transactions) {
-            htmlContent += `<p>Không có giao dịch nào cho ngày này.</p>`;
-        } else {
-            // Sort transactions: revenue first, then expense
-            const sortedTransactions = Object.entries(transactions).sort(([, a], [, b]) => {
-                // If one is revenue and other is expense, put revenue first
-                if (a.revenue > 0 && b.expense > 0) return -1;
-                if (a.expense > 0 && b.revenue > 0) return 1;
-                
-                // Otherwise, sort by timestamp
-                return a.timestamp - b.timestamp;
-            });
+        let htmlContent = `<p class="text-muted">Ngày: <strong>${formatDate(date)}</strong></p>`;
 
+        if (!transactions || Object.keys(transactions).length === 0) {
+            htmlContent += '<p class="text-center text-muted">Không có giao dịch chi tiết nào trong ngày này.</p>';
+        } else {
             htmlContent += `
                 <div class="table-responsive">
                     <table class="table table-bordered table-sm">
@@ -1256,28 +1495,30 @@ function unformatVND(formattedString) {
                             </tr>
                         </thead>
                         <tbody>
-                `;
-            sortedTransactions.forEach(([id, trans]) => {
-                const isExpense = trans.expense > 0;
-                // NOTE: Wallet transfer transactions are NO LONGER expected here.
-                const isWalletTransfer = ['wallet_in', 'wallet_out_cash', 'wallet_expense'].includes(trans.paymentMethod); // Updated check
+            `;
+            
+            const transactionsArray = Object.entries(transactions).map(([id, trans]) => ({ id, ...trans }));
+            transactionsArray.sort((a, b) => a.timestamp - b.timestamp);
 
-                let amount;
-                let amountClass;
-                let type;
-                let method;
+            transactionsArray.forEach(trans => {
+                const id = trans.id;
+                const isRevenue = trans.revenue > 0;
+                const amount = isRevenue ? trans.revenue : trans.expense;
+                const amountClass = isRevenue ? 'balance-positive' : 'balance-negative';
+                const type = isRevenue ? 'Thu' : 'Chi';
                 
-                // Simplified display since wallet transfers are moved
-                if (isExpense) {
-                    amount = trans.expense;
-                    amountClass = 'text-danger';
-                    type = 'Chi tiêu';
-                    method = ''; // Assume cash expense if not specified/needed
+                let method = '';
+                let isWalletTransfer = ['wallet_in', 'wallet_out_cash', 'wallet_expense', 'wallet_fund_out', 'fund_in', 'fund_expense'].includes(trans.paymentMethod);
+                
+                if (isWalletTransfer) {
+                     // Check if it's a Wallet/Fund transfer. Should not happen if they are logged separately, but for safety.
+                     method = `<span class="badge bg-secondary">Giao dịch Ví/Quỹ</span>`;
+                } else if (isRevenue) {
+                    method = trans.paymentMethod === 'transfer' ? 
+                             ('<span class="badge bg-primary">Chuyển khoản</span>') : 
+                             ('<span class="badge bg-warning text-dark">Tiền mặt</span>');
                 } else {
-                    amount = trans.revenue;
-                    amountClass = 'text-success';
-                    type = 'Doanh thu';
-                    method = trans.paymentMethod ? (trans.paymentMethod === 'cash' ? '<span class="badge bg-warning text-dark">Tiền mặt</span>' : '<span class="badge bg-primary">Chuyển khoản</span>') : '<span class="badge bg-warning text-dark">Tiền mặt</span>';
+                    method = '<span class="badge bg-danger">Chi tiêu</span>';
                 }
 
                 const time = trans.timestamp ? new Date(trans.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'}) : 'N/A';
@@ -1286,9 +1527,9 @@ function unformatVND(formattedString) {
                 const detailsForEdit = trans.details.replace(/'/g, "\\'").replace(/"/g, '\\"');
                 const paymentMethodForEdit = trans.paymentMethod || 'cash';
                 
-                // Action buttons are always available for non-wallet transfers
+                // Action buttons are only available for non-wallet/fund transfers (regular records)
                 const actionButtons = isWalletTransfer ? 
-                    `<span class="badge bg-secondary">Giao dịch Ví</span>` : 
+                    `<span class="badge bg-secondary">Giao dịch Ví/Quỹ</span>` : 
                     `
                         <button class="btn btn-sm btn-outline-primary" onclick="window.editTransaction('${date}', '${id}', ${trans.revenue}, ${trans.expense}, '${detailsForEdit}', '${paymentMethodForEdit}')"><i class="fas fa-edit"></i></button>
                         <button class="btn btn-sm btn-outline-danger" onclick="window.deleteTransaction('${date}', '${id}')"><i class="fas fa-trash-alt"></i></button>
@@ -1306,9 +1547,10 @@ function unformatVND(formattedString) {
                     </tr>
                 `;
             });
+
             htmlContent += `</tbody></table></div>`;
         }
-        
+
         detailsModalBodyEl.innerHTML = htmlContent;
         detailsModal.show();
     }
@@ -1333,6 +1575,7 @@ function unformatVND(formattedString) {
             if (!aggregated[key]) {
                 aggregated[key] = { revenue: 0, expense: 0, net: 0 };
             }
+
             aggregated[key].revenue += record.revenue;
             aggregated[key].expense += record.expense;
             aggregated[key].net += record.net;
@@ -1340,32 +1583,7 @@ function unformatVND(formattedString) {
         return aggregated;
     }
 
-
-    // Global Handlers for inline events (now calling async functions)
-    window.handleShowDetails = handleShowDetails;
-    window.handleDelete = async (date) => {
-        if (confirm('Xóa toàn bộ giao dịch của ngày ' + formatDate(date) + '?')) {
-            await deleteDay(date);
-        }
-    };
-    window.editTransaction = editTransaction; 
-    window.deleteTransaction = deleteTransaction;
-    // NEW: Delete Wallet Transfer Pair (Updated to handle both Nạp Ví and Chi Ví)
-    window.deleteWalletTransferPair = async (transferId) => {
-        if (confirm('Bạn có chắc muốn xóa giao dịch này? Thao tác này sẽ hoàn tác việc Nạp Ví hoặc Chi Ví (tăng/giảm ngược lại các số dư liên quan).')) {
-            // Deleting the single transaction (transferId)
-            await walletTransfersRef.child(transferId).remove();
-            
-            // NOTE: For Nạp Ví, we only created a pair with one known ID ('wallet_in') and implicitly one unknown ID ('wallet_out_cash').
-            // For Chi Ví, we created a pair with one known ID ('wallet_expense') and implicitly one unknown ID ('wallet_out_cash').
-            // A more robust solution would require linking the two IDs explicitly in the database.
-            // For now, we rely on the Firebase listener to recalculate all balances after the primary deletion.
-        }
-    };
-
-
     // --- Utility functions for Export/Import (kept basic) ---
-    // NOTE: CSV and JSON export logic is kept simple and might not reflect the cash/transfer split perfectly in the export file structure without further updates.
     function downloadFile(filename, text) {
         const element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -1376,21 +1594,21 @@ function unformatVND(formattedString) {
         document.body.removeChild(element);
     }
 
-    // UPDATED: Export all data including wallet transfers
-    function exportJson(records, walletTransfers) {
-        const fullData = {
-            daily_records: records,
-            wallet_transfers: walletTransfers
+    // UPDATED: Export all data including wallet/fund transfers
+    function exportJson(records, walletTransfers, fundTransfers) {
+        const fullData = { 
+            daily_records: records, 
+            wallet_transfers: walletTransfers,
+            fund_transfers: fundTransfers // NEW
         };
         const json = JSON.stringify(fullData, null, 2);
         downloadFile(`records_${new Date().toISOString().slice(0, 10)}.json`, json);
         alert('Dữ liệu đã được xuất ra JSON.');
     }
-    
+
     function exportCsv(dailyAggregatedRecords) {
         let csv = 'Ngày,Doanh thu,Chi tiêu,Số dư\n';
         const sortedKeys = Object.keys(dailyAggregatedRecords).sort();
-        
         sortedKeys.forEach(date => {
             const r = dailyAggregatedRecords[date];
             csv += `${formatDate(date)},${r.revenue},${r.expense},${r.net}\n`;
@@ -1413,289 +1631,412 @@ function unformatVND(formattedString) {
                 if (importedData.wallet_transfers) {
                     await walletTransfersRef.update(importedData.wallet_transfers);
                 }
+                if (importedData.fund_transfers) {
+                    await fundTransfersRef.update(importedData.fund_transfers); // NEW
+                }
+
                 alert('Dữ liệu đã được nhập thành công!');
             } catch (err) {
                 alert('Lỗi khi đọc file JSON: ' + err.message);
+                console.error(err);
             }
         };
         reader.readAsText(file);
     }
-    // ------------------------------------------------------------------------
 
-    // --- Event Listeners & Init ---
-    (function init() {
-        // Set today's date
-        const today = new Date().toISOString().slice(0, 10);
-        modalEntryDateEl.value = today;
-        specificDateFilterEl.value = today; // Set default specific date
-        transferDateEl.value = today; // Set default transfer date
-        walletExpenseDateEl.value = today; // NEW: Set default wallet expense date
+    // --- Event Listeners ---
+    document.querySelectorAll('.currency-input').forEach(input => {
+        input.addEventListener('input', formatNumberInput);
+        // Initial format on load (if value is present)
+        input.dispatchEvent(new Event('input'));
+    });
 
-        // Show modal for Revenue (UPDATED)
-        addRevenueBtn.addEventListener('click', () => {
-            modalTitle.innerText = "Thêm Giao Dịch Thu (Tiền mặt & Chuyển khoản)";
-            modalSubmitBtn.innerText = "Thêm Giao Dịch Thu";
-            transactionTypeEl.value = "revenue";
-            modalAmountEl.value = "0"; // Reset Expense field
-            modalAmountCashEl.value = "0"; // Reset Cash field
-            modalAmountTransferEl.value = "0"; // Reset Transfer field
-            modalDetailsEl.value = "";
+    // Toggle Date Filter Panel
+    toggleDateFilterBtn.addEventListener('click', () => {
+        const isHidden = dateFilterControlsEl.style.display === 'none';
+        dateFilterControlsEl.style.display = isHidden ? 'block' : 'none';
+        toggleDateFilterBtn.innerHTML = isHidden ? 
+            `<i class="fas fa-calendar-times me-2"></i> **Ẩn Thống kê theo Ngày**` : 
+            `<i class="fas fa-calendar-check me-2"></i> **Thống kê theo Ngày Cụ thể**`;
             
-            revenueFieldsEl.style.display = 'block'; // Show revenue fields
-            expenseFieldEl.style.display = 'none'; // Hide expense field
-            modalAmountEl.required = false;
-            
-            addTransactionModal.show();
-        });
+        // If showing, apply filter immediately if a date is selected
+        if (!isHidden && specificDateFilterEl.value && window.cachedRecords) {
+            updateFilteredTotalsUI(window.cachedRecords, window.cachedWalletTransfers, window.cachedFundTransfers);
+        }
+    });
 
-        // Show modal for Expense (UPDATED)
-        addExpenseBtn.addEventListener('click', () => {
-            modalTitle.innerText = "Thêm Giao Dịch Chi";
-            modalAmountLabel.innerText = "Số tiền Chi (VND)";
-            modalSubmitBtn.innerText = "Thêm Giao Dịch Chi";
-            transactionTypeEl.value = "expense";
-            modalAmountEl.value = "";
-            modalDetailsEl.value = "";
-            
-            revenueFieldsEl.style.display = 'none'; // Hide revenue fields
-            expenseFieldEl.style.display = 'block'; // Show expense field
-            modalAmountEl.required = true;
-            
-            addTransactionModal.show();
-        });
+    // Apply Date Filter
+    applyDateFilterBtn.addEventListener('click', () => {
+        if (!specificDateFilterEl.value) {
+            alert('Vui lòng chọn một ngày cụ thể để thống kê.');
+            return;
+        }
+        if (window.cachedRecords) {
+            updateFilteredTotalsUI(window.cachedRecords, window.cachedWalletTransfers, window.cachedFundTransfers);
+        }
+    });
 
-        // NEW: Show modal for Wallet Transfer (Updated to show all balances for context)
-        transferToWalletBtn.addEventListener('click', () => {
-            const currentCashBalance = unformatVND(totalBalanceCashEl.innerText);
-            const currentWalletBalance = unformatVND(totalWalletBalanceEl.innerText);
-            
-            // Update Nạp Ví tab
-            availableCashBalanceEl.innerText = formatVND(currentCashBalance);
-            hiddenAvailableCashBalanceEl.value = currentCashBalance;
-            transferAmountEl.value = "";
-            transferDetailsEl.value = `Chuyển ${currentCashBalance > 0 ? 'một phần' : ''} Dư Tiền mặt vào Ví Chuyển khoản`;
+    // Sort/View Change Listeners
+    sortOrderEl.addEventListener('change', () => {
+        if (window.cachedRecords) {
+            renderAll(window.cachedRecords, window.cachedWalletTransfers, window.cachedFundTransfers);
+        }
+    });
+    reportViewEl.addEventListener('change', () => {
+        if (window.cachedRecords) {
+            renderAll(window.cachedRecords, window.cachedWalletTransfers, window.cachedFundTransfers);
+        }
+    });
 
-            // Update Chi Ví tab (NEW)
-            availableWalletBalanceEl.innerText = formatVND(currentWalletBalance);
-            hiddenAvailableWalletBalanceEl.value = currentWalletBalance;
-            walletExpenseAmountEl.value = "";
-            walletExpenseDetailsEl.value = "";
-            
-            transferModal.show();
-        });
+    // Set today's date for modals on load
+    const today = new Date().toISOString().split('T')[0];
+    modalEntryDateEl.value = today;
+    transferDateEl.value = today;
+    walletExpenseDateEl.value = today;
+    fundInDateEl.value = today;
+    fundExpenseDateEl.value = today;
+
+    // Show modal for Revenue (UPDATED)
+    addRevenueBtn.addEventListener('click', () => {
+        modalTitle.innerText = "Thêm Giao Dịch Thu";
+        modalSubmitBtn.innerText = "Thêm Giao Dịch Thu";
+        transactionTypeEl.value = "revenue";
+        modalAmountCashEl.value = "";
+        modalAmountTransferEl.value = "";
+        modalDetailsEl.value = "";
         
-        // Handle form submission from the Add Transaction modal (UPDATED)
-        addTransactionForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const date = modalEntryDateEl.value;
-            const details = modalDetailsEl.value.trim();
-            const type = transactionTypeEl.value;
-            
-            if (type === "revenue") {
-                const amountCash = unformatVND(modalAmountCashEl.value);
-                const amountTransfer = unformatVND(modalAmountTransferEl.value);
+        revenueFieldsEl.style.display = 'flex'; // Show revenue fields
+        expenseFieldEl.style.display = 'none'; // Hide expense field
+        modalAmountEl.required = false;
+        addTransactionModal.show();
+    });
 
-                if (amountCash > 0) {
-                    addSingleEntry(date, amountCash, 0, details || "Thu nhập tiền mặt", 'cash');
-                }
-                if (amountTransfer > 0) {
-                    addSingleEntry(date, amountTransfer, 0, details || "Thu nhập chuyển khoản", 'transfer');
-                }
-                
-                if (amountCash <= 0 && amountTransfer <= 0) {
-                    alert("Vui lòng nhập số tiền Thu Tiền mặt hoặc Thu Chuyển khoản.");
-                    return;
-                }
-            } else {
-                // For Expense
-                const amount = unformatVND(modalAmountEl.value);
-                if (amount > 0) {
-                    // Generic Expense (Affects Cash Balance)
-                    addSingleEntry(date, 0, amount, details);
-                } else {
-                    alert("Vui lòng nhập số tiền Chi tiêu.");
-                    return;
-                }
-            }
-            
-            addTransactionModal.hide();
-        });
+    // Show modal for Expense (UPDATED)
+    addExpenseBtn.addEventListener('click', () => {
+        modalTitle.innerText = "Thêm Giao Dịch Chi";
+        modalAmountLabel.innerText = "Số tiền Chi (VND)";
+        modalSubmitBtn.innerText = "Thêm Giao Dịch Chi";
+        transactionTypeEl.value = "expense";
+        modalAmountEl.value = "";
+        modalDetailsEl.value = "";
         
-        // Handle form submission from the Transfer Modal (Nạp Ví)
-        transferForm.addEventListener('submit', async function(e) {
+        revenueFieldsEl.style.display = 'none'; // Hide revenue fields
+        expenseFieldEl.style.display = 'block'; // Show expense field
+        modalAmountEl.required = true;
+        addTransactionModal.show();
+    });
+
+    // Show modal for Wallet Transfer (Updated to show all balances for context)
+    transferToWalletBtn.addEventListener('click', () => {
+        const currentCashBalance = unformatVND(totalBalanceCashEl.innerText);
+        const currentWalletBalance = unformatVND(totalWalletBalanceEl.innerText);
+
+        // Update Nạp Ví tab
+        availableCashBalanceEl.innerText = formatVND(currentCashBalance);
+        hiddenAvailableCashBalanceEl.value = currentCashBalance;
+        transferAmountEl.value = "";
+        transferDetailsEl.value = `Chuyển ${currentCashBalance > 0 ? 'một phần' : ''} Dư Tiền mặt vào Ví Chuyển khoản`;
+
+        // Update Chi Ví tab
+        availableWalletBalanceEl.innerText = formatVND(currentWalletBalance);
+        hiddenAvailableWalletBalanceEl.value = currentWalletBalance;
+        walletExpenseAmountEl.value = "";
+        walletExpenseDetailsEl.value = "";
+        
+        // Render history for immediate update
+        if (window.cachedWalletTransfers) {
+            renderTransferHistory(window.cachedWalletTransfers);
+        }
+
+        transferModal.show();
+    });
+    
+    // Show modal for Fund Wallet (UPDATED to clear percentage info)
+    fundToWalletBtn.addEventListener('click', () => {
+        const currentTransferBalance = unformatVND(totalWalletBalanceEl.innerText);
+        const currentFundBalance = unformatVND(totalFundBalanceEl.innerText);
+
+        // Update Nạp Quỹ tab
+        availableTransferBalanceForFundEl.innerText = formatVND(currentTransferBalance);
+        hiddenAvailableTransferBalanceForFundEl.value = currentTransferBalance;
+        fundInAmountEl.value = "";
+        fundInDetailsEl.value = `Chuyển ${currentTransferBalance > 0 ? 'một phần' : ''} Ví Chuyển khoản vào Ví Quỹ`;
+        fundInPercentInfoEl.textContent = 'Hoặc nhập số tiền trực tiếp.'; // NEW: Clear info text
+
+        // Update Chi Quỹ tab
+        availableFundBalanceEl.innerText = formatVND(currentFundBalance);
+        hiddenAvailableFundBalanceEl.value = currentFundBalance;
+        fundExpenseAmountEl.value = "";
+        fundExpenseDetailsEl.value = ""; 
+        
+        // Render history for immediate update
+        if (window.cachedFundTransfers) {
+            renderFundHistory(window.cachedFundTransfers);
+        }
+
+        fundModal.show();
+    });
+
+    // Event listener for dropdown percentage buttons (NEW)
+    document.querySelectorAll('.fund-percent-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
             e.preventDefault();
-            
-            const date = transferDateEl.value;
-            const amount = unformatVND(transferAmountEl.value);
-            const details = transferDetailsEl.value.trim();
-            const maxAmount = Number(hiddenAvailableCashBalanceEl.value);
-            
-            if (amount <= 0) {
-                alert("Vui lòng nhập số tiền muốn nạp.");
+            const percent = e.target.getAttribute('data-percent');
+            applyFundInPercentage(percent);
+        });
+    });
+
+    // Event listener for applying custom percentage (NEW)
+    applyCustomPercentBtnEl.addEventListener('click', (e) => {
+        e.preventDefault();
+        const percent = customFundPercentEl.value;
+        applyFundInPercentage(percent);
+        customFundPercentEl.value = ''; // Clear custom input
+    });
+
+    // Handle form submission from the Add Transaction modal (UPDATED)
+    addTransactionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const date = modalEntryDateEl.value;
+        const details = modalDetailsEl.value.trim();
+        const type = transactionTypeEl.value;
+
+        if (type === "revenue") {
+            const amountCash = unformatVND(modalAmountCashEl.value);
+            const amountTransfer = unformatVND(modalAmountTransferEl.value);
+
+            if (amountCash <= 0 && amountTransfer <= 0) {
+                alert("Vui lòng nhập số tiền Thu Tiền mặt hoặc Thu Chuyển khoản.");
                 return;
             }
-            
-            // Logic kiểm tra số tiền nạp không được vượt quá Dư Tiền Mặt
-            if (amount > maxAmount) {
-                alert(`[THÔNG BÁO LỖI] Số tiền nạp (${formatVND(amount)}) đã vượt quá Số Dư Tiền Mặt hiện có (${formatVND(maxAmount)}). Vui lòng nhập số tiền nhỏ hơn hoặc bằng số dư.`);
-                return;
+
+            if (amountCash > 0) {
+                addSingleEntry(date, amountCash, 0, details || "Thu nhập tiền mặt", 'cash');
             }
-            
-            // 1. Giao dịch Chi Tiêu từ Tiền Mặt (Giảm Dư Tiền Mặt) - Saved to wallet_transfers
-            await addSingleEntry(date, 0, amount, `[Nạp Ví] Trừ Tiền mặt: ${details}`, 'wallet_out_cash');
-            
-            // 2. Giao dịch Thu vào Ví Chuyển Khoản (Tăng Ví Chuyển Khoản) - Saved to wallet_transfers
-            await addSingleEntry(date, amount, 0, `[Nạp Ví] Thu vào Ví: ${details}`, 'wallet_in');
-            
-            transferModal.hide();
-            transferAmountEl.value = ""; // Reset field
-        });
-        
-        // NEW: Handle form submission from the Wallet Expense Modal (Chi Ví)
-        walletExpenseForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const date = walletExpenseDateEl.value;
-            const amount = unformatVND(walletExpenseAmountEl.value);
-            const details = walletExpenseDetailsEl.value.trim();
-            const maxAmount = Number(hiddenAvailableWalletBalanceEl.value);
-            
+            if (amountTransfer > 0) {
+                addSingleEntry(date, amountTransfer, 0, details || "Thu nhập chuyển khoản", 'transfer');
+            }
+        } else if (type === "expense") {
+            const amount = unformatVND(modalAmountEl.value);
+
             if (amount <= 0) {
                 alert("Vui lòng nhập số tiền muốn chi.");
                 return;
             }
+            // Regular Expense is considered cash/undifferentiated for simplicity in this version
+            addSingleEntry(date, 0, amount, details || "Chi tiêu", null);
+        }
+
+        addTransactionModal.hide();
+    });
+
+    // Handle form submission from the Transfer Modal (Nạp Ví)
+    transferForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const date = transferDateEl.value;
+        const amount = unformatVND(transferAmountEl.value);
+        const details = transferDetailsEl.value.trim();
+        const maxAmount = Number(hiddenAvailableCashBalanceEl.value);
+
+        if (amount <= 0) {
+            alert("Vui lòng nhập số tiền muốn nạp.");
+            return;
+        }
+
+        // Logic kiểm tra số tiền nạp không được vượt quá Số Dư Tiền Mặt
+        if (amount > maxAmount) {
+            alert(`[THÔNG BÁO LỖI] Số tiền nạp (${formatVND(amount)}) đã vượt quá Số Dư Tiền Mặt hiện có (${formatVND(maxAmount)}). Vui lòng nhập số tiền nhỏ hơn hoặc bằng số dư.`);
+            return;
+        }
+
+        // 1. Giao dịch Chi Tiêu từ Tiền Mặt (Giảm Dư Tiền Mặt) - Saved to wallet_transfers
+        await addSingleEntry(date, 0, amount, `[Nạp Ví] Trừ Tiền mặt: ${details}`, 'wallet_out_cash');
+
+        // 2. Giao dịch Thu vào Ví Chuyển Khoản (Tăng Ví Chuyển Khoản) - Saved to wallet_transfers
+        await addSingleEntry(date, amount, 0, `[Nạp Ví] Thu vào Ví: ${details}`, 'wallet_in');
+
+        transferModal.hide();
+        transferAmountEl.value = ""; // Reset field
+    });
+
+    // Handle form submission from the Wallet Expense Modal (Chi Ví)
+    walletExpenseForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const date = walletExpenseDateEl.value;
+        const amount = unformatVND(walletExpenseAmountEl.value);
+        const details = walletExpenseDetailsEl.value.trim();
+        const maxAmount = Number(hiddenAvailableWalletBalanceEl.value);
+
+        if (amount <= 0) {
+            alert("Vui lòng nhập số tiền muốn chi.");
+            return;
+        }
+
+        // Logic kiểm tra số tiền chi không được vượt quá Số Dư Ví Chuyển Khoản
+        if (amount > maxAmount) {
+            alert(`[THÔNG BÁO LỖI] Số tiền chi (${formatVND(amount)}) đã vượt quá Số Dư Ví Chuyển Khoản hiện có (${formatVND(maxAmount)}). Vui lòng nhập số tiền nhỏ hơn hoặc bằng số dư.`);
+            return;
+        }
+
+        // 1. Giao dịch Chi từ Ví Chuyển Khoản (Giảm Ví Chuyển Khoản) - Saved to wallet_transfers
+        await addSingleEntry(date, 0, amount, `[Chi Ví] Chi tiêu từ Ví: ${details}`, 'wallet_expense');
+
+        walletExpenseForm.reset(); // Reset form fields
+        transferModal.hide();
+    });
+
+    // Handle form submission from the Fund In Modal (Nạp Ví Quỹ) (UPDATED to use fundInAmountEl value)
+    fundInForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const date = fundInDateEl.value;
+        const amount = unformatVND(fundInAmountEl.value); // Use the value from the input, which might be calculated from percentage
+        const details = fundInDetailsEl.value.trim();
+        const maxAmount = Number(hiddenAvailableTransferBalanceForFundEl.value);
+
+        if (amount <= 0) {
+            alert("Vui lòng nhập số tiền muốn nạp.");
+            return;
+        }
+
+        // Logic kiểm tra số tiền nạp không được vượt quá Số Dư Ví Chuyển Khoản
+        if (amount > maxAmount) {
+            alert(`[THÔNG BÁO LỖI] Số tiền nạp (${formatVND(amount)}) đã vượt quá Số Dư Ví Chuyển Khoản hiện có (${formatVND(maxAmount)}). Vui lòng nhập số tiền nhỏ hơn hoặc bằng số dư.`);
+            return;
+        }
+
+        // 1. Giao dịch Chi từ Ví Chuyển Khoản (Giảm Ví Chuyển Khoản) - Saved to wallet_transfers
+        await addSingleEntry(date, 0, amount, `[Nạp Quỹ] Trừ Ví Chuyển Khoản: ${details}`, 'wallet_fund_out');
+
+        // 2. Giao dịch Thu vào Ví Quỹ (Tăng Ví Quỹ) - Saved to fund_transfers
+        await addSingleEntry(date, amount, 0, `[Nạp Quỹ] Thu vào Ví Quỹ: ${details}`, 'fund_in');
+
+        fundModal.hide();
+        fundInAmountEl.value = ""; // Reset field
+    });
+
+    // Handle form submission from the Fund Expense Modal (Chi Ví Quỹ)
+    fundExpenseForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const date = fundExpenseDateEl.value;
+        const amount = unformatVND(fundExpenseAmountEl.value);
+        const details = fundExpenseDetailsEl.value.trim();
+        const maxAmount = Number(hiddenAvailableFundBalanceEl.value);
+
+        if (amount <= 0) {
+            alert("Vui lòng nhập số tiền muốn chi.");
+            return;
+        }
+
+        // Logic kiểm tra số tiền chi không được vượt quá Số Dư Ví Quỹ
+        if (amount > maxAmount) {
+            alert(`[THÔNG BÁO LỖI] Số tiền chi (${formatVND(amount)}) đã vượt quá Số Dư Ví Quỹ hiện có (${formatVND(maxAmount)}). Vui lòng nhập số tiền nhỏ hơn hoặc bằng số dư.`);
+            return;
+        }
+
+        // Giao dịch Chi từ Ví Quỹ (Giảm Ví Quỹ) - Saved to fund_transfers
+        await addSingleEntry(date, 0, amount, `[Chi Quỹ] Chi tiêu từ Ví Quỹ: ${details}`, 'fund_expense');
+
+        fundExpenseForm.reset();
+        fundModal.hide();
+    });
+
+
+    // Export/Import/Reset Listeners
+    document.getElementById('exportCsv').addEventListener('click', () => {
+        const dailyAggregatedRecords = {};
+        for (const dateKey in window.cachedRecords) {
+            const dailyRecord = window.cachedRecords[dateKey];
+            let dailyRevenue = 0;
+            let dailyExpense = 0;
             
-            // Logic kiểm tra số tiền chi không được vượt quá Số Dư Ví Chuyển Khoản
-            if (amount > maxAmount) {
-                alert(`[THÔNG BÁO LỖI] Số tiền chi (${formatVND(amount)}) đã vượt quá Số Dư Ví Chuyển Khoản hiện có (${formatVND(maxAmount)}). Vui lòng nhập số tiền nhỏ hơn hoặc bằng số dư.`);
-                return;
+            if (dailyRecord.transactions) {
+                Object.values(dailyRecord.transactions).forEach(trans => {
+                    // All non-wallet transfers go to daily summary
+                    dailyRevenue += Number(trans.revenue || 0);
+                    dailyExpense += Number(trans.expense || 0);
+                });
             }
-            
-            // 1. Giao dịch Chi từ Ví Chuyển Khoản (Giảm Ví Chuyển Khoản) - Saved to wallet_transfers
-            await addSingleEntry(date, 0, amount, `[Chi Ví] Chi tiêu từ Ví: ${details}`, 'wallet_expense');
-            
-            // 2. Giao dịch Thu vào Tiền Mặt (Tăng Dư Tiền Mặt)
-            // NOTE: The previous logic of 'wallet_out_cash' here is flawed. Chi Ví is a direct expense.
-            // For simplicity and to correctly account for the money leaving the *system* (total expense),
-            // we should technically add a regular 'expense' entry if we want it in the main table.
-            // However, the request asks to keep all existing logic intact, so we'll just track the 'wallet_expense'.
-            // The `calculateTotals` will handle it. We do NOT need a second transaction here.
-            
-            transferModal.hide();
-            walletExpenseAmountEl.value = ""; // Reset field
-            walletExpenseDetailsEl.value = ""; // Reset field
-        });
-        
-        // Add event listener for number formatting to ALL currency inputs
-        document.querySelectorAll('.currency-input').forEach(input => {
-            input.addEventListener('input', formatNumberInput);
-        });
+
+            dailyAggregatedRecords[dateKey] = {
+                date: dateKey,
+                revenue: dailyRevenue,
+                expense: dailyExpense,
+                net: dailyRevenue - dailyExpense,
+                transactions: dailyRecord.transactions
+            };
+        }
+        exportCsv(dailyAggregatedRecords);
+    });
+
+    document.getElementById('exportJson').addEventListener('click', async () => {
+        const recordsSnapshot = await recordsRef.get();
+        const transfersSnapshot = await walletTransfersRef.get();
+        const fundSnapshot = await fundTransfersRef.get();
+        exportJson(recordsSnapshot.val() || {}, transfersSnapshot.val() || {}, fundSnapshot.val() || {});
+    });
+
+    document.getElementById('importJsonBtn').addEventListener('click', () => {
+        document.getElementById('importFile').click();
+    });
+
+    document.getElementById('importFile').addEventListener('change', (ev) => {
+        const f = ev.target.files[0];
+        if (!f) return;
+        importJsonFile(f);
+        ev.target.value = ''; // Reset file input
+    });
+
+    // Reset button
+    document.getElementById('resetBtn').addEventListener('click', clearAll);
+
+    // Add sample data button
+    addSampleBtn.addEventListener('click', addSampleData);
 
 
-        // Event listeners for exports/imports
-        document.getElementById('exportCsv').addEventListener('click', async () => {
-            const snapshot = await recordsRef.get();
-            const records = snapshot.val() || {};
-            const dailyAggregatedRecords = {};
-            // Re-aggregate data for CSV, excluding Wallet_in/out
-            for (const dateKey in records) {
-                const dailyRecord = records[dateKey];
-                let dailyRevenue = 0;
-                let dailyExpense = 0;
-                if (dailyRecord.transactions) {
-                    Object.values(dailyRecord.transactions).forEach(trans => {
-                        // All non-wallet transfers go to daily summary
-                        dailyRevenue += Number(trans.revenue || 0);
-                        dailyExpense += Number(trans.expense || 0);
-                    });
-                }
-                dailyAggregatedRecords[dateKey] = {
-                    date: dateKey,
-                    revenue: dailyRevenue,
-                    expense: dailyExpense,
-                    net: dailyRevenue - dailyExpense,
-                    transactions: dailyRecord.transactions
-                };
-            }
-            exportCsv(dailyAggregatedRecords);
-        });
-        document.getElementById('exportJson').addEventListener('click', async () => {
-            const recordsSnapshot = await recordsRef.get();
-            const transfersSnapshot = await walletTransfersRef.get();
-            exportJson(recordsSnapshot.val() || {}, transfersSnapshot.val() || {});
-        });
-        document.getElementById('importJsonBtn').addEventListener('click', () => {
-            document.getElementById('importFile').click();
-        });
-        document.getElementById('importFile').addEventListener('change', (ev) => {
-            const f = ev.target.files[0];
-            if (!f) return;
-            importJsonFile(f);
-            ev.target.value = ''; // Reset file input
-        });
+    // --- Firebase Initialization and Listeners ---
+    (function init() {
+        // Cache variables to ensure all data is loaded before rendering
+        window.cachedRecords = null;
+        window.cachedWalletTransfers = null;
+        window.cachedFundTransfers = null;
 
-        // Reset button
-        document.getElementById('resetBtn').addEventListener('click', clearAll);
-
-        // Add sample data button
-        addSampleBtn.addEventListener('click', addSampleData);
-
-        // Sort order & Report View
-        sortOrderEl.addEventListener('change', () => {
-            renderAll(window.cachedRecords || {}, window.cachedWalletTransfers || {});
-        });
-        reportViewEl.addEventListener('change', () => {
-            renderAll(window.cachedRecords || {}, window.cachedWalletTransfers || {});
-        });
-
-        // NEW Event Listener: Toggle Date Filter Controls
-        toggleDateFilterBtn.addEventListener('click', () => {
-            if (dateFilterControlsEl.style.display === 'none') {
-                dateFilterControlsEl.style.display = 'block';
-                // Khi hiển thị, tự động cập nhật thống kê theo ngày mặc định (hoặc ngày đã chọn)
-                updateFilteredTotalsUI(window.cachedRecords || {}, window.cachedWalletTransfers || {});
-            } else {
-                dateFilterControlsEl.style.display = 'none';
-                // Khi ẩn đi, xóa kết quả đã lọc
-                filteredRevenueCashEl.innerText = formatVND(0);
-                filteredRevenueTransferEl.innerText = formatVND(0);
-                filteredExpenseEl.innerText = formatVND(0);
-                filteredBalanceEl.innerText = formatVND(0);
-                filteredBalanceEl.className = `h4`; 
-                filteredBalanceCashEl.innerText = formatVND(0);
-                filteredBalanceCashEl.className = `h4`; 
-            }
-        });
-        
-        // NEW Event Listener: Apply Date Filter
-        applyDateFilterBtn.addEventListener('click', () => {
-            updateFilteredTotalsUI(window.cachedRecords || {}, window.cachedWalletTransfers || {});
-        });
-        
         // Listen for data changes on Firebase (recordsRef)
         recordsRef.on('value', (snapshot) => {
             const records = snapshot.val() || {};
             window.cachedRecords = records; // Cache data for quick sorting and viewing
-            // Only render if wallet transfers data is also available
-            if (window.cachedWalletTransfers) {
-                renderAll(records, window.cachedWalletTransfers);
+            // Only render if wallet transfers data and fund transfers data are also available
+            if (window.cachedWalletTransfers !== null && window.cachedFundTransfers !== null) {
+                renderAll(records, window.cachedWalletTransfers, window.cachedFundTransfers);
             }
         }, (error) => {
             console.error('Lỗi khi đọc daily_records từ Firebase:', error);
             alert('Không thể kết nối với Firebase (Daily Records). Vui lòng kiểm tra kết nối mạng hoặc cấu hình.');
         });
         
-        // NEW: Listen for data changes on Firebase (walletTransfersRef)
+        // Listen for data changes on Firebase (walletTransfersRef)
         walletTransfersRef.on('value', (snapshot) => {
             const walletTransfers = snapshot.val() || {};
             window.cachedWalletTransfers = walletTransfers; // Cache data
-            // Only render if records data is also available
-            if (window.cachedRecords) {
-                renderAll(window.cachedRecords, walletTransfers);
+            // Only render if records data and fund data are available
+            if (window.cachedRecords !== null && window.cachedFundTransfers !== null) {
+                renderAll(window.cachedRecords, walletTransfers, window.cachedFundTransfers);
             }
         }, (error) => {
             console.error('Lỗi khi đọc wallet_transfers từ Firebase:', error);
             alert('Không thể kết nối với Firebase (Wallet Transfers). Vui lòng kiểm tra kết nối mạng hoặc cấu hình.');
+        });
+        
+        // Listen for data changes on Firebase (fundTransfersRef)
+        fundTransfersRef.on('value', (snapshot) => {
+            const fundTransfers = snapshot.val() || {};
+            window.cachedFundTransfers = fundTransfers; // Cache data
+            // Only render if records data and wallet data are available
+            if (window.cachedRecords !== null && window.cachedWalletTransfers !== null) {
+                renderAll(window.cachedRecords, window.cachedWalletTransfers, fundTransfers);
+            }
+        }, (error) => {
+            console.error('Lỗi khi đọc fund_transfers từ Firebase:', error);
+            alert('Không thể kết nối với Firebase (Fund Transfers). Vui lòng kiểm tra kết nối mạng hoặc cấu hình.');
         });
     })();
     </script>
