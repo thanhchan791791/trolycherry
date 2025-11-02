@@ -809,14 +809,14 @@
         }
 
         async function updateTopSellingItems() {
-            // ... (Giữ nguyên logic top bán chạy)
             const payments = await fetchPayments();
             
             const foodSales = {};
             const drinkSales = {};
             
+            // ĐIỀU CHỈNH: Thêm các món nước còn thiếu vào danh sách để phân loại đúng
             // Danh sách đồ uống mẫu, nên được fetch từ database hoặc cấu hình
-            const drinksList = ["coca", "trà đào", "nước cam", "bia sài gòn", "7 up", "pepsi", "trà sữa"]; 
+            const drinksList = ["coca", "trà đào", "nước cam", "bia sài gòn", "7 up", "pepsi", "trà sữa", "nước suối", "chanh dây mật ong", "soda chanh", "bia heineken", "tiger bạc"]; 
 
             payments.forEach(payment => {
                 if (payment.items) {
@@ -825,6 +825,7 @@
                         const itemName = item.name.toLowerCase().trim();
                         const quantity = item.quantity;
                         
+                        // Cập nhật logic: Kiểm tra nếu tên món có chứa bất kỳ từ khóa đồ uống nào
                         if (drinksList.some(drink => itemName.includes(drink))) {
                             if (drinkSales[itemName]) {
                                 drinkSales[itemName] += quantity;
