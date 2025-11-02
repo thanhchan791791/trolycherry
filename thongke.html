@@ -470,6 +470,7 @@
         
         const showAllOrdersButton = document.getElementById('showAllOrdersButton');
         const billDateFilterInput = document.getElementById('billDateFilterInput');
+        // Sử dụng ngày giờ hiện tại của hệ thống
         const TODAY = new Date().toISOString().slice(0, 10);
         
         // Thêm DOM elements cho Navigation Buttons MỚI
@@ -568,12 +569,16 @@
                     const payments = [];
                     snapshot.forEach(childSnapshot => {
                         const payment = childSnapshot.val();
+                        // Chuẩn hóa billId (chỉ lấy 6 ký tự đầu nếu không có billId)
+                        const billId = payment.billId || childSnapshot.key.substring(1, 7).toUpperCase(); 
+                        // Chuẩn hóa paymentMethod: lấy giá trị, nếu null/undefined thì dùng 'Tiền mặt', sau đó viết hoa chữ cái đầu và chuyển phần còn lại sang chữ thường.
+                        const paymentMethod = (payment.paymentMethod || 'Tiền mặt').charAt(0).toUpperCase() + (payment.paymentMethod || 'Tiền mặt').slice(1).toLowerCase();
+                        
                         payments.push({
                             key: childSnapshot.key,
-                            billId: payment.billId || childSnapshot.key.substring(1, 7).toUpperCase(), 
+                            billId: billId, 
                             ...payment,
-                            // Gán giá trị mặc định nếu không có, và chuẩn hóa chữ cái đầu
-                            paymentMethod: (payment.paymentMethod || 'Tiền mặt').charAt(0).toUpperCase() + (payment.paymentMethod || 'Tiền mặt').slice(1).toLowerCase(), 
+                            paymentMethod: paymentMethod, 
                             date: new Date(payment.timestamp).toISOString().slice(0, 10)
                         });
                     });
@@ -584,13 +589,13 @@
             });
         }
         
-        // --- 4. DATA RENDERING FUNCTIONS (Cập nhật logic tính toán) ---
+        // --- 4. DATA RENDERING FUNCTIONS (Cập nhật logic tính toán Tuần/Tháng) ---
 
         function updateChartColors() {
             const isDark = document.body.classList.contains('dark');
             const chartColor = isDark ? 'rgba(10, 132, 255, 0.7)' : 'rgba(0, 122, 255, 0.7)'; // iOS Blue
             const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const labelColor = isDark ? 'var(--text-color)' : 'var(--text-color)';
+            const labelColor = 'var(--text-color)'; 
             
             if (revenueChartInstance) {
                 revenueChartInstance.data.datasets[0].backgroundColor = chartColor;
@@ -626,6 +631,7 @@
                 revenueByDay[date] += (payment.finalTotal || 0);
             });
             
+            // Tạo mảng ngày đầy đủ cho 30 ngày (tùy chọn) hoặc chỉ hiển thị ngày có dữ liệu
             const sortedDates = Object.keys(revenueByDay).sort();
             const data = sortedDates.map(date => revenueByDay[date]);
             
@@ -635,6 +641,8 @@
             
             const isDark = document.body.classList.contains('dark');
             const chartColor = isDark ? 'rgba(10, 132, 255, 0.7)' : 'rgba(0, 122, 255, 0.7)';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const labelColor = 'var(--text-color)';
 
             revenueChartInstance = new Chart(revenueChartCanvas, {
                 type: 'bar',
@@ -677,11 +685,11 @@
                         y: {
                             beginAtZero: true,
                             grid: {
-                                color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                                color: gridColor,
                                 drawBorder: false,
                             },
                             ticks: {
-                                color: 'var(--text-color)',
+                                color: labelColor,
                                 callback: (value) => value.toLocaleString('vi-VN') + '₫',
                             }
                         },
@@ -690,7 +698,7 @@
                                 display: false,
                             },
                             ticks: {
-                                color: 'var(--text-color)',
+                                color: labelColor,
                                 maxRotation: 45,
                                 minRotation: 45
                             }
@@ -704,14 +712,19 @@
         function calculateRevenueByMethod(payments) {
             const result = payments.reduce((acc, p) => {
                 const total = p.finalTotal || 0;
-                if (p.paymentMethod === 'Tiền mặt') {
+                
+                // Chuẩn hóa paymentMethod để tính toán
+                const method = (p.paymentMethod || 'Tiền mặt'); // Đã được chuẩn hóa ở fetchPayments
+
+                if (method === 'Tiền mặt') {
                     acc.cash += total;
-                } else if (p.paymentMethod === 'Chuyển khoản') {
+                } else if (method === 'Chuyển khoản') {
                     acc.transfer += total;
                 } else {
-                    // Nếu paymentMethod không rõ, gộp vào tiền mặt
-                    acc.cash += total; 
+                    // Nếu paymentMethod không rõ, gộp vào tiền mặt (theo logic đã chuẩn hóa)
+                    acc.cash += total;
                 }
+                
                 acc.total = acc.cash + acc.transfer;
                 return acc;
             }, { total: 0, cash: 0, transfer: 0 });
@@ -724,24 +737,56 @@
             const now = new Date();
             const today = now.toISOString().slice(0, 10);
             
+            // --- LOGIC THỐNG KÊ TUẦN (Từ Thứ 2 đến Chủ nhật) ---
+            const dayOfWeek = now.getDay(); // Chủ nhật là 0, Thứ 2 là 1, ...
+            // Tính ngày Thứ 2 của tuần hiện tại
+            const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1; 
             const firstDayOfWeek = new Date(now);
-            firstDayOfWeek.setDate(now.getDate() - now.getDay());
+            firstDayOfWeek.setDate(now.getDate() - daysToSubtract);
+            firstDayOfWeek.setHours(0, 0, 0, 0); 
             const startOfWeek = firstDayOfWeek.toISOString().slice(0, 10);
 
-            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+            // Tính ngày Chủ nhật của tuần hiện tại
+            const daysToAdd = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+            const lastDayOfWeek = new Date(now);
+            lastDayOfWeek.setDate(now.getDate() + daysToAdd);
+            lastDayOfWeek.setHours(23, 59, 59, 999); 
+            const endOfWeekTimestamp = lastDayOfWeek.getTime();
+
+
+            // --- LOGIC THỐNG KÊ THÁNG (Từ ngày 1 đến ngày cuối tháng) ---
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+            
+            // Ngày 1 của tháng hiện tại
+            const startOfMonth = new Date(currentYear, currentMonth, 1);
+            startOfMonth.setHours(0, 0, 0, 0); 
+            const startOfMonthTimestamp = startOfMonth.getTime();
+            
+            // Ngày cuối cùng của tháng hiện tại
+            const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0); // Lấy ngày 0 của tháng tiếp theo (tức là ngày cuối tháng này)
+            lastDayOfMonth.setHours(23, 59, 59, 999);
+            const endOfMonthTimestamp = lastDayOfMonth.getTime();
+
             
             const payments = await fetchPayments();
 
-            // Lọc và tính toán cho Ngày
+            // Lọc và tính toán cho Ngày (từ 00:00:00 hôm nay đến 23:59:59 hôm nay)
             const dailyPayments = payments.filter(p => p.date === today);
             const dailyStats = calculateRevenueByMethod(dailyPayments);
 
-            // Lọc và tính toán cho Tuần
-            const weeklyPayments = payments.filter(p => p.date >= startOfWeek);
+            // Lọc và tính toán cho Tuần (từ Thứ 2 đến Chủ nhật)
+            const weeklyPayments = payments.filter(p => {
+                const pTimestamp = new Date(p.timestamp).getTime();
+                return pTimestamp >= firstDayOfWeek.getTime() && pTimestamp <= endOfWeekTimestamp;
+            });
             const weeklyStats = calculateRevenueByMethod(weeklyPayments);
 
-            // Lọc và tính toán cho Tháng
-            const monthlyPayments = payments.filter(p => p.date >= startOfMonth);
+            // Lọc và tính toán cho Tháng (từ ngày 1 đến ngày cuối tháng)
+            const monthlyPayments = payments.filter(p => {
+                const pTimestamp = new Date(p.timestamp).getTime();
+                return pTimestamp >= startOfMonthTimestamp && pTimestamp <= endOfMonthTimestamp;
+            });
             const monthlyStats = calculateRevenueByMethod(monthlyPayments);
 
 
@@ -766,10 +811,12 @@
             const foodSales = {};
             const drinkSales = {};
             
+            // Danh sách đồ uống mẫu, nên được fetch từ database hoặc cấu hình
             const drinksList = ["coca", "trà đào", "nước cam", "bia sài gòn", "7 up", "pepsi", "trà sữa"]; 
 
             payments.forEach(payment => {
                 if (payment.items) {
+                    // Object.values(payment.items) để lấy mảng các item
                     Object.values(payment.items).forEach(item => {
                         const itemName = item.name.toLowerCase().trim();
                         const quantity = item.quantity;
@@ -820,7 +867,7 @@
             renderTopList(topSellingDrinksListEl, sortedDrinks);
         }
         
-        // PHẦN ĐIỀU CHỈNH: Hàm tính và hiển thị số lượng món bán theo một ngày
+        // Hàm tính và hiển thị số lượng món bán theo một ngày
         async function updateDailyItemStats() {
             const selectedDate = dailyItemDateInput.value;
             
@@ -876,8 +923,6 @@
                 });
             }
         }
-        // KẾT THÚC PHẦN ĐIỀU CHỈNH
-
         
         // Hàm render/filter hóa đơn
         function renderOrderRows(paymentsToRender) {
@@ -900,10 +945,11 @@
             paymentsToRender.forEach(payment => {
                 const row = document.createElement('tr');
                 const dateObj = new Date(payment.timestamp);
+                // Định dạng ngày giờ: 20/10/2025 18:17
                 const formattedDate = dateObj.toLocaleDateString('vi-VN') + ' ' + dateObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
-                const formattedTotal = payment.finalTotal.toLocaleString('vi-VN') + '₫';
+                const formattedTotal = (payment.finalTotal || 0).toLocaleString('vi-VN') + '₫';
                 
-                // Xác định màu cho hình thức thanh toán
+                // Xác định màu cho hình thức thanh toán (đã được chuẩn hóa ở fetchPayments)
                 let methodColor = 'var(--text-color)';
                 if (payment.paymentMethod === 'Tiền mặt') {
                     methodColor = 'var(--cash-color)';
@@ -915,7 +961,8 @@
                 row.innerHTML = `
                     <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-medium" style="color: var(--primary-ios);">${payment.billId}</td>
                     <td class="py-3 px-2 md:px-4 text-xs md:text-sm hidden sm:table-cell opacity-70">${formattedDate}</td>
-                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-semibold" style="color: ${methodColor};">${payment.paymentMethod}</td> <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-semibold" style="color: var(--danger-ios);">${formattedTotal}</td>
+                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-semibold" style="color: ${methodColor};">${payment.paymentMethod}</td> 
+                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-semibold" style="color: var(--danger-ios);">${formattedTotal}</td>
                     <td class="py-3 px-2 md:px-4 text-right">
                         <button class="view-details-btn btn-ios text-sm font-semibold px-3 py-1 rounded-full text-white" 
                                 data-key="${payment.key}"
@@ -937,6 +984,7 @@
                 paymentsToDisplay = payments.filter(p => p.date === targetDate);
             }
             
+            // Sắp xếp giảm dần theo timestamp (mới nhất lên trên)
             const sortedPayments = paymentsToDisplay.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
             renderOrderRows(sortedPayments);
@@ -1012,12 +1060,14 @@
 
         function showOrderDetails(payment) {
             modalBillIdEl.textContent = payment.billId;
-            modalDateEl.textContent = new Date(payment.timestamp).toLocaleString('vi-VN');
+            // Định dạng ngày giờ: 20/10/2025 18:17:35
+            modalDateEl.textContent = new Date(payment.timestamp).toLocaleString('vi-VN'); 
             modalPaymentMethodEl.textContent = payment.paymentMethod; // Thêm trường mới
-            modalTotalEl.textContent = payment.finalTotal.toLocaleString('vi-VN') + '₫';
+            modalTotalEl.textContent = (payment.finalTotal || 0).toLocaleString('vi-VN') + '₫';
             
             modalItemsListEl.innerHTML = '';
             if (payment.items) {
+                // Sắp xếp items theo thứ tự trong object hoặc key nếu cần
                 Object.values(payment.items).forEach(item => {
                     const li = document.createElement('li');
                     li.className = 'flex justify-between py-2 text-sm';
@@ -1053,6 +1103,7 @@
             
             if (startDate && endDate) {
                 const payments = await fetchPayments(); 
+                // Lọc bao gồm cả ngày bắt đầu và ngày kết thúc
                 const filteredPayments = payments.filter(p => p.date >= startDate && p.date <= endDate);
                 
                 const stats = calculateRevenueByMethod(filteredPayments);
