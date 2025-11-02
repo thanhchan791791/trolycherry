@@ -1,1936 +1,589 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Ẩm Thực Buôn Mê - Đặc sản Buôn Ma Thuột, Hương vị Tây Nguyên</title>
-
-  <!-- ✅ SEO cơ bản -->
-  <meta name="description" content="Ẩm Thực Buôn Mê - Nơi hội tụ tinh hoa ẩm thực Buôn Ma Thuột. Thưởng thức đặc sản Tây Nguyên, món ngon dân dã, không gian đậm chất núi rừng.">
-  <meta name="keywords" content="ẩm thực Buôn Mê, Buôn Ma Thuột, đặc sản Tây Nguyên, món ngon Buôn Mê, nhà hàng Buôn Ma Thuột, đặc sản Buôn Ma Thuột, amthucbuonme.vn">
-  <meta name="language" content="vi">
-  <meta name="author" content="Ẩm Thực Buôn Mê">
-
-  <!-- ✅ Favicon & App Icons -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-v2.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-v2.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-v2.png">
-  <link rel="shortcut icon" href="/favicon-v2.png" type="image/png">
-  <link rel="apple-touch-icon" href="/favicon-v2.png">
-  <meta name="theme-color" content="#1f1f1f">
-
-  <!-- ✅ Open Graph (Facebook, Zalo, Google...) -->
-  <meta property="og:title" content="Ẩm Thực Buôn Mê - Đặc sản Buôn Ma Thuột, Hương vị Tây Nguyên">
-  <meta property="og:description" content="Khám phá hương vị ẩm thực Tây Nguyên tại Ẩm Thực Buôn Mê. Món ngon Buôn Ma Thuột, không gian dân dã và đậm chất văn hoá.">
-  <meta property="og:image" content="https://amthucbuonme.vn/assets/img/logobanme.png">
-  <meta property="og:image:secure_url" content="https://amthucbuonme.vn/assets/img/logobanme.png">
-  <meta property="og:image:type" content="image/png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://amthucbuonme.vn">
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="vi_VN">
-
-  <!-- ✅ Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ẩm Thực Buôn Mê - Đặc sản Buôn Ma Thuột, Hương vị Tây Nguyên">
-  <meta name="twitter:description" content="Thưởng thức đặc sản Buôn Ma Thuột và ẩm thực Tây Nguyên tại Ẩm Thực Buôn Mê.">
-  <meta name="twitter:image" content="https://amthucbuonme.vn/assets/img/logobanme.png">
-
-  <!-- ✅ Preconnect Fonts -->
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-  <!-- ✅ CSS Vendor -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
-  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
-  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-
-  <!-- ✅ Main CSS -->
-  <link href="assets/css/main.css" rel="stylesheet">
-
-  <!-- ✅ Google site verification -->
-  <!-- <meta name="google-site-verification" content="DÁN_MÃ_TỪ_SEARCH_CONSOLE_VÀO_ĐÂY"> -->
-
-  <style>
-    :root {
-      --color-primary-gold: #E0C097;
-      --color-background-dark: #1f1f1f;
-      --font-serif: 'Playfair Display', 'Source Serif Pro', Georgia, serif;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .form-status-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1050;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-
-    .form-status-overlay.show {
-      display: flex;
-      opacity: 1;
-      animation: fadeIn 0.5s ease-out;
-    }
-
-    .form-status-box {
-      background: var(--color-background-dark);
-      color: #fff;
-      padding: 40px;
-      border-radius: 5px;
-      max-width: 90%;
-      min-width: 350px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(224, 192, 151, 0.2);
-      transform: translateY(-20px);
-      transition: transform 0.5s ease, opacity 0.5s ease;
-      opacity: 0;
-      font-family: var(--font-serif);
-    }
-
-    .form-status-overlay.show .form-status-box {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .form-status-box h4 {
-      margin-bottom: 20px;
-      font-weight: 500;
-      font-size: 1.6rem;
-      color: var(--color-primary-gold);
-    }
-
-    .form-status-box p {
-      font-size: 1.05rem;
-      color: rgba(255, 255, 255, 0.85);
-    }
-
-    .form-status-box .bi {
-      font-size: 3.5rem;
-      margin-bottom: 15px;
-      display: block;
-    }
-
-    .status-loading .loading-spinner {
-      font-size: 4rem;
-      color: var(--color-primary-gold);
-      animation: spin 1.5s linear infinite;
-      display: inline-block;
-    }
-    .status-error h4 { color: #ff6b6b; }
-    .status-sent h4 { color: #90ee90; }
-
-    .modal-close-btn {
-      background: var(--color-primary-gold);
-      color: var(--color-background-dark);
-      border: none;
-      padding: 8px 20px;
-      border-radius: 3px;
-      font-weight: 700;
-      margin-top: 20px;
-      cursor: pointer;
-      transition: background 0.3s;
-      font-family: 'Roboto', sans-serif;
-    }
-    .modal-close-btn:hover {
-      background: #fff;
-    }
-
-    .booking-card .loading,
-    .booking-card .error-message,
-    .booking-card .sent-message,
-    .contact-form-wrapper .loading,
-    .contact-form-wrapper .error-message,
-    .contact-form-wrapper .sent-message {
-      display: none !important;
-    }
-
-    .booking-card select.form-control,
-    .booking-card select.form-control option {
-      color: #333 !important;
-      background-color: #fff !important;
-    }
-  </style>
-</head>
-
-
-<body class="index-page">
-
-  <header id="header" class="header fixed-top">
-
-    <div class="topbar d-flex align-items-center dark-background">
-      <div class="container d-flex justify-content-center justify-content-md-between">
-        <div class="contact-info d-flex align-items-center">
-          <i class="bi bi-envelope d-flex align-items-center"><a href="mailto:contact@example.com">Cherrypetcoffee@gmail.com</a></i>
-          <i class="bi bi-phone d-flex align-items-center ms-4"><span>0906 999 207</span></i>
-        </div>
-        <div class="social-links d-none d-md-flex align-items-center">
-          <a href="#" class="twitter"><i class="bi bi-twitter-x"></i></a>
-          <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-          <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-          <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-        </div>
-      </div>
-    </div><div class="branding d-flex align-items-cente">
-
-      <div class="container position-relative d-flex align-items-center justify-content-between">
-        <a href="index.html" class="logo d-flex align-items-center">
-          <h1 class="sitename">Ẩm thực Buôn mê</h1>
-        </a>
-
-        <nav id="navmenu" class="navmenu">
-          <ul>
-            <li><a href="#hero" class="active">Trang chủ</a></li>
-            <li><a href="#about">Giới thiệu</a></li>
-            <li><a href="#menu">Menu</a></li>
-           <li><a href="#contact">Liên hệ</a></li>
-          </ul>
-          <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-        </nav>
-
-      </div>
-
-    </div>
-
-  </header>
-
-  <main class="main">
-
-    <section id="hero" class="hero section dark-background">
-
-      <div class="hero-background">
-      <div class="hero-background">
-  <video autoplay muted loop playsinline webkit-playsinline poster="assets/img/restaurant/fallback.jpg">
-    <source src="assets/img/restaurant/0930.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-  <div class="overlay"></div>
-</div>
-
-        <div class="overlay"></div>
-      </div>
-
-      <div class="container hero-content">
-        <div class="row">
-          <div class="col-lg-8">
-            <div class="hero-text" data-aos="fade-up" data-aos-delay="100">
-              <span class="tagline">Tinh hoa ẩm thực Buôn Ma Thuột</span>
-              <h1 class="hero-title">Thưởng vị Buôn Ma Thuột, tận hưởng từng giây phút</h1>
-              <p class="hero-description">Đắm mình trong ẩm thực Buôn Ma Thuột đậm đà bản sắc, chế biến từ tâm huyết và nguyên liệu tinh tuyển. Từ món ăn truyền thống dân dã đến biến tấu độc đáo, tất cả tạo nên trải nghiệm đáng nhớ cho thực khách.</p>
-
-              <div class="hero-actions" data-aos="fade-up" data-aos-delay="200">
-                <a href="#datban" class="btn btn-primary">Đặt bàn</a>
-                <a href="#menu" class="btn btn-outline">Menu</a>
-              </div>
-
-              <div class="hero-features" data-aos="fade-up" data-aos-delay="300">
-                <div class="feature-item">
-                  <i class="bi bi-clock"></i>
-                  <div class="feature-text">
-                    <span class="label">Mở Cừa</span>
-                    <span class="value">10:00 AM - 10:00 PM</span>
-                  </div>
-                </div>
-                <div class="feature-item">
-                  <i class="bi bi-geo-alt"></i>
-                  <div class="feature-text">
-                    <span class="label">Địa chỉ</span>
-                    <span class="value">285/94B Cách Mạng Tháng 8, Phường Hòa Hưng, Quận 10, TP. Hồ Chí Minh</span>
-                  </div>
-                </div>
-                <div class="feature-item">
-                  <i class="bi bi-telephone"></i>
-                  <div class="feature-text">
-                    <span class="label">Liên hệ</span>
-                    <span class="value">0906 999 207</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-         <div class="col-lg-4">
- <section id="datban" class="section booking-section py-5">
-  <div class="container">
-    <div class="booking-card" data-aos="fade-left" data-aos-delay="200">
-      <h3 class="mb-4 text-center">Đặt bàn & Phòng VIP</h3>
-      <form id="firebase-booking-form">
-        <div class="row gy-3">
-          <div class="col-md-6">
-            <input type="text" name="name" class="form-control" placeholder="Họ và tên" required>
-          </div>
-          <div class="col-md-6">
-            <input type="tel" name="phone" class="form-control" placeholder="Số điện thoại" required>
-          </div>
-          <div class="col-md-6">
-            <select name="tableType" class="form-control" required>
-              <option value="">Chọn loại bàn</option>
-              <option value="Bàn thường">Bàn thường</option>
-              <option value="Phòng VIP">Phòng VIP</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <select name="people" class="form-control" required>
-              <option value="">Số người</option>
-              <option value="1">1 Người</option>
-              <option value="2">2 Người</option>
-              <option value="3">3 Người</option>
-              <option value="4">4 Người</option>
-              <option value="5">5+ Người</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <input type="date" name="date" class="form-control" required>
-          </div>
-          <div class="col-md-6">
-            <input type="time" name="time" class="form-control" required>
-          </div>
-          <div class="col-12">
-            <textarea name="message" class="form-control" rows="3" placeholder="Yêu cầu đặc biệt / chế độ ăn"></textarea>
-          </div>
-          <div class="col-12">
-            <button type="submit" class="btn btn-primary w-100">Đặt ngay</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-</section>
-
-</div>
-
-        </div>
-      </div>
-
-      <div class="scroll-indicator" data-aos="fade-up" data-aos-delay="400">
-        <div class="scroll-text">Cuộn xuống</div>
-        <div class="scroll-arrow">
-          <i class="bi bi-chevron-down"></i>
-        </div>
-      </div>
-
-    </section><section id="about" class="about section">
-
-      <div class="container section-title" data-aos="fade-up">
-        <span class="description-title"> About</span>
-        <h2>Câu chuyện</h2>
-        <p>Ẩm thực Buôn Ma Thuột mang đậm hương vị núi rừng Tây Nguyên, giản dị mà nồng nàn, gắn liền với văn hóa đồng bào và thiên nhiên hùng vĩ.</p>
-      </div><div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row g-5 align-items-center">
-          <div class="col-lg-6" data-aos="fade-up">
-            <div class="about-content">
-              <h2>Trải nghiệm hương vị riêng biệt</h2>
-              <p class="fst-italic">Hãy để quán cơm đồng bào đưa bạn vào hành trình trải nghiệm: từ cơm lam thơm nức, gà nướng đậm đà, cho đến chén rượu cần ấm áp tình người. Chúng tôi tin rằng ẩm thực không chỉ để thưởng thức, mà còn để gắn kết và sẻ chia.</p>
-             
-
-              <div class="row mt-4">
-                <div class="col-md-6">
-                  <div class="feature-item" data-aos="fade-up" data-aos-delay="150">
-                    <i class="bi bi-award"></i>
-                    <h4>Phục vụ tận tâm</h4>
-                    <p>Ẩm thực đồng bào – mộc mạc, chân thành nhưng đậm đà khó quên.</p>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="feature-item" data-aos="fade-up" data-aos-delay="200">
-  <i class="bi bi-trophy"></i>
-  <h4>Được Khách Hàng Tin Yêu</h4>
-  <p>Nhà hàng cơm đồng bào được thực khách yêu mến nhờ hương vị mộc mạc, phục vụ tận tâm và trải nghiệm ấm áp như ở nhà.</p>
-</div>
-
-                </div>
-              </div>
-
-             
-            </div>
-          </div>
-
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="about-gallery">
-              <div class="row g-3">
-                <div class="col-6">
-                  <img src="assets/img/restaurant/IMG_1046.webp" class="img-fluid rounded" alt="Restaurant Image">
-                </div>
-                <div class="col-6">
-                  <img src="assets/img/restaurant/IMG_1052.webp" class="img-fluid rounded" alt="Restaurant Image">
-                </div>
-                <div class="col-12 mt-3">
-                  
-                  <img src="assets/img/restaurant/IMG_1051.webp" class="img-fluid rounded" alt="Restaurant Image">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-    </section><section id="menu" class="menu section">
-
-      <div class="container section-title" data-aos="fade-up">
-        <span class="description-title">Menu</span>
-        <h2>Menu</h2>
-        <p>Mỗi bữa ăn tại quán cơm đồng bào là một hành trình trải nghiệm hương vị Buôn Mê, nơi hội tụ sự chân thành và tinh hoa ẩm thực Tây Nguyên.</p>
-      </div><div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="isotope-layout" data-default-filter="*" data-layout="masonry" data-sort="original-order">
-
-          <div class="menu-filters isotope-filters mb-5" data-aos="fade-up" data-aos-delay="200">
-            <ul>
-             <li data-filter="*" class="filter-active">Tất Cả Món</li>
-<li data-filter=".filter-starters">7 Món Nên Trải Nghiệm</li>
-<li data-filter=".filter-phaithu">4 Món Phải Thử</li>
-<li data-filter=".filter-canh">Món Canh</li>
-
-<li data-filter=".filter-main">Món Chính</li>
-<li data-filter=".filter-lau">Món Lẩu</li>
-<li data-filter=".filter-rau">Món Rau</li>
-
-
-            </ul>
-          </div>
-
-          <div class="menu-grid isotope-container row gy-5" data-aos="fade-up" data-aos-delay="300">
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-starters">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/canhcadang.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-vegetarian">V</span>
-                  </div>
-                  <div class="price-overlay">175.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Canh Cà Đắng</h4>
-                  <p>Hương vị dân dã hòa quyện vị đắng đặc trưng, đậm đà hồn quê núi rừng</p>
-                  <div class="spice-level">
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot active"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-starters">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/goicadangcacom.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-vegetarian">V</span>
-                  </div>
-                  <div class="price-overlay">175.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Gỏi Cà Đắng Cá Cơm</h4>
-                  <p>Món gỏi đậm chất cao nguyên, chua cay mặn ngọt hòa cùng vị đắng đặc biệt</p>
-                  <div class="spice-level">
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot active"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-starters">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/dudukienvang.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-vegetarian">V</span>
-                  </div>
-                  <div class="price-overlay">105.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>ĐU Đủ Kiến Vàng</h4>
-                  <p>Sự kết hợp táo bạo giữa đu đủ giòn và vị đặc trưng của kiến vàng.</p>
-                  <div class="spice-level">
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot active"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-starters">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/goiganonchuoi.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-vegetarian">V</span>
-                  </div>
-                  <div class="price-overlay">185.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Gỏi Gà Nõn Chuối</h4>
-                  <p>Vị thanh mát của nõn chuối quyện cùng thịt gà xé thơm ngọt, tạo nên hương vị khó quên</p>
-                  <div class="spice-level">
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot active"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-starters">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/nongheotronthinh.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-vegetarian">V</span>
-                  </div>
-                  <div class="price-overlay">215.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Nọng Heo Trộn Thính</h4>
-                  <p>Món ăn dân dã, thơm bùi vị thính, béo giòn vị nọng heo</p>
-                  <div class="spice-level">
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot active"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-starters">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/heonuongongtre.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-vegetarian">V</span>
-                  </div>
-                  <div class="price-overlay">225.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Heo Nướng Ống Tre</h4>
-                  <p>Thịt heo nướng trong ống tre thơm lừng, đậm đà hương vị núi rừng.</p>
-                  <div class="spice-level">
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot active"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-starters">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/heogacbep.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">255.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Heo Gác Bếp</h4>
-                  <p>Hương khói quyện thịt heo săn chắc, đậm đà vị đại ngàn</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-phaithu">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/canhbotlayao.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">195.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Canh bột lá Yao</h4>
-                  <p>Canh bột thơm nồng, thanh mát từ lá yao rừng</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-phaithu">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/heoquaytronmuoi.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">235.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Heo Quay Trộn Muối</h4>
-                  <p>Vị béo giòn hòa quyện cùng muối cay đậm đà</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-phaithu">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/caomraurung.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">225.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Cá Om Rau Rừng</h4>
-                  <p>Cá om rau rừng – thanh vị tự nhiên, hương thơm khó quên</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-phaithu">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/ganuonglae.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">350.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Gà Nướng Lá É(ăn kèm cơm lam)</h4>
-                  <p>Thịt gà mềm ngọt, quyện hương lá é nồng nàn</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-canh">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/canhcasuoikienvang.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">215.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Canh Cá Suối Kiến Vàng</h4>
-                  <p>Canh cá suối kiến vàng – hương vị lạ miệng, thanh mát tự nhiên</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-canh">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/canhgalae.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">195.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Canh Gà Lá É</h4>
-                  <p>Hương lá é hòa quyện cùng vị gà tươi mềm</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-main">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/maheonuongtronrauthom.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">255.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Má Heo Nướng Trộn Rau Thơm</h4>
-                  <p>Đậm vị nướng, tươi hương rau</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-main">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/ganuongongtre.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">530.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Gà Nướng Ống Tre</h4>
-                  <p>Thơm nồng hương tre nướng</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-main">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/bolalotcuonraurung.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">255.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Bò Lá Lốt Cuốn Rau Rừng</h4>
-                  <p>Sự kết hợp hoàn hảo giữa vị bò đậm và rau rừng tươi</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-main">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/bogacbepchammuoikienvang.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">265.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Bò Gác Bếp Chấm Muối Kiến Vàng</h4>
-                  <p>Thịt bò gác bếp dai thơm, chấm muối kiến vàng cay tê đầu lưỡi</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-main">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/calocnuong.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">245.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Cá Lóc Nướng</h4>
-                  <p>Thơm lừng, ngọt tự nhiên vị cá đồng</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-main">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/casuoichiengion.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">245.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Cá Suối Chiên Giòn</h4>
-                  <p>Giòn tan, ngọt thịt cá suối</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-main">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/lamixaotopmo.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">85.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Lá Mì Xào Tóp Mỡ</h4>
-                  <p>Béo giòn tóp mỡ, bùi thơm lá mì.</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-main">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/goigahoachuoi.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">175.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Gỏi Gà Hoa Chuối</h4>
-                  <p>Gỏi gà thanh mát, hòa quyện hương hoa chuối đồng quê</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-lau">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/laucuadong.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">250.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Lẩu Cua Đồng</h4>
-                  <p>Lẩu Cua Đồng – ấm lòng bữa sum vầy</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-lau">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/laugasamday.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">290.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Lẩu Gà Sâm Dây</h4>
-                  <p>Hương sâm lan tỏa – ấm áp tình thân</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-lau">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/laucasuoilae.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">200.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Lẩu Cá Suối Lá É</h4>
-                  <p>Quây quần bên nồi lẩu – say vị lá é, nhớ cá suối</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-lau">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/lauraurung.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">200.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Lẩu rau rừng</h4>
-                  <p>Mang hương rừng vào nồi lẩu.</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-rau">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/raurungxaotoi.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">50.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Rau Rừng Xào Tỏi</h4>
-                  <p>Vị rừng lên tiếng, tỏi thơm đánh thức vị giác</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-rau">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/lauraurung.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">200.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Lẩu rau rừng</h4>
-                  <p>Mang hương rừng vào nồi lẩu.</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-             <div class="col-xl-4 col-lg-6 isotope-item filter-rau">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/img2/lauraurung.webp" alt="Appetizer" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-seafood">SF</span>
-                  </div>
-                  <div class="price-overlay">200.000 đ</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Lẩu rau rừng</h4>
-                  <p>Mang hương rừng vào nồi lẩu.</p>
-                  <div class="spice-level">
-                    <span class="spice-dot active"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-          
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-dessert">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/dessert-4.webp" alt="Dessert" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-signature">Signature</span>
-                  </div>
-                  <div class="price-overlay">$11.25</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Salted Caramel Cheesecake</h4>
-                  <p>Cras fermentum odio eu feugiat luctus. Aliquam erat volutpat sed bibendum.</p>
-                  <div class="spice-level">
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-dessert">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/dessert-9.webp" alt="Dessert" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-vegan">VG</span>
-                  </div>
-                  <div class="price-overlay">$9.50</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Dark Chocolate Avocado Mousse</h4>
-                  <p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere.</p>
-                  <div class="spice-level">
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-drinks">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/drink-2.webp" alt="Beverage" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-alcoholic">21+</span>
-                  </div>
-                  <div class="price-overlay">$15.00</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Elderflower Gin Fizz</h4>
-                  <p>Nulla facilisi morbi tempus iaculis urna id volutpat lacus laoreet non.</p>
-                  <div class="spice-level">
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-6 isotope-item filter-drinks">
-              <div class="menu-card">
-                <div class="menu-card-image">
-                  <img src="assets/img/restaurant/drink-6.webp" alt="Beverage" class="img-fluid">
-                  <div class="dietary-badges">
-                    <span class="badge-fresh">Fresh</span>
-                  </div>
-                  <div class="price-overlay">$8.75</div>
-                </div>
-                <div class="menu-card-content">
-                  <h4>Tropical Green Smoothie</h4>
-                  <p>Ut pharetra sit amet aliquam id diam maecenas ultricies mi eget mauris.</p>
-                  <div class="spice-level">
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                    <span class="spice-dot"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-        <div class="menu-actions" data-aos="fade-up" data-aos-delay="400">
-          <div class="row align-items-center">
-            <div class="col-md-8">
-              <div class="seasonal-notice">
-                <i class="bi bi-info-circle"></i>
-                <span>Để mang đến hương vị tươi ngon nhất, thực đơn theo từng thời điểm của quán được thay đổi mỗi quý. Một số món có thể khác nhau tùy vào nguyên liệu tự nhiên trong từng thời điểm.</span>
-              </div>
-            </div>
-            <div class="col-md-4 text-md-end">
-              <a href="#" class="menu-download-btn">
-                <i class="bi bi-download"></i>
-                <span>Full Menu PDF</span>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div class="chef-recommendations" data-aos="fade-up" data-aos-delay="500">
-          <div class="section-header">
-            <h3><i class="bi bi-star-fill"></i> Today's Chef Recommendations</h3>
-            <p>Carefully curated dishes featuring the finest seasonal ingredients</p>
-          </div>
-
-          <div class="row g-4">
-            <div class="col-lg-6">
-              <div class="recommendation-card">
-                <div class="recommendation-image">
-                  <img src="assets/img/restaurant/main-9.webp" alt="Chef Recommendation" class="img-fluid">
-                  <div class="chef-badge">
-                    <i class="bi bi-award"></i>
-                    <span>Chef's Pick</span>
-                  </div>
-                </div>
-                <div class="recommendation-content">
-                  <div class="recommendation-header">
-                    <h4>Pan-Seared Duck Breast</h4>
-                    <div class="recommendation-price">$34.50</div>
-                  </div>
-                  <p>Etiam porta sem malesuada magna mollis euismod. Cras mattis consectetur purus sit amet fermentum.</p>
-                  <div class="recommendation-details">
-                    <div class="serving-info">
-                      <i class="bi bi-clock"></i>
-                      <span>25 min preparation</span>
-                    </div>
-                    <div class="dietary-info">
-                      <span class="mini-badge gluten-free">GF</span>
-                      <span class="mini-badge dairy-free">DF</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-lg-6">
-              <div class="recommendation-card">
-                <div class="recommendation-image">
-                  <img src="assets/img/restaurant/main-8.webp" alt="Chef Recommendation" class="img-fluid">
-                  <div class="chef-badge">
-                    <i class="bi bi-award"></i>
-                    <span>Chef's Pick</span>
-                  </div>
-                </div>
-                <div class="recommendation-content">
-                  <div class="recommendation-header">
-                    <h4>Lobster Thermidor Risotto</h4>
-                    <div class="recommendation-price">$39.95</div>
-                  </div>
-                  <p>Fusce dapibus tellus ac cursus commodo tortor mauris condimentum nibh ut fermentum massa.</p>
-                  <div class="recommendation-details">
-                    <div class="serving-info">
-                      <i class="bi bi-clock"></i>
-                      <span>30 min preparation</span>
-                    </div>
-                    <div class="dietary-info">
-                      <span class="mini-badge seafood">SF</span>
-                      <span class="mini-badge premium">Premium</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-    </section><section id="book-a-table" class="book-a-table section light-background">
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row">
-          <div class="col-12">
-           <div class="col-lg-7" data-aos="fade-left" data-aos-delay="300">
-  <div class="reservation-info-section">
-    <div class="hero-image">
-      <img src="assets/img/restaurant/IMG_1049.webp" alt="Không gian quán ăn" class="img-fluid">
-      <div class="overlay-content">
-        <h4>Trải Nghiệm Ẩm Thực Đặc Sắc</h4>
-        <p>Thưởng thức hương vị đồng bào mộc mạc, đậm đà và không gian ấm áp ngay tại Sài Gòn.</p>
-      </div>
-    </div>
-
-    <div class="info-cards">
-      <div class="row g-3">
-        <div class="col-md-6" data-aos="zoom-in" data-aos-delay="400">
-          <div class="info-card">
-            <div class="card-icon">
-              <i class="bi bi-clock"></i>
-            </div>
-            <div class="card-content">
-              <h5>Giờ Hoạt Động</h5>
-              <p>Thứ 2 - Chủ Nhật: 10:00 - 22:00</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-6" data-aos="zoom-in" data-aos-delay="450">
-          <div class="info-card">
-            <div class="card-icon">
-              <i class="bi bi-geo-alt-fill"></i>
-            </div>
-            <div class="card-content">
-              <h5>Địa Chỉ</h5>
-              <p>285/94B Cách Mạng Tháng 8<br>
-                 Phường Hòa Hưng, Quận 10<br>
-                 TP. Hồ Chí Minh </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-6" data-aos="zoom-in" data-aos-delay="500">
-          <div class="info-card">
-            <div class="card-icon">
-              <i class="bi bi-telephone-fill"></i>
-            </div>
-            <div class="card-content">
-              <h5>Liên Hệ</h5>
-              <p>0906 999 207<br>
-                <small>Tiếp nhận từ 9:00 - 21:00 hàng ngày</small>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-6" data-aos="zoom-in" data-aos-delay="550">
-          <div class="info-card">
-            <div class="card-icon">
-              <i class="bi bi-envelope-fill"></i>
-            </div>
-            <div class="card-content">
-              <h5>Email Liên Hệ</h5>
-              <p>datban@quancomdongbao.com<br>
-                <small>Phản hồi trong vòng 24h</small>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="additional-info" data-aos="fade-up" data-aos-delay="600">
-      <div class="info-highlight">
-        <i class="bi bi-star-fill"></i>
-        <span>Nên đặt bàn trước 2-3 ngày cho dịp cuối tuần</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-    </section><section id="location" class="location section">
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row g-4">
-          <div class="col-lg-6" data-aos="fade-right" data-aos-delay="200">
-            <div class="map-container">
-            <iframe 
-  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d244.96533233520037!2d106.67741761441415!3d10.777165003491323!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f5f68755279%3A0x7a1c4d39e68c1ef6!2z4bqobSBUaOG7sWMgQnXDtG4gTcOq!5e0!3m2!1sen!2s!4v1762054223120!5m2!1sen!2s"
-  width="100%"
-  height="450"
-  style="border:0;"
-  allowfullscreen=""
-  loading="lazy"
-  referrerpolicy="no-referrer-when-downgrade">
-</iframe>
-
-            </div>
-          </div>
-
-          <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
-           <div class="info-container">
-  <div class="section-header">
-    <h2>Tìm Chúng Tôi</h2>
-    <p>Ghé thăm ngay hôm nay</p>
-  </div>
-
-  <div class="info-card" data-aos="fade-up" data-aos-delay="300">
-    <div class="info-icon">
-      <i class="bi bi-geo-alt"></i>
-    </div>
-    <div class="info-content">
-      <h3>Địa chỉ</h3>
-      <p>
-        <a href="https://maps.app.goo.gl/fFu3bVaFgcrLaaw56" target="_blank">
-          285/94B Cách Mạng Tháng 8,<br>Phường Hòa Hưng, Quận 10,<br>TP. Hồ Chí Minh 
-        </a>
-      </p>
-    </div>
-  </div>
-
-  <div class="info-card" data-aos="fade-up" data-aos-delay="400">
-    <div class="info-icon">
-      <i class="bi bi-telephone"></i>
-    </div>
-    <div class="info-content">
-      <h3>Liên hệ / Đặt bàn</h3>
-      <p><a href="tel:0906 999 207">0906 999 207</a></p>
-      <p class="small-text">Nên đặt bàn trước 2-3 ngày cho dịp cuối tuần</p>
-    </div>
-  </div>
-
-  <div class="info-card" data-aos="fade-up" data-aos-delay="500">
-    <div class="info-icon">
-      <i class="bi bi-clock"></i>
-    </div>
-    <div class="info-content">
-      <h3>Giờ hoạt động</h3>
-      <div class="hours-grid">
-        <div class="day">Thứ 2 - Chủ Nhật</div>
-        <div class="time">10:00 - 22:00</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="cta-wrapper" data-aos="fade-up" data-aos-delay="600">
-    <a href="tel:0906 999 207" class="btn-book">📞 Gọi đặt bàn</a>
-    <a href="https://maps.app.goo.gl/fFu3bVaFgcrLaaw56" target="_blank" class="btn-contact">📍 Xem bản đồ</a>
-  </div>
-</div>
-
-          </div>
-        </div>
-
-      </div>
-
-    </section><section id="events" class="events section light-background">
-
-     
-     
-      </div>
-
-   <section id="gallery" class="gallery section">
-
-  <div class="container section-title" data-aos="fade-up">
-    <span class="description-title">Bộ Sưu Tập</span>
-    <h2>Khoảnh khắc tại nhà hàng</h2>
-    <p>Khám phá không gian, ẩm thực và đội ngũ của chúng tôi qua những hình ảnh chân thực.</p>
-  </div><div class="container" data-aos="fade-up" data-aos-delay="100">
-
-    <div class="isotope-layout" data-default-filter="*" data-layout="masonry" data-sort="original-order">
-      <ul class="restaurant-gallery-filters isotope-filters mb-4 justify-content-center d-flex gap-2" data-aos="fade-up" data-aos-delay="100">
-        <li data-filter="*" class="filter-active">Tất cả</li>
-        <li data-filter=".filter-food">Món ăn</li>
-        <li data-filter=".filter-drinks">Thức uống</li>
-        <li data-filter=".filter-interior">Không gian</li>
-        <li data-filter=".filter-staff">Đội ngũ</li>
-      </ul>
-
-      <div class="row g-3 isotope-container" data-aos="fade-up" data-aos-delay="200">
-        <div class="col-lg-4 col-md-6 isotope-item filter-food">
-          <figure class="gallery-card">
-            <a href="assets/img/restaurant/main-3.webp" class="glightbox" data-gallery="restaurant-gallery">
-              <img src="assets/img/restaurant/main-3.webp" alt="Cá hồi nướng" class="img-fluid rounded" loading="lazy">
-            </a>
-            <figcaption class="caption">
-              <span class="caption-title">Cá hồi nướng</span>
-              <span>Cá hồi tươi với sốt bơ chanh.</span>
-            </figcaption>
-          </figure>
-        </div>
-
-        <div class="col-lg-4 col-md-6 isotope-item filter-interior">
-          <figure class="gallery-card">
-            <a href="assets/img/restaurant/IMG_1049.webp" class="glightbox" data-gallery="restaurant-gallery">
-              <img src="assets/img/restaurant/IMG_1049.webp" alt="Phòng ăn" class="img-fluid rounded" loading="lazy">
-            </a>
-            <figcaption class="caption">
-              <span class="caption-title">Phòng ăn</span>
-              <span>Không gian rộng rãi, ấm cúng và sang trọng.</span>
-            </figcaption>
-          </figure>
-        </div>
-      </div></div>
-
-  </div>
-
-</section><section id="contact" class="contact section light-background">
-
-  <div class="container section-title" data-aos="fade-up">
-    <span class="description-title">Liên hệ</span>
-    <h2>Liên hệ</h2>
-    <p>Hãy kết nối với chúng tôi để được hỗ trợ nhanh nhất</p>
-  </div><div class="container" data-aos="fade-up" data-aos-delay="100">
-
-    <div class="row gy-4 mb-5">
-      <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
-        <div class="contact-info-box">
-          <div class="icon-box">
-            <i class="bi bi-geo-alt"></i>
-          </div>
-          <div class="info-content">
-            <h4>Địa chỉ</h4>
-            <p>
-              <a href="https://maps.google.com/?q=10.7771101,106.6775563" target="_blank">
-                285/94B Cách Mạng Tháng 8,<br>
-                Phường Hòa Hưng, Quận 10,<br>
-                TP. Hồ Chí Minh 
-              </a>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
-        <div class="contact-info-box">
-          <div an="icon-box">
-            <i class="bi bi-envelope"></i>
-          </div>
-          <div class="info-content">
-            <h4>Email</h4>
-            <p>datban@quancomdongbao.com</p>
-            <p>support@quancomdongbao.com</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
-        <div class="contact-info-box">
-          <div class="icon-box">
-            <i class="bi bi-clock"></i>
-          </div>
-          <div class="info-content">
-            <h4>Giờ hoạt động</h4>
-            <p>Thứ 2 - Chủ Nhật</p>
-            <p>10:00 - 22:00</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="map-section" data-aos="fade-up" data-aos-delay="200">
-   <iframe 
-  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d244.96533233520037!2d106.67741761441415!3d10.777165003491323!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f5f68755279%3A0x7a1c4d39e68c1ef6!2z4bqobSBUaOG7sWMgQnXDtG4gTcOq!5e0!3m2!1sen!2s!4v1762054223120!5m2!1sen!2s"
-  width="100%"
-  height="450"
-  style="border:0;"
-  allowfullscreen=""
-  loading="lazy"
-  referrerpolicy="no-referrer-when-downgrade">
-</iframe>
-  </div>
-<div class="container form-container-overlap">
-    <div class="row justify-content-center" data-aos="fade-up" data-aos-delay="300">
-      <div class="col-lg-10">
-        <div class="contact-form-wrapper">
-  <h2 class="text-center mb-4">Gửi tin nhắn cho chúng tôi</h2>
-
-  <form id="firebase-contact-form" class="firebase-form">
-    <div class="row g-3">
-      <div class="col-md-6">
-        <div class="form-group">
-          <div class="input-with-icon">
-            <i class="bi bi-person"></i>
-            <input type="text" class="form-control" name="name" placeholder="Họ và Tên" required>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <div class="form-group">
-          <div class="input-with-icon">
-            <i class="bi bi-phone"></i>
-            <input type="tel" class="form-control" name="phone" placeholder="Số điện thoại" required>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-12">
-        <div class="form-group">
-          <div class="input-with-icon">
-            <i class="bi bi-text-left"></i>
-            <input type="text" class="form-control" name="subject" placeholder="Chủ đề" required>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12">
-        <div class="form-group">
-          <div class="input-with-icon">
-            <i class="bi bi-chat-dots message-icon"></i>
-            <textarea class="form-control" name="message" placeholder="Nhập tin nhắn..." style="height: 180px" required></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12">
-        </div>
-
-      <div class="col-12 text-center">
-        <button type="submit" class="btn btn-primary btn-submit">GỬI NGAY</button>
-      </div>
-    </div>
-  </form>
-</div>
-      </div>
-    </div>
-  </div> 
-
-</section></main>
-
-  <footer id="footer" class="footer dark-background">
-
-  <div class="container">
-    <div class="row gy-5">
-
-      <div class="col-lg-4">
-        <div class="footer-content">
-          <a href="index.html" class="logo d-flex align-items-center mb-4">
-            <span class="sitename">Ẩm Thực Buôn Mê</span>
-          </a>
-          <p class="mb-4">
-            Trải nghiệm ẩm thực độc đáo với nguyên liệu tươi ngon, thực đơn theo mùa 
-            và không gian ấm cúng cho mọi dịp đặc biệt.
-          </p>
-
-          <div class="newsletter-form">
-            <h5>Nhận tin mới nhất</h5>
-            <form action="forms/newsletter.php" method="post" class="php-email-form">
-              <div class="input-group">
-                <input type="email" name="email" class="form-control" placeholder="Nhập email của bạn" required="">
-                <button type="submit" class="btn-subscribe">
-                  <i class="bi bi-send"></i>
-                </button>
-              </div>
-              <div class="loading">Đang gửi...</div>
-              <div class="error-message"></div>
-              <div class="sent-message">Cảm ơn bạn đã đăng ký!</div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-2 col-6">
-        <div class="footer-links">
-          <h4>Khám phá</h4>
-          <ul>
-            <li><a href="#"><i class="bi bi-chevron-right"></i> Thực đơn</a></li>
-            <li><a href="#"><i class="bi bi-chevron-right"></i> Đặt bàn</a></li>
-            <li><a href="#"><i class="bi bi-chevron-right"></i> Ưu đãi</a></li>
-            <li><a href="#"><i class="bi bi-chevron-right"></i> Sự kiện</a></li>
-            <li><a href="#contact"><i class="bi bi-chevron-right"></i> Liên hệ</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="col-lg-2 col-6">
-        <div class="footer-links">
-          <h4>Dịch vụ</h4>
-          <ul>
-            <li><a href="#"><i class="bi bi-chevron-right"></i> Ăn tại chỗ</a></li>
-            <li><a href="#"><i class="bi bi-chevron-right"></i> Giao hàng</a></li>
-            <li><a href="#"><i class="bi bi-chevron-right"></i> Tổ chức tiệc</a></li>
-            <li><a href="#"><i class="bi bi-chevron-right"></i> Đặt tiệc cưới</a></li>
-            <li><a href="#"><i class="bi bi-chevron-right"></i> Catering</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="col-lg-4">
-        <div class="footer-contact">
-          <h4>Liên hệ</h4>
-          <div class="contact-item">
-            <div class="contact-icon">
-              <i class="bi bi-geo-alt"></i>
-            </div>
-           <div class="contact-info">
-  <p>285/94B Cách Mạng Tháng 8<br>Phường Hòa Hưng, Quận 10<br>TP. Hồ Chí Minh</p>
-</div>
-
-          </div>
-
-          <div class="contact-item">
-            <div class="contact-icon">
-              <i class="bi bi-telephone"></i>
-            </div>
-            <div class="contact-info">
-              <p>+84 909 650 816</p>
-            </div>
-          </div>
-
-          <div class="contact-item">
-            <div class="contact-icon">
-              <i class="bi bi-envelope"></i>
-            </div>
-            <div class="contact-info">
-              <p>Amthucbuonme@gmail.com</p>
-            </div>
-          </div>
-
-          <div class="social-links">
-            <a href="#"><i class="bi bi-facebook"></i></a>
-            <a href="#"><i class="bi bi-instagram"></i></a>
-            <a href="#"><i class="bi bi-tiktok"></i></a>
-            <a href="#"><i class="bi bi-youtube"></i></a>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="footer-bottom">
-    <div class="container">
-      <div class="row align-items-center">
-        <div class="col-lg-6">
-          <div class="copyright">
-<p>© <span>2025</span> <strong class="px-1 sitename">Ẩm Thực Buôn Mê</strong> <span>All Rights Reserved</span></p>
-          </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="footer-bottom-links">
-            <a href="#">Chính sách bảo mật</a>
-            <a href="#">Điều khoản dịch vụ</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</footer>
-
-
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-  <div id="preloader"></div>
-
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-
-  <script src="assets/js/main.js"></script>
-
-<div id="form-status-modal" class="form-status-overlay">
-  <div class="form-status-box" id="status-box-content">
-    </div>
-</div>
-</body>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-  import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-
-  // === Thông tin Telegram ===
-  const TELEGRAM_BOT_TOKEN = "7807531189:AAGhMQ9jjew7Q9ywMDSTaGDy4Ns6XtPQUrI";
-  const TELEGRAM_CHAT_ID = "-4804053572";
-
-  // Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyB4S6E-Gl6k5mG57otkF8WUh3iuvqq-pWw",
-    authDomain: "member-ffd77.firebaseapp.com",
-    databaseURL: "https://member-ffd77-default-rtdb.firebaseio.com",
-    projectId: "member-ffd77",
-    storageBucket: "member-ffd77.firebasestorage.app",
-    messagingSenderId: "375537857518",
-    appId: "1:375537857518:web:86449f4419f0ab5f6954ff",
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // === Logic Modal Thông Báo Toàn Cục ===
-  const modalEl = document.getElementById("form-status-modal");
-  const modalContentEl = document.getElementById("status-box-content");
-
-  // KHAI BÁO BIẾN ĐỂ LƯU ID CỦA LỆNH SETTIMEOUT CẦN HỦY
-  let hideTimeoutId = null; 
-  
-  function hideModal() {
-    if (!modalEl) return;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Hóa Đơn & Tìm kiếm - RTDB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    // Xóa bất kỳ lệnh ẩn đang chờ nào
-    if (hideTimeoutId) {
-        clearTimeout(hideTimeoutId);
-        hideTimeoutId = null;
-    }
-    
-    modalEl.classList.remove("show");
-    
-    // Lên lịch ẩn hoàn toàn (display: none) sau khi hiệu ứng fade-out (0.5s - khớp với transition CSS) kết thúc
-    hideTimeoutId = setTimeout(() => {
-        modalEl.style.display = 'none';
-        // Xóa listener tạm thời sau khi đóng
-        modalEl.removeEventListener('click', handleOverlayClick);
-        const closeBtn = modalEl.querySelector('#modal-close-btn');
-        if (closeBtn) closeBtn.removeEventListener('click', hideModal); // Đảm bảo xóa listener của nút
-        hideTimeoutId = null; // Xóa ID sau khi thực thi
-    }, 500); // Tăng thời gian chờ để khớp với CSS transition
-  }
-
-  function showModal(type, message) {
-    if (!modalEl || !modalContentEl) return;
-    
-    // QUAN TRỌNG: Hủy lệnh ẩn cũ (nếu có) trước khi hiển thị nội dung mới
-    if (hideTimeoutId) {
-        clearTimeout(hideTimeoutId);
-        hideTimeoutId = null;
-    }
-
-    modalEl.classList.remove("show");
-    modalContentEl.innerHTML = "";
-    
-    let iconHtml, title;
-    let boxClass = `status-${type}`;
-
-    if (type === "loading") {
-      // SỬ DỤNG ICON LY CÀ PHÊ CHO PHONG CÁCH BUÔN MÊ (HOẶC ICON PHÙ HỢP)
-      // Dùng bi-cup-hot hoặc bi-hourglass-split
-      iconHtml = '<i class="bi bi-cup-hot loading-spinner"></i>'; 
-      title = "Đang xử lý yêu cầu của bạn...";
-    } else if (type === "sent") {
-      iconHtml = '<i class="bi bi-check-circle-fill"></i>';
-      title = "Yêu cầu đã được gửi thành công!";
-    } else if (type === "error") {
-      iconHtml = '<i class="bi bi-x-circle-fill"></i>';
-      title = "Rất tiếc, có lỗi xảy ra!";
-    }
-
-    let buttonHtml = (type === "booking" || type === "error") ? '<button id="modal-close-btn" class="modal-close-btn">ĐÓNG</button>' : '';
-
-
-    modalContentEl.innerHTML = `
-      ${iconHtml}
-      <h4>${title}</h4>
-      <p>${message}</p>
-      ${buttonHtml}
-    `;
-    modalContentEl.className = `form-status-box ${boxClass}`;
-    
-    modalEl.style.display = 'flex';
-    // Đảm bảo fade-in xảy ra sau khi display: flex
-    setTimeout(() => {
-        modalEl.classList.add("show");
-    }, 10);
-  }
-  
-  // Hàm xử lý click trên lớp phủ (overlay)
-  function handleOverlayClick(event) {
-    // Chỉ đóng khi click trực tiếp vào overlay (để không đóng khi click vào box nội dung)
-    if (event.target === modalEl) {
-        // Chỉ đóng bằng click overlay khi không phải trạng thái loading
-        if (!modalContentEl.classList.contains('status-loading')) {
-             hideModal();
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ios-background': '#F8F9FB', // Nền sáng iOS
+                        'ios-dark-background': '#1C1C1E', // Nền tối iOS
+                        'ios-card': 'rgba(255, 255, 255, 0.65)',
+                        'ios-dark-card': 'rgba(40, 40, 42, 0.65)',
+                        'ios-accent': '#007AFF', // Xanh iOS
+                        'ios-text': '#1C1C1E',
+                        'ios-dark-text': '#F2F2F7',
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                    },
+                    boxShadow: {
+                        'ios-soft': '0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04)',
+                        'ios-dark-soft': '0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2)',
+                        'ios-modal': '0 -20px 50px rgba(0, 0, 0, 0.1)',
+                        'ios-dark-modal': '0 -20px 50px rgba(0, 0, 0, 0.6)',
+                    },
+                }
+            }
         }
-    }
-  }
+    </script>
 
-  // Gán listener để đóng modal khi click ra ngoài và cho nút Đóng (cho trạng thái SENT/ERROR)
-  function setupClickToClose() {
-    // Thêm listener vào overlay (lớp nền đen)
-    modalEl.addEventListener("click", handleOverlayClick);
-    
-    // Nếu có nút Đóng, thêm listener cho nút đó
-    const closeBtn = modalEl.querySelector('#modal-close-btn');
-    if (closeBtn) {
-        // Gắn listener cho nút đóng
-        closeBtn.addEventListener('click', hideModal); 
-    }
-  }
+    <style>
+        /* SF Pro Display Font Fallback (Similar to iOS) */
+        @font-face {
+            font-family: 'SF Pro Display';
+            font-weight: 100 900;
+            src: local('Helvetica Neue'); /* Fallback on Mac/iOS */
+        }
+        
+        /* Transition chung cho tất cả, đảm bảo animation mượt */
+        * {
+            transition: all 0.35s cubic-bezier(0.25, 0.1, 0.25, 1); /* Ease-in-out mượt */
+        }
 
-  // === Hết Logic Modal ===
+        body {
+            font-family: 'SF Pro Display', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            background-color: theme('colors.ios-background');
+            color: theme('colors.ios-text');
+            min-height: 100vh;
+        }
 
-  // Gửi thông báo Telegram (Đã cập nhật để bao gồm Loại bàn/phòng)
-  function sendToTelegram(data, type) {
-    let text = "";
+        /* iOS Glassmorphism Card */
+        .ios-card {
+            background-color: theme('colors.ios-card');
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); /* For Safari */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: theme('boxShadow.ios-soft');
+            transform: translateZ(0); /* Kích hoạt GPU acceleration */
+        }
 
-    if (type === "booking") {
-      text = `
-📌 *Yêu cầu đặt bàn mới*
+        /* iOS Modern Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3); /* Nền tối nhẹ */
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none; /* Vô hiệu hóa tương tác khi ẩn */
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-card {
+            width: 100%;
+            max-width: 500px;
+            background-color: theme('colors.ios-card');
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-top-left-radius: 2rem;
+            border-top-right-radius: 2rem;
+            box-shadow: theme('boxShadow.ios-modal');
+            padding: 1.5rem;
+            max-height: 90vh; /* Tăng độ cao cho phép cuộn */
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* iOS bounce/slide up */
+        }
+        .modal-overlay.show .modal-card {
+            transform: translateY(0);
+        }
 
-👤 Tên: ${data.name}
-📞 Điện thoại: ${data.phone}
-🛋️ Loại bàn: ${data.tableType}
-👥 Số người: ${data.people}
-📅 Ngày: ${data.date}
-⏰ Giờ: ${data.time}
-📝 Ghi chú: ${data.message || "Không có"}
-⏱️ Thời gian gửi: ${data.createdAt}
-      `;
-    } else if (type === "contact") {
-      text = `
-📩 *Liên hệ mới từ khách hàng*
+        /* Input Field Style */
+        .ios-input {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 0.75rem; /* Corner radius nhỏ hơn card */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .ios-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.2); /* Focus ring iOS */
+            border-color: theme('colors.ios-accent');
+        }
 
-👤 Tên: ${data.name}
-📞 Điện thoại: ${data.phone}
-📌 Chủ đề: ${data.subject}
-📝 Tin nhắn: ${data.message}
-⏱️ Thời gian gửi: ${data.createdAt}
-      `;
-    }
+        /* Custom scrollbar for better mobile feel */
+        .receipt-container { -ms-overflow-style: none; scrollbar-width: none; }
+        .receipt-container::-webkit-scrollbar { display: none; }
 
-    return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: text,
-        parse_mode: "Markdown"
-      })
-    });
-  }
+        /* --- Dark Mode Styles --- */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: theme('colors.ios-dark-background');
+                color: theme('colors.ios-dark-text');
+            }
+            .ios-card {
+                background-color: theme('colors.ios-dark-card');
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: theme('boxShadow.ios-dark-soft');
+            }
+            .modal-card {
+                background-color: theme('colors.ios-dark-card');
+                box-shadow: theme('boxShadow.ios-dark-modal');
+            }
+            .ios-input {
+                background-color: rgba(60, 60, 67, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: theme('colors.ios-dark-text');
+            }
+            .ios-input::placeholder {
+                color: rgba(255, 255, 255, 0.5);
+            }
+            .ios-input:focus {
+                box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.4);
+            }
+        }
+    </style>
+</head>
+<body class="p-4 flex flex-col items-center">
 
-  // Hàm xử lý form chung
-  function handleFormSubmit(form, type) {
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
+    <div id="notification-box" class="rounded-xl shadow-xl p-3 text-sm font-semibold text-white transition duration-300 hidden fixed top-4 left-1/2 -translate-x-1/2 z-[2000] min-w-[280px] max-w-[90vw] text-center backdrop-blur-md">
+        <p id="notification-message"></p>
+    </div>
 
-      const btn = this.querySelector("button[type=submit]");
+    <div class="w-full max-w-lg">
+        <header class="mb-6 pt-4">
+            <h1 class="text-4xl font-bold text-ios-text dark:text-ios-dark-text tracking-tight">Hóa đơn</h1>
+        </header>
 
-      // --- BẮT ĐẦU: Logic cho Modal (Loading) ---
-      showModal("loading", "Hệ thống đang xử lý yêu cầu của bạn...");
-      if (btn) btn.disabled = true;
-      // --- KẾT THÚC: Logic cho Modal (Loading) ---
+        <div class="mb-6">
+            <input type="text" id="search-input" placeholder="Tìm kiếm theo Mã HĐ hoặc Tổng tiền..." 
+                   class="w-full px-4 py-3 border-transparent rounded-xl focus:outline-none shadow-sm transition duration-150 ios-input"
+            >
+        </div>
+        
+        <div id="loading" class="text-center p-8 ios-card rounded-4xl">
+            <svg class="animate-spin h-8 w-8 text-ios-accent mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">Đang tải danh sách hóa đơn...</p>
+        </div>
 
-      let data = {};
+        <div id="error-message" class="hidden bg-red-500/10 border border-red-500 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl relative mb-4 ios-card" role="alert">
+            <strong class="font-bold">Lỗi!</strong>
+            <span class="block sm:inline" id="error-details"></span>
+        </div>
 
-      if (type === "booking") {
-        data = {
-          name: this.name.value,
-          phone: this.phone.value,
-          tableType: this.tableType.value, // Lấy giá trị Loại bàn/phòng
-          people: this.people.value,
-          date: this.date.value,
-          time: this.time.value,
-          message: this.message.value,
-          formType: type,
-          createdAt: new Date().toISOString()
+        <div id="receipts-list" class="space-y-4 receipt-container max-h-[70vh] overflow-y-auto">
+            </div>
+
+        <p id="no-data-message" class="hidden text-center text-gray-500 mt-8 p-4 ios-card rounded-4xl">Không tìm thấy dữ liệu hóa đơn nào trong "payment_history".</p>
+    </div>
+
+    <div id="receipt-modal-overlay" class="modal-overlay">
+        <div id="receipt-modal" class="modal-card">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-ios-text dark:text-ios-dark-text">Chi tiết Hóa đơn</h2>
+                <button id="close-modal" class="text-gray-400 hover:text-ios-accent dark:hover:text-ios-accent p-2 -mr-2 rounded-full active:scale-90 transition duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="space-y-4 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+                <p class="text-base flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400 font-medium">Mã HĐ:</span> 
+                    <span id="invoice-id" class="font-semibold text-ios-text dark:text-ios-dark-text break-all text-right"></span>
+                </p>
+                <p class="text-base flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400 font-medium">Ngày:</span> 
+                    <span id="invoice-date" class="font-semibold text-red-500 dark:text-red-400 text-right"></span>
+                </p>
+                <p class="text-base flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400 font-medium">Hình thức:</span> 
+                    <span id="payment-method" class="font-semibold text-ios-text dark:text-ios-dark-text text-right"></span>
+                </p>
+            </div>
+
+            <div class="flex justify-between items-center mb-6 pt-4 border-t border-dashed border-gray-300 dark:border-gray-600">
+                <p class="text-lg font-bold text-gray-700 dark:text-gray-300">Tổng tiền:</p>
+                <p id="total-amount" class="text-2xl font-extrabold text-red-600 dark:text-red-400">₫</p>
+            </div>
+
+            <h3 class="font-bold text-lg text-ios-text dark:text-ios-dark-text mb-4">Các món đã mua:</h3>
+            <div id="items-list" class="space-y-2 mb-8 p-3 bg-gray-50/50 dark:bg-white/5 rounded-xl">
+                </div>
+
+            <button id="set-to-zero-btn" class="w-full bg-ios-accent text-white font-bold text-lg py-4 rounded-full shadow-lg hover:bg-blue-600 active:scale-[0.97] transition duration-150 active:shadow-none">
+                VỀ 0 ĐỒNG
+            </button>
+            
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // setLogLevel('Debug');
+        
+        // Cấu hình Firebase gốc từ yêu cầu của người dùng
+        const providedConfig = {
+            apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
+            authDomain: "chitieu-7263e.firebaseapp.com",
+            databaseURL: "https://chitieu-7263e-default-rtdb.firebaseio.com", 
+            projectId: "chitieu-7263e",
+            storageBucket: "chitieu-7263e.firebasestorage.app",
+            messagingSenderId: "83833140682",
+            appId: "1:83833140682:web:f9254b418ace3a659fcb33",
+            measurementId: "G-523X74K18N"
         };
-      } else if (type === "contact") {
-        data = {
-          name: this.name.value,
-          phone: this.phone.value,
-          subject: this.subject.value,
-          message: this.message.value,
-          formType: type,
-          createdAt: new Date().toISOString()
+        
+        let firebaseConfig = providedConfig;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        if (typeof __firebase_config !== 'undefined') {
+            try {
+                const globalConfig = JSON.parse(__firebase_config);
+                firebaseConfig = { ...providedConfig, ...globalConfig };
+            } catch (e) {
+                console.warn("Lỗi khi parse __firebase_config, sử dụng providedConfig.", e);
+            }
+        }
+        
+        let app, auth, db;
+        // Lưu trữ toàn bộ dữ liệu gốc đã tải về từ Firebase
+        let masterReceipts = []; 
+        let currentInvoiceId = null; 
+
+        const loadingElement = document.getElementById('loading');
+        const errorElement = document.getElementById('error-message');
+        const errorDetails = document.getElementById('error-details');
+        const listElement = document.getElementById('receipts-list');
+        const modalOverlay = document.getElementById('receipt-modal-overlay');
+        const noDataMessage = document.getElementById('no-data-message');
+        const itemsListElement = document.getElementById('items-list');
+        const closeModalButton = document.getElementById('close-modal');
+        const setToZeroButton = document.getElementById('set-to-zero-btn');
+        const searchInput = document.getElementById('search-input'); // New search input element
+        const notificationBox = document.getElementById('notification-box');
+        const notificationMessage = document.getElementById('notification-message');
+
+        // --- Custom Notification Function ---
+        const showCustomMessage = (type, message) => {
+            notificationMessage.textContent = message;
+            notificationBox.classList.remove('hidden', 'bg-green-600', 'bg-red-600');
+            
+            if (type === 'success') {
+                notificationBox.classList.add('bg-green-600');
+            } else if (type === 'error') {
+                notificationBox.classList.add('bg-red-600');
+            }
+
+            // Show and hide animation
+            setTimeout(() => notificationBox.classList.add('show'), 10);
+            setTimeout(() => notificationBox.classList.remove('show'), 3000);
+            setTimeout(() => notificationBox.classList.add('hidden'), 3500);
         };
-      }
 
-      const formRef = ref(db, type === "booking" ? "bookings" : "contacts");
-      const newRef = push(formRef);
+        // --- Helper Functions ---
+        const formatVND = (amount) => {
+            if (typeof amount !== 'number' || isNaN(amount)) return '0₫';
+            return amount.toLocaleString('vi-VN', { 
+                style: 'currency', 
+                currency: 'VND', 
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        };
 
-      set(newRef, data)
-        .then(() => sendToTelegram(data, type))
-        .then(() => {
-          let successMessage = "Chúng tôi sẽ liên hệ lại bạn qua điện thoại để xác nhận chi tiết trong thời gian sớm nhất. Cảm ơn quý khách!";
-          
-          if (type === "booking") {
-            const warningHtml = `
-              <p class="mt-3" style="font-weight: 700; color: var(--color-primary-gold); font-size: 1em; margin-top: 15px;">
-                ⚠️ Lưu ý: Chúng tôi chỉ giữ bàn/phòng trong **10 phút** kể từ giờ đặt.
-              </p>
-            `;
-            successMessage = "Yêu cầu đặt bàn của bạn đã được ghi nhận thành công. " + successMessage + warningHtml;
-          } else if (type === "contact") {
-             successMessage = "Tin nhắn của bạn đã được gửi. " + successMessage;
-          }
+        const formatTimestamp = (timestamp) => {
+            if (!timestamp) return 'Không rõ';
+            const ms = String(timestamp).length === 10 ? timestamp * 1000 : timestamp;
+            const date = new Date(ms);
+            if (isNaN(date.getTime())) return 'Ngày không hợp lệ';
 
-          // --- BẮT ĐẦU: Logic cho Modal (Thành công) ---
-          // showModal sẽ tự động hủy lệnh ẩn (nếu có) từ trạng thái loading
-          showModal("sent", successMessage); 
+            const time = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const day = date.toLocaleDateString('vi-VN');
+            return `${time} ${day}`;
+        };
+        
+        // --- Search/Filter Function (New) ---
+        const filterReceipts = () => {
+            const query = searchInput.value.toLowerCase().trim();
+            
+            if (!query) {
+                // Nếu ô tìm kiếm trống, hiển thị toàn bộ danh sách gốc
+                renderReceiptsList(masterReceipts);
+                return;
+            }
 
-          if (type === "contact") {
-              // Tự động đóng modal cho form liên hệ sau 4s
-              setTimeout(hideModal, 4000);
-          } else if (type === "booking") {
-              // Thiết lập lắng nghe sự kiện click để đóng cho form đặt bàn
-              setupClickToClose(); 
-          }
-          // --- KẾT THÚC: Logic cho Modal (Thành công) ---
-          
-          this.reset();
-          if (btn) btn.disabled = false;
-        })
-        .catch((err) => {
-          // --- BẮT ĐẦU: Logic cho Modal (Lỗi) ---
-          // showModal cũng sẽ tự động hủy lệnh ẩn (nếu có)
-          let errorMessage = `Vui lòng thử lại. Chi tiết: ${err.message}.`;
-          if(type === "booking") {
-              errorMessage = "Gửi yêu cầu đặt bàn thất bại. " + errorMessage;
-          } else if (type === "contact") {
-              errorMessage = "Gửi tin nhắn liên hệ thất bại. " + errorMessage;
-          }
-          
-          showModal("error", errorMessage);
-          setupClickToClose(); // Cho phép đóng bằng nút ĐÓNG/click ra ngoài
-          
-          // Tự động đóng sau 5s nếu người dùng không tương tác
-          // setTimeout(hideModal, 5000); // Tắt để người dùng click ĐÓNG cho phong cách cao cấp
-          
-          // --- KẾT THÚC: Logic cho Modal (Lỗi) ---
-          
-          if (btn) btn.disabled = false;
-        });
-    });
-  }
+            const filtered = masterReceipts.filter(receipt => {
+                const idMatch = receipt.invoiceId && receipt.invoiceId.toLowerCase().includes(query);
+                
+                // Chuyển tổng tiền sang chuỗi VND để tìm kiếm (ví dụ: "100.000₫")
+                const totalVND = formatVND(receipt.totalAmount || 0).toLowerCase().replace(/\./g, '');
+                // Chuyển tổng tiền sang chuỗi số (ví dụ: "100000")
+                const totalNumber = String(receipt.totalAmount || 0);
 
-  // Kích hoạt cho từng form
-  const bookingForm = document.getElementById("firebase-booking-form");
-  if (bookingForm) handleFormSubmit(bookingForm, "booking");
+                // Kiểm tra xem query có phải là số tiền (ví dụ: "100000" hoặc "100k")
+                const priceMatch = totalVND.includes(query) || totalNumber.includes(query);
 
-  const contactForm = document.getElementById("firebase-contact-form");
-  if (contactForm) handleFormSubmit(contactForm, "contact");
-</script>
+                return idMatch || priceMatch;
+            });
+
+            if (filtered.length === 0) {
+                listElement.innerHTML = `<p class="text-center text-gray-500 mt-8 p-4 ios-card rounded-4xl">Không tìm thấy hóa đơn nào khớp với từ khóa "${query}".</p>`;
+            } else {
+                renderReceiptsList(filtered, true); // true để không cập nhật masterReceipts
+            }
+        };
 
 
+        // --- Database Update Function ---
+        const setTotalAmountToZero = async (invoiceId) => {
+            if (!db || !invoiceId) {
+                showCustomMessage('error', 'Lỗi: Không thể kết nối DB hoặc thiếu ID hóa đơn.');
+                return;
+            }
+
+            try {
+                const receiptRef = ref(db, `payment_history/${invoiceId}`);
+                
+                await update(receiptRef, {
+                    totalAmount: 0
+                });
+                
+                showCustomMessage('success', `Hóa đơn ${invoiceId.substring(0, 5)}... đã được cập nhật thành công về 0₫!`);
+                
+                setTimeout(() => modalOverlay.classList.remove('show'), 1000); // Ẩn modal bằng class 'show'
+
+            } catch (error) {
+                console.error("Lỗi khi cập nhật DB:", error);
+                showCustomMessage('error', 'Lỗi khi cập nhật DB: ' + error.message);
+            }
+        };
+
+
+        // --- Renderer Functions ---
+        // Thêm tham số isFiltered để tránh cập nhật masterReceipts khi đang lọc
+        const renderReceiptsList = (receipts, isFiltered = false) => {
+            listElement.innerHTML = '';
+            loadingElement.classList.add('hidden');
+            
+            if (!isFiltered) {
+                 masterReceipts = receipts; // Chỉ cập nhật master data khi load từ Firebase
+            }
+            
+            if (receipts.length === 0) {
+                // Chỉ hiển thị thông báo không có dữ liệu nếu không có kết quả lọc
+                if (!isFiltered) { 
+                    noDataMessage.textContent = 'Không tìm thấy dữ liệu hóa đơn nào trong "payment_history".';
+                    noDataMessage.classList.remove('hidden');
+                }
+                return;
+            }
+
+            noDataMessage.classList.add('hidden');
+
+            receipts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+            receipts.forEach((receipt) => {
+                const card = document.createElement('div');
+                card.id = `receipt-${receipt.invoiceId}`;
+                // Sử dụng các class iOS mới: ios-card, rounded-4xl, active:scale-[0.97]
+                card.className = 'ios-card p-4 rounded-4xl shadow-lg cursor-pointer active:scale-[0.97] transition duration-200 ease-in-out hover:bg-white/70 dark:hover:bg-gray-800/70';
+                card.onclick = () => renderReceiptDetail(receipt);
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-xs font-medium text-ios-accent">Mã HĐ: ${receipt.invoiceId.substring(0, 10)}...</p>
+                        <p class="text-lg font-extrabold ${receipt.totalAmount === 0 ? 'text-green-500' : 'text-red-600 dark:text-red-400'}">${formatVND(receipt.totalAmount || 0)}</p>
+                    </div>
+                    <div class="flex justify-between items-end mt-1">
+                        <p class="text-sm text-gray-700 dark:text-gray-300">${receipt.paymentMethod || 'Không rõ'}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">${formatTimestamp(receipt.timestamp)}</p>
+                    </div>
+                `;
+                listElement.appendChild(card);
+            });
+        };
+
+        const renderReceiptDetail = (receipt) => {
+            currentInvoiceId = receipt.invoiceId; 
+
+            document.getElementById('invoice-id').textContent = receipt.invoiceId;
+            document.getElementById('invoice-date').textContent = formatTimestamp(receipt.timestamp);
+            document.getElementById('payment-method').textContent = receipt.paymentMethod || 'Không rõ';
+            document.getElementById('total-amount').textContent = formatVND(receipt.totalAmount || 0);
+
+            // Cập nhật trạng thái nút nếu tổng tiền đã bằng 0
+            if (receipt.totalAmount === 0) {
+                setToZeroButton.textContent = "ĐÃ VỀ 0 ĐỒNG";
+                setToZeroButton.disabled = true;
+                setToZeroButton.classList.remove('bg-ios-accent', 'hover:bg-blue-600');
+                setToZeroButton.classList.add('bg-green-500', 'cursor-not-allowed');
+            } else {
+                setToZeroButton.textContent = "VỀ 0 ĐỒNG";
+                setToZeroButton.disabled = false;
+                setToZeroButton.classList.remove('bg-green-500', 'cursor-not-allowed');
+                setToZeroButton.classList.add('bg-ios-accent', 'hover:bg-blue-600');
+            }
+
+            itemsListElement.innerHTML = '';
+            
+            if (receipt.items) {
+                const rawItems = receipt.items;
+                const itemsArray = Array.isArray(rawItems) 
+                    ? rawItems.filter(item => item) 
+                    : Object.keys(rawItems).map(key => rawItems[key]).filter(item => item);
+
+                if (itemsArray.length > 0) {
+                    itemsArray.forEach(item => {
+                        const itemTotal = (item.price || 0) * (item.quantity || 1);
+
+                        const itemElement = document.createElement('div');
+                        itemElement.className = 'flex justify-between items-start text-sm border-b border-gray-200 dark:border-gray-700 py-2 last:border-b-0';
+                        
+                        const itemNameAndQuantity = document.createElement('p');
+                        itemNameAndQuantity.className = 'text-gray-700 dark:text-gray-300 pr-2 flex-1';
+                        itemNameAndQuantity.innerHTML = `<span class="font-semibold">${item.name || 'Sản phẩm'}</span> <span class="text-ios-accent font-bold">x ${item.quantity || 1}</span>`;
+
+                        const itemPrice = document.createElement('p');
+                        itemPrice.className = 'text-gray-800 dark:text-ios-dark-text font-medium whitespace-nowrap';
+                        itemPrice.textContent = formatVND(itemTotal);
+
+                        itemElement.appendChild(itemNameAndQuantity);
+                        itemElement.appendChild(itemPrice);
+                        itemsListElement.appendChild(itemElement);
+                    });
+                } else {
+                    itemsListElement.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 italic text-sm py-2">Không có chi tiết mặt hàng.</p>';
+                }
+            } else {
+                itemsListElement.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 italic text-sm py-2">Không có chi tiết mặt hàng.</p>';
+            }
+            
+            // Dùng class 'show' để kích hoạt animation modal
+            modalOverlay.classList.add('show');
+        };
+
+        // --- Main Firebase Logic ---
+
+        const fetchData = () => {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getDatabase(app);
+                
+                const authenticate = async () => {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        const dbRef = ref(db, 'payment_history');
+                        
+                        // onValue sẽ tự động chạy lại khi dữ liệu thay đổi
+                        onValue(dbRef, (snapshot) => {
+                            const data = snapshot.val();
+
+                            let receipts = [];
+                            if (data) {
+                                receipts = Object.keys(data).map(key => ({
+                                    ...data[key],
+                                    invoiceId: key 
+                                }));
+                            }
+
+                            // Cập nhật master data và lọc/render lại
+                            masterReceipts = receipts; 
+                            filterReceipts(); // Sử dụng hàm lọc để hiển thị
+
+                            // Nếu modal đang mở, cập nhật chi tiết hóa đơn đang xem
+                            if (modalOverlay.classList.contains('show') && currentInvoiceId) {
+                                const updatedReceipt = masterReceipts.find(r => r.invoiceId === currentInvoiceId);
+                                if (updatedReceipt) {
+                                    renderReceiptDetail(updatedReceipt);
+                                } else {
+                                     // Nếu hóa đơn bị xóa (dù không có chức năng xóa ở đây), đóng modal
+                                    modalOverlay.classList.remove('show'); 
+                                }
+                            }
+
+                        }, (err) => {
+                            console.error("Firebase DB Error:", err);
+                            loadingElement.classList.add('hidden');
+                            errorDetails.textContent = `Lỗi truy cập DB: ${err.message}`;
+                            errorElement.classList.remove('hidden');
+                        });
+                        
+                    } else {
+                        await authenticate();
+                    }
+                });
+
+                authenticate().catch(e => {
+                    console.error("Authentication failed:", e);
+                    loadingElement.classList.add('hidden');
+                    errorDetails.textContent = `Lỗi xác thực: ${e.message}`;
+                    errorElement.classList.remove('hidden');
+                });
+
+            } catch (e) {
+                console.error("Initialization Error:", e);
+                loadingElement.classList.add('hidden');
+                errorDetails.textContent = `Lỗi khởi tạo Firebase: ${e.message}`;
+                errorElement.classList.remove('hidden');
+            }
+        };
+
+        // --- Event Listeners and Initialization ---
+
+        // Lắng nghe sự kiện input trên ô tìm kiếm để lọc tức thì
+        searchInput.addEventListener('input', filterReceipts);
+
+        // Xử lý sự kiện click nút "VỀ 0 ĐỒNG"
+        setToZeroButton.onclick = () => {
+            if (currentInvoiceId) {
+                // Ta bỏ qua bước xác nhận (window.confirm) và thực hiện ngay
+                setTotalAmountToZero(currentInvoiceId);
+            } else {
+                showCustomMessage('error', 'Không tìm thấy ID hóa đơn để cập nhật.');
+            }
+        };
+
+        // Close modal when close button is clicked
+        closeModalButton.onclick = () => modalOverlay.classList.remove('show');
+
+        // Close modal when clicking outside the modal card
+        modalOverlay.onclick = (event) => {
+            if (event.target === modalOverlay) {
+                modalOverlay.classList.remove('show');
+            }
+        };
+
+        window.onload = function() {
+            if (!firebaseConfig.databaseURL) {
+                loadingElement.classList.add('hidden');
+                errorDetails.textContent = 'Lỗi cấu hình: databaseURL không được tìm thấy. Vui lòng kiểm tra lại cấu hình Firebase.';
+                errorElement.classList.remove('hidden');
+            } else {
+                fetchData();
+            }
+        };
+
+    </script>
+</body>
 </html>
