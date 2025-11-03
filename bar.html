@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <!-- Rất quan trọng cho thiết kế mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>KDS Khu Vực Nước/Bar - Phong Cách iOS</title>
+    <!-- Tải Tailwind CSS để tạo kiểu (dùng cho cấu trúc và spacing nhanh) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- 1. BIẾN VÀ DARK MODE THEO CHUẨN iOS --- */
+        :root {
+            /* Light Mode Colors (F2F2F7 - iOS Light Background) */
+            --ios-background: #F9F9F9; /* Hơi sáng hơn F2F2F7 để tương phản tốt hơn */
+            --ios-primary-panel: rgba(255, 255, 255, 0.85); /* Card/Panel Light Blur */
+            --ios-accent: #007AFF; /* Apple Blue */
+            --ios-text-primary: #000000;
+            --ios-text-secondary: #8E8E93;
+            --ios-pending: #FF3B30; /* iOS Red */
+            --ios-completed: #34C759; /* iOS Green */
+            --ios-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 4px rgba(0, 0, 0, 0.04);
+            --ios-header-height: 56px;
+            --ios-border-color: rgba(0, 0, 0, 0.08);
+            --ios-easing: cubic-bezier(0.3, 0.7, 0.4, 1); /* Custom spring-like easing */
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* Dark Mode Colors (1C1C1E - iOS Dark Background) */
+                --ios-background: #1C1C1E; 
+                --ios-primary-panel: rgba(44, 44, 46, 0.85); /* Card/Panel Dark Blur */
+                --ios-text-primary: #FFFFFF;
+                --ios-text-secondary: #98989D;
+                --ios-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 4px rgba(0, 0, 0, 0.2);
+                --ios-border-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        /* --- 2. GLOBAL RESET VÀ TYPOGRAPHY (SF PRO) --- */
+        body { 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--ios-background);
+            color: var(--ios-text-primary);
+            min-height: 100vh;
+            transition: background-color 0.4s ease;
+            /* Hiệu ứng cuộn mượt momentum scroll */
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch; 
+        }
+
+        /* Tăng cường độ đậm cho tiêu đề (Bold and Semi-Bold) */
+        h1, h2, h3 { font-weight: 700; } 
+        p, span, button { font-weight: 500; }
+        
+        /* --- 3. COMPONENTS: iOS-STYLE CARD (GLASSMORPHISM) --- */
+        .ios-card {
+            background-color: var(--ios-primary-panel);
+            border-radius: 16px; /* Bo góc chuẩn iOS */
+            box-shadow: var(--ios-shadow);
+            /* Blur nền - Rất quan trọng */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--ios-border-color); /* Border mềm mại */
+            transition: transform 0.3s var(--ios-easing), box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        
+        /* Hiệu ứng chạm/hover: iOS Tap Effect - Dùng cho các thẻ có thể nhấn/tương tác */
+        .ios-interactive-element {
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease;
+        }
+
+        .ios-interactive-element:active {
+            transform: scale(0.95); /* Co lại 5% khi chạm/nhấn */
+            opacity: 0.9;
+        }
+
+        /* Hiệu ứng Hover nhẹ nhàng (chủ yếu trên Desktop/Tablet) */
+        .ios-interactive-element:hover {
+            transform: scale(1.005);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- 4. COMPONENTS: HEADER (LỚN VÀ BLUR) --- */
+        .ios-header {
+            background-color: var(--ios-primary-panel);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid var(--ios-border-color);
+            padding-top: env(safe-area-inset-top); /* Hỗ trợ notch/safe area */
+        }
+        
+        /* Tiêu đề lớn giống trang Settings/App Store */
+        .ios-large-title {
+            padding: 16px 24px 8px; /* Padding phù hợp mobile */
+        }
+
+
+        /* --- 5. COMPONENTS: BUTTONS (BO TRÒN VÀ MƯỢT) --- */
+        .ios-button {
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 14px 16px; /* Padding lớn hơn cho touch target */
+            transition: all 0.2s var(--ios-easing);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            -webkit-tap-highlight-color: transparent; /* Loại bỏ highlight khi chạm */
+        }
+
+        .ios-button:active {
+            transform: scale(0.95);
+            opacity: 0.85;
+            box-shadow: none;
+        }
+
+        /* Nút Hoàn thành - Màu Xanh Lá iOS */
+        .ios-button-complete {
+            background-color: var(--ios-completed);
+            color: white;
+        }
+        .ios-button-complete:hover {
+            background-color: #28a94b; /* Màu hover iOS */
+        }
+
+        /* --- 6. UTILITIES --- */
+        .text-secondary {
+            color: var(--ios-text-secondary);
+        }
+        .text-pending {
+            color: var(--ios-pending);
+        }
+        .text-completed {
+            color: var(--ios-completed);
+        }
+    </style>
+</head>
+<body class="p-0">
+
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- FIXED TOP HEADER (iOS Navigation Bar Style) -->
+        <header class="ios-header">
+            <!-- Tiêu đề nhỏ (Khi cuộn lên, phần này sẽ hiển thị) -->
+            <div class="h-[56px] flex items-center justify-center border-b" style="border-color: var(--ios-border-color);">
+                <h1 class="text-lg font-extrabold" style="color: var(--ios-text-primary);">
+                    KDS Nước/Bar
+                </h1>
+            </div>
+            <!-- Tiêu đề lớn (Giống trang Settings/App Store - phần này luôn cố định trên cùng) -->
+            <div class="ios-large-title">
+                <h2 class="text-4xl font-extrabold" style="color: var(--ios-text-primary);">
+                    Đơn hàng Pha chế
+                </h2>
+                <p class="text-secondary mt-1 text-sm font-medium">Theo dõi các yêu cầu theo thời gian thực.</p>
+            </div>
+        </header>
+
+        <!-- CONTAINER CHÍNH -->
+        <main class="p-4 sm:p-6 pb-20"> 
+            <!-- Loading & Error -->
+            <div id="loading" class="text-center p-10 text-secondary text-2xl font-semibold">Đang tải dữ liệu...</div>
+            <div id="error-message" class="hidden ios-card p-6 mb-6 border-l-4" style="border-color: var(--ios-pending);" role="alert">
+                <p class="font-bold text-pending">LỖI KẾT NỐI</p>
+                <p class="text-sm text-secondary">Không thể đọc dữ liệu. Chi tiết lỗi: <span id="error-details" class="font-mono text-xs"></span></p>
+            </div>
+
+            <!-- KDS GRID -->
+            <div id="main-kds-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                
+                <!-- CỘT 1: CHƯA LÀM (PENDING) -->
+                <div class="lg:col-span-1">
+                    <h3 class="text-2xl font-bold mb-4 text-pending" style="color: var(--ios-pending);">CHƯA LÀM</h3>
+                    <div id="pending-orders-container" class="grid grid-cols-1 gap-6">
+                        <!-- Đơn hàng CHƯA LÀM hiển thị ở đây -->
+                    </div>
+                    <div id="no-pending-orders" class="hidden text-center p-8 ios-card text-secondary text-base font-bold mt-6 opacity-60">
+                        TUYỆT VỜI! KHÔNG CÒN ĐƠN HÀNG CHƯA LÀM.
+                    </div>
+                </div>
+
+                <!-- CỘT 2: ĐÃ XONG (COMPLETED) -->
+                <div class="lg:col-span-1">
+                    <h3 class="text-2xl font-bold mb-4 text-completed" style="color: var(--ios-completed);">ĐÃ XONG</h3>
+                    <div id="completed-orders-container" class="grid grid-cols-1 gap-6">
+                        <!-- Đơn hàng ĐÃ XONG hiển thị ở đây -->
+                    </div>
+                    <div id="no-completed-orders" class="hidden text-center p-8 ios-card text-secondary text-base font-bold mt-6 opacity-60">
+                        CHƯA CÓ ĐƠN HÀNG ĐÃ XONG.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Chú thích chung khi không có đơn hàng nào trong DB -->
+            <div id="no-orders" class="hidden text-center p-16 ios-card text-secondary text-xl font-bold mt-10 opacity-70">
+                HỆ THỐNG KHÔNG CÓ ĐƠN HÀNG MỚI NÀO.
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        // Import các hàm cần thiết từ Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // Cấu hình Firebase của bạn
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
+            authDomain: "chitieu-7263e.firebaseapp.com",
+            databaseURL: "https://chitieu-7263e-default-rtdb.firebaseio.com",
+            projectId: "chitieu-7263e",
+            storageBucket: "chitieu-7263e.firebasestorage.app",
+            messagingSenderId: "83833140682",
+            appId: "1:83833140682:web:f9254b418ace3a659fcb33",
+            measurementId: "G-523X74K18N"
+        };
+        
+        // Khởi tạo Firebase
+        try {
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+            const ordersRef = ref(db, 'kitchen_bar_orders'); 
+            
+            const loadingIndicator = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+            const errorDetails = document.getElementById('error-details');
+            const noOrders = document.getElementById('no-orders');
+            
+            const pendingContainer = document.getElementById('pending-orders-container');
+            const completedContainer = document.getElementById('completed-orders-container');
+            const noPendingMessage = document.getElementById('no-pending-orders');
+            const noCompletedMessage = document.getElementById('no-completed-orders');
+
+
+            /**
+             * Hiển thị lỗi ra UI
+             * @param {Error} error
+             */
+            const displayError = (error) => {
+                loadingIndicator.classList.add('hidden');
+                errorMessage.classList.remove('hidden');
+                errorDetails.textContent = error.message || 'Lỗi không xác định.';
+                console.error("Firebase Error:", error);
+            };
+
+            /**
+             * Xử lý khi nhấn nút Hoàn thành.
+             * GHI TRỰC TIẾP status2='completed' vào Firebase.
+             * @param {string} orderId
+             */
+            window.markAsComplete = async (orderId) => {
+                const orderPath = 'kitchen_bar_orders/' + orderId;
+                
+                try {
+                    await update(ref(db, orderPath), { 
+                        status2: 'completed' 
+                    });
+                    console.log(`Đã cập nhật status2 cho đơn hàng ${orderId}`);
+                } catch (error) {
+                    console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+                }
+            };
+
+            /**
+             * Tạo HTML cho một đơn hàng.
+             * @param {string} orderId 
+             * @param {object} orderData 
+             * @param {boolean} isCompleted 
+             * @returns {HTMLElement}
+             */
+            const createOrderCard = (orderId, orderData, isCompleted) => {
+                // Lấy thông tin chính
+                const tableNumber = orderData.tableName || orderData.table || 'N/A';
+                const orderTime = orderData.timestamp 
+                    ? new Date(orderData.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false }) 
+                    : 'Không rõ';
+
+                let itemsHtml = '';
+                const items = orderData.items; 
+                let pendingItemCount = 0;
+
+                // --- Logic xử lý món ăn (chỉ hiển thị 'drink') ---
+                if (typeof items === 'object' && items !== null) {
+                    Object.entries(items).forEach(([itemKey, itemDetails]) => {
+                        
+                        // LỌC 1: CHỈ HIỂN THỊ MÓN NƯỚC (type: 'drink')
+                        if (typeof itemDetails === 'object' && itemDetails !== null && itemDetails.type !== 'drink') {
+                            return; 
+                        }
+
+                        // LỌC 2: Nếu đang ở cột CHƯA LÀM, ta chỉ hiển thị món pending/chưa hoàn thành
+                        if (!isCompleted && itemDetails.status && itemDetails.status === 'completed') return;
+
+                        if (!isCompleted) pendingItemCount++; // Chỉ đếm khi là đơn pending/chưa làm
+
+                        let name = 'Món không tên';
+                        let quantity = 1;
+                        let note = '';
+
+                        if (typeof itemDetails === 'object' && itemDetails !== null) {
+                            name = itemDetails.itemName || itemDetails.name || itemDetails.item_name || itemDetails.dish_name || itemKey;
+                            quantity = itemDetails.quantity || 1;
+                            note = itemDetails.note || itemDetails.ghi_chu || ''; 
+                        } else {
+                            name = itemKey;
+                            quantity = itemDetails || 1;
+                            note = '';
+                        }
+                        
+                        // Sử dụng class iOS-style cho list item
+                        const itemTextClass = isCompleted ? 'text-secondary line-through' : 'font-semibold';
+                        const qtyTextClass = isCompleted ? 'text-completed opacity-70 line-through' : 'text-accent';
+                        const noteClass = isCompleted ? 'text-secondary opacity-60' : 'text-pending';
+
+                        itemsHtml += `
+                            <li class="flex justify-between items-center text-sm ${itemTextClass} border-b py-2" style="border-color: var(--ios-border-color);">
+                                <span>${name}</span>
+                                <span class="text-xl font-bold ${qtyTextClass}" style="color: ${isCompleted ? '' : 'var(--ios-accent)'};">${quantity}</span>
+                            </li>
+                        `;
+                        if (note) {
+                             itemsHtml += `
+                                <li class="text-xs italic ${noteClass} ml-2 mb-1" style="color: ${isCompleted ? 'var(--ios-text-secondary)' : 'var(--ios-pending)'};">
+                                    <span class="font-medium">Ghi chú:</span> ${note}
+                                </li>
+                            `;
+                        }
+                    });
+                } else {
+                    itemsHtml = '<li class="text-pending text-sm italic" style="color: var(--ios-pending);">Không tìm thấy danh sách món chi tiết.</li>';
+                }
+                
+                // Nếu là đơn CHƯA LÀM mà không có món nước pending nào, ta bỏ qua
+                if (!isCompleted && pendingItemCount === 0) return null;
+                
+                // --- Kết thúc logic xử lý món ăn ---
+                
+                const statusColorVar = isCompleted ? 'var(--ios-completed)' : 'var(--ios-pending)';
+                const buttonHtml = isCompleted ? '' : `
+                    <button onclick="markAsComplete('${orderId}')" 
+                        class="w-full ios-button ios-button-complete uppercase text-base ios-interactive-element">
+                        HOÀN THÀNH
+                    </button>
+                `;
+
+                // Tạo phần tử hiển thị cho mỗi đơn hàng với class iOS
+                const orderCard = document.createElement('div');
+                orderCard.id = `order-${orderId}`;
+                orderCard.className = `ios-card overflow-hidden flex flex-col ${!isCompleted ? 'ios-interactive-element' : ''}`;
+                
+                let cardHtml = `
+                    <!-- Header Đơn hàng - Tối giản -->
+                    <div class="p-4 flex justify-between items-center border-b" style="background-color: ${statusColorVar}; color: white; border-color: rgba(255, 255, 255, 0.2);">
+                        <span class="text-sm font-medium opacity-90">Mã ĐH: ${orderId.substring(0, 8)}...</span>
+                        <span class="text-sm font-medium opacity-90 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            ${orderTime}
+                        </span>
+                    </div>
+
+                    <!-- Thông tin Bàn và Thời gian (Phần nổi bật) -->
+                    <div class="flex-shrink-0 p-6 flex justify-between items-center">
+                        <div class="text-left">
+                            <p class="text-xs font-light text-secondary uppercase">BÀN</p>
+                            <p class="text-5xl font-extrabold" style="color: ${statusColorVar};">${tableNumber}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-light text-secondary uppercase">TRẠNG THÁI</p>
+                            <p class="text-lg font-bold" style="color: ${statusColorVar};">
+                                ${isCompleted ? 'ĐÃ XONG' : 'CẦN LÀM'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách Món -->
+                    <div class="flex-grow p-4 overflow-y-auto max-h-80">
+                        <h3 class="text-lg font-bold mb-3 pb-1 text-secondary" style="border-bottom: 1px solid var(--ios-border-color);">
+                            MÓN NƯỚC (${!isCompleted ? `${pendingItemCount} MÓN CHỜ` : 'ĐÃ HOÀN TẤT'})
+                        </h3>
+                        <ul class="space-y-1">
+                            ${itemsHtml}
+                        </ul>
+                    </div>
+
+                    <!-- Nút Thao tác -->
+                    <div class="flex-shrink-0 p-4 border-t" style="border-color: var(--ios-border-color); background-color: rgba(255, 255, 255, 0.2);">
+                        ${buttonHtml}
+                    </div>
+                `;
+                
+                orderCard.innerHTML = cardHtml;
+                return orderCard;
+            };
+
+            /**
+             * Hàm chính xử lý và render đơn hàng
+             */
+            const renderOrders = (snapshot) => {
+                loadingIndicator.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+                
+                // Xóa và reset tất cả các container
+                pendingContainer.innerHTML = ''; 
+                completedContainer.innerHTML = '';
+                noOrders.classList.add('hidden');
+                noPendingMessage.classList.add('hidden');
+                noCompletedMessage.classList.add('hidden');
+                
+                let totalOrders = 0;
+                let totalPending = 0;
+                let totalCompleted = 0;
+
+                if (snapshot.exists()) {
+                    const orders = snapshot.val();
+                    
+                    // Lặp qua từng đơn hàng
+                    Object.entries(orders).forEach(([orderId, orderData]) => {
+                        totalOrders++;
+
+                        // Logic phân loại đơn hàng
+                        const isCompletedByStatus2 = orderData.status2 === 'completed'; 
+                        const isCompletedInDB = orderData.status === 'completed';
+
+                        const isCompleted = isCompletedInDB || isCompletedByStatus2;
+
+                        const orderCard = createOrderCard(orderId, orderData, isCompleted);
+                        
+                        if (orderCard) {
+                            if (isCompleted) {
+                                completedContainer.appendChild(orderCard);
+                                totalCompleted++;
+                            } else {
+                                pendingContainer.appendChild(orderCard);
+                                totalPending++;
+                            }
+                        }
+                    });
+                    
+                    // Hiển thị thông báo khi không có đơn hàng trong cột
+                    if (totalPending === 0) {
+                        noPendingMessage.classList.remove('hidden');
+                    }
+                    if (totalCompleted === 0) {
+                        noCompletedMessage.classList.remove('hidden');
+                    }
+                    if (totalPending > 0 || totalCompleted > 0) {
+                        // Ẩn thông báo chung nếu có bất kỳ đơn hàng nào (kể cả đã lọc)
+                    }
+
+                } else {
+                    noOrders.classList.remove('hidden');
+                }
+            };
+
+            /**
+             * Lắng nghe dữ liệu Realtime Database
+             */
+            onValue(ordersRef, renderOrders, (error) => {
+                displayError(error);
+            });
+
+        } catch (error) {
+            // Xử lý lỗi khởi tạo Firebase
+            displayError(error);
+        }
+    </script>
+</body>
+</html>
