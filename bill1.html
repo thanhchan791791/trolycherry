@@ -347,7 +347,7 @@
         };
 
 
-        // --- Database Update Function ---
+        // --- Database Update Function (Đã sửa để cập nhật totalAmount và finalTotal về 0) ---
         const setTotalAmountToZero = async (invoiceId) => {
             if (!db || !invoiceId) {
                 showCustomMessage('error', 'Lỗi: Không thể kết nối DB hoặc thiếu ID hóa đơn.');
@@ -357,8 +357,10 @@
             try {
                 const receiptRef = ref(db, `payment_history/${invoiceId}`);
                 
+                // Cập nhật cả totalAmount và finalTotal về 0
                 await update(receiptRef, {
-                    totalAmount: 0
+                    totalAmount: 0,
+                    finalTotal: 0 // Thêm trường finalTotal
                 });
                 
                 showCustomMessage('success', `Hóa đơn ${invoiceId.substring(0, 5)}... đã được cập nhật thành công về 0₫!`);
@@ -402,10 +404,13 @@
                 card.className = 'ios-card p-4 rounded-4xl shadow-lg cursor-pointer active:scale-[0.97] transition duration-200 ease-in-out hover:bg-white/70 dark:hover:bg-gray-800/70';
                 card.onclick = () => renderReceiptDetail(receipt);
 
+                // Lấy tổng tiền, ưu tiên finalTotal nếu có, nếu không thì dùng totalAmount
+                const displayAmount = receipt.finalTotal !== undefined ? receipt.finalTotal : (receipt.totalAmount || 0);
+
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-1">
                         <p class="text-xs font-medium text-ios-accent">Mã HĐ: ${receipt.invoiceId.substring(0, 10)}...</p>
-                        <p class="text-lg font-extrabold ${receipt.totalAmount === 0 ? 'text-green-500' : 'text-red-600 dark:text-red-400'}">${formatVND(receipt.totalAmount || 0)}</p>
+                        <p class="text-lg font-extrabold ${displayAmount === 0 ? 'text-green-500' : 'text-red-600 dark:text-red-400'}">${formatVND(displayAmount)}</p>
                     </div>
                     <div class="flex justify-between items-end mt-1">
                         <p class="text-sm text-gray-700 dark:text-gray-300">${receipt.paymentMethod || 'Không rõ'}</p>
@@ -418,14 +423,17 @@
 
         const renderReceiptDetail = (receipt) => {
             currentInvoiceId = receipt.invoiceId; 
+            
+            // Lấy tổng tiền để hiển thị, ưu tiên finalTotal nếu có
+            const displayAmount = receipt.finalTotal !== undefined ? receipt.finalTotal : (receipt.totalAmount || 0);
 
             document.getElementById('invoice-id').textContent = receipt.invoiceId;
             document.getElementById('invoice-date').textContent = formatTimestamp(receipt.timestamp);
             document.getElementById('payment-method').textContent = receipt.paymentMethod || 'Không rõ';
-            document.getElementById('total-amount').textContent = formatVND(receipt.totalAmount || 0);
+            document.getElementById('total-amount').textContent = formatVND(displayAmount); // Hiển thị tổng tiền đã được cập nhật
 
             // Cập nhật trạng thái nút nếu tổng tiền đã bằng 0
-            if (receipt.totalAmount === 0) {
+            if (displayAmount === 0) {
                 setToZeroButton.textContent = "ĐÃ VỀ 0 ĐỒNG";
                 setToZeroButton.disabled = true;
                 setToZeroButton.classList.remove('bg-ios-accent', 'hover:bg-blue-600');
@@ -515,7 +523,15 @@
                             if (modalOverlay.classList.contains('show') && currentInvoiceId) {
                                 const updatedReceipt = masterReceipts.find(r => r.invoiceId === currentInvoiceId);
                                 if (updatedReceipt) {
-                                    renderReceiptDetail(updatedReceipt);
+                                    // Kiểm tra xem hóa đơn có bị cập nhật về 0 hay không để đóng modal
+                                    const displayAmount = updatedReceipt.finalTotal !== undefined ? updatedReceipt.finalTotal : (updatedReceipt.totalAmount || 0);
+                                    if (displayAmount === 0) {
+                                        // Cập nhật trạng thái chi tiết (nút, số tiền)
+                                        renderReceiptDetail(updatedReceipt); 
+                                        showCustomMessage('success', `Cập nhật thành công!`);
+                                    } else {
+                                        renderReceiptDetail(updatedReceipt);
+                                    }
                                 } else {
                                      // Nếu hóa đơn bị xóa (dù không có chức năng xóa ở đây), đóng modal
                                     modalOverlay.classList.remove('show'); 
