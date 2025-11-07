@@ -232,12 +232,15 @@
             transform: scale(0.98); /* Hiệu ứng bấm nhẹ */
         }
         
-        /* KHUNG ẢNH NHÂN VIÊN TRÒN */
+        /* [THAY ĐỔI QUAN TRỌNG] KHUNG ẢNH NHÂN VIÊN - CHUYỂN LẠI VỀ HÌNH TRÒN VÀ LẤP ĐẦY */
         .employee-card img {
             width: 80px; 
             height: 80px;
-            border-radius: 50%; /* Ảnh tròn */
-            object-fit: cover;
+            /* ĐÃ SỬA: Chuyển lại về hình tròn để có tính thẩm mỹ profile hơn */
+            border-radius: 50%; 
+            /* ĐÃ SỬA: Dùng 'cover' để LẤP ĐẦY 100% khung, KHÔNG CÒN KHOẢNG TRẮNG */
+            object-fit: cover; 
+            background-color: transparent; 
             margin-bottom: 10px;
             margin-top: 0;
             border: 3px solid var(--ios-light-gray); /* Viền nhẹ */
@@ -538,6 +541,20 @@
             transition: color 0.2s;
             line-height: 1;
         }
+        
+        /* [THAY ĐỔI QUAN TRỌNG] KHUNG ẢNH NHÂN VIÊN TRONG MODAL */
+        #ratingEmployeeImage {
+            width: 100px; 
+            height: 100px; 
+            /* ĐÃ SỬA: Chuyển lại về hình tròn để lấp đầy */
+            border-radius: 50% !important; 
+            /* ĐÃ SỬA: Dùng 'cover' để LẤP ĐẦY 100% khung, KHÔNG CÒN KHOẢNG TRẮNG */
+            object-fit: cover !important; 
+            background-color: transparent; 
+            margin: 15px auto 10px !important; 
+            border: 3px solid var(--wood-light) !important;
+        }
+
 
         /* -------------------------- MEDIA QUERIES -------------------------- */
 
@@ -557,11 +574,10 @@
                 padding: 0 15px 120px 15px; /* Giảm padding ngang trên mobile */
             }
             .employee-card {
-                padding: 12px 5px;
-            }
+padding: 40px 5px;            }
             .employee-card img {
-                width: 70px; 
-                height: 70px;
+                width: 100px; 
+                height: 100px;
             }
             .employee-card h3 {
                 font-size: 0.9em;
@@ -588,40 +604,35 @@
         <div class="employee-list" id="employeeList">
             
             <div class="employee-card animated-element" data-employee-id="NV001" onclick="openEmployeeRatingModal(this)">
-                <img src="nv2.jpg" alt="Nguyễn Thị A" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=A';">
-                <h3>Nguyễn Thị A</h3>
-                <p>Phục vụ Bàn</p>
+                <img src="nv3.jpg" alt="Nguyễn Thị A" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=A';">
+                <h3>Nguyễn Tuấn Đạt</h3>
+                <p>Giám sát</p>
             </div>
             
             <div class="employee-card animated-element" data-employee-id="NV002" onclick="openEmployeeRatingModal(this)">
-                <img src="https://images.unsplash.com/photo-1541460395786-c320875e528b?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDR8fHxlbnwwfHx8fHw%3D" alt="Trần Văn B" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=B';">
-                <h3>Trần Văn B</h3>
-                <p>Pha Chế</p>
+                <img src="nv4.jpg" alt="Trần Văn B" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=B';">
+                <h3>Trương Bá Lân</h3>
+                <p>Bảo vệ</p>
             </div>
 
             <div class="employee-card animated-element" data-employee-id="NV003" onclick="openEmployeeRatingModal(this)">
-                <img src="https://images.unsplash.com/photo-1627909384594-55581c1f53f3?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDh8fHxlbnwwfHx8fHw%3D" alt="Lê Thị C" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=C';">
-                <h3>Lê Thị C</h3>
-                <p>Thu Ngân</p>
-            </div>
-            
-            <div class="employee-card animated-element" data-employee-id="NV004" onclick="openEmployeeRatingModal(this)">
-                <img src="https://images.unsplash.com/photo-1600572836261-2f7b8e11a2f9?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D" alt="Phạm Văn D" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=D';">
-                <h3>Phạm Văn D</h3>
+                <img src="nv5.jpg" alt="Lê Thị C" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=C';">
+                <h3>Tạ Thị Hoài Uyên</h3>
                 <p>Quản Lý</p>
             </div>
             
-            <div class="employee-card animated-element" data-employee-id="NV005" onclick="openEmployeeRatingModal(this)">
-                <img src="https://images.unsplash.com/photo-1596814510078-433b5c192d6e?q=80&w=900&auto=format&fit=crop" alt="Nguyễn Thị E" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=E';">
-                <h3>Nguyễn Thị E</h3>
-                <p>Tiếp Tân</p>
+            <div class="employee-card animated-element" data-employee-id="NV004" onclick="openEmployeeRatingModal(this)">
+                <img src="nv6.jpg" alt="Phạm Văn D" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=D';">
+                <h3>Phạm Hoàng Thanh Ngân </h3>
+                <p>Lễ Tân</p>
             </div>
             
-            <div class="employee-card animated-element" data-employee-id="NV006" onclick="openEmployeeRatingModal(this)">
-                <img src="https://images.unsplash.com/photo-1627909384594-55581c1f53f3?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDh8fHxlbnwwfHx8fHw%3D" alt="Đỗ Văn F" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=F';">
-                <h3>Đỗ Văn F</h3>
-                <p>Bảo Vệ</p>
+            <div class="employee-card animated-element" data-employee-id="NV005" onclick="openEmployeeRatingModal(this)">
+                <img src="nv7.jpg" alt="Nguyễn Thị E" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=E';">
+                <h3>Trần Huỳnh Phi Yến</h3>
+                <p>Lễ Tân</p>
             </div>
+           
             
         </div>
     </div>
@@ -646,7 +657,7 @@
             <div id="ratingModalContent" style="text-align: center;">
                 
                 <div class="employee-info-modal" style="text-align: center;">
-                    <img id="ratingEmployeeImage" src="" alt="Employee" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 15px auto 10px; border: 3px solid var(--wood-light);">
+                    <img id="ratingEmployeeImage" src="" alt="Employee" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background-color: transparent; margin: 15px auto 10px; border: 3px solid var(--wood-light);">
                     <h2 style="font-size: 1.8em; margin: 5px 0 0 0;"><span id="ratingEmployeeName"></span></h2>
                     <p id="ratingEmployeeRole" style="margin: 0; color: var(--wood-light); font-weight: 600; font-size: 1.1em;"></p>
                 </div>
