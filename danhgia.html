@@ -250,27 +250,34 @@
             white-space: nowrap; /* Giữ chức danh không xuống dòng */
         }
 
-        /* Rating Icons - HỆ THỐNG STAR RATING */
-        /* ẨN SAO TRONG THẺ NHÂN VIÊN */
-        .rating-stars {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            gap: 12px; 
-            margin: 30px 0; /* Khoảng cách trong Modal */
-        }
+        /* Rating Icons - HỆ THỐNG ICON CẢM XÚC */
+        /* ẨN ICON TRONG THẺ NHÂN VIÊN */
         .employee-card .rating-stars {
             display: none !important; 
         }
 
-        .rating-star {
-            font-size: 32px; 
-            cursor: pointer;
-            color: var(--star-color-inactive); 
-            transition: color 0.2s var(--ios-ease), transform 0.25s var(--ios-ease), filter 0.25s var(--ios-ease);
-            min-height: 44px; 
+        .rating-stars {
             display: flex;
-            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 80px; /* **ĐÃ SỬA:** KHOẢNG CÁCH RỘNG HƠN GIỮA 2 ICON */
+            margin: 30px 0; 
+        }
+        
+        .rating-star {
+            font-size: 50px; /* **ĐÃ SỬA:** Tăng kích thước icon */
+            cursor: pointer;
+            color: var(--ios-text-secondary); /* Dùng màu xám ấm cho trạng thái inactive */
+            transition: color 0.2s var(--ios-ease), transform 0.25s var(--ios-ease), filter 0.25s var(--ios-ease);
+            
+            /* FIX TRIỆT ĐỂ: Vùng bấm riêng biệt và rõ ràng */
+            position: relative; 
+            z-index: 1000; 
+            padding: 15px; /* Vùng bấm lớn */
+            margin: 0; 
+            display: inline-block; 
+            line-height: 1; 
+            text-align: center;
         }
         
         /* HIỆU ỨNG KHI RÊ CHUỘT (HOVER) */
@@ -281,9 +288,15 @@
 
         /* TRẠNG THÁI ĐÃ ĐƯỢC CHỌN (ACTIVE) */
         .rating-star.active {
-            color: var(--star-color-active);
+            color: var(--highlight); /* Màu vàng ấm cho Hài Lòng */
             filter: drop-shadow(0 0 4px rgba(255, 217, 158, 0.4)); 
-            transform: scale(1.1); /* Giữ lớn hơn một chút để nổi bật */
+            transform: scale(1.1);
+        }
+        
+        /* Màu riêng cho icon Không Hài Lòng */
+        .rating-star.frown.active {
+            color: var(--wood); /* Màu nâu gỗ đậm cho Không Hài Lòng */
+            filter: drop-shadow(0 0 4px rgba(90, 63, 51, 0.4));
         }
 
         /* CLASS ĐỂ KÍCH HOẠT HIỆU ỨNG NÀY */
@@ -607,11 +620,16 @@
                 <p style="margin-top: 30px;">Cảm ơn quý khách đã dành thời gian đánh giá. Vui lòng chọn mức độ hài lòng của bạn:</p>
                 
                 <div id="dynamicRatingStars" class="rating-stars">
-                    <i class="fas fa-star rating-star" title="1/5: Rất Tệ" data-rating="1" onclick="submitRatingFromModal(this, 1, 'Rất Tệ')"></i>
-                    <i class="fas fa-star rating-star" title="2/5: Không Hài Lòng" data-rating="2" onclick="submitRatingFromModal(this, 2, 'Không Hài Lòng')"></i>
-                    <i class="fas fa-star rating-star" title="3/5: Bình Thường" data-rating="3" onclick="submitRatingFromModal(this, 3, 'Bình Thường')"></i>
-                    <i class="fas fa-star rating-star" title="4/5: Hài Lòng" data-rating="4" onclick="submitRatingFromModal(this, 4, 'Hài Lòng')"></i>
-                    <i class="fas fa-star rating-star" title="5/5: Tuyệt Vời" data-rating="5" onclick="submitRatingFromModal(this, 5, 'Tuyệt Vời')"></i>
+                    <i class="fas fa-face-frown rating-star frown" 
+                       title="Không Hài Lòng" 
+                       data-rating="1" 
+                       onclick="submitRatingFromModal(this, 1, 'Không Hài Lòng')">
+                    </i>
+                    <i class="fas fa-face-smile rating-star" 
+                       title="Hài Lòng" 
+                       data-rating="3" 
+                       onclick="submitRatingFromModal(this, 3, 'Hài Lòng')">
+                    </i>
                 </div>
             </div>
             
@@ -637,7 +655,7 @@
             authDomain: "lichnghi-4c665.firebaseapp.com",
             databaseURL: "https://lichnghi-4c665-default-rtdb.firebaseio.com",
             projectId: "lichnghi-4c665",
-            storageBucket: "lichnghi-4c665.firebasestorage.app",
+            storageBucket: "lichnghi-4c665.firebase-storage.app",
             messagingSenderId: "86673813509",
             appId: "1:86673813509:web:168376408dfcbf14e16c6c",
             measurementId: "G-2G08MRQY1V"
@@ -685,7 +703,7 @@
         const feedbackModal = document.getElementById('feedbackModal');
         const feedbackTextarea = document.getElementById('feedbackText');
         
-        // **QUAN TRỌNG: BIẾN CHẶN CLICK KÉP**
+        // BIẾN CHẶN CLICK KÉP: GIÚP CHỈ 1 LẦN CLICK ĐƯỢC XỬ LÝ
         let isSubmitting = false; 
         
         function getVietnamTime() {
@@ -759,8 +777,10 @@
                 star.classList.remove('active');
                 star.classList.remove('last-selected');
                 star.classList.remove('star-bounce'); 
-                star.style.pointerEvents = 'auto'; // Đảm bảo luôn được click khi modal mở
             });
+            
+            // **FIX ĐỂ ĐẢM BẢO SAO LUÔN CÓ THỂ CLICK ĐƯỢC KHI MODAL MỞ**
+            dynamicRatingStarsContainer.style.pointerEvents = 'auto';
 
             // Hiển thị modal
             document.body.style.overflow = 'hidden'; 
@@ -772,11 +792,14 @@
             document.body.style.overflow = '';
         }
 
-        // --- HÀM SUBMIT RATING TỪ MODAL VÀ LƯU VÀO DB (ĐÃ SỬA LỖI TÔ MÀU VÀ HIỆU ỨNG) ---
+        // --- HÀM SUBMIT RATING TỪ MODAL VÀ LƯU VÀO DB (GIỮ NGUYÊN LOGIC FIX CLICK KÉP) ---
         window.submitRatingFromModal = async function(selectedIconElement, rating, mood) {
             
-            if (isSubmitting) return; // **NGĂN CHẶN DOUBLE CLICK/NHIỀU EVENT**
+            if (isSubmitting) return; // Ngăn chặn click kép
             isSubmitting = true; 
+            
+            // VÔ HIỆU HÓA CLICK TRÊN TOÀN BỘ CONTAINER SAO trong lúc xử lý
+            dynamicRatingStarsContainer.style.pointerEvents = 'none'; 
 
             const employeeId = currentRatingEmployee.employeeId;
             const employeeName = currentRatingEmployee.employeeName;
@@ -787,24 +810,21 @@
             
             // 1. Reset trạng thái: Xóa tất cả hiệu ứng cũ
             allStars.forEach(star => {
-                star.style.pointerEvents = 'none'; // **QUAN TRỌNG: TẠM THỜI VÔ HIỆU HÓA CLICK**
                 star.classList.remove('active');
                 star.classList.remove('last-selected');
                 star.classList.remove('star-bounce'); 
             });
             
             // 2. Kích hoạt trạng thái ACTIVE cho TẤT CẢ các sao <= rating
-            allStars.forEach(star => {
-                const starRating = parseInt(star.getAttribute('data-rating'));
-                
-                if (starRating <= rating) {
-                    star.classList.add('active'); // Thêm màu sáng cho sao đã chọn và các sao trước đó
-                }
-            });
+            // Dù chỉ có 2 nút, logic này vẫn hoạt động tốt: nếu bấm 3, cả 1 và 3 sẽ active. Nếu bấm 1, chỉ 1 active.
+            // Tuy nhiên, vì là 2 nút tách biệt, ta chỉ cần active nút được chọn. Sửa lại logic:
+            
+            // 2. Kích hoạt trạng thái ACTIVE cho chỉ icon được chọn
+            selectedIconElement.classList.add('active');
             
             // 3. Thêm hiệu ứng Nảy (Bounce) vào ngôi sao vừa click
             selectedIconElement.classList.add('star-bounce');
-            selectedIconElement.classList.add('last-selected');
+            selectedIconElement.classList.add('last-selected'); 
 
             // FIREBASE LOGIC
             try {
@@ -823,7 +843,6 @@
                 const ratingsRef = ref(db, `ratings`);
                 await push(ratingsRef, data); 
 
-                // Hiển thị toast thành công
                 showToast(`Cảm ơn bạn đã đánh giá ${employeeName} ${rating} sao. Chúng mình xin phép được ghi nhận ạ`);
                 console.log(`Đánh giá ${employeeId} đã lưu thành công vào Realtime DB. Bàn: ${tableNumber}`);
 
@@ -831,9 +850,9 @@
                 setTimeout(() => {
                     selectedIconElement.classList.remove('star-bounce'); 
                     
-                    // **TÁI KÍCH HOẠT LOGIC**
+                    // TÁI KÍCH HOẠT LOGIC TRƯỚC KHI ĐÓNG MODAL
+                    dynamicRatingStarsContainer.style.pointerEvents = 'auto'; 
                     isSubmitting = false;
-                    allStars.forEach(star => star.style.pointerEvents = 'auto'); 
                     
                     closeEmployeeRatingModal(); 
                 }, 800); 
@@ -844,8 +863,8 @@
                 
                 // Đảm bảo reset hiệu ứng và trạng thái ngay cả khi lỗi
                 selectedIconElement.classList.remove('star-bounce');
+                dynamicRatingStarsContainer.style.pointerEvents = 'auto'; 
                 isSubmitting = false;
-                allStars.forEach(star => star.style.pointerEvents = 'auto'); 
             }
         }
 
