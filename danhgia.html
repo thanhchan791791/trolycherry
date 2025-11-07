@@ -47,19 +47,31 @@
 
         /* ------------------ CÁC PHÉP CHUYỂN ĐỘNG (ANIMATION) ------------------ */
 
-        /* Hiệu ứng iOS spring bounce cho card */
-        @keyframes cardBounceIn {
-            0% { opacity: 0; transform: translateY(40px) scale(0.95); }
-            60% { opacity: 1; transform: translateY(-5px) scale(1.005); }
-            100% { transform: translateY(0) scale(1); }
+        /* Hiệu ứng trượt lên và mờ dần (Fade In Up) */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
-        /* HIỆU ỨNG STAR NHẤP NHÔ MẠNH */
-        @keyframes starPulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            40% { transform: scale(1.35); opacity: 1; filter: drop-shadow(0 0 10px var(--star-color-active)); } /* Tăng scale lên 1.35 */
-            70% { transform: scale(1.15); opacity: 1; }
-            100% { transform: scale(1.2); opacity: 1; } /* Giữ ở 1.2 thay vì 1.1 */
+        /* HIỆU ỨNG NHẢY LỚN KHI CLICK */
+        @keyframes starBounce {
+            0% { 
+                transform: scale(1); 
+            }
+            50% { 
+                transform: scale(1.7); /* Nảy lớn hơn */
+                color: var(--highlight); 
+                filter: drop-shadow(0 0 15px var(--highlight)); 
+            }
+            100% { 
+                transform: scale(1.2); 
+            }
         }
 
         /* Pop-up Nảy vào giữa màn hình - HIỆU ỨNG TRƯỢT RA GIỮA */
@@ -113,16 +125,16 @@
         .main-container {
             max-width: 580px; /* Max-width trên desktop */
             margin: 0 auto;
-            padding: 0 20px 120px;
+            padding: 0 20px 120px 20px; /* Thêm padding ngang trở lại */
         }
 
         /* iOS Header Style */
         .app-header {
-            padding: 40px 0 30px;
+            padding: 40px 0 30px; /* Giảm padding ngang trong header */
             text-align: center; /* Căn giữa */
         }
         
-        /* Logo Quán - Kích thước lớn, Bo góc, Đổ bóng nhẹ */
+        /* Logo Quán */
         .logo-container {
             margin-bottom: 25px;
             display: flex;
@@ -132,19 +144,19 @@
         }
 
         .logo-container:hover {
-             transform: translateY(-4px); /* Hiệu ứng hover nâng nhẹ */
+             transform: translateY(-4px); 
              box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         #restaurantLogo {
-            width: 180px; /* Kích thước logo lớn */
-            height: 180px;
+            width: 120px; 
+            height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 16px; /* Bo góc nhẹ */
-            background: linear-gradient(135deg, var(--wood-light), var(--wood)); /* Gradient nhẹ */
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* Bóng nhẹ */
+            border-radius: 16px; 
+            background: linear-gradient(135deg, var(--wood-light), var(--wood)); 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
             overflow: hidden;
             margin-bottom: 15px;
         }
@@ -158,14 +170,14 @@
         
         /* Icon dự phòng */
         #restaurantLogo i {
-             font-size: 70px !important;
+             font-size: 50px !important;
         }
 
         .app-header h1 {
-            font-size: 2.2em; 
+            font-size: 2em; 
             font-weight: 900; 
             margin: 0;
-            letter-spacing: 0.5px; /* Khoảng cách chữ thoáng */
+            letter-spacing: 0.5px; 
             color: var(--ios-dark-gray);
             line-height: 1.2;
         }
@@ -179,114 +191,113 @@
             margin-right: auto;
         }
 
-        /* Employee List - Grid Layout */
+        /* Employee List - BỐ CỤC GRID XUỐNG HÀNG */
         .employee-list {
             display: grid;
-            grid-template-columns: 1fr; /* Luôn 1 cột trên mobile */
-            gap: 20px; 
-            margin: 0 auto;
+            grid-template-columns: repeat(3, 1fr); /* 3 cột trên mobile (mặc định) */
+            gap: 15px; /* Khoảng cách giữa các thẻ */
+            padding: 20px 0 20px 0; /* Loại bỏ padding ngang dư thừa */
+            overflow-x: hidden; /* Bỏ cuộn ngang */
         }
         
-        /* Employee Card - Tinh tế và bo góc */
+        /* Employee Card - THẺ NHỎ (PROFILE CARD) */
         .employee-card {
             background-color: var(--ios-card-bg);
-            border-radius: var(--radius-main-container); /* Bo góc lớn */
+            border-radius: var(--radius-card); /* Bo góc mềm */
             box-shadow: var(--ios-shadow-soft); 
-            padding: 20px 20px 30px 20px; /* Giảm padding ngang để ảnh to ra */
+            padding: 15px; /* Giảm padding */
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            animation: cardBounceIn 0.6s var(--ios-spring) forwards;
-            min-height: 280px; 
-            transition: transform 0.3s var(--ios-ease), box-shadow 0.3s var(--ios-ease);
-            cursor: default; 
+            min-height: auto; 
+            transition: transform 0.2s var(--ios-ease), box-shadow 0.2s var(--ios-ease);
+            cursor: pointer; 
         }
         
-        .employee-card:hover {
-            transform: translateY(-5px); 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        .employee-card:active {
+            transform: scale(0.98); /* Hiệu ứng bấm nhẹ */
         }
         
-        /* Animation delays */
-        .employee-card:nth-child(1) { animation-delay: 0.1s; }
-        .employee-card:nth-child(2) { animation-delay: 0.2s; }
-        .employee-card:nth-child(3) { animation-delay: 0.3s; }
-        .employee-card:nth-child(4) { animation-delay: 0.4s; }
-
-        /* KHUNG ẢNH NHÂN VIÊN MỚI - LỚN HƠN */
+        /* KHUNG ẢNH NHÂN VIÊN TRÒN */
         .employee-card img {
-            width: 100%; /* Chiếm toàn bộ chiều rộng thẻ (trừ padding) */
-            max-width: 100%;
-            height: 250px; /* Chiều cao cố định lớn hơn */
-            border-radius: 20px; /* Vuông bo tròn */
+            width: 80px; 
+            height: 80px;
+            border-radius: 50%; /* Ảnh tròn */
             object-fit: cover;
-            margin-bottom: 20px;
-            margin-top: 10px; /* Đẩy xuống một chút */
-            /* Bỏ viền ngoài để ảnh nổi bật hơn */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            margin-bottom: 10px;
+            margin-top: 0;
+            border: 3px solid var(--ios-light-gray); /* Viền nhẹ */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .employee-card h3 {
             margin: 0;
-            font-size: 1.5em; /* Kích thước tên lớn hơn */
-            font-weight: 600; /* Semi-bold */
+            font-size: 1em; /* Tên nhỏ hơn */
+            font-weight: 700; 
+            /* Cho phép tên xuống dòng */
+            white-space: normal; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
         }
 
         .employee-card p {
-            font-size: 1em;
-            color: var(--ios-text-secondary);
-            margin: 5px 0 25px 0;
-            font-weight: 500;
+            font-size: 0.9em;
+            color: var(--wood-light);
+            margin: 3px 0 0 0;
+            font-weight: 600;
+            white-space: nowrap; /* Giữ chức danh không xuống dòng */
         }
 
         /* Rating Icons - HỆ THỐNG STAR RATING */
+        /* ẨN SAO TRONG THẺ NHÂN VIÊN */
         .rating-stars {
             display: flex;
             justify-content: center;
             width: 100%;
-            gap: 12px; /* Tăng khoảng cách */
+            gap: 12px; 
+            margin: 30px 0; /* Khoảng cách trong Modal */
+        }
+        .employee-card .rating-stars {
+            display: none !important; 
         }
 
         .rating-star {
-            font-size: 32px; /* Icon sao lớn 32px */
+            font-size: 32px; 
             cursor: pointer;
             color: var(--star-color-inactive); 
             transition: color 0.2s var(--ios-ease), transform 0.25s var(--ios-ease), filter 0.25s var(--ios-ease);
-            min-height: 44px; /* Vùng chạm tối thiểu */
+            min-height: 44px; 
             display: flex;
             align-items: center;
         }
         
-        /* Hiệu ứng nhấn sao - Scale nhẹ */
-        .rating-star:active {
-            transform: scale(0.9);
+        /* HIỆU ỨNG KHI RÊ CHUỘT (HOVER) */
+        .rating-star:hover {
+            transform: scale(1.1);
+            color: var(--highlight);
         }
-        
-        /* Màu sao đã chọn */
-        .rating-star.active { 
+
+        /* TRẠNG THÁI ĐÃ ĐƯỢC CHỌN (ACTIVE) */
+        .rating-star.active {
             color: var(--star-color-active);
+            filter: drop-shadow(0 0 4px rgba(255, 217, 158, 0.4)); 
+            transform: scale(1.1); /* Giữ lớn hơn một chút để nổi bật */
+        }
+
+        /* CLASS ĐỂ KÍCH HOẠT HIỆU ỨNG NÀY */
+        .rating-star.star-bounce {
+            animation: starBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
         
-        /* Dùng Animation cho sự lựa chọn */
-        .rating-star.last-selected { 
-            animation: starPulse 0.4s var(--ios-ease) forwards;
-            /* Thêm gradient/shadow nhẹ khi chọn */
-            filter: drop-shadow(0 0 4px var(--star-color-active));
-        }
-        
-        /* Ẩn các icon cũ không dùng */
-        .rating-icons { display: none; }
-
-
-        /* Fixed Feedback Button - iOS Floating Button */
+        /* Fixed Feedback Button */
         .feedback-button-fixed {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             padding: 16px 36px; 
-            /* Nền gradient kem -> trắng */
             background: linear-gradient(180deg, var(--ios-card-bg) 0%, var(--cream) 100%);
             color: var(--wood-dark);
             border: none;
@@ -294,40 +305,39 @@
             font-size: 1.1em;
             font-weight: 700; 
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1), 0 0 0 1px var(--ios-light-gray); /* Bóng mềm + viền nhẹ */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1), 0 0 0 1px var(--ios-light-gray); 
             z-index: 1000;
             transition: transform 0.2s var(--ios-ease), box-shadow 0.2s var(--ios-ease);
             display: flex;
             align-items: center;
             gap: 12px; 
-            min-height: 55px; /* Tăng chiều cao để dễ chạm */
+            min-height: 55px; 
             letter-spacing: 0.2px;
         }
         
-        /* Hiệu ứng bấm trồi nhẹ - iOS effect */
         .feedback-button-fixed:active {
             transform: translateX(-50%) translateY(2px); 
-            box-shadow: 5px 15px rgba(0,0,0,0.1); /* Giảm shadow 20% */
+            box-shadow: 5px 15px rgba(0,0,0,0.1); 
         }
 
-        /* -------------------------- TOAST NOTIFICATION STYLE (ĐÃ CHỈNH SỬA) -------------------------- */
+        /* -------------------------- TOAST NOTIFICATION STYLE -------------------------- */
         #toastNotification {
             position: fixed;
-            top: 50%; /* Canh giữa màn hình */
+            top: 50%; 
             left: 50%;
-            transform: translate(-50%, -50%) scale(0.9); /* Trạng thái ẩn/bắt đầu */
+            transform: translate(-50%, -50%) scale(0.9); 
             z-index: 2000;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            padding: 18px 30px; /* Padding lớn hơn cho nổi bật */
+            padding: 18px 30px; 
             border-radius: var(--radius-toast);
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2); /* Shadow đậm hơn */
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2); 
             color: var(--ios-dark-gray);
             font-weight: 600; 
-            font-size: 1.1em; /* Font lớn hơn */
+            font-size: 1.1em; 
             display: flex;
-            flex-direction: column; /* Sắp xếp icon và text theo chiều dọc */
+            flex-direction: column; 
             align-items: center;
             gap: 10px;
             opacity: 0;
@@ -337,51 +347,44 @@
         }
 
         #toastNotification.show {
-            animation: toastPopInCenter 0.4s var(--ios-spring) forwards; /* Dùng hiệu ứng giữa màn hình */
+            animation: toastPopInCenter 0.4s var(--ios-spring) forwards; 
         }
 
         #toastNotification.hide {
-            animation: toastFadeOutCenter 0.3s ease-out forwards; /* Dùng hiệu ứng ẩn giữa màn hình */
+            animation: toastFadeOutCenter 0.3s ease-out forwards; 
         }
         
-        /* Container của icon và vòng tròn (Phần đã thêm) */
         .success-icon-container {
-            width: 60px; /* Kích thước vùng vẽ */
+            width: 60px; 
             height: 60px;
             border-radius: 50%;
-            border: 3px solid transparent; /* Border mặc định trong suốt */
+            border: 3px solid transparent; 
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            margin-bottom: 5px; /* Khoảng cách với text */
+            margin-bottom: 5px; 
             background: rgba(139, 94, 69, 0.05); 
             transition: border-color 0.2s;
         }
 
-        /* Icon dấu tích */
         .success-check-icon {
-            font-size: 2.2em; /* Kích thước dấu tích */
+            font-size: 2.2em; 
             color: var(--wood-light);
-            /* Trạng thái ban đầu: Ẩn và sẵn sàng cho animation vẽ */
             opacity: 0; 
             transform: scale(1.1);
-            clip-path: inset(100% 100% 0% 0%); /* Ẩn hoàn toàn dấu tích ban đầu */
+            clip-path: inset(100% 100% 0% 0%); 
         }
 
-        /* Áp dụng animation cho icon container (Vẽ Vòng Tròn) */
         #toastNotification.show .success-icon-container {
-            /* 0.4s duration, start at 0.2s delay */
             animation: drawCircle 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s forwards; 
         }
 
-        /* Áp dụng animation cho dấu tích (Vẽ Dấu Tích) */
         #toastNotification.show .success-check-icon {
-            /* 0.6s duration, start at 0.6s delay (sau khi vòng tròn đã vẽ xong) */
             animation: drawCheckmark 0.6s ease-out 0.6s forwards; 
         }
 
-        /* -------------------------- MODAL STYLE (Đã sửa lỗi hiển thị) -------------------------- */
+        /* -------------------------- MODAL STYLE -------------------------- */
         .feedback-modal {
             position: fixed;
             z-index: 1001; 
@@ -389,18 +392,17 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.25); /* Nền tối hơn để nổi bật */
+            background-color: rgba(0, 0, 0, 0.25); 
             backdrop-filter: blur(12px); 
             -webkit-backdrop-filter: blur(12px);
             opacity: 0;
             transition: opacity 0.3s ease-out;
-            pointer-events: none; /* Rất quan trọng: Mặc định không tương tác */
+            pointer-events: none; 
         }
         
-        /* Khi Modal hiện lên (có class show) */
         .feedback-modal.show {
             opacity: 1;
-            pointer-events: auto; /* Cho phép tương tác */
+            pointer-events: auto; 
         }
 
         .modal-content {
@@ -412,8 +414,6 @@
             max-width: 480px; 
             box-shadow: var(--ios-shadow-soft);
             position: relative;
-            
-            /* Dùng giá trị mặc định cho trạng thái ẩn */
             opacity: 0; 
             transform: translateY(50px) scale(0.95);
             transition: transform 0.4s var(--ios-spring), opacity 0.3s ease-out;
@@ -421,7 +421,7 @@
 
         .feedback-modal.show .modal-content {
             opacity: 1;
-            transform: translateY(0) scale(1); /* Hiệu ứng mở mượt mà */
+            transform: translateY(0) scale(1); 
         }
 
         .modal-content h2 {
@@ -436,11 +436,11 @@
             margin-bottom: 25px;
         }
 
-        /* Input & Textarea - Style Settings iOS */
+        /* Input & Textarea */
         .modal-content textarea {
             width: 100%;
             height: 150px; 
-            padding: 20px; /* Padding lớn hơn */
+            padding: 20px; 
             margin: 10px 0 25px 0;
             box-sizing: border-box;
             border: 1px solid transparent;
@@ -448,36 +448,35 @@
             resize: vertical;
             font-size: 1em;
             font-family: inherit;
-            background-color: var(--ios-light-gray); /* Nền màu gỗ nhạt */
+            background-color: var(--ios-light-gray); 
             transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
             outline: none;
             color: var(--ios-dark-gray);
         }
 
         .modal-content textarea:focus {
-            /* Border highlight mềm mại */
             border-color: var(--wood-light); 
             box-shadow: 0 0 0 1px var(--wood-light), 0 0 12px rgba(139, 94, 69, 0.15); 
             background-color: var(--ios-card-bg);
         }
         
-        /* Modal Submit Button - Bo góc mềm mại */
+        /* Modal Submit Button */
         .modal-content button {
             width: 100%;
             background-color: var(--wood);
             color: white;
             padding: 16px;
             border: none;
-            border-radius: var(--radius-input); /* Bo góc mềm hơn */
+            border-radius: var(--radius-input); 
             cursor: pointer;
             font-size: 1.15em;
             font-weight: 700;
             transition: transform 0.2s var(--ios-ease), background-color 0.2s;
-            min-height: 50px; /* Vùng chạm tối thiểu */
+            min-height: 50px; 
         }
 
         .modal-content button:active {
-            transform: scale(0.98); /* Hiệu ứng bấm nhẹ */
+            transform: scale(0.98); 
             background-color: var(--wood-dark); 
         }
 
@@ -493,63 +492,32 @@
             line-height: 1;
         }
 
-        .close-button:hover,
-        .close-button:focus {
-            color: var(--ios-dark-gray);
-        }
-
-        /* -------------------------- MEDIA QUERIES (Mobile & Desktop Grid) -------------------------- */
+        /* -------------------------- MEDIA QUERIES -------------------------- */
 
         @media (min-width: 580px) {
             .employee-list {
-                grid-template-columns: repeat(2, 1fr); /* 2 cột trên desktop */
-            }
-        }
-        
-        @media (min-width: 900px) {
-            .employee-card {
-                padding: 30px 20px 30px 20px; /* Giữ padding trên desktop lớn */
-            }
-            .employee-card img {
-                height: 200px; /* Có thể giảm chiều cao ảnh trên desktop 4 cột để tối ưu */
-            }
-            .employee-list {
-                grid-template-columns: repeat(4, 1fr); /* 4 cột trên desktop lớn */
+                grid-template-columns: repeat(4, 1fr); /* 4 cột trên desktop */
+                gap: 20px;
             }
         }
         
         @media (max-width: 580px) {
-            .app-header {
-                padding: 30px 0 20px;
-            }
-            .app-header h1 {
-                font-size: 2em;
-            }
-            #restaurantLogo {
-                width: 150px; 
-                height: 150px;
-            }
             .employee-list {
-                 gap: 15px;
+                grid-template-columns: repeat(3, 1fr); /* 3 cột trên mobile */
+                gap: 12px;
+            }
+            .main-container {
+                padding: 0 15px 120px 15px; /* Giảm padding ngang trên mobile */
+            }
+            .employee-card {
+                padding: 12px 5px;
             }
             .employee-card img {
-                height: 200px; /* Giữ kích thước lớn hơn cho mobile 1 cột */
+                width: 70px; 
+                height: 70px;
             }
-            .rating-star {
-                font-size: 28px; /* Cập nhật kích thước sao cho mobile */
-                gap: 8px;
-            }
-            .feedback-button-fixed {
-                bottom: 20px;
-                padding: 14px 30px;
-                font-size: 1em;
-            }
-            /* #toastNotification {
-                bottom: 20px;
-            } */
-            .modal-content {
-                margin: 15vh 20px; /* Đảm bảo padding quanh modal */
-                width: auto;
+            .employee-card h3 {
+                font-size: 0.9em;
             }
         }
     </style>
@@ -562,67 +530,52 @@
                 <div id="restaurantLogo">
                     <img src="logobanme.png" 
                          alt="Logo Nhà hàng Ẩm thực Buôn Mê" 
-                         onerror="this.onerror=null; this.outerHTML='<i class=\'fas fa-utensils\' style=\'font-size: 70px; color: #f4e6d4;\'></i>';" 
+                         onerror="this.onerror=null; this.outerHTML='<i class=\'fas fa-utensils\' style=\'font-size: 50px; color: #f4e6d4;\'></i>';" 
                     >
                 </div>
                 <h1>Nhà hàng Ẩm thực Buôn Mê</h1>
             </div>
-            <p>Vui lòng đánh giá trải nghiệm của bạn với từng nhân viên. Sự hài lòng của quý khách là động lực của chúng tôi.</p>
+            <p> Sự hài lòng của quý khách là động lực của chúng tôi.</p>
         </header>
 
         <div class="employee-list" id="employeeList">
             
-            <div class="employee-card" data-employee-id="NV001">
+            <div class="employee-card" data-employee-id="NV001" onclick="openEmployeeRatingModal(this)">
                 <img src="nv1.webp" alt="Nguyễn Thị A" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=A';">
                 <h3>Nguyễn Thị A</h3>
                 <p>Phục vụ Bàn</p>
-                <div class="rating-stars" data-employee-id="NV001">
-                    <i class="fas fa-star rating-star" title="1/5: Rất Tệ" data-rating="1" onclick="rateEmployee('NV001', 1, 'Rất Tệ', this)"></i>
-                    <i class="fas fa-star rating-star" title="2/5: Không Hài Lòng" data-rating="2" onclick="rateEmployee('NV001', 2, 'Không Hài Lòng', this)"></i>
-                    <i class="fas fa-star rating-star" title="3/5: Bình Thường" data-rating="3" onclick="rateEmployee('NV001', 3, 'Bình Thường', this)"></i>
-                    <i class="fas fa-star rating-star" title="4/5: Hài Lòng" data-rating="4" onclick="rateEmployee('NV001', 4, 'Hài Lòng', this)"></i>
-                    <i class="fas fa-star rating-star" title="5/5: Tuyệt Vời" data-rating="5" onclick="rateEmployee('NV001', 5, 'Tuyệt Vời', this)"></i>
-                </div>
             </div>
             
-            <div class="employee-card" data-employee-id="NV002">
+            <div class="employee-card" data-employee-id="NV002" onclick="openEmployeeRatingModal(this)">
                 <img src="https://images.unsplash.com/photo-1541460395786-c320875e528b?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDR8fHxlbnwwfHx8fHw%3D" alt="Trần Văn B" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=B';">
                 <h3>Trần Văn B</h3>
                 <p>Pha Chế</p>
-                <div class="rating-stars" data-employee-id="NV002">
-                    <i class="fas fa-star rating-star" title="1/5: Rất Tệ" data-rating="1" onclick="rateEmployee('NV002', 1, 'Rất Tệ', this)"></i>
-                    <i class="fas fa-star rating-star" title="2/5: Không Hài Lòng" data-rating="2" onclick="rateEmployee('NV002', 2, 'Không Hài Lòng', this)"></i>
-                    <i class="fas fa-star rating-star" title="3/5: Bình Thường" data-rating="3" onclick="rateEmployee('NV002', 3, 'Bình Thường', this)"></i>
-                    <i class="fas fa-star rating-star" title="4/5: Hài Lòng" data-rating="4" onclick="rateEmployee('NV002', 4, 'Hài Lòng', this)"></i>
-                    <i class="fas fa-star rating-star" title="5/5: Tuyệt Vời" data-rating="5" onclick="rateEmployee('NV002', 5, 'Tuyệt Vời', this)"></i>
-                </div>
             </div>
 
-            <div class="employee-card" data-employee-id="NV003">
+            <div class="employee-card" data-employee-id="NV003" onclick="openEmployeeRatingModal(this)">
                 <img src="https://images.unsplash.com/photo-1627909384594-55581c1f53f3?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDh8fHxlbnwwfHx8fHw%3D" alt="Lê Thị C" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=C';">
                 <h3>Lê Thị C</h3>
                 <p>Thu Ngân</p>
-                <div class="rating-stars" data-employee-id="NV003">
-                    <i class="fas fa-star rating-star" title="1/5: Rất Tệ" data-rating="1" onclick="rateEmployee('NV003', 1, 'Rất Tệ', this)"></i>
-                    <i class="fas fa-star rating-star" title="2/5: Không Hài Lòng" data-rating="2" onclick="rateEmployee('NV003', 2, 'Không Hài Lòng', this)"></i>
-                    <i class="fas fa-star rating-star" title="3/5: Bình Thường" data-rating="3" onclick="rateEmployee('NV003', 3, 'Bình Thường', this)"></i>
-                    <i class="fas fa-star rating-star" title="4/5: Hài Lòng" data-rating="4" onclick="rateEmployee('NV003', 4, 'Hài Lòng', this)"></i>
-                    <i class="fas fa-star rating-star" title="5/5: Tuyệt Vời" data-rating="5" onclick="rateEmployee('NV003', 5, 'Tuyệt Vời', this)"></i>
-                </div>
             </div>
             
-            <div class="employee-card" data-employee-id="NV004">
+            <div class="employee-card" data-employee-id="NV004" onclick="openEmployeeRatingModal(this)">
                 <img src="https://images.unsplash.com/photo-1600572836261-2f7b8e11a2f9?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D" alt="Phạm Văn D" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=D';">
                 <h3>Phạm Văn D</h3>
                 <p>Quản Lý</p>
-                <div class="rating-stars" data-employee-id="NV004">
-                    <i class="fas fa-star rating-star" title="1/5: Rất Tệ" data-rating="1" onclick="rateEmployee('NV004', 1, 'Rất Tệ', this)"></i>
-                    <i class="fas fa-star rating-star" title="2/5: Không Hài Lòng" data-rating="2" onclick="rateEmployee('NV004', 2, 'Không Hài Lòng', this)"></i>
-                    <i class="fas fa-star rating-star" title="3/5: Bình Thường" data-rating="3" onclick="rateEmployee('NV004', 3, 'Bình Thường', this)"></i>
-                    <i class="fas fa-star rating-star" title="4/5: Hài Lòng" data-rating="4" onclick="rateEmployee('NV004', 4, 'Hài Lòng', this)"></i>
-                    <i class="fas fa-star rating-star" title="5/5: Tuyệt Vời" data-rating="5" onclick="rateEmployee('NV004', 5, 'Tuyệt Vời', this)"></i>
-                </div>
             </div>
+            
+            <div class="employee-card" data-employee-id="NV005" onclick="openEmployeeRatingModal(this)">
+                <img src="https://images.unsplash.com/photo-1596814510078-433b5c192d6e?q=80&w=900&auto=format&fit=crop" alt="Nguyễn Thị E" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=E';">
+                <h3>Nguyễn Thị E</h3>
+                <p>Tiếp Tân</p>
+            </div>
+            
+            <div class="employee-card" data-employee-id="NV006" onclick="openEmployeeRatingModal(this)">
+                <img src="https://images.unsplash.com/photo-1627909384594-55581c1f53f3?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDh8fHxlbnwwfHx8fHw%3D" alt="Đỗ Văn F" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=F';">
+                <h3>Đỗ Văn F</h3>
+                <p>Bảo Vệ</p>
+            </div>
+            
         </div>
     </div>
 
@@ -640,6 +593,31 @@
         </div>
     </div>
     
+    <div id="employeeRatingModal" class="feedback-modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeEmployeeRatingModal()">&times;</span>
+            <div id="ratingModalContent" style="text-align: center;">
+                
+                <div class="employee-info-modal" style="text-align: center;">
+                    <img id="ratingEmployeeImage" src="" alt="Employee" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 15px auto 10px; border: 3px solid var(--wood-light);">
+                    <h2 style="font-size: 1.8em; margin: 5px 0 0 0;"><span id="ratingEmployeeName"></span></h2>
+                    <p id="ratingEmployeeRole" style="margin: 0; color: var(--wood-light); font-weight: 600; font-size: 1.1em;"></p>
+                </div>
+                
+                <p style="margin-top: 30px;">Cảm ơn quý khách đã dành thời gian đánh giá. Vui lòng chọn mức độ hài lòng của bạn:</p>
+                
+                <div id="dynamicRatingStars" class="rating-stars">
+                    <i class="fas fa-star rating-star" title="1/5: Rất Tệ" data-rating="1" onclick="submitRatingFromModal(this, 1, 'Rất Tệ')"></i>
+                    <i class="fas fa-star rating-star" title="2/5: Không Hài Lòng" data-rating="2" onclick="submitRatingFromModal(this, 2, 'Không Hài Lòng')"></i>
+                    <i class="fas fa-star rating-star" title="3/5: Bình Thường" data-rating="3" onclick="submitRatingFromModal(this, 3, 'Bình Thường')"></i>
+                    <i class="fas fa-star rating-star" title="4/5: Hài Lòng" data-rating="4" onclick="submitRatingFromModal(this, 4, 'Hài Lòng')"></i>
+                    <i class="fas fa-star rating-star" title="5/5: Tuyệt Vời" data-rating="5" onclick="submitRatingFromModal(this, 5, 'Tuyệt Vời')"></i>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
     <div id="toastNotification">
         <div class="success-icon-container"> 
             <i class="fas fa-check success-check-icon"></i> 
@@ -648,13 +626,12 @@
     </div>
 
     <script type="module">
-        // --- FIREBASE IMPORTS ---
+        // --- FIREBASE IMPORTS (GIỮ NGUYÊN) ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-
-        // --- FIREBASE CONFIG (Lấy từ thông tin người dùng) ---
+        // --- FIREBASE CONFIG (GIỮ NGUYÊN) ---
         const firebaseConfig = {
             apiKey: "AIzaSyC4k2DyiEVKXcMpc_j9XwqZG1OHHBNegDk",
             authDomain: "lichnghi-4c665.firebaseapp.com",
@@ -670,40 +647,47 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
-        let userId = 'anonymous'; // ID mặc định trước khi xác thực
+        let userId = 'anonymous'; 
 
-        // Đăng nhập ẩn danh để có ID người dùng (quan trọng cho việc lưu trữ)
+        // Đăng nhập ẩn danh
         signInAnonymously(auth).then((userCredential) => {
             userId = userCredential.user.uid;
             console.log("Người dùng đã đăng nhập ẩn danh. User ID:", userId);
         }).catch((error) => {
             console.error("Lỗi đăng nhập ẩn danh:", error);
-            // Vẫn để userId là 'anonymous' nếu lỗi
         });
 
         // --- LOGIC LẤY SỐ BÀN TỪ URL ---
 
-        let tableNumber = 'unknown'; // Biến toàn cục để lưu số bàn
+        let tableNumber = 'unknown'; 
 
-        // Hàm lấy giá trị của tham số 'table' từ URL
         function getTableNumberFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             const table = urlParams.get('table');
-            return table ? table.toUpperCase() : 'UNKNOWN'; // Chuyển thành chữ hoa/số, nếu không có thì là UNKNOWN
+            return table ? table.toUpperCase() : 'UNKNOWN'; 
         }
         
-        // Gọi hàm ngay khi script khởi tạo
         tableNumber = getTableNumberFromUrl();
         console.log("Số bàn (Table Number) từ URL:", tableNumber);
 
         // --- HÀM XỬ LÝ CHUNG ---
 
-        let employeeRatings = {};
         const toastNotification = document.getElementById('toastNotification');
         const toastMessage = document.getElementById('toastMessage');
         let toastTimeout;
         
-        // Hàm mới để lấy thời gian hiện tại theo múi giờ Việt Nam (GMT+7)
+        let currentRatingEmployee = {};
+        const employeeRatingModal = document.getElementById('employeeRatingModal');
+        const ratingEmployeeNameElement = document.getElementById('ratingEmployeeName');
+        const ratingEmployeeImageElement = document.getElementById('ratingEmployeeImage');
+        const ratingEmployeeRoleElement = document.getElementById('ratingEmployeeRole');
+        const dynamicRatingStarsContainer = document.getElementById('dynamicRatingStars');
+        const feedbackModal = document.getElementById('feedbackModal');
+        const feedbackTextarea = document.getElementById('feedbackText');
+        
+        // **QUAN TRỌNG: BIẾN CHẶN CLICK KÉP**
+        let isSubmitting = false; 
+        
         function getVietnamTime() {
             const now = new Date();
             const options = { 
@@ -719,61 +703,115 @@
             return new Intl.DateTimeFormat('vi-VN', options).format(now);
         }
 
-        // CẬP NHẬT LOGIC SHOW TOAST CHO HIỆU ỨNG GIỮA MÀN HÌNH
         function showToast(message) {
             clearTimeout(toastTimeout); 
             
-            // Xóa hết class animation cũ
             toastNotification.classList.remove('show');
             toastNotification.classList.remove('hide');
 
             toastMessage.textContent = message;
             
             setTimeout(() => {
-                // Thêm class 'show' để kích hoạt animation PopInCenter, drawCircle và drawCheckmark
                 toastNotification.classList.add('show'); 
             }, 10);
             
             toastTimeout = setTimeout(() => {
-                // Thêm class 'hide' để kích hoạt animation FadeOutCenter
                 toastNotification.classList.remove('show');
                 toastNotification.classList.add('hide'); 
                 setTimeout(() => {
-                    // Xóa class 'hide' sau khi animation hoàn tất để sẵn sàng cho lần sau
                     toastNotification.classList.remove('hide');
-                }, 400); // 400ms > 300ms của animation toastFadeOutCenter
+                }, 400); 
             }, 3000);
         }
 
-        // --- HÀM ĐÁNH GIÁ NHÂN VIÊN VÀ LƯU VÀO DB (Gán vào window) ---
-        window.rateEmployee = async function(employeeId, rating, mood, selectedIconElement) {
-            console.log(`Rating: Employee ${employeeId} - ${rating} Sao (${mood})`);
-            employeeRatings[employeeId] = rating;
+        // --- HÀM XỬ LÝ MODAL GÓP Ý CHUNG (GIỮ NGUYÊN) ---
+        window.openFeedbackModal = function() {
+            document.body.style.overflow = 'hidden'; 
+            feedbackModal.classList.remove('show'); 
+            setTimeout(() => {
+                feedbackModal.classList.add('show');
+            }, 10);
+            setTimeout(() => feedbackTextarea.focus(), 350); 
+        }
 
-            // UI LOGIC
-            const ratingStarsContainer = selectedIconElement.closest('.rating-stars');
-            const allStars = ratingStarsContainer.querySelectorAll('.rating-star');
+        window.closeFeedbackModal = function() {
+            feedbackModal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        // --- HÀM XỬ LÝ MODAL ĐÁNH GIÁ NHÂN VIÊN MỚI (GIỮ NGUYÊN) ---
+        window.openEmployeeRatingModal = function(cardElement) {
+            const employeeId = cardElement.getAttribute('data-employee-id');
+            const employeeName = cardElement.querySelector('h3').textContent;
+            const employeeRole = cardElement.querySelector('p').textContent;
+            const employeeImage = cardElement.querySelector('img').src;
             
+            currentRatingEmployee = { employeeId, employeeName, employeeRole };
+            
+            // Cập nhật nội dung Modal
+            ratingEmployeeNameElement.textContent = employeeName;
+            ratingEmployeeImageElement.src = employeeImage;
+            ratingEmployeeRoleElement.textContent = employeeRole;
+            
+            // Reset trạng thái sao
+            const stars = dynamicRatingStarsContainer.querySelectorAll('.rating-star');
+            stars.forEach(star => {
+                star.classList.remove('active');
+                star.classList.remove('last-selected');
+                star.classList.remove('star-bounce'); 
+                star.style.pointerEvents = 'auto'; // Đảm bảo luôn được click khi modal mở
+            });
+
+            // Hiển thị modal
+            document.body.style.overflow = 'hidden'; 
+            employeeRatingModal.classList.add('show');
+        }
+
+        window.closeEmployeeRatingModal = function() {
+            employeeRatingModal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        // --- HÀM SUBMIT RATING TỪ MODAL VÀ LƯU VÀO DB (ĐÃ SỬA LỖI TÔ MÀU VÀ HIỆU ỨNG) ---
+        window.submitRatingFromModal = async function(selectedIconElement, rating, mood) {
+            
+            if (isSubmitting) return; // **NGĂN CHẶN DOUBLE CLICK/NHIỀU EVENT**
+            isSubmitting = true; 
+
+            const employeeId = currentRatingEmployee.employeeId;
+            const employeeName = currentRatingEmployee.employeeName;
+            const employeeRole = currentRatingEmployee.employeeRole;
+            
+            // Lấy tất cả các ngôi sao
+            const allStars = dynamicRatingStarsContainer.querySelectorAll('.rating-star');
+            
+            // 1. Reset trạng thái: Xóa tất cả hiệu ứng cũ
+            allStars.forEach(star => {
+                star.style.pointerEvents = 'none'; // **QUAN TRỌNG: TẠM THỜI VÔ HIỆU HÓA CLICK**
+                star.classList.remove('active');
+                star.classList.remove('last-selected');
+                star.classList.remove('star-bounce'); 
+            });
+            
+            // 2. Kích hoạt trạng thái ACTIVE cho TẤT CẢ các sao <= rating
             allStars.forEach(star => {
                 const starRating = parseInt(star.getAttribute('data-rating'));
-                star.classList.remove('last-selected');
                 
                 if (starRating <= rating) {
-                    star.classList.add('active');
-                } else {
-                    star.classList.remove('active');
+                    star.classList.add('active'); // Thêm màu sáng cho sao đã chọn và các sao trước đó
                 }
             });
             
+            // 3. Thêm hiệu ứng Nảy (Bounce) vào ngôi sao vừa click
+            selectedIconElement.classList.add('star-bounce');
             selectedIconElement.classList.add('last-selected');
 
             // FIREBASE LOGIC
             try {
-                const employeeCard = selectedIconElement.closest('.employee-card');
                 const data = {
                     employeeId: employeeId,
-                    employeeName: employeeCard.querySelector('h3').textContent,
-                    employeeRole: employeeCard.querySelector('p').textContent,
+                    employeeName: employeeName,
+                    employeeRole: employeeRole,
                     rating: rating,
                     mood: mood,
                     timestamp: Date.now(), 
@@ -782,48 +820,36 @@
                     tableNumber: tableNumber
                 };
                 
-                // Ghi vào Realtime DB, sử dụng push() để tạo khóa duy nhất
                 const ratingsRef = ref(db, `ratings`);
                 await push(ratingsRef, data); 
 
-                showToast(`Cảm ơn bạn đã đánh giá, chúng mình xin phép được ghi nhận ạ`);
+                // Hiển thị toast thành công
+                showToast(`Cảm ơn bạn đã đánh giá ${employeeName} ${rating} sao. Chúng mình xin phép được ghi nhận ạ`);
                 console.log(`Đánh giá ${employeeId} đã lưu thành công vào Realtime DB. Bàn: ${tableNumber}`);
+
+                // 4. Đóng modal sau khi hiệu ứng Nảy hoàn tất (800ms)
+                setTimeout(() => {
+                    selectedIconElement.classList.remove('star-bounce'); 
+                    
+                    // **TÁI KÍCH HOẠT LOGIC**
+                    isSubmitting = false;
+                    allStars.forEach(star => star.style.pointerEvents = 'auto'); 
+                    
+                    closeEmployeeRatingModal(); 
+                }, 800); 
 
             } catch (error) {
                 console.error("Lỗi khi lưu đánh giá vào Firebase:", error);
                 showToast("Lỗi! Không thể lưu đánh giá. Vui lòng thử lại.");
+                
+                // Đảm bảo reset hiệu ứng và trạng thái ngay cả khi lỗi
+                selectedIconElement.classList.remove('star-bounce');
+                isSubmitting = false;
+                allStars.forEach(star => star.style.pointerEvents = 'auto'); 
             }
         }
 
-        // --- HÀM XỬ LÝ MODAL (Gán vào window) ---
-
-        const feedbackModal = document.getElementById('feedbackModal');
-        const feedbackTextarea = document.getElementById('feedbackText');
-        
-        window.openFeedbackModal = function() {
-            document.body.style.overflow = 'hidden'; 
-            
-            feedbackModal.classList.remove('show'); 
-            
-            setTimeout(() => {
-                feedbackModal.classList.add('show');
-            }, 10);
-            
-            setTimeout(() => feedbackTextarea.focus(), 350); 
-        }
-
-        window.closeFeedbackModal = function() {
-            feedbackModal.classList.remove('show');
-            document.body.style.overflow = '';
-            
-            setTimeout(() => {
-                if (!feedbackModal.classList.contains('show')) {
-                    // Đảm bảo không có lỗi
-                }
-            }, 400); 
-        }
-
-        // --- HÀM GỬI GÓP Ý VÀ LƯU VÀO DB (Gán vào window) ---
+        // --- HÀM GỬI GÓP Ý VÀ LƯU VÀO DB (Giữ nguyên) ---
         window.submitFeedback = async function() {
             const feedback = feedbackTextarea.value.trim();
 
@@ -842,12 +868,10 @@
                     tableNumber: tableNumber 
                 };
                 
-                // Ghi vào Realtime DB dưới node /general_feedback
                 const feedbackRef = ref(db, 'general_feedback');
                 await push(feedbackRef, data); 
 
                 console.log("Nội dung góp ý đã được lưu:", feedback);
-                // GỌI HIỆU ỨNG VẼ VÒNG TRÒN + DẤU TÍCH TẠI ĐÂY
                 showToast(`Góp ý của quý khách tại bàn ${tableNumber} đã được ghi nhận. Xin chân thành cảm ơn!`);
                 
                 feedbackTextarea.value = '';
@@ -859,10 +883,13 @@
             }
         }
 
-        // Đóng modal khi click ra ngoài khung nội dung
+        // Đóng modal khi click ra ngoài khung nội dung (Cập nhật để bao gồm cả 2 modal)
         window.onclick = function(event) {
             if (event.target == feedbackModal) {
                 window.closeFeedbackModal();
+            }
+            if (event.target == employeeRatingModal) {
+                window.closeEmployeeRatingModal();
             }
         }
     </script>
