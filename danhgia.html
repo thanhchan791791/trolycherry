@@ -588,7 +588,7 @@
         <div class="employee-list" id="employeeList">
             
             <div class="employee-card animated-element" data-employee-id="NV001" onclick="openEmployeeRatingModal(this)">
-                <img src="nv1.webp" alt="Nguyễn Thị A" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=A';">
+                <img src="nv2.jpg" alt="Nguyễn Thị A" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E0D9D4/3E2723?text=A';">
                 <h3>Nguyễn Thị A</h3>
                 <p>Phục vụ Bàn</p>
             </div>
@@ -898,19 +898,20 @@
                     const ratingsRef = ref(db, `ratings`);
                     await push(ratingsRef, data); 
 
-                    showToast(`Cảm ơn bạn đã đánh giá ${currentRatingEmployee.employeeName} ${rating} sao. Chúng mình xin phép được ghi nhận ạ`);
+                    const toastMessage = `Cảm ơn bạn đã đánh giá. Chúng mình xin phép được ghi nhận ạ`;
+                    
+                    // Đóng modal ngay lập tức (Modal có animation 0.4s). Hàm này đã reset trạng thái sao.
+                    closeEmployeeRatingModal(); 
 
-                    // Đóng modal sau khi hoàn tất animation/lưu
+                    // Show Toast SAU KHI modal đã đóng (chờ 0.6s)
                     setTimeout(() => { 
-                        selectedIconElement.classList.remove('star-bounce');
-                        allStars.forEach(star => star.style.pointerEvents = 'auto'); // Kích hoạt lại
-                        closeEmployeeRatingModal(); 
-                    }, 500); 
+                        showToast(toastMessage);
+                    }, 600); 
 
                 } catch (error) {
                     console.error("Lỗi khi lưu đánh giá vào Firebase:", error);
                     showToast("Lỗi! Không thể lưu đánh giá. Vui lòng thử lại.");
-                    allStars.forEach(star => star.style.pointerEvents = 'auto'); // Kích hoạt lại
+                    allStars.forEach(star => star.style.pointerEvents = 'auto'); // Kích hoạt lại nếu lỗi xảy ra
                 }
                 
             } else if (rating === 1) {
@@ -926,6 +927,8 @@
                     employeeFeedbackTextarea.focus();
                     
                     selectedIconElement.classList.remove('star-bounce'); 
+                    
+                    allStars.forEach(star => star.style.pointerEvents = 'auto'); // Kích hoạt lại các icon đã bị vô hiệu hóa
                     
                 }, 500); 
 
@@ -970,11 +973,16 @@
                 const ratingsRef = ref(db, `ratings`);
                 await push(ratingsRef, data); 
 
-                showToast(`Góp ý của bạn về ${currentRatingEmployee.employeeName} đã được ghi nhận. Cảm ơn bạn!`);
-                
-                // Reset và đóng (sẽ gọi hàm closeEmployeeRatingModal() đã được fix logic reset)
+                const toastMessage = `Góp ý của bạn về ${currentRatingEmployee.employeeName} đã được ghi nhận. Cảm ơn bạn!`;
+
+                // 1. Reset và Đóng modal
                 employeeFeedbackTextarea.value = '';
                 closeEmployeeRatingModal(); 
+
+                // 2. Show Toast SAU KHI modal đã đóng (chờ 0.6s)
+                setTimeout(() => { 
+                    showToast(toastMessage);
+                }, 600);
 
             } catch (error) {
                 console.error("Lỗi khi lưu góp ý nhân viên vào Firebase:", error);
