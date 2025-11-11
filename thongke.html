@@ -741,22 +741,14 @@
             const now = new Date();
             const today = now.toISOString().slice(0, 10);
             
-            // --- LOGIC THỐNG KÊ TUẦN (Từ Thứ 2 đến Chủ nhật) ---
-            const dayOfWeek = now.getDay(); // Chủ nhật là 0, Thứ 2 là 1, ...
-            // Tính ngày Thứ 2 của tuần hiện tại
-            const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1; 
-            const firstDayOfWeek = new Date(now);
-            firstDayOfWeek.setDate(now.getDate() - daysToSubtract);
-            firstDayOfWeek.setHours(0, 0, 0, 0); 
-            const startOfWeek = firstDayOfWeek.toISOString().slice(0, 10);
-
-            // Tính ngày Chủ nhật của tuần hiện tại
-            const daysToAdd = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
-            const lastDayOfWeek = new Date(now);
-            lastDayOfWeek.setDate(now.getDate() + daysToAdd);
-            lastDayOfWeek.setHours(23, 59, 59, 999); 
-            const endOfWeekTimestamp = lastDayOfWeek.getTime();
-
+          // --- LOGIC THỐNG KÊ 7 NGÀY GẦN NHẤT ---
+        const startOfLast7Days = new Date(now);
+        startOfLast7Days.setDate(now.getDate() - 6); // Lùi lại 6 ngày để tính tổng cộng 7 ngày (bao gồm hôm nay)
+        startOfLast7Days.setHours(0, 0, 0, 0); // Đặt giờ về 00:00:00
+        
+        // Ngày kết thúc là 23:59:59 của hôm nay
+        const endOfToday = new Date(now);
+        endOfToday.setHours(23, 59, 59, 999);
 
             // --- LOGIC THỐNG KÊ THÁNG (Từ ngày 1 đến ngày cuối tháng) ---
             const currentYear = now.getFullYear();
@@ -779,12 +771,13 @@
             const dailyPayments = payments.filter(p => p.date === today);
             const dailyStats = calculateRevenueByMethod(dailyPayments);
 
-            // Lọc và tính toán cho Tuần (từ Thứ 2 đến Chủ nhật)
-            const weeklyPayments = payments.filter(p => {
-                const pTimestamp = new Date(p.timestamp).getTime();
-                return pTimestamp >= firstDayOfWeek.getTime() && pTimestamp <= endOfWeekTimestamp;
-            });
-            const weeklyStats = calculateRevenueByMethod(weeklyPayments);
+           // Lọc và tính toán cho 7 ngày gần nhất
+        const weeklyPayments = payments.filter(p => {
+            const pTimestamp = new Date(p.timestamp).getTime();
+            // So sánh với mốc thời gian mới (startOfLast7Days và endOfToday)
+            return pTimestamp >= startOfLast7Days.getTime() && pTimestamp <= endOfToday.getTime();
+        });
+        const weeklyStats = calculateRevenueByMethod(weeklyPayments);
 
             // Lọc và tính toán cho Tháng (từ ngày 1 đến ngày cuối tháng)
             const monthlyPayments = payments.filter(p => {
