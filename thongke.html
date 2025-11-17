@@ -37,7 +37,7 @@
             --secondary-ios: #30D158;
             --danger-ios: #FF453A;
             --shadow-subtle: 0 1px 3px rgba(255, 255, 255, 0.05), 0 4px 10px rgba(255, 255, 255, 0.02);
-            --shadow-hover: 0 4px 8px rgba(255, 255, 255, 0.1), 0 10px 20px rgba(255, 255, 255, 0.04);
+            --shadow-hover: 0 4px 8px rgba(255, 255, 255, 0.1), 0 10px 20px rgba(255, 255, 255, 0.06);
             --header-gradient: linear-gradient(135deg, #0A84FF 0%, #409CFF 100%);
         }
 
@@ -239,7 +239,17 @@
             <div class="card-ios p-5 text-center bg-gradient-to-r from-green-400 to-blue-500 dark:from-green-600 dark:to-blue-700" style="background: var(--header-gradient);">
                 <h3 class="text-lg font-medium text-white opacity-90">TỔNG DOANH THU</h3>
                 <p id="totalRevenueAllTime" class="text-4xl md:text-5xl font-extrabold mt-2 text-white">0₫</p>
-            </div>
+                <div class="mt-4 pt-3 border-t border-white border-opacity-30 text-xs opacity-90 flex justify-center space-x-6 text-white">
+                    <span class="flex items-center">
+                        <i class="fas fa-money-bill-wave mr-1" style="color: var(--cash-color);"></i>
+                        Tiền mặt: <strong id="totalCash" class="ml-1 text-sm">0₫</strong>
+                    </span>
+                    <span class="flex items-center">
+                        <i class="fas fa-exchange-alt mr-1" style="color: var(--transfer-color);"></i>
+                        C.Khoản: <strong id="totalTransfer" class="ml-1 text-sm">0₫</strong>
+                    </span>
+                </div>
+                </div>
         </section>
         <section id="dailyStatsSection" class="mb-8 space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-4 pt-1">
             <div class="card-ios p-4 text-center animated-item" data-delay="0.1">
@@ -436,6 +446,10 @@
 
         // DOM elements
         const totalRevenueAllTimeEl = document.getElementById('totalRevenueAllTime'); // Thẻ Tổng Doanh Thu MỚI
+        // BỔ SUNG: DOM elements cho Tổng Tiền mặt & Tổng Chuyển khoản
+        const totalCashEl = document.getElementById('totalCash');
+        const totalTransferEl = document.getElementById('totalTransfer');
+        
         const dailyRevenueEl = document.getElementById('dailyRevenue');
         const dailyCashEl = document.getElementById('dailyCash');
         const dailyTransferEl = document.getElementById('dailyTransfer');
@@ -747,6 +761,15 @@
             const payments = await fetchPayments();
             const totalRevenue = payments.reduce((sum, p) => sum + (p.finalTotal || 0), 0);
             totalRevenueAllTimeEl.textContent = totalRevenue.toLocaleString('vi-VN') + '₫';
+        }
+        
+        // BỔ SUNG: Hàm tính và hiển thị Tổng Tiền mặt & Tổng Chuyển khoản
+        async function updateTotalRevenueDetails() {
+             const payments = await fetchPayments();
+             const totalStats = calculateRevenueByMethod(payments); // Tính toán tổng tiền mặt và chuyển khoản từ tất cả payments
+
+             totalCashEl.textContent = totalStats.cash.toLocaleString('vi-VN') + '₫';
+             totalTransferEl.textContent = totalStats.transfer.toLocaleString('vi-VN') + '₫';
         }
 
 
@@ -1149,7 +1172,8 @@
         
         document.addEventListener('DOMContentLoaded', () => {
             loadTheme();
-            updateTotalRevenueAllTime(); // GỌI HÀM MỚI
+            updateTotalRevenueAllTime(); // GỌI HÀM CŨ
+            updateTotalRevenueDetails(); // GỌI HÀM MỚI BỔ SUNG
             updateSummaryStats();
             update30DayChart();
             updateTopSellingItems();
