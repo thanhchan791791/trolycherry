@@ -235,6 +235,12 @@
 
     <div class="container mx-auto p-4 max-w-4xl pt-8">
         
+        <section class="mb-8 animated-item pt-1" data-delay="0.0">
+            <div class="card-ios p-5 text-center bg-gradient-to-r from-green-400 to-blue-500 dark:from-green-600 dark:to-blue-700" style="background: var(--header-gradient);">
+                <h3 class="text-lg font-medium text-white opacity-90">TỔNG DOANH THU</h3>
+                <p id="totalRevenueAllTime" class="text-4xl md:text-5xl font-extrabold mt-2 text-white">0₫</p>
+            </div>
+        </section>
         <section id="dailyStatsSection" class="mb-8 space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-4 pt-1">
             <div class="card-ios p-4 text-center animated-item" data-delay="0.1">
                 <h4 class="text-sm font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu hôm nay</h4>
@@ -429,6 +435,7 @@
         const database = firebase.database();
 
         // DOM elements
+        const totalRevenueAllTimeEl = document.getElementById('totalRevenueAllTime'); // Thẻ Tổng Doanh Thu MỚI
         const dailyRevenueEl = document.getElementById('dailyRevenue');
         const dailyCashEl = document.getElementById('dailyCash');
         const dailyTransferEl = document.getElementById('dailyTransfer');
@@ -734,6 +741,12 @@
             }, { total: 0, cash: 0, transfer: 0 });
             
             return result;
+        }
+
+        async function updateTotalRevenueAllTime() {
+            const payments = await fetchPayments();
+            const totalRevenue = payments.reduce((sum, p) => sum + (p.finalTotal || 0), 0);
+            totalRevenueAllTimeEl.textContent = totalRevenue.toLocaleString('vi-VN') + '₫';
         }
 
 
@@ -1136,6 +1149,7 @@
         
         document.addEventListener('DOMContentLoaded', () => {
             loadTheme();
+            updateTotalRevenueAllTime(); // GỌI HÀM MỚI
             updateSummaryStats();
             update30DayChart();
             updateTopSellingItems();
