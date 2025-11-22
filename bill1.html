@@ -19,6 +19,7 @@
                         'ios-text': '#1C1C1E',
                         'ios-dark-text': '#F2F2F7',
                         'ios-orange': '#FF9500', // Màu cam mới cho nút giảm giá
+                        'ios-purple': '#AF52DE', // Màu tím mới cho nút set custom
                     },
                     borderRadius: {
                         '4xl': '2rem',
@@ -226,6 +227,17 @@
                 <p id="total-amount" class="text-2xl font-extrabold text-red-600 dark:text-red-400">₫</p>
             </div>
 
+            <div id="custom-set-section" class="mb-6 p-4 bg-gray-50/50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-gray-700">
+                <h3 class="font-bold text-lg text-ios-text dark:text-ios-dark-text mb-3">💰 Đặt lại Tổng tiền (Custom)</h3>
+                <div class="flex space-x-2">
+                    <input type="text" id="custom-amount-input" placeholder="Nhập số tiền mong muốn" 
+                        class="w-2/3 px-3 py-3 border-transparent rounded-xl focus:outline-none shadow-sm transition duration-150 ios-input text-right font-semibold"
+                    >
+                    <button id="set-custom-amount-btn" class="flex-1 bg-ios-purple text-white font-bold py-3 rounded-full shadow-lg hover:bg-purple-600 active:scale-[0.97] transition duration-150 active:shadow-none disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        CẬP NHẬT BILL
+                    </button>
+                </div>
+            </div>
             <div id="discount-section" class="mb-6 p-4 bg-gray-50/50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-gray-700">
                 <h3 class="font-bold text-lg text-ios-text dark:text-ios-dark-text mb-3">🛠 Công cụ giảm giá</h3>
                 <div class="flex space-x-2">
@@ -238,6 +250,7 @@
                     </button>
                 </div>
             </div>
+            
             <h3 class="font-bold text-lg text-ios-text dark:text-ios-dark-text mb-4">Các món đã mua:</h3>
             <div id="items-list" class="space-y-2 mb-8 p-3 bg-gray-50/50 dark:bg-white/5 rounded-xl">
                 </div>
@@ -303,6 +316,11 @@
         // Các phần tử mới
         const applyDiscountButton = document.getElementById('apply-discount-btn');
         const discountPercentInput = document.getElementById('discount-percent-input');
+        
+        // CÁC PHẦN TỬ MỚI THÊM VÀO
+        const customAmountInput = document.getElementById('custom-amount-input');
+        const setCustomAmountButton = document.getElementById('set-custom-amount-btn');
+        // KẾT THÚC CÁC PHẦN TỬ MỚI THÊM VÀO
 
         // --- Custom Notification Function ---
         const showCustomMessage = (type, message) => {
@@ -333,6 +351,18 @@
                 maximumFractionDigits: 0
             });
         };
+        
+        // Hàm định dạng số tiền có dấu chấm ngăn cách 000
+        const formatNumber = (num) => {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        };
+
+        // Hàm chuyển chuỗi có dấu chấm thành số nguyên
+        const parseNumber = (str) => {
+            // Loại bỏ tất cả các ký tự không phải số
+            return parseInt(str.replace(/[^0-9]/g, ''), 10) || 0;
+        };
+
 
         const formatTimestamp = (timestamp) => {
             if (!timestamp) return 'Không rõ';
@@ -426,7 +456,26 @@
             // Gọi hàm cập nhật chung
             updateReceiptTotal(currentInvoiceId, newTotal);
         };
+        
+        // --- Hàm xử lý Đặt lại tổng tiền theo giá trị nhập (MỚI) ---
+        const setCustomAmount = () => {
+            if (!currentInvoiceId) {
+                showCustomMessage('error', 'Lỗi: Không tìm thấy ID hóa đơn.');
+                return;
+            }
 
+            const amountString = customAmountInput.value;
+            const newAmount = parseNumber(amountString); // Chuyển chuỗi có dấu chấm thành số nguyên
+
+            if (isNaN(newAmount) || newAmount < 0) {
+                 showCustomMessage('error', 'Vui lòng nhập số tiền hợp lệ.');
+                return;
+            }
+
+            // Gọi hàm cập nhật chung
+            updateReceiptTotal(currentInvoiceId, newAmount);
+        };
+        // KẾT THÚC HÀM MỚI
 
         // --- Renderer Functions ---
         const renderReceiptsList = (receipts, isFiltered = false) => {
@@ -493,16 +542,21 @@
                 setToZeroButton.classList.remove('bg-ios-accent', 'hover:bg-blue-600');
                 setToZeroButton.classList.add('bg-green-500', 'cursor-not-allowed');
                 applyDiscountButton.disabled = true;
+                setCustomAmountButton.disabled = true; // Vô hiệu hóa nút set custom
             } else {
                 setToZeroButton.textContent = "VỀ 0 ĐỒNG";
                 setToZeroButton.disabled = false;
                 setToZeroButton.classList.remove('bg-green-500', 'cursor-not-allowed');
                 setToZeroButton.classList.add('bg-ios-accent', 'hover:bg-blue-600');
                 applyDiscountButton.disabled = false;
+                setCustomAmountButton.disabled = false; // Kích hoạt nút set custom
             }
             
             // Reset input giảm giá về giá trị mặc định 10% mỗi lần mở modal
             discountPercentInput.value = '10';
+            
+            // Cập nhật giá trị hiển thị cho input custom amount
+            customAmountInput.value = formatNumber(displayAmount);
 
             itemsListElement.innerHTML = '';
             
@@ -618,6 +672,18 @@
 
         // Xử lý sự kiện Giảm giá
         applyDiscountButton.onclick = applyDiscount;
+        
+        // Xử lý sự kiện Set Custom Amount (MỚI)
+        setCustomAmountButton.onclick = setCustomAmount;
+        
+        // Xử lý định dạng khi người dùng nhập vào input custom amount (MỚI)
+        customAmountInput.addEventListener('input', function(e) {
+            // Lấy số tiền không dấu chấm
+            const rawValue = parseNumber(e.target.value);
+            // Định dạng lại và gán vào input
+            e.target.value = formatNumber(rawValue);
+        });
+        // KẾT THÚC XỬ LÝ SỰ KIỆN MỚI
 
         // Xử lý sự kiện click nút "VỀ 0 ĐỒNG"
         setToZeroButton.onclick = () => {
