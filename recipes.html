@@ -305,7 +305,7 @@
         }
 
         /* Modal cho Recipe Editor - CĂN GIỮA */
-        #recipeEditorModal {
+        #recipeEditorModal, #editIngredientModal {
             align-items: center; /* Căn giữa dọc */
         }
         
@@ -337,7 +337,8 @@
         /* Animation khi show modal */
         #inventoryModal.show-modal .modal-content, 
         #sellModal.show-modal .modal-content,
-        #addIngredientModalForRecipe.show-modal .modal-content {
+        #addIngredientModalForRecipe.show-modal .modal-content,
+        #editIngredientModal.show-modal .modal-content {
             transform: translateY(0);
         }
         #recipeEditorModal.show-modal .modal-content.recipe-editor-content {
@@ -439,11 +440,13 @@
             min-height: 0; /* FIX: Cho phép flex item (danh sách) co lại và kích hoạt thanh cuộn */
             border-top: none; 
         }
-        .inv-item { 
-            display: flex; 
-            justify-content: space-between; 
+
+        /* NEW: Update inv-item style to accommodate the button using grid */
+        .inv-item {
+            display: grid; 
+            grid-template-columns: 1fr 100px 120px 60px; /* Name | Min Qty | Stock | Button */
             align-items: center; 
-            padding: 12px 5px; 
+            padding: 8px 5px; /* Adjust padding */
             border-bottom: 1px solid var(--ios-system-gray);
         }
         .inv-item:hover { background: var(--ios-system-gray); }
@@ -451,10 +454,52 @@
             font-size: 1em; 
             font-weight: 600; 
             color: var(--ios-blue); 
-            min-width: 120px; 
             text-align: right; 
         }
         .inv-stock span { font-weight: normal; color: #8e8e93; font-size: 0.9em; margin-left: 5px;}
+        
+        /* NEW: Low Stock Warning Style */
+        .inv-item.warning {
+            background-color: #ff3b301a; /* Very light red background */
+            border-left: 5px solid var(--ios-red); /* Red border on the left */
+        }
+        .inv-item.warning .inv-stock {
+            color: var(--ios-red); /* Red text for stock */
+        }
+        
+        /* NEW: Style for Inventory Header (using grid) */
+        .ing-header.inventory-header {
+            display: grid; 
+            grid-template-columns: 1fr 100px 120px 60px; /* Name | Min Qty | Stock | Actions */
+            align-items: center; 
+            padding: 10px 5px; 
+            font-weight: 600; 
+            border-bottom: 1px solid var(--ios-system-gray); 
+            background: white; 
+            position: sticky; top: 0; 
+            z-index: 10;
+        }
+        .ing-header .col-name { grid-column: 1; }
+        .ing-header .col-min-qty { grid-column: 2; text-align: right; margin-right: 5px; color: var(--ios-orange); }
+        .ing-header .col-stock { grid-column: 3; text-align: right; color: var(--ios-blue); }
+        .ing-header .col-actions { grid-column: 4; } /* New column for actions */
+
+        /* NEW: Style for Edit Button */
+        .btn-edit {
+            background-color: var(--ios-orange);
+            color: white;
+            border: none;
+            padding: 6px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.15s;
+            line-height: 1.2;
+        }
+        .btn-edit:hover { background-color: #e68900; }
+        .btn-edit:active { transform: scale(0.95); }
+
 
         /* Modal Sell/Add Recipe List */
         .sell-list-container { 
@@ -543,6 +588,16 @@
                 grid-template-columns: 1fr; 
                 height: auto; 
             }
+            /* Adjust inventory item layout for very small screens */
+            .inv-item, .ing-header.inventory-header {
+                grid-template-columns: 1fr 70px 70px 50px; /* Name | Min Qty | Stock | Button */
+                font-size: 0.9em;
+            }
+            .inv-item span, .inv-stock {
+                white-space: nowrap; /* Prevent wrap on names */
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
         }
     </style>
 </head>
@@ -556,11 +611,20 @@
             <button class="btn-inventory transition-ease" onclick="openInventoryModal()">📦 Quản Lý Nguyên Liệu</button>
             <button class="btn-sell transition-ease" onclick="openSellModal()">🛒 Bán Hàng</button>
         </div>
-        
-        <input type="text" id="search-menu" class="search-box" placeholder="🔍 Tìm kiếm món ăn..." onkeyup="filterMenu()" style="margin: 0 15px 15px 15px;">
 
-        <div class="list-container" id="menu-list">
-            <div style="text-align: center; padding: 20px; color: #8e8e93;">Đang tải menu...</div>
+        <div style="padding: 10px 15px 5px 15px; border-bottom: 1px solid var(--ios-system-gray); margin-bottom: 15px;">
+             <button class="btn-save btn-add-recipe transition-ease" id="toggle-menu-btn" style="width: 100%;" onclick="toggleMenuVisibility()">
+                📝 THÊM/SỬA CÔNG THỨC
+            </button>
+        </div>
+        
+        <div id="menu-content" class="hidden" style="flex: 1; display: flex; flex-direction: column;">
+            
+            <input type="text" id="search-menu" class="search-box" placeholder="🔍 Tìm kiếm món ăn..." onkeyup="filterMenu()" style="margin: 0 15px 15px 15px;">
+
+            <div class="list-container" id="menu-list">
+                <div style="text-align: center; padding: 20px; color: #8e8e93;">Đang tải menu...</div>
+            </div>
         </div>
     </div>
     </div>
@@ -604,29 +668,67 @@
         </div>
         
         <div class="add-ing-form">
-            <input type="text" id="newIngName" placeholder="Tên nguyên liệu (vd: Bò Mỹ)">
+            <input type="text" id="newIngName" placeholder="Tên nguyên liệu (vd: Bò Mỹ)" style="flex: 2;">
             
-            <select id="newIngUnit">
+            <select id="newIngUnit" style="flex: 1; min-width: 80px;">
                 <option value="kg">kg</option>
                 <option value="gr">gr</option>
                 <option value="con">con</option>
                 <option value="cai">cái</option>
             </select>
             
-            <input type="number" id="newIngQuantity" placeholder="Tồn kho (ví dụ: 100)" value="0" min="0">
+            <input type="number" id="newIngMinQuantity" placeholder="Tối thiểu (vd: 5)" value="0" min="0" style="flex: 1; min-width: 80px;">
+
+            <input type="number" id="newIngQuantity" placeholder="Tồn kho (vd: 100)" value="0" min="0" style="flex: 1; min-width: 80px;">
             
-            <button class="btn-add transition-ease" onclick="addNewIngredient()">+ Thêm</button>
+            <button class="btn-add transition-ease" onclick="addNewIngredient()" style="flex: 0.5; min-width: 60px;">+ Thêm</button>
         </div>
         
         <input type="text" id="search-inventory-modal" class="search-box" placeholder="🔍 Tìm kiếm nguyên liệu..." onkeyup="filterInventoryModal()" style="margin-bottom: 10px;">
 
-        <div class="ing-header" style="background: white;">
-            <span style="flex: 1;">Tên Nguyên Liệu</span>
-            <span style="color:#007bff; text-align: right; min-width: 120px;">Số Lượng Tồn Kho</span>
-        </div>
+        <div class="ing-header inventory-header">
+            <span class="col-name">Tên Nguyên Liệu</span>
+            <span class="col-min-qty">Tối Thiểu</span>
+            <span class="col-stock">Tồn Kho</span>
+            <span class="col-actions"></span> </div>
 
         <div class="inventory-list" id="modal-inventory-list">
             </div>
+    </div>
+</div>
+
+<div id="editIngredientModal" class="modal-overlay">
+    <div class="modal-content transition-ease">
+        <div class="modal-header">
+            <div class="modal-title" style="color:var(--ios-orange);">🖊️ CHỈNH SỬA NGUYÊN LIỆU</div>
+            <span class="close-btn" onclick="closeEditIngredientModal()">&times;</span>
+        </div>
+        
+        <input type="hidden" id="editIngKey">
+
+        <div class="add-ing-form" style="display: block; flex-direction: column; gap: 10px; padding: 10px;">
+            <label style="font-weight: 600; color: #1c1c1e; display: block; margin-top: 5px;">Tên Nguyên Liệu:</label>
+            <input type="text" id="editIngName" placeholder="Tên nguyên liệu" style="width: 100%; margin-bottom: 10px;">
+            
+            <label style="font-weight: 600; color: #1c1c1e; display: block; margin-top: 5px;">Đơn Vị Tính:</label>
+            <select id="editIngUnit" style="width: 100%; margin-bottom: 10px;">
+                <option value="kg">kg</option>
+                <option value="gr">gr</option>
+                <option value="con">con</option>
+                <option value="cai">cái</option>
+            </select>
+            
+            <label style="font-weight: 600; color: #1c1c1e; display: block; margin-top: 5px;">Số Lượng Tối Thiểu (Báo Đỏ):</label>
+            <input type="number" id="editIngMinQuantity" placeholder="Tối thiểu (vd: 5)" value="0" min="0" style="width: 100%; margin-bottom: 10px;">
+
+            <label style="font-weight: 600; color: #1c1c1e; display: block; margin-top: 5px;">Số Lượng Tồn Kho:</label>
+            <input type="number" id="editIngQuantity" placeholder="Tồn kho (vd: 100)" value="0" min="0" style="width: 100%;">
+        </div>
+
+        <div class="sell-footer">
+            <button class="btn-save transition-ease" style="background-color: var(--ios-orange); width: 100%;" onclick="saveEditedIngredient()">💾 LƯU CHỈNH SỬA</button>
+            <button class="btn-process-sale transition-ease" style="margin-top: 10px; width: 100%;" onclick="deleteIngredient()">🗑️ XÓA NGUYÊN LIỆU</button>
+        </div>
     </div>
 </div>
 
@@ -720,25 +822,35 @@
         });
     }
 
-    // --- HÀM TẢI KHO NGUYÊN LIỆU ---
+    // --- HÀM TẢI KHO NGUYÊN LIỆU (ĐÃ CẬP NHẬT LOGIC SORT VÀ CẢNH BÁO) ---
     function loadInventory() {
         db.ref('inventory').on('value', snapshot => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 allInventory = Object.keys(data).map(key => {
                     const item = data[key];
+                    const stock = item.quantity || 0;
+                    const min = item.minQuantity || 0; // Fetch minQuantity
+                    
                     return {
                         key: key,
                         name: item.name,
                         unit: item.unit,
-                        stockQuantity: item.quantity || 0 
+                        stockQuantity: stock, 
+                        minQuantity: min, 
+                        isLowStock: stock <= min // Check low stock status (Tồn kho <= Tối thiểu)
                     };
                 });
             } else {
                 console.log("Kho trống.");
             }
             
-            allInventory.sort((a, b) => a.name.localeCompare(b.name));
+            // Sort by isLowStock (true first) then by name
+            allInventory.sort((a, b) => {
+                if (a.isLowStock && !b.isLowStock) return -1; // a is warning, b is not -> a comes first
+                if (!a.isLowStock && b.isLowStock) return 1;  // b is warning, a is not -> b comes first
+                return a.name.localeCompare(b.name);          // otherwise, sort by name
+            });
 
             // Cập nhật lại danh sách nguyên liệu trong Editor nếu đang mở
             if(currentDishKey) {
@@ -812,6 +924,29 @@
         // Ẩn/hiện category-title nếu không có món nào được hiển thị trong đó (Optional, giữ nguyên cho dễ)
         // Hiện tại chỉ lọc item, category-title sẽ luôn hiển thị.
     }
+
+    // --- HÀM HIỂN THỊ/ẨN DANH SÁCH MÓN ĂN (MỚI) ---
+    function toggleMenuVisibility() {
+        const menuContent = document.getElementById('menu-content');
+        const toggleBtn = document.getElementById('toggle-menu-btn');
+        
+        if (menuContent.classList.contains('hidden')) {
+            // Hiện danh sách
+            menuContent.classList.remove('hidden');
+            // Cập nhật text của nút
+            toggleBtn.innerHTML = '❌ ẨN DANH SÁCH MÓN ĂN';
+            // Đảm bảo menu đã được tải và hiển thị
+            loadMenu(); 
+        } else {
+            // Ẩn danh sách
+            menuContent.classList.add('hidden');
+            // Cập nhật text của nút
+            toggleBtn.innerHTML = '📝 THÊM/SỬA CÔNG THỨC';
+            // Đóng Editor Modal nếu đang mở
+            closeRecipeEditorModal();
+        }
+    }
+
 
     // --- HÀM HIỂN THỊ EDITOR ---
     function selectDish(key, name, element) {
@@ -985,21 +1120,33 @@
         document.getElementById('inventoryModal').classList.remove('show-modal');
     }
 
+    // --- RENDER DANH SÁCH KHO (ĐÃ CẬP NHẬT) ---
     function renderModalList() {
         const container = document.getElementById('modal-inventory-list');
         container.innerHTML = '';
 
         allInventory.forEach(ing => {
             const qty = ing.stockQuantity || 0;
+            const minQty = ing.minQuantity || 0; // Get minimum quantity
             const unit = ing.unit; 
+            const isLowStock = ing.isLowStock; // Use pre-calculated status
 
             const div = document.createElement('div');
-            div.className = 'inv-item transition-ease'; 
-            div.dataset.search = ing.name.toLowerCase(); // THÊM DATASET CHO SEARCH
+            // Apply 'warning' class if isLowStock is true
+            div.className = `inv-item transition-ease ${isLowStock ? 'warning' : ''}`; 
+            div.dataset.search = ing.name.toLowerCase(); 
+            
+            // Update innerHTML to use the new grid layout and include the Edit button
             div.innerHTML = `
                 <span><strong>${ing.name}</strong></span>
+                <div style="text-align: right; color: var(--ios-orange); font-weight: 500;">
+                    ${parseFloat(minQty).toFixed(2).replace(/\.00$/, '')} <span>${unit}</span>
+                </div>
                 <div class="inv-stock">
                     ${parseFloat(qty).toFixed(2).replace(/\.00$/, '')} <span>${unit}</span>
+                </div>
+                <div style="text-align: right;">
+                    <button class="btn-edit transition-ease" onclick="openEditIngredientModal('${ing.key}')">Sửa</button>
                 </div>
             `;
             container.appendChild(div);
@@ -1016,21 +1163,24 @@
             const name = item.dataset.search;
             
             if (name.includes(term)) {
-                item.style.display = 'flex';
+                item.style.display = 'grid'; // Use grid display for the inv-item
             } else {
                 item.style.display = 'none';
             }
         });
     }
 
+    // --- HÀM THÊM NGUYÊN LIỆU MỚI (ĐÃ CẬP NHẬT LƯU minQuantity) ---
     function addNewIngredient() {
         const nameInput = document.getElementById('newIngName');
         const unitSelect = document.getElementById('newIngUnit');
         const quantityInput = document.getElementById('newIngQuantity');
+        const minQuantityInput = document.getElementById('newIngMinQuantity'); // NEW
         
         const name = nameInput.value.trim();
         const unit = unitSelect.value.trim();
         const quantity = parseFloat(quantityInput.value) || 0;
+        const minQuantity = parseFloat(minQuantityInput.value) || 0; // NEW
 
         if (!name || !unit) {
             alert("Vui lòng nhập tên và chọn đơn vị!");
@@ -1040,14 +1190,106 @@
         db.ref('inventory').push({
             name: name,
             unit: unit,
-            quantity: quantity 
+            quantity: quantity, 
+            minQuantity: minQuantity // NEW: Save minimum quantity
         }).then(() => {
             nameInput.value = '';
             unitSelect.value = 'kg'; 
             quantityInput.value = '0'; 
+            minQuantityInput.value = '0'; // NEW: Reset minimum quantity input
             nameInput.focus();
             showToast('Đã thêm nguyên liệu mới!');
         }).catch(err => alert(err.message));
+    }
+
+    // --- LOGIC MODAL CHỈNH SỬA NGUYÊN LIỆU (NEW) ---
+    function openEditIngredientModal(key) {
+        const ingredient = allInventory.find(i => i.key === key);
+        if (!ingredient) {
+            showToast("Không tìm thấy nguyên liệu!");
+            return;
+        }
+        
+        // Đóng Inventory Modal trước (optional but cleaner UX)
+        closeInventoryModal();
+
+        // 1. Populate fields
+        document.getElementById('editIngKey').value = key;
+        document.getElementById('editIngName').value = ingredient.name;
+        document.getElementById('editIngUnit').value = ingredient.unit;
+        document.getElementById('editIngQuantity').value = ingredient.stockQuantity;
+        document.getElementById('editIngMinQuantity').value = ingredient.minQuantity;
+
+        // 2. Open modal
+        document.getElementById('editIngredientModal').style.display = 'flex';
+        document.getElementById('editIngredientModal').classList.add('show-modal');
+    }
+
+    function closeEditIngredientModal() {
+        document.getElementById('editIngredientModal').style.display = 'none';
+        document.getElementById('editIngredientModal').classList.remove('show-modal');
+        // Mở lại Inventory Modal nếu cần
+        // openInventoryModal(); 
+    }
+
+    function saveEditedIngredient() {
+        const key = document.getElementById('editIngKey').value;
+        const name = document.getElementById('editIngName').value.trim();
+        const unit = document.getElementById('editIngUnit').value.trim();
+        const quantity = parseFloat(document.getElementById('editIngQuantity').value) || 0;
+        const minQuantity = parseFloat(document.getElementById('editIngMinQuantity').value) || 0;
+
+        if (!key || !name || !unit) {
+            alert("Lỗi: Không đủ thông tin để lưu!");
+            return;
+        }
+
+        const updates = {
+            name: name,
+            unit: unit,
+            quantity: quantity, 
+            minQuantity: minQuantity 
+        };
+
+        db.ref(`inventory/${key}`).update(updates)
+            .then(() => {
+                showToast(`Đã lưu chỉnh sửa cho: ${name}`);
+                closeEditIngredientModal();
+                openInventoryModal(); // Re-open inventory list
+            })
+            .catch(err => alert("Lỗi khi lưu chỉnh sửa: " + err.message));
+    }
+
+    function deleteIngredient() {
+        const key = document.getElementById('editIngKey').value;
+        const name = document.getElementById('editIngName').value.trim();
+
+        if (!key) return;
+
+        if (confirm(`Bạn có chắc chắn muốn XÓA nguyên liệu "${name}" này không? Thao tác này KHÔNG thể hoàn tác và sẽ ảnh hưởng đến mọi công thức sử dụng nó!`)) {
+            db.ref(`inventory/${key}`).remove()
+                .then(() => {
+                    showToast(`Đã xóa nguyên liệu: ${name}`);
+                    closeEditIngredientModal();
+                    openInventoryModal(); // Re-open inventory list
+                    
+                    // Optional: Remove from all recipes that use it (more robust)
+                    db.ref('recipes').once('value').then(snapshot => {
+                        const recipes = snapshot.val() || {};
+                        const recipeUpdates = {};
+                        for (const dishKey in recipes) {
+                            if (recipes[dishKey][key]) {
+                                recipeUpdates[`recipes/${dishKey}/${key}`] = null;
+                            }
+                        }
+                        if (Object.keys(recipeUpdates).length > 0) {
+                            db.ref().update(recipeUpdates);
+                        }
+                    });
+
+                })
+                .catch(err => alert("Lỗi khi xóa nguyên liệu: " + err.message));
+        }
     }
     
     // --- LOGIC MODAL BÁN HÀNG ---
@@ -1323,6 +1565,7 @@
         const sellModal = document.getElementById('sellModal');
         const addIngModal = document.getElementById('addIngredientModalForRecipe');
         const editorModal = document.getElementById('recipeEditorModal');
+        const editIngModal = document.getElementById('editIngredientModal'); // NEW
 
         if (event.target == invModal) {
             closeInventoryModal();
@@ -1335,6 +1578,9 @@
         }
         if (event.target == editorModal) { // Thêm logic đóng editor modal
             closeRecipeEditorModal();
+        }
+        if (event.target == editIngModal) { // NEW: Logic đóng edit modal
+            closeEditIngredientModal();
         }
     }
 
