@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -7,7 +8,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Quản lý Menu</title>
     
-    <!-- SF Pro Font (Apple System Fallback) -->
     <style>
         :root {
             --ios-bg: #F2F2F7;
@@ -205,14 +205,24 @@
             padding: 6px 12px;
             font-size: 14px;
             border-radius: 16px;
-            background: var(--ios-gray-light);
-            color: var(--ios-blue);
             font-weight: 600;
             margin-left: 10px;
             box-shadow: none;
             min-width: unset;
         }
 
+        /* Nút Sửa trong Kho */
+        #ingredientList li button.edit-btn {
+            background: var(--ios-gray-light);
+            color: var(--ios-blue);
+        }
+
+        /* Nút Xóa trong Kho */
+        #ingredientList li button.delete-btn {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--ios-red);
+        }
+        
         #currentRecipeList button {
             color: var(--ios-red);
             background: rgba(255, 59, 48, 0.1);
@@ -289,22 +299,18 @@
 </head>
 <body>
 
-    <!-- Header Chuẩn iOS -->
     <header>
         <h1>Quản Lý Bếp</h1>
     </header>
 
-    <!-- Tab Bar (Di chuyển 2 nút chính xuống đây bằng CSS/HTML Wrapper) -->
     <div class="tab-bar">
         <button id="btnShowMenu">Menu</button>
         <button id="btnIngredient">Kho</button>
     </div>
 
-    <!-- Container chính để padding không bị Header/Footer che -->
     <div class="main-content">
         
-        <!-- SECTION: MENU -->
-        <div id="menuSection" class="hidden box">
+        <div id="menuSection" class="box">
             <h2>Món Ăn</h2>
             <div style="position: sticky; top: 0; background: #fff; padding-bottom: 10px; z-index: 10;">
                 <input type="text" id="menuSearchInput" placeholder="🔍 Tìm kiếm món ăn...">
@@ -317,7 +323,6 @@
             <ul id="drinkList"></ul>
         </div>
 
-        <!-- SECTION: NGUYÊN LIỆU -->
         <div id="ingredientSection" class="hidden box">
             <h2>Nguyên Liệu</h2>
             <input type="text" id="ingredientSearchInput" placeholder="🔍 Tìm kiếm nguyên liệu...">
@@ -360,7 +365,6 @@
             <ul id="ingredientList"></ul>
         </div>
 
-        <!-- SECTION: CÔNG THỨC (MODAL) -->
         <div id="recipeFormSection" class="hidden box">
             <div class="recipe-title-group" style="display: flex; justify-content: space-between; align-items: center;">
                 <h2 id="recipeTitle" style="font-size: 22px; margin: 0;">Công thức</h2>
@@ -375,18 +379,19 @@
             </div>
             
             <h3>Điều chỉnh công thức</h3>
+            
+            <input type="text" id="recipeIngredientSearchInput" placeholder="🔍 Tìm kiếm nguyên liệu để thêm...">
+
             <div style="background: #fff; padding: 10px; border-radius: 12px;">
                 <div id="recipeIngredients" class="recipe-list-container"></div>
             </div>
 
             <div style="height: 20px;"></div>
             <button id="btnSaveRecipe">💾 Lưu Công Thức</button>
-            <div style="height: 40px;"></div> <!-- Space for scrolling -->
-        </div>
+            <div style="height: 40px;"></div> </div>
 
     </div>
 
-    <!-- JAVASCRIPT GỐC (GIỮ NGUYÊN HOÀN TOÀN) -->
     <script type="module">
         const firebaseConfig = {
             apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
@@ -413,7 +418,7 @@
         const foodList = document.getElementById("foodList");
         const drinkList = document.getElementById("drinkList");
         
-        // Elements Tìm kiếm MỚI
+        // Elements Tìm kiếm 
         const menuSearchInput = document.getElementById("menuSearchInput");
         const ingredientSearchInput = document.getElementById("ingredientSearchInput");
         
@@ -435,11 +440,12 @@
         const recipeIngredients = document.getElementById("recipeIngredients"); 
         const btnSaveRecipe = document.getElementById("btnSaveRecipe");
         const btnCloseRecipe = document.getElementById("btnCloseRecipe");
+        const recipeIngredientSearchInput = document.getElementById("recipeIngredientSearchInput");
 
         // Biến lưu trữ trạng thái
         let allIngredients = {}; 
-        let allFoodData = {}; // NEW: Lưu trữ dữ liệu Food thô
-        let allDrinkData = {}; // NEW: Lưu trữ dữ liệu Drink thô
+        let allFoodData = {}; 
+        let allDrinkData = {}; 
         let currentRecipe = {
             id: null,
             name: null,
@@ -452,7 +458,7 @@
         //   LOGIC CHUNG
         // ---------------------------
 
-        // NEW: Logic hiện/ẩn form thêm/sửa nguyên liệu
+        // Logic hiện/ẩn form thêm/sửa nguyên liệu
         btnToggleAddForm.addEventListener("click", () => {
             const isHidden = ingredientFormContainer.classList.contains("hidden");
             
@@ -504,6 +510,7 @@
         btnCloseRecipe.addEventListener("click", () => {
             recipeFormSection.classList.add("hidden");
             currentRecipe.id = null;
+            recipeIngredientSearchInput.value = ""; 
         });
         
         // ---------------------------
@@ -550,14 +557,14 @@
 
         // Lắng nghe dữ liệu Food và thiết lập listener cho tìm kiếm
         onValue(ref(db, "menu/food"), snap => {
-            allFoodData = snap.val() || {}; // Lưu dữ liệu thô
-            filterMenu(); // Render lần đầu (hoặc render lại sau khi có dữ liệu mới)
+            allFoodData = snap.val() || {}; 
+            filterMenu(); 
         });
 
         // Lắng nghe dữ liệu Drink và thiết lập listener cho tìm kiếm
         onValue(ref(db, "menu/drink"), snap => {
-            allDrinkData = snap.val() || {}; // Lưu dữ liệu thô
-            filterMenu(); // Render lần đầu
+            allDrinkData = snap.val() || {}; 
+            filterMenu(); 
         });
         
         // Thêm listener cho ô tìm kiếm menu
@@ -565,7 +572,7 @@
 
         
         // ---------------------------
-        //   FORM CÔNG THỨC LOGIC (Giữ nguyên)
+        //   FORM CÔNG THỨC LOGIC 
         // ---------------------------
 
         function handleRecipeClick(event) {
@@ -584,6 +591,9 @@
             btnToggleAddForm.textContent = "➕ Thêm nguyên liệu";
             btnToggleAddForm.classList.remove("active");
             resetIngredientForm();
+            
+            recipeIngredientSearchInput.value = ""; 
+            recipeIngredientSearchInput.addEventListener("input", filterRecipeIngredients); 
 
             loadRecipeForDish(dishId, dishName);
         }
@@ -596,6 +606,7 @@
                 currentRecipe.existingRecipe = snapshot.val() || {};
                 
                 loadRecipeForm(currentRecipe.existingRecipe);
+                filterRecipeIngredients(); 
             } catch (error) {
                 console.error("Lỗi khi tải công thức:", error);
                 alert("Lỗi khi tải công thức: " + error.message);
@@ -604,15 +615,17 @@
 
         function loadRecipeForm(existingRecipe) {
             currentRecipeList.innerHTML = "";
-            recipeIngredients.innerHTML = "";
-
+            
             if (Object.keys(allIngredients).length === 0) {
                 recipeIngredients.innerHTML = "<p>Chưa có nguyên liệu nào trong kho. Vui lòng thêm nguyên liệu trước.</p>";
                 btnSaveRecipe.classList.add("hidden");
+                recipeIngredientSearchInput.classList.add("hidden"); 
                 return;
             }
-            btnSaveRecipe.classList.remove("hidden");
             
+            btnSaveRecipe.classList.remove("hidden");
+            recipeIngredientSearchInput.classList.remove("hidden"); 
+
             // --- PHẦN 1: HIỂN THỊ CÔNG THỨC HIỆN TẠI (ĐÃ LƯU) VÀ NÚT XÓA ---
             const savedIngredients = Object.keys(existingRecipe).length;
             if (savedIngredients > 0) {
@@ -635,42 +648,55 @@
             } else {
                 currentRecipeList.innerHTML = "<li>(Chưa có định lượng)</li>";
             }
-            
+        }
+        
+        // Hàm render danh sách nguyên liệu trong kho có lọc
+        function filterRecipeIngredients() {
+            const query = recipeIngredientSearchInput.value.trim().toLowerCase();
+            recipeIngredients.innerHTML = ""; 
+            const existingRecipe = currentRecipe.existingRecipe || {};
 
-            // --- PHẦN 2: DANH SÁCH NGUYÊN LIỆU TRONG KHO (ĐỂ NHẬP LIỆU) + TỒN KHO ---
-            Object.keys(allIngredients).forEach(key => {
-                const ingredient = allIngredients[key];
-                const currentQty = existingRecipe[key] ? existingRecipe[key].qty : '';
-                
-                const div = document.createElement("div");
-                div.classList.add("recipe-form-item");
-                div.style.display = "flex";
-                div.style.justifyContent = "space-between";
-                div.style.alignItems = "center";
-                
-                const minQtyDisplay = (Number(ingredient.minQty) > 0) ? ` (Min: ${ingredient.minQty})` : '';
-                
-                div.innerHTML = `
-                    <div style="flex: 1;">
-                        <label class="label" style="font-size: 15px; color: #000; margin: 0;">${ingredient.name}</label>
-                        <span class="stock">Kho: ${ingredient.qty} ${ingredient.unit}${minQtyDisplay}</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <input 
-                            type="number" 
-                            data-ing-id="${key}"
-                            data-ing-name="${ingredient.name}"
-                            data-ing-unit="${ingredient.unit}"
-                            placeholder="SL" 
-                            value="${currentQty}"
-                            min="0"
-                            style="width: 60px; height: 36px; margin: 0; background: #E5E5EA; text-align: center;"
-                        />
-                        <span class="unit" style="font-size: 14px; width: 30px;">${ingredient.unit}</span>
-                    </div>
-                `;
-                recipeIngredients.appendChild(div);
-            });
+            if (Object.keys(allIngredients).length === 0) {
+                recipeIngredients.innerHTML = "<p>Chưa có nguyên liệu nào trong kho.</p>";
+                return;
+            }
+            
+            // Lọc nguyên liệu
+            Object.keys(allIngredients)
+                .filter(key => allIngredients[key].name.toLowerCase().includes(query))
+                .forEach(key => {
+                    const ingredient = allIngredients[key];
+                    const currentQty = existingRecipe[key] ? existingRecipe[key].qty : '';
+                    
+                    const div = document.createElement("div");
+                    div.classList.add("recipe-form-item");
+                    div.style.display = "flex";
+                    div.style.justifyContent = "space-between";
+                    div.style.alignItems = "center";
+                    
+                    const minQtyDisplay = (Number(ingredient.minQty) > 0) ? ` (Min: ${ingredient.minQty})` : '';
+                    
+                    div.innerHTML = `
+                        <div style="flex: 1;">
+                            <label class="label" style="font-size: 15px; color: #000; margin: 0;">${ingredient.name}</label>
+                            <span class="stock">Kho: ${ingredient.qty} ${ingredient.unit}${minQtyDisplay}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <input 
+                                type="number" 
+                                data-ing-id="${key}"
+                                data-ing-name="${ingredient.name}"
+                                data-ing-unit="${ingredient.unit}"
+                                placeholder="SL" 
+                                value="${currentQty}"
+                                min="0"
+                                style="width: 60px; height: 36px; margin: 0; background: #E5E5EA; text-align: center;"
+                            />
+                            <span class="unit" style="font-size: 14px; width: 30px;">${ingredient.unit}</span>
+                        </div>
+                    `;
+                    recipeIngredients.appendChild(div);
+                });
         }
         
         function handleDeleteIngredientFromRecipe(event) {
@@ -701,10 +727,11 @@
                 return;
             }
             
-            const recipeData = {};
-            const inputFields = recipeIngredients.querySelectorAll("input[type='number']");
+            // Lấy tất cả các input đang hiển thị trong khu vực định lượng
+            const recipeInputs = recipeIngredients.querySelectorAll("input[type='number']");
+            const dataToSave = {};
             
-            inputFields.forEach(input => {
+            recipeInputs.forEach(input => {
                 const qty = Number(input.value);
                 
                 if (qty > 0) {
@@ -712,7 +739,7 @@
                     const ingName = input.getAttribute("data-ing-name");
                     const ingUnit = input.getAttribute("data-ing-unit");
                     
-                    recipeData[ingId] = {
+                    dataToSave[ingId] = {
                         name: ingName,
                         qty: qty,
                         unit: ingUnit
@@ -720,7 +747,8 @@
                 }
             });
 
-            set(ref(db, `recipes/${currentRecipe.id}`), recipeData)
+
+            set(ref(db, `recipes/${currentRecipe.id}`), dataToSave)
                 .then(() => {
                     alert(`Đã lưu công thức cho món "${currentRecipe.name}" thành công!`);
                     loadRecipeForDish(currentRecipe.id, currentRecipe.name);
@@ -734,7 +762,7 @@
         //   QUẢN LÝ NGUYÊN LIỆU LOGIC & TÌM KIẾM
         // ---------------------------
         
-        // Hàm render & filter nguyên liệu (MỚI)
+        // Hàm render & filter nguyên liệu (ĐÃ SỬA: Thêm nút Xóa)
         function filterAndRenderIngredients() {
             const query = ingredientSearchInput.value.trim().toLowerCase();
 
@@ -778,10 +806,28 @@
                     <div style="font-size: 13px; color: #8E8E93;">Kho: ${item.qty} ${item.unit}${minQtyDisplay}</div>
                 `;
 
+                // Nút Sửa
                 const editButton = document.createElement("button");
                 editButton.textContent = "Sửa";
+                editButton.classList.add("edit-btn");
                 editButton.setAttribute("data-id", item.id);
-                editButton.addEventListener("click", () => handleEditIngredientClick(item)); 
+                editButton.addEventListener("click", (e) => {
+                    e.stopPropagation(); // Ngăn sự kiện click lan ra li (dù li không có listener)
+                    handleEditIngredientClick(item);
+                }); 
+                
+                // Nút Xóa (MỚI)
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Xóa";
+                deleteButton.classList.add("delete-btn");
+                deleteButton.setAttribute("data-id", item.id);
+                deleteButton.setAttribute("data-name", item.name);
+                deleteButton.addEventListener("click", handleDeleteIngredientClick);
+                
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.display = 'flex';
+                buttonContainer.appendChild(editButton); 
+                buttonContainer.appendChild(deleteButton); 
 
                 const minQty = Number(item.minQty) || 0;
                 if (item.qty <= minQty) {
@@ -789,13 +835,13 @@
                 }
                 
                 li.appendChild(contentDiv);
-                li.appendChild(editButton); 
+                li.appendChild(buttonContainer);
                 ingredientList.appendChild(li);
             });
             
             // Nếu Form Công thức đang mở, cập nhật lại form với tồn kho mới nhất
             if (!recipeFormSection.classList.contains("hidden") && currentRecipe.id) {
-                loadRecipeForDish(currentRecipe.id, currentRecipe.name);
+                filterRecipeIngredients();
             }
         }
 
@@ -805,12 +851,40 @@
         // Lắng nghe dữ liệu Nguyên liệu từ Firebase (GỌI HÀM RENDER CHUNG)
         onValue(ref(db, "ingredients"), snapshot => {
             allIngredients = snapshot.val() || {}; 
-            filterAndRenderIngredients(); // Gọi hàm render sau khi nhận dữ liệu
+            filterAndRenderIngredients(); 
         });
         
         // ---------------------------
-        //   LOGIC THÊM/SỬA NGUYÊN LIỆU (Giữ nguyên)
+        //   LOGIC THÊM/SỬA/XÓA NGUYÊN LIỆU KHO (ĐÃ SỬA: Thêm hàm xóa)
         // ---------------------------
+        
+        // Hàm xử lý Xóa nguyên liệu (MỚI)
+        function handleDeleteIngredientClick(event) {
+            event.stopPropagation(); // Ngăn sự kiện click lan ra li
+            const ingId = event.currentTarget.getAttribute("data-id");
+            const ingName = event.currentTarget.getAttribute("data-name");
+
+            if (confirm(`Bạn có chắc chắn muốn xóa nguyên liệu "${ingName}" khỏi kho không?`)) {
+                const path = `ingredients/${ingId}`;
+                
+                remove(ref(db, path))
+                    .then(() => {
+                        alert(`Đã xóa nguyên liệu "${ingName}" khỏi kho thành công!`);
+                        // Firebase listener sẽ tự động gọi lại filterAndRenderIngredients
+                        
+                        // Nếu đang trong chế độ sửa nguyên liệu này, hãy reset form
+                        if (editingIngredientId === ingId) {
+                            ingredientFormContainer.classList.add("hidden");
+                            btnToggleAddForm.textContent = "➕ Thêm nguyên liệu";
+                            btnToggleAddForm.classList.remove("active");
+                            resetIngredientForm();
+                        }
+                    })
+                    .catch(error => {
+                        alert("Lỗi khi xóa nguyên liệu: " + error.message);
+                    });
+            }
+        }
         
         function addIngredient() {
             const name = ingName.value.trim();
