@@ -319,7 +319,7 @@
        // --- Role-Based Access Control (RBAC) Setup - UPDATED PERMISSIONS ---
 const PERMISSIONS = {
     // 1. Cập nhật phân quyền cho Admin: Thêm 'order' và 'menu_management'
-    'admin': ['revenue_expense', 'stats', 'inventory', 'personnel', 'menu_management', 'table_booking','lichnghi','order','kitchen_bar','lichnghi','sales'], // THÊM QUYỀN MỚI
+    'admin': ['revenue_expense', 'stats', 'inventory', 'personnel', 'menu_management','recipes','table_booking','lichnghi','order','kitchen_bar','lichnghi','sales'], // THÊM QUYỀN MỚI
     // 2. Cập nhật phân quyền cho Waiter: Chỉ có 'order'
     'waiter': ['order'], 
     'cashier': ['sales', 'kitchen_bar', 'revenue_expense', 'stats'], // THÊM QUYỀN MỚI
@@ -347,6 +347,13 @@ const PERMISSIONS = {
   color: '#34C759', // Xanh lá nhẹ (bạn có thể đổi)
   view: renderLichnghiView ,
   file: 'lichnghi.html'
+},{
+  id: 'recipes',
+  name: 'công thức',
+  icon: 'fa-solid fa-receipt', // Icon lịch
+  color: '#FAF3E0', // Xanh lá nhẹ (bạn có thể đổi)
+  view: renderrecipes ,
+  file: 'recipes.html'
 },
 
     // CHỨC NĂNG MỚI ĐƯỢC THÊM VÀO ĐÂY
@@ -599,7 +606,9 @@ const PERMISSIONS = {
         function renderOrderView() {
             renderIframeView(getFile('order'), getName('order')); // order.html
         }
-        
+           function renderrecipes() {
+            renderIframeView(getFile('recipes'), getName('recipes')); // order.html
+        }
         // THÊM HÀM RENDER CHO CHỨC NĂNG ĐẶT BÀN MỚI
         function renderTableBookingView() {
             renderIframeView(getFile('table_booking'), getName('table_booking')); // reser-book.html
