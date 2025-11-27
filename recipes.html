@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -602,7 +601,8 @@
             recipeTitle.textContent = `Công thức: ${dishName}`;
             
             try {
-                const snapshot = await get(ref(db, `recipes/${dishId}`));
+                // ĐÃ SỬA: Lấy dữ liệu theo tên món ăn (dishName) thay vì ID
+                const snapshot = await get(ref(db, `recipes/${dishName}`));
                 currentRecipe.existingRecipe = snapshot.val() || {};
                 
                 loadRecipeForm(currentRecipe.existingRecipe);
@@ -666,6 +666,7 @@
                 .filter(key => allIngredients[key].name.toLowerCase().includes(query))
                 .forEach(key => {
                     const ingredient = allIngredients[key];
+                    // Kiểm tra tồn tại trong công thức hiện tại
                     const currentQty = existingRecipe[key] ? existingRecipe[key].qty : '';
                     
                     const div = document.createElement("div");
@@ -708,7 +709,8 @@
             }
 
             if (confirm(`Bạn có chắc chắn muốn xóa nguyên liệu này khỏi công thức món "${currentRecipe.name}" không?`)) {
-                const path = `recipes/${currentRecipe.id}/${ingId}`;
+                // ĐÃ SỬA: Dùng currentRecipe.name trong đường dẫn xóa
+                const path = `recipes/${currentRecipe.name}/${ingId}`;
                 
                 remove(ref(db, path))
                     .then(() => {
@@ -734,6 +736,7 @@
             recipeInputs.forEach(input => {
                 const qty = Number(input.value);
                 
+                // Lưu theo ID nguyên liệu (key), nhưng node cha sẽ là Tên Món Ăn
                 if (qty > 0) {
                     const ingId = input.getAttribute("data-ing-id");
                     const ingName = input.getAttribute("data-ing-name");
@@ -747,8 +750,8 @@
                 }
             });
 
-
-            set(ref(db, `recipes/${currentRecipe.id}`), dataToSave)
+            // ĐÃ SỬA: Lưu vào path recipes/TEN_MON_AN thay vì ID
+            set(ref(db, `recipes/${currentRecipe.name}`), dataToSave)
                 .then(() => {
                     alert(`Đã lưu công thức cho món "${currentRecipe.name}" thành công!`);
                     loadRecipeForDish(currentRecipe.id, currentRecipe.name);
