@@ -236,6 +236,32 @@
         
         .recipe-form-item span.stock { font-size: 13px; color: var(--ios-gray); }
 
+        /* Recipe Qty & Unit Group */
+        .recipe-qty-unit-group {
+            display: flex; 
+            align-items: center; 
+            gap: 5px;
+        }
+
+        .recipe-qty-unit-group input[type="number"] {
+            width: 65px; 
+            height: 36px; 
+            margin: 0; 
+            background: #E5E5EA; 
+            text-align: center;
+        }
+
+        .recipe-qty-unit-group select {
+            width: 55px;
+            height: 36px;
+            padding: 0 5px;
+            background: #E5E5EA;
+            border-radius: 12px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+
         /* --- UTILS & ANIMATIONS --- */
         .hidden { display: none !important; }
 
@@ -690,6 +716,7 @@
             if (savedIngredients > 0) {
                 Object.keys(existingRecipe).forEach(key => {
                     const item = existingRecipe[key];
+                    // Hiển thị định lượng đã lưu theo đơn vị trong kho (item.unit)
                     const li = document.createElement("li");
                     const contentSpan = document.createElement("span");
                     contentSpan.textContent = `${item.name}: ${item.qty} ${item.unit}`;
@@ -717,25 +744,73 @@
                 .filter(key => allIngredients[key].name.toLowerCase().includes(query))
                 .forEach(key => {
                     const ingredient = allIngredients[key];
-                    const currentQty = existingRecipe[key] ? existingRecipe[key].qty : '';
                     
+                    // Lấy đơn vị trong kho và tính toán đơn vị thay thế (nếu có)
+                    const stockUnit = ingredient.unit;
+                    let altUnit = null;
+                    let conversionFactor = 1;
+                    
+                    if (stockUnit === 'kg') {
+                        altUnit = 'g';
+                        conversionFactor = 1000;
+                    } else if (stockUnit === 'lít') {
+                        altUnit = 'ml';
+                        conversionFactor = 1000;
+                    }
+                    
+                    // Lấy giá trị đã lưu trong công thức, luôn theo đơn vị trong kho (stockUnit)
+                    const savedQty = existingRecipe[key] ? Number(existingRecipe[key].qty) : 0;
+                    
+                    // Giá trị hiển thị mặc định trong form: theo đơn vị lớn (stockUnit)
+                    let currentQtyDisplay = savedQty > 0 ? savedQty : '';
+                    let currentUnitInput = stockUnit;
+
+                    // Nếu có giá trị đã lưu, và giá trị đó rất nhỏ (ví dụ 0.005kg), ta có thể chọn hiển thị nó theo đơn vị bé (g) để người dùng dễ nhìn hơn
+                    // Tuy nhiên, để đơn giản, ta sẽ chỉ tập trung vào việc cho phép người dùng chọn đơn vị nhập.
+
                     const div = document.createElement("div");
                     div.classList.add("recipe-form-item");
                     div.style.display = "flex";
                     div.style.justifyContent = "space-between";
                     div.style.alignItems = "center";
                     
+                    // Tạo Options cho Dropdown Đơn vị
+                    let unitOptionsHTML = `<option value="${stockUnit}">${stockUnit}</option>`;
+                    if (altUnit) {
+                        unitOptionsHTML += `<option value="${altUnit}">${altUnit}</option>`;
+                    }
+                    
                     div.innerHTML = `
                         <div style="flex: 1;">
                             <label class="label" style="font-size: 15px; color: #000; margin: 0;">${ingredient.name}</label>
-                            <span class="stock">Kho: ${ingredient.qty} ${ingredient.unit}</span>
+                            <span class="stock">Kho: ${ingredient.qty} ${stockUnit}</span>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 5px;">
-                            <input type="number" data-ing-id="${key}" data-ing-name="${ingredient.name}" data-ing-unit="${ingredient.unit}" placeholder="SL" value="${currentQty}" min="0" style="width: 60px; height: 36px; margin: 0; background: #E5E5EA; text-align: center;">
-                            <span class="unit" style="font-size: 14px; width: 30px;">${ingredient.unit}</span>
+                        <div class="recipe-qty-unit-group">
+                            <input type="number" 
+                                data-ing-id="${key}" 
+                                data-ing-name="${ingredient.name}" 
+                                data-stock-unit="${stockUnit}"
+                                data-alt-unit="${altUnit || ''}"
+                                data-conversion="${conversionFactor}"
+                                placeholder="SL" 
+                                value="${currentQtyDisplay}" 
+                                min="0">
+                            <select class="recipe-unit-select">
+                                ${unitOptionsHTML}
+                            </select>
                         </div>
                     `;
                     recipeIngredients.appendChild(div);
+
+                    // Thiết lập đơn vị đã lưu (mặc định là đơn vị kho)
+                    const unitSelect = div.querySelector('.recipe-unit-select');
+                    const qtyInput = div.querySelector('input[type="number"]');
+
+                    // Logic: Nếu đã có công thức lưu, hiển thị nó theo đơn vị đã lưu (unit trong recipe, mặc dù ta chỉ lưu unit kho)
+                    // Để đơn giản hơn: Ta mặc định hiển thị định lượng đã lưu theo đơn vị trong kho (stockUnit)
+
+                    // Nếu muốn hiển thị giá trị đã lưu theo đơn vị nhỏ hơn nếu giá trị rất bé, cần logic phức tạp hơn.
+                    // Tạm thời, ta chỉ hiển thị theo đơn vị kho, và cho phép người dùng nhập theo đơn vị họ muốn.
                 });
         }
         
@@ -752,22 +827,61 @@
             if (!currentRecipe.name) return;
             const recipeInputs = recipeIngredients.querySelectorAll("input[type='number']");
             const dataToSave = {};
+            let hasError = false;
+
             recipeInputs.forEach(input => {
-                const qty = Number(input.value);
+                if (hasError) return;
+                
+                let qty = Number(input.value);
+                const ingId = input.getAttribute("data-ing-id");
+                const stockUnit = input.getAttribute("data-stock-unit");
+                const altUnit = input.getAttribute("data-alt-unit");
+                const conversionFactor = Number(input.getAttribute("data-conversion"));
+                
+                const unitSelect = input.closest('.recipe-qty-unit-group').querySelector('.recipe-unit-select');
+                const selectedUnit = unitSelect.value;
+                
                 if (qty > 0) {
-                    const ingId = input.getAttribute("data-ing-id");
+                    // Xử lý chuyển đổi đơn vị
+                    let finalQty = qty;
+                    
+                    if (selectedUnit === altUnit && altUnit) {
+                        // Nếu người dùng nhập đơn vị nhỏ (g, ml) nhưng đơn vị kho là lớn (kg, lít)
+                        if (conversionFactor === 1000) {
+                            finalQty = qty / 1000; // Chuyển g -> kg, hoặc ml -> lít
+                        } else {
+                             // Xử lý các trường hợp khác nếu cần (vd: con/cái)
+                             // Hiện tại chỉ hỗ trợ tỉ lệ 1000
+                        }
+                    } else if (selectedUnit !== stockUnit && selectedUnit !== altUnit) {
+                        // Trường hợp không có altUnit (ví dụ: con, cái), nhưng người dùng chọn đơn vị khác đơn vị kho.
+                        // Ta mặc định không chuyển đổi, chỉ lưu giá trị theo đơn vị kho
+                        // (Ở đây ta chỉ có 2 lựa chọn: stockUnit hoặc altUnit, nên phần này có thể bỏ qua)
+                    }
+
+                    // Kiểm tra tồn kho (nên được thực hiện ở test, nhưng có thể cảnh báo tại đây)
+                    const currentStock = allIngredients[ingId] ? Number(allIngredients[ingId].qty) : 0;
+                    if (finalQty > currentStock) {
+                        // Cảnh báo nhưng vẫn cho phép lưu công thức (vì công thức chỉ là định mức)
+                        console.warn(`Cảnh báo: Định lượng ${finalQty} ${stockUnit} lớn hơn tồn kho ${currentStock} cho nguyên liệu ${input.getAttribute("data-ing-name")}.`);
+                    }
+
                     dataToSave[ingId] = {
                         name: input.getAttribute("data-ing-name"),
-                        qty: qty,
-                        unit: input.getAttribute("data-ing-unit")
+                        qty: finalQty, // Giá trị đã được chuyển đổi về đơn vị trong KHO (stockUnit)
+                        unit: stockUnit // Lưu đơn vị trong kho (stockUnit)
                     };
                 }
             });
+            
+            if (hasError) return;
+
             set(ref(db, `recipes/${currentRecipe.name}`), dataToSave)
                 .then(() => {
-                    alert(`Đã lưu công thức món "${currentRecipe.name}"!`);
+                    alert(`Đã lưu công thức món "${currentRecipe.name}"! Lưu ý: Định lượng đã được chuyển đổi về đơn vị kho (${Object.values(dataToSave)[0]?.unit || 'N/A'}).`);
                     loadRecipeForDish(currentRecipe.id, currentRecipe.name);
-                });
+                })
+                .catch(error => alert("Lỗi khi lưu công thức: " + error.message));
         });
 
         // Ingredient Management
@@ -888,3 +1002,4 @@
     </script>
 </body>
 </html>
+
