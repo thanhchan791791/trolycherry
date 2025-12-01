@@ -451,10 +451,17 @@
                             </div>
                         </div>
 
-                        <div class="mb-3" id="expenseField" style="display: none;">
-                            <label class="form-label fw-bold" id="modalAmountLabel"></label>
-                            <input type="text" id="modalAmount" class="form-control currency-input" required>
-                        </div>
+                       <div class="mb-3" id="expenseField" style="display: none;">
+    <label class="form-label fw-bold" id="modalAmountLabel"></label>
+    <input type="text" id="modalAmount" class="form-control currency-input mb-3" required> 
+    
+    <label class="form-label fw-bold"><i class="fas fa-money-check-alt me-1"></i> Hình thức Chi</label>
+    <select id="modalPaymentMethod" class="form-select" required>
+        <option value="">Chọn hình thức thanh toán</option>
+        <option value="cash">Tiền mặt</option>
+        <option value="transfer">Chuyển khoản</option>
+    </select>
+    </div>
                         
                         <div class="mb-3">
                             <label class="form-label fw-bold">Chi tiết Giao dịch</label>
@@ -653,6 +660,8 @@
     const modalAmountEl = document.getElementById('modalAmount'); // Expense Amount
     const modalAmountCashEl = document.getElementById('modalAmountCash'); // Cash Amount
     const modalAmountTransferEl = document.getElementById('modalAmountTransfer'); // Transfer Amount
+    // NEW: Expense Payment Method Element
+const modalPaymentMethodEl = document.getElementById('modalPaymentMethod');
     const modalDetailsEl = document.getElementById('modalDetails');
     const historyBodyEl = document.getElementById('historyBody');
     // Overall Totals
@@ -1418,29 +1427,29 @@ function unformatVND(formattedString) {
     /**
      * Shows the modal with all transactions for a specific day.
      */
-    function showDetailsModal(date) {
-        const dailyRecord = window.cachedRecords[date];
-        detailsModalBodyEl.innerHTML = '';
+   function showDetailsModal(date) {
+    const dailyRecord = window.cachedRecords[date];
+    detailsModalBodyEl.innerHTML = '';
 
-        let htmlContent = `<h5 class="mb-3">Giao dịch Ngày: ${formatDate(date)}</h5>`;
+    let htmlContent = `<h5 class="mb-3">Giao dịch Ngày: ${formatDate(date)}</h5>`;
 
-        if (!dailyRecord || !dailyRecord.transactions) {
-            htmlContent += '<p class="text-muted">Không có giao dịch nào trong ngày này.</p>';
-        } else {
-            const transactions = dailyRecord.transactions;
-            const transactionsArray = Object.entries(transactions).map(([id, trans]) => ({ id, ...trans })).sort((a, b) => a.timestamp - b.timestamp);
+    if (!dailyRecord || !dailyRecord.transactions) {
+        htmlContent += '<p class="text-muted">Không có giao dịch nào trong ngày này.</p>';
+    } else {
+        const transactions = dailyRecord.transactions;
+        const transactionsArray = Object.entries(transactions).map(([id, trans]) => ({ id, ...trans })).sort((a, b) => a.timestamp - b.timestamp);
 
-            htmlContent += `<div class="table-responsive"><table class="table table-sm table-striped">
-                <thead>
-                    <tr>
-                        <th>Giờ</th>
-                        <th>Số Tiền</th>
-                        <th>Hình thức</th>
-                        <th>Chi tiết</th>
-                        <th>Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>`;
+        htmlContent += `<div class="table-responsive"><table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>Giờ</th>
+                    <th>Số Tiền</th>
+                    <th>Hình thức</th>
+                    <th>Chi tiết</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>`;
 
             transactionsArray.forEach(trans => {
                 const id = trans.id;
@@ -1453,19 +1462,32 @@ function unformatVND(formattedString) {
                 
                 if (trans.revenue > 0) {
                     if (trans.paymentMethod === 'transfer') {
-                        method = '<span class="badge bg-primary">Chuyển khoản</span>';
+                        method = '<span class="badge bg-primary"><i class="fas fa-university me-1"></i> Chuyển khoản</span>';
                     } else if (trans.paymentMethod === 'cash') {
-                        method = '<span class="badge bg-warning text-dark">Tiền mặt</span>';
+                        method = '<span class="badge bg-warning text-dark"><i class="fas fa-money-bill-wave me-1"></i> Tiền mặt</span>';
                     } else if (trans.paymentMethod === 'cash_in_from_wallet') {
                         // For LEGACY data only, new data no longer shows here
                         method = '<span class="badge bg-success text-white"><i class="fas fa-undo me-1"></i> Tiền mặt (Từ Ví CK)</span>';
                     } else {
                         method = '<span class="badge bg-secondary">Thu khác</span>';
                     }
+                } else if (trans.expense > 0) {
+                    // *** PHẦN ĐÃ SỬA: Xử lý hiển thị Phương thức cho giao dịch Chi ***
+                    if (trans.paymentMethod === 'transfer') {
+                        method = '<span class="badge bg-primary"><i class="fas fa-university me-1"></i> Chuyển khoản</span>';
+                    } else if (trans.paymentMethod === 'cash') {
+                        method = '<span class="badge bg-warning text-dark"><i class="fas fa-money-bill-wave me-1"></i> Tiền mặt</span>';
+                    } else if (isWalletTransfer) {
+                        method = `<span class="badge bg-info">${trans.paymentMethod}</span>`; // Display the specific wallet transfer type
+                    } else {
+                        // Nếu là chi tiêu thường mà không có paymentMethod (data cũ)
+                        method = '<span class="badge bg-secondary">Chi</span>';
+                    }
+                    // *** KẾT THÚC PHẦN ĐÃ SỬA ***
                 } else if (isWalletTransfer) {
-                    method = `<span class="badge bg-info">${trans.paymentMethod}</span>`; // Display the specific wallet transfer type
+                    method = `<span class="badge bg-info">${trans.paymentMethod}</span>`; // Fallback for transfers not categorized as revenue/expense
                 } else {
-                    method = '<span class="badge bg-secondary">Chi</span>';
+                    method = '<span class="badge bg-secondary">Chi</span>'; // Fallback cho Chi không xác định phương thức (data cũ)
                 }
 
                 const time = trans.timestamp ? new Date(trans.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'}) : 'N/A';
@@ -1503,12 +1525,12 @@ function unformatVND(formattedString) {
                 `;
             });
 
-            htmlContent += `</tbody></table></div>`;
-        }
-
-        detailsModalBodyEl.innerHTML = htmlContent;
-        detailsModal.show();
+        htmlContent += `</tbody></table></div>`;
     }
+
+    detailsModalBodyEl.innerHTML = htmlContent;
+    detailsModal.show();
+}
 
     window.showDetailsModal = showDetailsModal; // Attach to window
 
@@ -1585,22 +1607,27 @@ function unformatVND(formattedString) {
         addTransactionModal.show();
     });
 
-    // Show modal for Expense
-    addExpenseBtn.addEventListener('click', () => {
-        modalTitle.innerText = "Thêm Giao Dịch Chi";
-        modalAmountLabel.innerText = "Số tiền Chi (VND)";
-        modalSubmitBtn.innerText = "Xác nhận Chi";
-        transactionTypeEl.value = "expense";
-        revenueFieldsEl.style.display = 'none';
-        expenseFieldEl.style.display = 'block';
-        modalAmountEl.required = true;
-        modalAmountCashEl.required = false;
-        modalAmountTransferEl.required = false;
-        modalEntryDateEl.value = new Date().toISOString().slice(0, 10);
-        modalAmountEl.value = "";
-        modalDetailsEl.value = "";
-        addTransactionModal.show();
-    });
+  // Show modal for Expense
+addExpenseBtn.addEventListener('click', () => {
+    modalTitle.innerText = "Thêm Giao Dịch Chi";
+    modalAmountLabel.innerText = "Số tiền Chi (VND)";
+    modalSubmitBtn.innerText = "Xác nhận Chi";
+    transactionTypeEl.value = "expense";
+    revenueFieldsEl.style.display = 'none';
+    expenseFieldEl.style.display = 'block';
+    modalAmountEl.required = true;
+    modalAmountCashEl.required = false;
+    modalAmountTransferEl.required = false;
+    // Bắt đầu phần sửa mới: Thêm logic cho trường thanh toán
+    modalPaymentMethodEl.required = true;
+    modalPaymentMethodEl.value = ""; // Reset giá trị
+    // Kết thúc phần sửa mới
+
+    modalEntryDateEl.value = new Date().toISOString().slice(0, 10);
+    modalAmountEl.value = "";
+    modalDetailsEl.value = "";
+    addTransactionModal.show();
+});
 
     // Handle form submission from the Add Transaction Modal
     addTransactionForm.addEventListener('submit', async function(e) {
@@ -1624,14 +1651,25 @@ function unformatVND(formattedString) {
             if (amountTransfer > 0) {
                 await addSingleEntry(date, amountTransfer, 0, details || "Thu Chuyển khoản", 'transfer');
             }
-        } else if (type === 'expense') {
-            const amount = unformatVND(modalAmountEl.value);
-            if (amount <= 0) {
-                alert("Vui lòng nhập số tiền chi.");
-                return;
-            }
-            await addSingleEntry(date, 0, amount, details || "Chi tiêu", null);
-        }
+      } else if (type === 'expense') {
+    const amount = unformatVND(modalAmountEl.value);
+    // Bắt đầu phần sửa mới: Lấy hình thức thanh toán
+    const paymentMethod = modalPaymentMethodEl.value; 
+    
+    if (amount <= 0) {
+        alert("Vui lòng nhập số tiền chi.");
+        return;
+    }
+    // Kiểm tra đã chọn hình thức chưa
+    if (!paymentMethod) {
+        alert("Vui lòng chọn hình thức thanh toán.");
+        return;
+    }
+    
+    // Gửi dữ liệu lên Firebase, sử dụng paymentMethod
+    await addSingleEntry(date, 0, amount, details || "Chi tiêu", paymentMethod);
+    // Kết thúc phần sửa mới
+}
 
         addTransactionForm.reset();
         addTransactionModal.hide();
