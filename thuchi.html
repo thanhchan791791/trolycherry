@@ -377,8 +377,7 @@
                         <button id="exportJson" class="btn btn-sm btn-outline-primary btn-sm-custom"><i class="fas fa-file-code me-1"></i> JSON</button>
                         <input type="file" id="importFile" accept=".json" style="display:none;">
                         <button id="importJsonBtn" class="btn btn-sm btn-outline-dark btn-sm-custom"><i class="fas fa-upload me-1"></i> Import</button>
-                        <button id="resetBtn" class="btn btn-sm btn-outline-danger btn-sm-custom ms-auto"><i class="fas fa-trash-alt me-1"></i> Reset</button>
-                        <button id="addSampleBtn" class="btn btn-sm btn-outline-info btn-sm-custom"><i class="fas fa-database me-1"></i> Thêm dữ liệu mẫu</button>
+                       
                     </div>                </div>
             </div>
 
@@ -1814,9 +1813,7 @@ function unformatVND(formattedString) {
         }
     });
     
-    document.getElementById('resetBtn').addEventListener('click', clearAll);
-    document.getElementById('addSampleBtn').addEventListener('click', addSampleData);
-
+   
     // Filter Controls
     toggleDateFilterBtn.addEventListener('click', () => {
         if (dateFilterControlsEl.style.display === 'none') {
