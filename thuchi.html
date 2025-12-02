@@ -451,11 +451,15 @@
                             </div>
                         </div>
 
-                        <div class="mb-3" id="expenseField" style="display: none;">
-                            <label class="form-label fw-bold" id="modalAmountLabel"></label>
-                            <input type="text" id="modalAmount" class="form-control currency-input" required>
-                        </div>
-                        
+                       <div class="mb-3" id="expenseField" style="display: none;">
+    <div class="mb-3 p-3 border rounded bg-light">
+        <p class="mb-1 small-muted">Số Dư Có Thể Rút (Dư Tiền Mặt):</p>
+        <h4 id="availableWithdrawalCashBalance" class="balance-cash fw-bold">0 ₫</h4>
+        <input type="hidden" id="hiddenAvailableWithdrawalCashBalance" value="0">
+    </div>
+    <label class="form-label fw-bold" id="modalAmountLabel"></label>
+    <input type="text" id="modalAmount" class="form-control currency-input" required placeholder="Nhập số tiền muốn rút">
+</div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Chi tiết Giao dịch</label>
                             <textarea id="modalDetails" class="form-control" rows="3"></textarea>
@@ -662,7 +666,9 @@
     const totalBalanceEl = document.getElementById('totalBalance');
     const totalBalanceCashEl = document.getElementById('totalBalanceCash');
     const totalWalletBalanceEl = document.getElementById('totalWalletBalance'); // Wallet Balance
-
+// NEW: Withdrawal Cash Balance
+const availableWithdrawalCashBalanceEl = document.getElementById('availableWithdrawalCashBalance');
+const hiddenAvailableWithdrawalCashBalanceEl = document.getElementById('hiddenAvailableWithdrawalCashBalance');
     const sortOrderEl = document.getElementById('sortOrder');
     const reportViewEl = document.getElementById('reportView');
     const reportTitleEl = document.getElementById('reportTitle');
@@ -1585,74 +1591,104 @@ function unformatVND(formattedString) {
         addTransactionModal.show();
     });
 
-    // Show modal for Expense
-    addExpenseBtn.addEventListener('click', () => {
-        modalTitle.innerText = "Rút tiền";
-        modalAmountLabel.innerText = "Số tiền rút (VND)";
-        modalSubmitBtn.innerText = "Xác nhận rút";
-        transactionTypeEl.value = "expense";
-        revenueFieldsEl.style.display = 'none';
-        expenseFieldEl.style.display = 'block';
-        modalAmountEl.required = true;
-        modalAmountCashEl.required = false;
-        modalAmountTransferEl.required = false;
-        modalEntryDateEl.value = new Date().toISOString().slice(0, 10);
-        modalAmountEl.value = "";
-        modalDetailsEl.value = "";
-        addTransactionModal.show();
-    });
+   // Show modal for Expense
+addExpenseBtn.addEventListener('click', () => {
+    // Lấy số dư tiền mặt hiện tại
+    const currentCashBalance = window.cachedTotals ? window.cachedTotals.cashBalance : 0; 
 
-   // Handle form submission from the Add Transaction Modal
-    addTransactionForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const type = transactionTypeEl.value;
-        const date = modalEntryDateEl.value;
-        const details = modalDetailsEl.value.trim();
+    modalTitle.innerText = "Rút tiền";
+    modalAmountLabel.innerText = "Số tiền rút (VND)";
+    modalSubmitBtn.innerText = "Xác nhận rút";
+    transactionTypeEl.value = "expense";
+    revenueFieldsEl.style.display = 'none';
+    expenseFieldEl.style.display = 'block';
 
-        if (type === 'revenue') {
-            const amountCash = unformatVND(modalAmountCashEl.value);
-            const amountTransfer = unformatVND(modalAmountTransferEl.value);
+    // NEW: Cập nhật số dư có thể rút
+    availableWithdrawalCashBalanceEl.innerText = formatVND(currentCashBalance);
+    hiddenAvailableWithdrawalCashBalanceEl.value = currentCashBalance;
+    // (Tùy chọn) Đổi placeholder nếu số dư âm/bằng 0
+    modalAmountEl.placeholder = (currentCashBalance <= 0) ? "Số dư tiền mặt không đủ để rút." : "Nhập số tiền muốn rút";
+    
+    modalAmountEl.required = true;
+    modalAmountCashEl.required = false;
+    modalAmountTransferEl.required = false;
+    modalEntryDateEl.value = new Date().toISOString().slice(0, 10);
+    modalAmountEl.value = "";
+    modalDetailsEl.value = "";
+    addTransactionModal.show();
+});
 
-            if (amountCash <= 0 && amountTransfer <= 0) {
-                alert("Vui lòng nhập số tiền thu.");
-                return;
-            }
+  // Handle form submission from the Add Transaction Modal
+addTransactionForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const type = transactionTypeEl.value;
+    const date = modalEntryDateEl.value;
+    const details = modalDetailsEl.value.trim();
 
-            if (amountCash > 0) {
-                await addSingleEntry(date, amountCash, 0, details || "Thu Tiền mặt", 'cash');
-            }
-            if (amountTransfer > 0) {
-                await addSingleEntry(date, amountTransfer, 0, details || "Thu Chuyển khoản", 'transfer');
-            }
-        } else if (type === 'expense') {
-            const amount = unformatVND(modalAmountEl.value);
-            if (amount <= 0) {
-                alert("Vui lòng nhập số tiền chi.");
-                return;
-            }
-            
-            // 1. Ghi lại giao dịch Chi thông thường vào daily_records
-            await addSingleEntry(date, 0, amount, details || "Chi tiêu", null);
-            
-            // 2. TẠO VÀ ĐẨY GIAO DỊCH THU TỰ ĐỘNG VÀO vi/lichsu
-            
-            // Chuẩn bị dữ liệu giao dịch Thu
-            const thuTuDong = {
-                chitiet: "rút tiền về ví", // Chi tiết cố định
-                loai: "thu", // Loại giao dịch là "thu"
-                ngay: date, // Lấy ngày từ giao dịch Chi
-                sotien: amount, // Lấy số tiền (amount) từ giao dịch Chi
-                time: firebase.database.ServerValue.TIMESTAMP // Lấy thời gian thực từ Firebase
-            };
-            
-            // Đẩy giao dịch Thu vào node vi/lichsu
-            await database.ref('vi/lichsu').push(thuTuDong);
-            
+    // === Xử lý giao dịch THU (REVENUE) ===
+    if (type === 'revenue') {
+        const amountCash = unformatVND(modalAmountCashEl.value);
+        const amountTransfer = unformatVND(modalAmountTransferEl.value);
+
+        if (amountCash <= 0 && amountTransfer <= 0) {
+            alert("Vui lòng nhập số tiền thu.");
+            return;
         }
 
-        addTransactionForm.reset();
-        addTransactionModal.hide();
-    });
+        if (amountCash > 0) {
+            await addSingleEntry(date, amountCash, 0, details || "Thu Tiền mặt", 'cash');
+        }
+        if (amountTransfer > 0) {
+            await addSingleEntry(date, amountTransfer, 0, details || "Thu Chuyển khoản", 'transfer');
+        }
+
+    // === Xử lý giao dịch CHI (EXPENSE - Rút tiền) ===
+    } else if (type === 'expense') {
+        const amount = unformatVND(modalAmountEl.value);
+        
+        // NEW: Lấy số dư tối đa có thể rút từ input hidden (Đã thêm ở bước 1)
+        // Đảm bảo bạn đã thêm biến 'hiddenAvailableWithdrawalCashBalanceEl' vào phần Khai báo biến
+        const maxAmount = Number(hiddenAvailableWithdrawalCashBalanceEl.value); 
+
+        if (amount <= 0) {
+            alert("Vui lòng nhập số tiền chi.");
+            return;
+        }
+
+        // 1. NEW: Kiểm tra điều kiện rút tiền
+        if (maxAmount <= 0) {
+            alert(`[LỖI] Dư Tiền mặt hiện tại là ${formatVND(maxAmount)}. Bạn chỉ có thể rút khi Dư Tiền mặt dương.`);
+            return;
+        }
+
+        if (amount > maxAmount) {
+            alert(`[LỖI] Số tiền rút (${formatVND(amount)}) đã vượt quá Số Dư Tiền mặt hiện có (${formatVND(maxAmount)}). Vui lòng nhập số tiền nhỏ hơn hoặc bằng số dư.`);
+            return;
+        }
+        // END NEW CHECK
+
+        // 2. Ghi lại giao dịch Chi thông thường (Rút tiền) vào daily_records
+        // Lưu ý: Tôi đã thay đổi type trong addSingleEntry từ null thành 'cash' để đảm bảo giao dịch này trừ vào cột Tiền mặt.
+        await addSingleEntry(date, 0, amount, details || "Chi tiêu", 'cash'); 
+        
+        // 3. TẠO VÀ ĐẨY GIAO DỊCH THU TỰ ĐỘNG VÀO vi/lichsu (Ví)
+        
+        // Chuẩn bị dữ liệu giao dịch Thu (vào Ví)
+        const thuTuDong = {
+            chitiet: "rút tiền về ví", // Chi tiết cố định
+            loai: "thu", // Loại giao dịch là "thu"
+            ngay: date, // Lấy ngày từ giao dịch Chi
+            sotien: amount, // Lấy số tiền (amount) từ giao dịch Chi
+            time: firebase.database.ServerValue.TIMESTAMP // Lấy thời gian thực từ Firebase
+        };
+        
+        // Đẩy giao dịch Thu vào node vi/lichsu
+        await database.ref('vi/lichsu').push(thuTuDong);
+    }
+
+    addTransactionForm.reset();
+    addTransactionModal.hide();
+});
 
     // Handle form submission from the Transfer Modal (Nạp Ví)
     transferForm.addEventListener('submit', async function(e) {
