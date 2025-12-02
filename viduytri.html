@@ -4,48 +4,43 @@
 <meta charset="UTF-8">
 <title>Ví Thu Chi Firebase</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMDJc5n/kO6cMFwBw4mF-sXq6v6H/D+W5wI/Q7q0FwFwFwFwFwFwFwFwFwFwFwFw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
 <style>
     /* VARIABLES */
     :root {
-        --ios-background: #F2F2F7; /* System Grouped Background */
+        --ios-background: #F2F2F7;
         --ios-card-bg: #FFFFFF;
-        --ios-blue: #007AFF; /* System Blue */
-        --ios-red: #FF3B30; /* System Red */
-        --ios-green: #34C759; /* System Green */
-        --ios-text-primary: #1C1C1E; /* Label Primary (Dark) */
-        --ios-text-secondary: #636366; /* Secondary Label */
-        --ios-separator: #E5E5EA; /* Separator */
+        --ios-blue: #007AFF;
+        --ios-red: #FF3B30;
+        --ios-green: #34C759;
+        --ios-text-primary: #1C1C1E;
+        --ios-text-secondary: #8E8E93;
+        --ios-separator: #E5E5EA;
         
-        /* SHADOW & ROUNDING */
-        --ios-shadow-light: 0 1px 3px rgba(0, 0, 0, 0.05), 0 5px 15px rgba(0, 0, 0, 0.05); /* Apple light shadow */
-        --ios-border-radius-xl: 28px; /* Large corner for cards/modals */
-        --ios-border-radius-large: 16px; /* Medium corner for inputs/buttons */
-        --ios-border-radius-medium: 12px;
+        /* Colors for List */
+        --bg-chi-light: #FFF0F0;
+        --bg-thu-light: #F0FFF4;
         
-        /* ANIMATION */
-        --ios-animation-duration: 0.35s;
-        --ios-easing: cubic-bezier(0.2, 0.8, 0.2, 1); /* iOS Spring-like curve */
+        --ios-border-radius-xl: 28px;
+        --ios-border-radius-large: 16px;
     }
 
-    /* GLOBAL STYLES - iOS Base */
+    /* GLOBAL STYLES */
     body {
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
         background: var(--ios-background);
         padding: 0;
         margin: 0;
         color: var(--ios-text-primary);
-        padding-bottom: 90px; /* Space for Bottom Tab Bar */
+        padding-bottom: 90px;
         overflow-x: hidden;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    /* TYPOGRAPHY */
-    .container {
-        padding: 0 20px;
-    }
+    .container { padding: 0 20px; }
     
-    /* Large Title Style - Fixed Top Bar */
+    /* Navigation Bar */
     .navigation-bar {
         position: sticky;
         top: 0;
@@ -55,42 +50,28 @@
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border-bottom: 0.5px solid var(--ios-separator);
-        transition: border-bottom 0.2s;
     }
-
     .navigation-bar h2 {
         font-size: 34px;
         font-weight: 700;
         margin: 0;
-        padding: 0;
     }
 
-    /* SECTION HEADERS (H3) */
-    h3 {
-        font-size: 20px;
-        font-weight: 600;
-        text-align: left;
-        margin: 25px 0 10px 0;
-        padding: 0 20px;
-        color: var(--ios-text-primary);
-    }
-    
-    /* iOS Card Style */
+    /* Cards */
     .ios-card {
         background: var(--ios-card-bg);
         border-radius: var(--ios-border-radius-xl);
         margin: 0 20px 25px 20px;
-        box-shadow: var(--ios-shadow-light);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         overflow: hidden;
     }
 
-    /* BALANCE CARD (sodu) */
+    /* BALANCE CARD */
     #sodu {
         padding: 25px 20px;
         text-align: center;
-        margin-top: 15px; /* Adjust spacing after Navigation Bar */
+        margin-top: 15px;
     }
-
     #sodu::before {
         content: "Số dư hiện tại";
         display: block;
@@ -98,7 +79,6 @@
         color: var(--ios-text-secondary);
         margin-bottom: 8px;
     }
-
     #sodu-value {
         font-size: 40px;
         font-weight: 700;
@@ -106,7 +86,7 @@
         letter-spacing: -0.5px;
     }
 
-    /* TỔNG KẾT THU CHI */
+    /* SUMMARY BOX */
     #summary-box {
         padding: 15px 20px;
         display: flex;
@@ -116,39 +96,23 @@
         text-align: center;
         border-radius: var(--ios-border-radius-large);
         margin: 0 20px 25px 20px;
-        box-shadow: var(--ios-shadow-light);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        background: var(--ios-card-bg);
     }
-    
-    .summary-item {
-        flex: 1;
-        padding: 5px 0;
-    }
+    .summary-item { flex: 1; padding: 5px 0; }
+    .summary-item:not(:last-child) { border-right: 0.5px solid var(--ios-separator); }
+    .summary-item-label { font-size: 13px; color: var(--ios-text-secondary); margin-bottom: 3px; display: block; }
+    .summary-item-value { font-size: 18px; font-weight: 600; }
+    .thu-text { color: var(--ios-green); }
+    .chi-text { color: var(--ios-red); }
 
-    .summary-item:not(:last-child) {
-        border-right: 0.5px solid var(--ios-separator);
-    }
-
-    .summary-item-label {
-        font-size: 13px;
-        color: var(--ios-text-secondary);
-        margin-bottom: 3px;
-        display: block;
-        font-weight: 400;
-    }
-
-    .summary-item-value {
-        font-size: 18px;
-        font-weight: 600;
-    }
-
-    /* iOS BUTTONS */
+    /* ACTION BUTTONS */
     .btn-box {
         display: flex;
         justify-content: space-around;
         gap: 15px;
         margin: 0 20px 30px 20px;
     }
-
     .action-button {
         flex: 1;
         height: 52px;
@@ -157,297 +121,316 @@
         border-radius: var(--ios-border-radius-large);
         cursor: pointer;
         font-weight: 600;
-        transition: transform 0.1s ease-out;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        min-width: 44px;
+        transition: transform 0.1s;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
     }
-
-    .action-button:active {
-        transform: scale(0.98);
-        opacity: 0.9;
-    }
-
+    .action-button:active { transform: scale(0.96); opacity: 0.9; }
     .thu { background: var(--ios-green); color: white; }
     .chi { background: var(--ios-red); color: white; }
     
-    /* iOS Input and Textarea */
-    .form-box {
-        display: none;
-        background: var(--ios-card-bg);
-        padding: 20px;
-        border-radius: var(--ios-border-radius-xl);
-        margin: 0 20px 25px 20px;
-        box-shadow: var(--ios-shadow-light);
+    /* ========================================= */
+    /* NEW INPUT FORM STYLES (CENTER POPUP)      */
+    /* ========================================= */
+    
+    /* Lớp phủ mờ nền */
+    #input-form-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 2000;
         opacity: 0;
-        transform: translateY(20px);
-        transition: opacity var(--ios-animation-duration) var(--ios-easing), transform var(--ios-animation-duration) var(--ios-easing);
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s;
+    }
+    
+    #input-form-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Form chính */
+    .form-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 85%;
+        max-width: 350px;
+        background: var(--ios-card-bg);
+        padding: 25px 20px;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        z-index: 2001;
+        
+        /* Hiệu ứng trượt và scale */
+        transform: translate(-50%, -40%) scale(0.9);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .form-box.show {
-        display: block;
+        transform: translate(-50%, -50%) scale(1);
         opacity: 1;
-        transform: translateY(0);
+        pointer-events: auto;
     }
 
-    #formTitle {
-        text-align: left;
-        margin-top: 0;
+    /* Header của Form */
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 20px;
+    }
+
+    .form-header h3 {
+        margin: 0;
+        padding: 0;
         font-size: 22px;
         font-weight: 700;
-        padding: 0;
     }
 
+    .close-form-btn {
+        background: #F2F2F7;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        color: #8E8E93;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    /* Các input trong form */
     input, textarea {
         width: 100%;
-        box-sizing: border-box;
-        padding: 12px 15px;
-        margin-bottom: 12px;
-        border-radius: 12px;
-        border: 0.5px solid var(--ios-separator); 
+        padding: 14px 15px;
+        margin-bottom: 15px;
+        border-radius: 14px;
+        border: 1px solid var(--ios-separator); 
         font-size: 17px;
+        box-sizing: border-box;
         font-family: inherit;
-        color: var(--ios-text-primary);
-        background: var(--ios-background);
-        -webkit-appearance: none; 
-        transition: border-color 0.2s, box-shadow 0.2s;
+        -webkit-appearance: none;
+        background: #F9F9F9;
     }
-
-    input[type="date"] {
-        /* Fix date input height issue on iOS */
-        height: 44px;
-        line-height: 44px;
-        padding: 0 15px;
+    input:focus, textarea:focus { 
+        border-color: var(--ios-blue); 
+        background: #fff;
+        outline: none; 
     }
-
-    input:focus, textarea:focus {
-        border-color: var(--ios-blue);
-        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
-        outline: none;
-        background: var(--ios-card-bg);
-    }
-
-    /* SAVE BUTTON - Primary Action */
+    
     #save-btn {
-        margin-top: 15px;
-        background: var(--ios-blue) !important;
-        color: white;
-        width: 100%;
-        height: 52px;
-        border-radius: var(--ios-border-radius-large);
-        font-size: 18px;
+        background: var(--ios-blue); 
+        color: white; 
+        width: 100%; 
+        height: 50px;
+        border-radius: 14px; 
+        font-size: 17px; 
         font-weight: 600;
+        border: none; 
+        margin-top: 10px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
     }
-    #save-btn:active {
-        transform: scale(0.98);
-        opacity: 0.9;
-    }
+    #save-btn:active { transform: scale(0.98); opacity: 0.9; }
 
-    /* HISTORY LIST - Daily Summary (Cell) */
-    #history {
-        margin: 0 20px;
-    }
+    /* HISTORY LIST */
+    h3.section-title { margin: 25px 0 10px 0; padding: 0 20px; font-size: 20px; font-weight: 600; }
+    #history { margin: 0 20px; }
 
     .daily-summary-item {
         background: var(--ios-card-bg);
         padding: 15px;
         margin-top: 10px;
         border-radius: var(--ios-border-radius-large);
-        box-shadow: var(--ios-shadow-light);
-        overflow: hidden;
-        opacity: 0;
-        transform: translateY(20px);
-        animation: slideInUp var(--ios-animation-duration) var(--ios-easing) forwards;
-    }
-
-    .summary-header {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
-        border-bottom: 0.5px solid var(--ios-separator);
-        padding-bottom: 10px;
-    }
-
-    .summary-date {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--ios-text-primary);
-    }
-
-    .summary-totals div {
-        font-size: 15px;
-        margin-bottom: 5px;
-    }
-
-    .summary-totals .thu-text { color: var(--ios-green); font-weight: 600; }
-    .summary-totals .chi-text { color: var(--ios-red); font-weight: 600; }
-
-    .detail-toggle-btn {
-        background: none;
-        border: none;
-        color: var(--ios-blue);
-        font-weight: 500;
         cursor: pointer;
-        font-size: 16px;
-        padding: 5px 10px;
-        margin: -5px -10px;
-        transition: opacity 0.1s;
+        transition: background 0.2s;
     }
-    .detail-toggle-btn:active {
-        opacity: 0.7;
-    }
+    .daily-summary-item:active { background-color: #f2f2f7; }
 
-    .detail-container {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.4s ease-out;
-    }
+    .summary-left { display: flex; flex-direction: column; }
+    .summary-date { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+    .summary-mini-total { font-size: 13px; color: var(--ios-text-secondary); }
 
-    .detail-container.show {
-        max-height: 5000px;
-    }
-    
-    /* Giao dịch chi tiết */
-    .transaction-detail-item {
-        display: flex;
-        align-items: center;
-        padding: 10px 0;
-        border-bottom: 0.5px solid var(--ios-separator);
-        font-size: 15px;
-    }
-    .transaction-detail-item:last-child {
-        border-bottom: none;
-    }
-
-    .detail-icon {
-        font-size: 18px;
-        width: 30px;
-        text-align: center;
-        margin-right: 10px;
-    }
-    
-    .detail-content {
-        flex-grow: 1;
-    }
-
-    .detail-main-info {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    .detail-btn {
+        background-color: transparent;
+        color: var(--ios-blue);
+        border: none;
         font-weight: 500;
-        margin-bottom: 2px;
-    }
-    
-    .detail-amount { 
-        font-weight: 600; 
-        font-size: 16px;
-    }
-    .detail-note { 
-        font-size: 14px; 
-        color: var(--ios-text-secondary); 
-        margin-top: 2px;
-        font-weight: 400;
+        font-size: 14px;
+        cursor: pointer;
     }
 
-    .thu-text { color: var(--ios-green); }
-    .chi-text { color: var(--ios-red); }
-
-    /* ANIMATION KEYFRAMES */
-    @keyframes slideInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+    /* ========================================= */
+    /* DETAIL MODAL STYLES (View Details)        */
+    /* ========================================= */
     
-    /* Alert/Modal Style */
-    #custom-alert {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.4);
-        z-index: 1000;
+    #detail-modal-overlay {
         display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 3000;
         justify-content: center;
         align-items: center;
         opacity: 0;
-        transition: opacity 0.2s ease-out;
+        transition: opacity 0.3s ease;
     }
 
-    #custom-alert.show {
+    #detail-modal-overlay.show { display: flex; opacity: 1; }
+
+    .detail-modal-card {
+        background: #fff;
+        width: 90%;
+        max-width: 400px;
+        max-height: 80vh;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         display: flex;
-        opacity: 1;
+        flex-direction: column;
+        overflow: hidden;
+        transform: scale(0.95);
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .alert-content {
-        background: var(--ios-card-bg);
-        border-radius: 14px;
-        width: 80%;
-        max-width: 300px;
-        padding: 20px;
-        text-align: center;
-        font-family: inherit;
-        transform: scale(1.1);
-        opacity: 0;
-        transition: transform 0.3s var(--ios-easing), opacity 0.3s var(--ios-easing);
-    }
-    
-    #custom-alert.show .alert-content {
-        transform: scale(1);
-        opacity: 1;
+    #detail-modal-overlay.show .detail-modal-card { transform: scale(1); }
+
+    .modal-header {
+        padding: 20px 20px 10px 20px;
+        background: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
 
-    .alert-content p {
-        margin: 0 0 15px 0;
-        font-size: 16px;
-        font-weight: 500;
-    }
+    .modal-title { font-size: 18px; font-weight: 700; color: #000; }
 
-    .alert-button {
-        background: var(--ios-blue);
-        color: white;
+    .close-modal-btn {
+        background: #E5E5EA;
         border: none;
-        border-radius: 8px;
-        padding: 10px;
-        width: 100%;
-        font-size: 16px;
-        font-weight: 600;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        color: #636366;
+        font-size: 14px;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-body {
+        padding: 10px 15px 20px 15px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ITEM GIAO DỊCH */
+    .modal-trans-item {
+        background: #fff;
+        border-radius: 18px;
+        padding: 12px 15px;
+        margin-bottom: 12px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        overflow: hidden; 
+    }
+
+    .modal-trans-item::before {
+        content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 4px; border-radius: 0 4px 4px 0;
+    }
+
+    .modal-trans-item.thu { background-color: var(--bg-thu-light); }
+    .modal-trans-item.thu::before { background-color: var(--ios-green); }
+
+    .modal-trans-item.chi { background-color: var(--bg-chi-light); }
+    .modal-trans-item.chi::before { background-color: var(--ios-red); }
+
+    .trans-icon-circle {
+        width: 45px; height: 45px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; margin-right: 12px; flex-shrink: 0; margin-left: 5px;
+    }
+
+    .thu .trans-icon-circle { background: rgba(52, 199, 89, 0.2); color: var(--ios-green); }
+    .chi .trans-icon-circle { background: rgba(255, 59, 48, 0.2); color: var(--ios-red); }
+
+    .trans-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .trans-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .trans-meta { display: flex; align-items: center; gap: 6px; }
+    .trans-time { font-size: 13px; color: var(--ios-text-secondary); font-weight: 500; }
+    
+    .trans-badge {
+        font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;
+    }
+    .thu .trans-badge { background: rgba(52, 199, 89, 0.15); color: var(--ios-green); }
+    .chi .trans-badge { background: rgba(255, 59, 48, 0.15); color: var(--ios-red); }
+
+    .trans-amount { font-size: 16px; font-weight: 700; }
+    .thu .trans-amount { color: var(--ios-green); }
+    .chi .trans-amount { color: var(--ios-red); }
+
+    .trans-note {
+        font-size: 14px; color: #000; font-weight: 400;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
+    }
+
+    /* ALERT */
+    #custom-alert {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.4); z-index: 4000;
+        display: none; justify-content: center; align-items: center;
+    }
+    #custom-alert.show { display: flex; }
+    .alert-content {
+        background: #fff; border-radius: 14px; width: 80%; max-width: 280px;
+        padding: 20px; text-align: center;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+    .alert-button {
+        background: var(--ios-blue); color: white; border: none; border-radius: 8px;
+        padding: 10px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px;
     }
 
 </style>
 </head>
 <body>
 
-<!-- Custom Alert for iOS feel -->
 <div id="custom-alert">
     <div class="alert-content">
-        <p id="alert-message"></p>
+        <p id="alert-message" style="margin-bottom: 15px; font-weight: 500; font-size: 16px;"></p>
         <button class="alert-button" onclick="closeAlert()">OK</button>
     </div>
 </div>
 
-<!-- iOS Navigation Bar (Fixed Top) -->
 <div class="navigation-bar">
     <h2><i class="fas fa-wallet" style="color: var(--ios-blue); margin-right: 5px;"></i> Ví Thu Chi</h2>
 </div>
 
-<!-- Main Content -->
 <div class="container">
-
-    <!-- Balance Card -->
     <div id="sodu" class="ios-card">
         <span id="sodu-value">0 đ</span>
     </div>
 
-    <!-- Summary Box - Updated to look like a separate card -->
     <div id="summary-box">
         <div class="summary-item">
             <span class="summary-item-label">Tổng Thu</span>
@@ -464,61 +447,58 @@
     </div>
     
     <div class="btn-box">
-        <!-- Icons added for iOS SF Symbols style -->
         <button class="thu action-button" onclick="openForm('thu')">
-            <i class="fas fa-plus-circle"></i> Thu
+            <i class="fas fa-arrow-up"></i> Thu
         </button>
         <button class="chi action-button" onclick="openForm('chi')">
-            <i class="fas fa-minus-circle"></i> Chi
+            <i class="fas fa-arrow-down"></i> Chi
         </button>
     </div>
 
-    <!-- Form Box - iOS Modal/Grouped style -->
-    <div class="form-box" id="formBox">
-        <h3 id="formTitle" style="padding: 0; margin-bottom: 20px;"></h3>
-
-        <!-- Input Group (Ngay) -->
-        <label for="ngay" style="font-size: 15px; color: var(--ios-text-secondary); margin-bottom: 5px; display: block;">Ngày giao dịch</label>
-        <input type="date" id="ngay">
-        
-        <!-- Input Group (So Tien) -->
-        <label for="sotien" style="font-size: 15px; color: var(--ios-text-secondary); margin-bottom: 5px; display: block;">Số tiền</label>
-        <input type="text" id="sotien" placeholder="Nhập số tiền" oninput="formatAndSanitizeNumber(this)">
-        
-        <!-- Textarea Group (Chi Tiet) -->
-        <label for="chitiet" style="font-size: 15px; color: var(--ios-text-secondary); margin-bottom: 5px; display: block;">Chi tiết</label>
-        <textarea id="chitiet" rows="3" placeholder="Ghi chú chi tiết..."></textarea>
-
-        <button id="save-btn"
-                onclick="saveData()">Lưu giao dịch</button>
-    </div>
-
-    <!-- History Header -->
-    <h3><i class="fas fa-history" style="color: var(--ios-text-secondary); margin-right: 5px;"></i> Lịch sử giao dịch</h3>
+    <h3 class="section-title">Lịch sử</h3>
     <div id="history"></div>
-
 </div>
 
-<!-- Template for Transaction Details -->
-<template id="transactionDetailTemplate">
-    <div class="transaction-detail-item">
-        <div class="detail-icon"></div>
-        <div class="detail-content">
-            <div class="detail-main-info">
-                <span class="detail-type"></span>
-                <span class="detail-amount"></span>
-            </div>
-            <div class="detail-note"></div>
-        </div>
+<div id="input-form-overlay" onclick="closeForm()"></div>
+
+<div class="form-box" id="formBox">
+    <div class="form-header">
+        <h3 id="formTitle"></h3>
+        <button class="close-form-btn" onclick="closeForm()">
+            <i class="fas fa-times"></i>
+        </button>
     </div>
-</template>
+    
+    <label for="ngay" style="font-size: 15px; color: var(--ios-text-secondary); margin-left: 2px;">Ngày giao dịch</label>
+    <input type="date" id="ngay">
+    
+    <label for="sotien" style="font-size: 15px; color: var(--ios-text-secondary); margin-left: 2px;">Số tiền</label>
+    <input type="text" id="sotien" placeholder="0 đ" oninput="formatAndSanitizeNumber(this)" inputmode="numeric">
+    
+    <label for="chitiet" style="font-size: 15px; color: var(--ios-text-secondary); margin-left: 2px;">Chi tiết</label>
+    <textarea id="chitiet" rows="3" placeholder="Ví dụ: Ăn sáng, tiền nhà..."></textarea>
+    
+    <button id="save-btn" onclick="saveData()">Lưu giao dịch</button>
+</div>
+
+<div id="detail-modal-overlay">
+    <div class="detail-modal-card">
+        <div class="modal-header">
+            <span class="modal-title" id="modal-date-title">Ngày ...</span>
+            <button class="close-modal-btn" onclick="closeDetailModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="modal-body-content">
+            </div>
+    </div>
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, onValue }
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // DO NOT CHANGE LOGIC OR FIREBASE CONFIG
     const firebaseConfig = {
         apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
         authDomain: "chitieu-7263e.firebaseapp.com",
@@ -535,18 +515,27 @@
 
     let currentType = "";
     const lichsuRef = ref(db, "vi/lichsu");
+    
+    window.dailyDataStore = {};
 
-    // Lấy ngày hiện tại ở định dạng yyyy-mm-dd
+    function getVietnameseDateString(dateStr) {
+        const date = new Date(dateStr);
+        const daysVN = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        const dayName = daysVN[date.getDay()];
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${dayName}, ${day}/${month}/${year}`;
+    }
+
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
     const todayDateString = `${yyyy}-${mm}-${dd}`;
     
-    // Hàm định dạng số có dấu chấm ngăn cách hàng nghìn (Không thay đổi)
     window.formatAndSanitizeNumber = function(input) {
         let value = input.value.replace(/\D/g, '');
-
         if (value) {
             input.setAttribute('data-numeric-value', value);
             input.value = Number(value).toLocaleString('vi-VN');
@@ -556,46 +545,50 @@
         }
     }
 
-    // Custom Alert Logic (Replacing window.alert)
     window.showAlert = function(message) {
         document.getElementById('alert-message').innerText = message;
         document.getElementById('custom-alert').classList.add('show');
     }
-
     window.closeAlert = function() {
         document.getElementById('custom-alert').classList.remove('show');
     }
 
-
+    // --- MODIFIED: OPEN FORM CENTER ANIMATION ---
     window.openForm = function(type) {
         currentType = type;
         const formBox = document.getElementById("formBox");
+        const overlay = document.getElementById("input-form-overlay");
         
         document.getElementById("ngay").value = todayDateString;
-
         document.getElementById("sotien").value = "";
         document.getElementById("sotien").removeAttribute('data-numeric-value');
         document.getElementById("chitiet").value = "";
 
+        // Show Overlay & Form
+        overlay.classList.add("show");
         formBox.classList.add("show");
+        
         document.getElementById("formTitle").innerHTML =
-            type === "thu" ? '<i class="fas fa-arrow-circle-up" style="color: var(--ios-green);"></i> Thêm khoản Thu' : '<i class="fas fa-arrow-circle-down" style="color: var(--ios-red);"></i> Thêm khoản Chi';
+            type === "thu" ? '<span style="color:var(--ios-green)">Thêm khoản Thu</span>' : '<span style="color:var(--ios-red)">Thêm khoản Chi</span>';
     };
 
-    // Lưu giao dịch THU/CHI (Không thay đổi logic)
+    // --- NEW: CLOSE FORM FUNCTION ---
+    window.closeForm = function() {
+        document.getElementById("formBox").classList.remove("show");
+        document.getElementById("input-form-overlay").classList.remove("show");
+    }
+
     window.saveData = function() {
         let ngay = document.getElementById("ngay").value;
         let sotienElement = document.getElementById("sotien");
-        // Lấy giá trị số nguyên từ data-numeric-value
         let sotien = Number(sotienElement.getAttribute('data-numeric-value') || 0);
         let chitiet = document.getElementById("chitiet").value;
 
         if (!ngay || !sotien || sotien <= 0) {
-            showAlert("Vui lòng nhập ngày và số tiền hợp lệ!");
+            showAlert("Vui lòng nhập đủ thông tin!");
             return;
         }
 
-        // Ghi vào vi/lichsu
         push(lichsuRef, {
             loai: currentType,
             ngay,
@@ -604,142 +597,157 @@
             time: Date.now()
         });
         
-        // Cập nhật UI
-        document.getElementById("formBox").classList.remove("show");
+        // Close form on success
+        closeForm();
+        
+        // Clear data
         document.getElementById("ngay").value = "";
         document.getElementById("sotien").value = "";
         document.getElementById("sotien").removeAttribute('data-numeric-value');
         document.getElementById("chitiet").value = "";
-
-        showAlert("Đã lưu giao dịch!");
+        
+        showAlert("Đã lưu thành công!");
     };
 
-    // Bật/tắt hiển thị chi tiết giao dịch (Không thay đổi logic)
-    window.toggleDetails = function(date) {
-        const detailContainer = document.getElementById(`details-${date}`);
-        const button = document.querySelector(`.detail-toggle-btn[onclick*="${date}"]`);
-        
-        if (detailContainer.classList.contains('show')) {
-            detailContainer.classList.remove('show');
-            button.innerHTML = 'Chi tiết <i class="fas fa-chevron-right" style="font-size: 14px;"></i>';
-        } else {
-            detailContainer.classList.add('show');
-            button.innerHTML = '<i class="fas fa-chevron-down" style="font-size: 14px;"></i> Thu gọn';
-        }
-    }
+    // ===========================================
+    // VIEW DETAIL MODAL LOGIC
+    // ===========================================
+    window.openDetailModal = function(dateKey) {
+        const data = window.dailyDataStore[dateKey];
+        if (!data) return;
 
-    // Load lịch sử ví (Tổng hợp theo ngày) VÀ TÍNH SỐ DƯ, TỔNG THU, TỔNG CHI (Không thay đổi logic)
+        document.getElementById('modal-date-title').innerText = getVietnameseDateString(dateKey);
+        
+        const modalBody = document.getElementById('modal-body-content');
+        let html = '';
+
+        const sortedTrans = data.transactions.sort((a, b) => b.time - a.time);
+
+        if(sortedTrans.length === 0) {
+             html = '<p style="text-align:center; color:#999; margin-top:20px;">Trống</p>';
+        } else {
+            sortedTrans.forEach(item => {
+                const isThu = item.loai === 'thu';
+                const className = isThu ? 'thu' : 'chi';
+                const sign = isThu ? '+' : '-';
+                const iconClass = isThu ? 'fa-piggy-bank' : 'fa-bag-shopping';
+                const badgeText = isThu ? 'THU' : 'CHI';
+                
+                const timeObj = new Date(item.time);
+                const timeString = timeObj.getHours().toString().padStart(2, '0') + ':' + 
+                                   timeObj.getMinutes().toString().padStart(2, '0');
+
+                html += `
+                    <div class="modal-trans-item ${className}">
+                        <div class="trans-icon-circle">
+                            <i class="fa-solid ${iconClass}"></i>
+                        </div>
+                        <div class="trans-content">
+                            <div class="trans-row-top">
+                                <div class="trans-meta">
+                                    <span class="trans-time">${timeString}</span>
+                                    <span class="trans-badge">${badgeText}</span>
+                                </div>
+                                <span class="trans-amount">${sign}${item.sotien.toLocaleString('vi-VN')} đ</span>
+                            </div>
+                            <div class="trans-note">
+                                ${item.chitiet || "Không có ghi chú"}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        modalBody.innerHTML = html;
+        document.getElementById('detail-modal-overlay').classList.add('show');
+    };
+
+    window.closeDetailModal = function() {
+        document.getElementById('detail-modal-overlay').classList.remove('show');
+    };
+
+    document.getElementById('detail-modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDetailModal();
+        }
+    });
+
+    // ===========================================
+    // FIREBASE LISTENER
+    // ===========================================
     onValue(lichsuRef, snapshot => {
         const historyData = snapshot.val();
         const historyElement = document.getElementById("history");
-        const detailTemplate = document.getElementById("transactionDetailTemplate");
         
-        let totalRevenue = 0; // Tổng Thu
-        let totalExpense = 0; // Tổng Chi
-        let finalBalance = 0; // Tổng Dư cuối kỳ
+        let totalRevenue = 0;
+        let totalExpense = 0;
+        let finalBalance = 0;
+
+        window.dailyDataStore = {};
 
         if (!historyData) {
-            historyElement.innerHTML = "<p style='text-align: center; color: var(--ios-text-secondary); margin-top: 20px; font-size: 16px;'>Chưa có giao dịch nào.</p>";
-            document.getElementById("sodu-value").innerText = "0 đ";
-            document.getElementById("tong-thu").innerText = "0 đ";
-            document.getElementById("tong-chi").innerText = "0 đ";
-            document.getElementById("tong-du").innerText = "0 đ";
+            historyElement.innerHTML = "<p style='text-align: center; color: var(--ios-text-secondary); margin-top: 20px;'>Chưa có giao dịch.</p>";
             return;
         }
 
-        // 1. Tổng hợp dữ liệu theo ngày và tính toán tổng cộng
-        const dailySummary = {};
         const transactions = Object.entries(historyData)
             .map(([key, value]) => ({ id: key, ...value }))
-            .sort((a, b) => b.time - a.time); // Sort by time (latest first)
+            .sort((a, b) => b.time - a.time);
 
         transactions.forEach(d => {
-            // Đảm bảo chỉ xử lý 'thu' và 'chi'
-            if (d.loai !== 'thu' && d.loai !== 'chi') {
-                return; 
-            }
+            if (d.loai !== 'thu' && d.loai !== 'chi') return;
             
             const ngay = d.ngay;
-            if (!dailySummary[ngay]) {
-                dailySummary[ngay] = { totalThu: 0, totalChi: 0, transactions: [] };
+            if (!window.dailyDataStore[ngay]) {
+                window.dailyDataStore[ngay] = { totalThu: 0, totalChi: 0, transactions: [] };
             }
 
             const sotien = d.sotien || 0;
             if (d.loai === 'thu') {
-                dailySummary[ngay].totalThu += sotien;
+                window.dailyDataStore[ngay].totalThu += sotien;
                 totalRevenue += sotien;
                 finalBalance += sotien;
             } else if (d.loai === 'chi') {
-                dailySummary[ngay].totalChi += sotien;
+                window.dailyDataStore[ngay].totalChi += sotien;
                 totalExpense += sotien;
                 finalBalance -= sotien;
             }
-            dailySummary[ngay].transactions.push(d);
+            window.dailyDataStore[ngay].transactions.push(d);
         });
 
-        // 🎯 Cập nhật Số dư và Tổng kết (Dùng toLocaleString('vi-VN') để có dấu chấm)
         document.getElementById("sodu-value").innerText = finalBalance.toLocaleString('vi-VN') + " đ";
         document.getElementById("tong-thu").innerText = totalRevenue.toLocaleString('vi-VN') + " đ";
         document.getElementById("tong-chi").innerText = totalExpense.toLocaleString('vi-VN') + " đ";
         document.getElementById("tong-du").innerText = finalBalance.toLocaleString('vi-VN') + " đ";
         
-        // 2. Tạo HTML hiển thị
         let html = "";
-        let index = 0;
         
-        for (const ngay in dailySummary) {
-            const summary = dailySummary[ngay];
-            const dateDisplay = new Date(ngay).toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const sortedDates = Object.keys(window.dailyDataStore).sort((a,b) => new Date(b) - new Date(a));
 
-            // Phần tổng hợp
+        for (const ngay of sortedDates) {
+            const summary = window.dailyDataStore[ngay];
+            const dateDisplay = getVietnameseDateString(ngay);
+
             html += `
-                <div class="daily-summary-item" style="animation-delay: ${index * 0.05}s;">
-                    <div class="summary-header">
-                        <span class="summary-date"><i class="far fa-calendar-alt"></i> Ngày ${dateDisplay}</span>
-                        <button class="detail-toggle-btn" onclick="toggleDetails('${ngay}')">
-                            Chi tiết <i class="fas fa-chevron-right" style="font-size: 14px;"></i>
-                        </button>
-                    </div>
-
-                    <div class="summary-totals">
-                        <div>Thu: <span class="thu-text">+${summary.totalThu.toLocaleString('vi-VN')} đ</span></div>
-                        <div>Chi: <span class="chi-text">-${summary.totalChi.toLocaleString('vi-VN')} đ</span></div>
+                <div class="daily-summary-item" onclick="openDetailModal('${ngay}')">
+                    <div class="summary-left">
+                        <span class="summary-date">${dateDisplay}</span>
+                        <span class="summary-mini-total">
+                            <span style="color:var(--ios-green)">+${summary.totalThu.toLocaleString('vi-VN')}</span>
+                            &nbsp;/&nbsp; 
+                            <span style="color:var(--ios-red)">-${summary.totalChi.toLocaleString('vi-VN')}</span>
+                        </span>
                     </div>
                     
-                    <div id="details-${ngay}" class="detail-container">
-                        </div>
+                    <button class="detail-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
             `;
-            index++;
         }
         
         historyElement.innerHTML = html;
-
-        // 3. Chèn chi tiết giao dịch vào các container tương ứng
-        for (const ngay in dailySummary) {
-            const summary = dailySummary[ngay];
-            const detailContainer = document.getElementById(`details-${ngay}`);
-            
-            summary.transactions.forEach(d => {
-                const clone = document.importNode(detailTemplate.content, true);
-                const item = clone.querySelector('.transaction-detail-item');
-                
-                const loaiText = d.loai === 'thu' ? 'Thu' : 'Chi';
-                const loaiClass = d.loai === 'thu' ? 'thu-text' : 'chi-text';
-                const sign = d.loai === 'thu' ? '+' : '-';
-                const icon = d.loai === 'thu' ? 
-                    '<i class="fas fa-piggy-bank" style="color: var(--ios-green);"></i>' : 
-                    '<i class="fas fa-shopping-bag" style="color: var(--ios-red);"></i>';
-
-                item.querySelector('.detail-icon').innerHTML = icon;
-                item.querySelector('.detail-type').innerText = loaiText;
-                item.querySelector('.detail-amount').innerHTML = 
-                    `<span class="${loaiClass}">${sign}${d.sotien.toLocaleString('vi-VN')} đ</span>`;
-                item.querySelector('.detail-note').innerText = d.chitiet || "Không ghi chú";
-
-                detailContainer.appendChild(clone);
-            });
-        }
     });
 </script>
 
