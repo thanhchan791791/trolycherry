@@ -211,11 +211,15 @@
         #ingredientList li button.delete-btn { background: rgba(255, 59, 48, 0.1); color: var(--ios-red); }
         #currentRecipeList button { color: var(--ios-red); background: rgba(255, 59, 48, 0.1); }
         
-        #btnToggleAddForm { margin-top: 10px; background: rgba(0,122,255,0.1); color: var(--ios-blue); }
-        #btnToggleAddForm.active { background: rgba(255, 59, 48, 0.1); color: var(--ios-red); }
+        #btnToggleAddForm, #btnToggleAddMenuForm { margin-top: 10px; background: rgba(0,122,255,0.1); color: var(--ios-blue); }
+        #btnToggleAddForm.active, #btnToggleAddMenuForm.active { background: rgba(255, 59, 48, 0.1); color: var(--ios-red); }
 
         /* Run Test Button Special Style */
         #btnRunTest { background: var(--ios-green); box-shadow: 0 2px 8px rgba(52, 199, 89, 0.25); }
+        
+        /* Save Menu Button Special Style */
+        #btnAddMenu { background: var(--ios-green); box-shadow: 0 2px 8px rgba(52, 199, 89, 0.25); }
+
 
         /* --- RECIPE FORM SPECIALS --- */
         .recipe-form-item {
@@ -324,6 +328,26 @@
             <h2>Món Ăn</h2>
             <div style="position: sticky; top: 0; background: #fff; padding-bottom: 10px; z-index: 10;">
                 <input type="text" id="menuSearchInput" placeholder="🔍 Tìm kiếm món ăn...">
+            </div>
+            
+            <button id="btnToggleAddMenuForm">➕ Thêm món ăn mới</button> 
+            
+            <div id="menuFormContainer" class="hidden" style="background: var(--ios-gray-light); padding: 16px; border-radius: 12px; margin-top: 15px; margin-bottom: 20px;">
+                <h3 style="margin-top: 0;">Thông tin món ăn mới</h3>
+
+                <label class="label">Tên món ăn</label>
+                <input type="text" id="menuName" placeholder="Ví dụ: Phở Bò">
+
+                <label class="label">Loại</label>
+                <select id="menuType">
+                    <option value="food">Food</option>
+                    <option value="drink">Drink</option>
+                </select>
+
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="btnAddMenu" style="flex: 2; margin-bottom: 0;">💾 Lưu Món Ăn</button>
+                    <button id="btnCancelMenuEdit" style="flex: 1; margin-bottom: 0;">Hủy</button> 
+                </div>
             </div>
 
             <h3>Food</h3>
@@ -454,6 +478,18 @@
         const drinkList = document.getElementById("drinkList");
         const menuSearchInput = document.getElementById("menuSearchInput");
         
+        // --- NEW MENU ELEMENTS ---
+        const btnToggleAddMenuForm = document.getElementById("btnToggleAddMenuForm");
+        const menuFormContainer = document.getElementById("menuFormContainer");
+        const menuName = document.getElementById("menuName");
+        // const menuPrice = document.getElementById("menuPrice"); // REMOVED
+        const menuType = document.getElementById("menuType");
+        // const menuStatus = document.getElementById("menuStatus"); // REMOVED
+        // const menuImageUrl = document.getElementById("menuImageUrl"); // REMOVED
+        const btnAddMenu = document.getElementById("btnAddMenu");
+        const btnCancelMenuEdit = document.getElementById("btnCancelMenuEdit");
+        // -------------------------
+
         // Ingredient Elements
         const ingredientSearchInput = document.getElementById("ingredientSearchInput");
         const ingredientFormContainer = document.getElementById("ingredientFormContainer"); 
@@ -487,6 +523,7 @@
         let allDrinkData = {}; 
         let currentRecipe = { id: null, name: null, existingRecipe: {} };
         let editingIngredientId = null; 
+        //let editingDishId = null; // Cần nếu muốn hỗ trợ sửa món ăn sau này
 
         // ---------------------------
         //   NAVIGATION LOGIC
@@ -498,6 +535,11 @@
             testSection.classList.add("hidden");
             recipeFormSection.classList.add("hidden");
             ingredientFormContainer.classList.add("hidden");
+            // Thêm logic ẩn form Menu
+            menuFormContainer.classList.add("hidden");
+            btnToggleAddMenuForm.textContent = "➕ Thêm món ăn mới";
+            btnToggleAddMenuForm.classList.remove("active");
+            resetMenuForm(); 
         }
 
         btnShowMenu.addEventListener("click", () => {
@@ -521,6 +563,73 @@
             testLog.classList.add("hidden");
             testLog.innerHTML = "";
         });
+
+        // ---------------------------
+        //   MENU ADD LOGIC (SIMPLIFIED)
+        // ---------------------------
+        
+        btnToggleAddMenuForm.addEventListener("click", () => {
+            const isHidden = menuFormContainer.classList.contains("hidden");
+            if (isHidden) {
+                menuFormContainer.classList.remove("hidden");
+                btnToggleAddMenuForm.textContent = "➖ Đóng form";
+                btnToggleAddMenuForm.classList.add("active");
+            } else {
+                menuFormContainer.classList.add("hidden");
+                btnToggleAddMenuForm.textContent = "➕ Thêm món ăn mới";
+                btnToggleAddMenuForm.classList.remove("active");
+                resetMenuForm();
+            }
+        });
+
+        btnCancelMenuEdit.addEventListener("click", () => {
+            menuFormContainer.classList.add("hidden");
+            btnToggleAddMenuForm.textContent = "➕ Thêm món ăn mới";
+            btnToggleAddMenuForm.classList.remove("active");
+            resetMenuForm();
+        });
+
+        btnAddMenu.addEventListener("click", addDish);
+        
+        function resetMenuForm() {
+            //editingDishId = null; 
+            menuName.value = "";
+            menuType.value = "food";
+            // Các trường khác không cần reset vì không còn trong form
+            btnAddMenu.textContent = "💾 Lưu Món Ăn";
+            btnAddMenu.style.backgroundColor = "";
+            btnCancelMenuEdit.classList.remove("hidden"); // Luôn hiển thị khi thêm mới
+        }
+
+        function addDish() {
+            const name = menuName.value.trim();
+            const type = menuType.value;
+
+            // Chỉ kiểm tra Tên món ăn
+            if (!name) { alert("Vui lòng nhập Tên món ăn!"); return; }
+
+            const data = {
+                name: name,
+                price: 0, // Giá trị mặc định
+                status: "available", // Giá trị mặc định
+                imageUrl: "", // Giá trị mặc định
+                ingredients: {} // Đảm bảo trường ingredients là {} (trống)
+            };
+            
+            // Đường dẫn đến node 'food' hoặc 'drink'
+            const dbRef = ref(db, `menu/${type}`);
+
+            // Thêm món ăn mới
+            set(push(dbRef), data)
+                .then(() => { 
+                    alert(`Đã thêm món "${name}" vào ${type}!`); 
+                    resetMenuForm();
+                    menuFormContainer.classList.add("hidden");
+                    btnToggleAddMenuForm.textContent = "➕ Thêm món ăn mới";
+                    btnToggleAddMenuForm.classList.remove("active");
+                })
+                .catch(error => alert("Lỗi khi thêm món ăn: " + error.message));
+        }
 
         // ---------------------------
         //   TEST / DEDUCT STOCK LOGIC (NEW)
@@ -1002,4 +1111,3 @@
     </script>
 </body>
 </html>
-
