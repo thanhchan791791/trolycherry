@@ -238,7 +238,7 @@
         padding: 20px; /* Tăng padding */
         /* Border: 1px viền màu gold */
         border: 1px solid var(--color-gold); 
-        transition: transform 0.3s var(--transition-bezier), box-shadow 0.3s;
+        transition: transform 0.3s var(--transition-bezier), box-shadow 0.3s, border 0.3s, background 0.3s; /* Thêm transition cho mượt */
         cursor: pointer;
         position: relative;
         overflow: hidden; /* Dùng cho hiệu ứng góc */
@@ -254,6 +254,7 @@
         height: 100%;
         background-color: var(--color-gold);
         opacity: 0.8;
+        transition: background-color 0.3s;
     }
 
     .voucher-card:hover {
@@ -261,6 +262,28 @@
         box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
     }
     
+    /* NEW: Animation cho toàn bộ Voucher Card khi đạt được (ấn tượng hơn) */
+    .voucher-card.complete {
+        border: 2px solid var(--color-gold); 
+        box-shadow: 0 0 15px rgba(184, 134, 11, 0.6), var(--shadow-soft); 
+        background: linear-gradient(135deg, #FFF, #FFF8E1); /* Nền hơi vàng */
+        /* Thêm hiệu ứng lấp lánh nhẹ nhàng */
+        animation: glowPulse 2s infinite alternate;
+    }
+    
+    @keyframes glowPulse {
+        from {
+            box-shadow: 0 0 10px rgba(184, 134, 11, 0.4), var(--shadow-soft);
+        }
+        to {
+            box-shadow: 0 0 20px rgba(184, 134, 11, 0.8), var(--shadow-soft);
+        }
+    }
+    
+    .voucher-card.complete::before {
+        background-color: #38761D; /* Thanh bên đổi màu xanh lá */
+    }
+
     .voucher-icon {
         /* Đổi style icon: Dùng màu nền tối, chữ vàng */
         background-color: var(--color-dark-brown); 
@@ -277,6 +300,13 @@
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
         flex-shrink: 0;
         font-family: serif; /* Dùng font cổ điển hơn */
+        transition: background-color 0.3s, box-shadow 0.3s;
+    }
+    
+    /* NEW: Hiệu ứng đặc biệt cho icon khi đủ điểm */
+    .voucher-card.complete .voucher-icon {
+        background-color: #38761D; /* Màu xanh lá cây đậm */
+        box-shadow: 0 0 10px rgba(56, 118, 29, 0.8);
     }
     
     .voucher-details {
@@ -299,6 +329,42 @@
         font-style: italic;
     }
     
+    /* NEW: Style cho dòng hiển thị điểm cần tích thêm */
+    .voucher-diff-text {
+        margin-top: 5px;
+        font-size: 13px;
+        color: #9C6500; /* Màu cam/vàng ấm để nổi bật thông báo */
+        font-weight: 500;
+        font-style: normal;
+        /* Animation Base */
+        opacity: 0;
+        transform: translateY(5px);
+        animation: diffTextFadeIn 0.4s ease-out forwards;
+    }
+
+    /* Keyframe cho hiệu ứng Fade In mượt mà */
+    @keyframes diffTextFadeIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* NEW: Style cho trạng thái đã đủ điểm */
+    .voucher-diff-text.complete {
+        color: #38761D; /* Màu xanh lá cây cho trạng thái đạt */
+        font-weight: 700; 
+        /* Thêm hiệu ứng "pop" khi đạt được */
+        animation: completePopIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    }
+
+    /* Keyframe cho hiệu ứng Pop In khi hoàn thành */
+    @keyframes completePopIn {
+        0% { opacity: 0; transform: scale(0.8); }
+        70% { opacity: 1; transform: scale(1.05); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+
     .voucher-cost {
         min-width: 90px;
         text-align: right;
@@ -345,11 +411,12 @@
         
         <div class="voucher-list">
             
-            <div class="voucher-card">
+            <div class="voucher-card" id="card-50">
                 <div class="voucher-icon">50</div>
                 <div class="voucher-details">
                     <h4>Voucher Giảm 50.000 VNĐ</h4>
                     <p>Áp dụng cho mọi hóa đơn từ 500.000 VNĐ</p>
+                    <p class="voucher-diff-text" id="diff-50">Tra cứu để xem điểm cần tích thêm.</p>
                 </div>
                 <div class="voucher-cost">
                     50
@@ -357,11 +424,12 @@
                 </div>
             </div>
 
-            <div class="voucher-card">
+            <div class="voucher-card" id="card-100">
                 <div class="voucher-icon">100</div> 
                 <div class="voucher-details">
                     <h4>Voucher Giảm 100.000 VNĐ</h4>
                     <p>Giảm trừ trực tiếp vào tổng hóa đơn của bạn</p>
+                    <p class="voucher-diff-text" id="diff-100">Tra cứu để xem điểm cần tích thêm.</p>
                 </div>
                 <div class="voucher-cost">
                     100
@@ -369,11 +437,12 @@
                 </div>
             </div>
             
-            <div class="voucher-card">
+            <div class="voucher-card" id="card-150">
                 <div class="voucher-icon">150</div>
                 <div class="voucher-details">
                     <h4>Voucher Giảm 150.000 VNĐ</h4>
                     <p>Áp dụng cho mọi hóa đơn, không giới hạn giá trị</p>
+                    <p class="voucher-diff-text" id="diff-150">Tra cứu để xem điểm cần tích thêm.</p>
                 </div>
                 <div class="voucher-cost">
                     150
@@ -381,11 +450,12 @@
                 </div>
             </div>
             
-            <div class="voucher-card">
+            <div class="voucher-card" id="card-200">
                 <div class="voucher-icon">200</div>
                 <div class="voucher-details">
                     <h4>Voucher Tiệc Lớn 200.000 VNĐ</h4>
                     <p>Đặc quyền dùng cho bữa tiệc lớn tại Buôn Làng</p>
+                    <p class="voucher-diff-text" id="diff-200">Tra cứu để xem điểm cần tích thêm.</p>
                 </div>
                 <div class="voucher-cost">
                     200
@@ -451,9 +521,45 @@
     }
   }
 
+  // --- MODIFIED FUNCTION: Cập nhật thông tin điểm cần tích thêm trên Voucher ---
+  function updateVoucherDifference(currentPoints) {
+        // Danh sách các voucher, điểm cần thiết VÀ ID THẺ CHA
+        const vouchers = [
+            { id: 'diff-50', cost: 50, cardId: 'card-50' }, 
+            { id: 'diff-100', cost: 100, cardId: 'card-100' },
+            { id: 'diff-150', cost: 150, cardId: 'card-150' },
+            { id: 'diff-200', cost: 200, cardId: 'card-200' }
+        ];
+
+        vouchers.forEach(v => {
+            const diffElement = document.getElementById(v.id);
+            const cardElement = document.getElementById(v.cardId); // Lấy thẻ cha (voucher-card)
+
+            if (diffElement && cardElement) {
+                const requiredPoints = v.cost - currentPoints;
+                
+                // Reset animation state trước khi cập nhật
+                diffElement.style.animation = 'none';
+                diffElement.offsetHeight; /* trigger reflow */
+                diffElement.style.animation = null; 
+
+                if (requiredPoints <= 0) {
+                    // Nếu đủ điểm, hiển thị thông báo hoàn thành, thêm class 'complete' và animation
+                    diffElement.innerHTML = `🌟 **Chúc mừng!** Bạn đã đủ điểm để đổi Voucher này!`;
+                    diffElement.className = "voucher-diff-text complete";
+                    cardElement.classList.add('complete'); 
+                } else {
+                    // Nếu chưa đủ điểm, hiển thị số điểm cần thêm và xóa class 'complete'
+                    diffElement.innerHTML = `Bạn cần tích thêm **${requiredPoints.toLocaleString()}** điểm Êđê nữa.`;
+                    diffElement.className = "voucher-diff-text";
+                    cardElement.classList.remove('complete'); 
+                }
+            }
+        });
+  }
+
 
   // --- HÀM TÍNH ĐIỂM TÍCH LŨY, TÍNH ĐIỂM CÒN LẠI VÀ CẬP NHẬT DB ---
-  // KHÔNG SỬA TÊN FUNCTION
   async function getLoyaltyPoints() {
     const phoneInput = document.getElementById("customerPhoneInput");
     const phone = phoneInput.value.trim();
@@ -465,6 +571,8 @@
       // Đổi HTML để phù hợp với UI mới
       resultDiv.innerHTML = "<span class='result-title'>Ê-xem!</span> Vui lòng nhập **Số điện thoại** của bạn.";
       resultDiv.className = "info";
+      // Cập nhật lại voucher về trạng thái ban đầu khi lỗi
+      updateVoucherDifference(-99999);
       return;
     }
 
@@ -481,6 +589,7 @@
         // Đổi HTML để phù hợp với UI mới
         resultDiv.innerHTML = `<span class='result-title'>Lỗi Hệ Thống</span><br>Yàng (Trời) ơi! Hệ thống đang có chút trục trặc. Xin bạn đợi lát.`;
         resultDiv.className = "error";
+        updateVoucherDifference(-99999); // Cập nhật lại voucher về trạng thái ban đầu khi lỗi
         return;
       }
 
@@ -514,6 +623,7 @@
             **Bạn chưa đăng ký thành viên.** Mời bạn ghé quầy gặp **Pô** để đăng ký ngay và nhận quà nha!
           `;
           resultDiv.className = "error";
+          updateVoucherDifference(-99999); // Cập nhật lại voucher về trạng thái ban đầu khi lỗi
           return;
       } 
       
@@ -535,6 +645,10 @@
 
       // Tính điểm hiện tại (KHÔNG SỬA LOGIC)
       const currentPoints = Math.max(0, accumulatedPoints - redeemedPoints);
+
+      // --- NEW CALL: Cập nhật hiển thị điểm cần tích thêm trên Voucher ---
+      updateVoucherDifference(currentPoints);
+
 
       // 3. CẬP NHẬT DỮ LIỆU ĐIỂM MỚI VÀO DB (KHÔNG SỬA LOGIC)
       await updateLoyaltyDataInDB(phone, totalAmount, accumulatedPoints, redeemedPoints, currentPoints);
