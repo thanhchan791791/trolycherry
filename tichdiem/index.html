@@ -22,6 +22,9 @@
       --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.08);
       --shadow-light: 0 4px 10px rgba(0, 0, 0, 0.05);
       --transition-bezier: cubic-bezier(0.25, 0.1, 0.25, 1);
+      /* Màu mới cho voucher 5 sao */
+      --color-gold: #B8860B; /* Vàng kim loại */
+      --color-dark-brown: #5C4033; /* Nâu sẫm */
     }
 
     body {
@@ -201,7 +204,7 @@
     }
     
     /* * ----------------------------------------
-     * 4. VOUCHER SECTION (NEW)
+     * 4. VOUCHER SECTION (REDESIGN: 5-STAR PROFESSIONAL)
      * ----------------------------------------
      */
     .voucher-section {
@@ -210,11 +213,13 @@
     }
     
     .voucher-section h3 {
-        font-size: 20px;
-        color: var(--color-primary);
+        font-size: 22px;
+        color: var(--color-dark-brown); /* Màu nâu sẫm lịch lãm */
         margin-bottom: 20px;
-        font-weight: 600;
+        font-weight: 700;
         text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
     
     .voucher-list {
@@ -226,68 +231,94 @@
     .voucher-card {
         display: flex;
         align-items: center;
-        background-color: var(--color-card-bg);
+        background: linear-gradient(135deg, #FFF, #FAFAFA); /* Nền gradient nhẹ */
         border-radius: var(--border-radius-sm);
-        box-shadow: var(--shadow-light);
-        padding: 15px;
-        border: 1px solid var(--color-secondary); /* Viền màu gỗ nhẹ */
-        transition: transform 0.2s var(--transition-bezier), box-shadow 0.2s;
+        /* Box shadow thanh lịch */
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); 
+        padding: 20px; /* Tăng padding */
+        /* Border: 1px viền màu gold */
+        border: 1px solid var(--color-gold); 
+        transition: transform 0.3s var(--transition-bezier), box-shadow 0.3s;
         cursor: pointer;
+        position: relative;
+        overflow: hidden; /* Dùng cho hiệu ứng góc */
     }
     
+    /* Hiệu ứng góc: Thêm một dải màu nhỏ ở góc */
+    .voucher-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 10px;
+        height: 100%;
+        background-color: var(--color-gold);
+        opacity: 0.8;
+    }
+
     .voucher-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
     }
     
     .voucher-icon {
-        background-color: var(--color-primary);
-        color: white;
-        min-width: 50px;
-        height: 50px;
-        border-radius: 50%;
+        /* Đổi style icon: Dùng màu nền tối, chữ vàng */
+        background-color: var(--color-dark-brown); 
+        color: var(--color-gold);
+        min-width: 55px;
+        height: 55px;
+        border-radius: var(--border-radius-sm); /* Hình vuông bo góc */
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 24px;
-        font-weight: 700;
-        margin-right: 15px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        font-size: 26px; /* Chữ to hơn */
+        font-weight: 800;
+        margin-right: 20px; /* Tăng khoảng cách */
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
         flex-shrink: 0;
+        font-family: serif; /* Dùng font cổ điển hơn */
     }
     
     .voucher-details {
         flex-grow: 1;
+        margin-left: 5px; /* Điều chỉnh để có khoảng cách với dải góc */
     }
     
     .voucher-details h4 {
         margin: 0;
-        font-size: 16px;
-        font-weight: 600;
-        color: #B8860B; /* Màu vàng đồng/kim loại */
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--color-dark-brown); /* Tiêu đề màu nâu sẫm */
+        letter-spacing: 0.5px;
     }
     
     .voucher-details p {
-        margin: 3px 0 0 0;
+        margin: 5px 0 0 0;
         font-size: 14px;
         color: var(--color-text-light);
+        font-style: italic;
     }
     
     .voucher-cost {
-        min-width: 80px;
+        min-width: 90px;
         text-align: right;
-        font-weight: 700;
-        font-size: 18px;
-        color: var(--color-primary);
+        font-weight: 800;
+        font-size: 20px;
+        color: var(--color-gold); /* Điểm số màu vàng gold nổi bật */
         display: flex;
         flex-direction: column;
         align-items: flex-end;
+        border-left: 2px dashed #E0E0E0; /* Thêm đường phân cách mờ */
+        padding-left: 15px;
+        margin-left: 10px;
+        line-height: 1.2;
     }
     
     .voucher-cost small {
         font-size: 12px;
         font-weight: 500;
         color: var(--color-text-light);
+        margin-top: 3px;
     }
 
   </style>
@@ -310,15 +341,15 @@
     </div>
     
     <div class="voucher-section">
-        <h3>🎁 Đổi Quà Buôn Làng 🎁</h3>
+        <h3>🎁 ƯU ĐÃI ĐỘC QUYỀN TỪ BUÔN LÀNG 🎁</h3>
         
         <div class="voucher-list">
             
             <div class="voucher-card">
                 <div class="voucher-icon">50</div>
                 <div class="voucher-details">
-                    <h4>Giảm 50.000 VNĐ</h4>
-                    <p>Áp dụng cho mọi hóa đơn từ 500K</p>
+                    <h4>Voucher Giảm 50.000 VNĐ</h4>
+                    <p>Áp dụng cho mọi hóa đơn từ 500.000 VNĐ</p>
                 </div>
                 <div class="voucher-cost">
                     50
@@ -327,10 +358,10 @@
             </div>
 
             <div class="voucher-card">
-                <div class="voucher-icon" style="background-color: #A0522D;">100</div>
+                <div class="voucher-icon">100</div> 
                 <div class="voucher-details">
-                    <h4>Giảm 100.000 VNĐ</h4>
-                    <p>Giảm trừ trực tiếp vào hóa đơn</p>
+                    <h4>Voucher Giảm 100.000 VNĐ</h4>
+                    <p>Giảm trừ trực tiếp vào tổng hóa đơn của bạn</p>
                 </div>
                 <div class="voucher-cost">
                     100
@@ -339,10 +370,10 @@
             </div>
             
             <div class="voucher-card">
-                <div class="voucher-icon" style="background-color: #C07936;">150</div>
+                <div class="voucher-icon">150</div>
                 <div class="voucher-details">
-                    <h4>Giảm 150.000 VNĐ</h4>
-                    <p>Áp dụng cho mọi hóa đơn không giới hạn</p>
+                    <h4>Voucher Giảm 150.000 VNĐ</h4>
+                    <p>Áp dụng cho mọi hóa đơn, không giới hạn giá trị</p>
                 </div>
                 <div class="voucher-cost">
                     150
@@ -351,10 +382,10 @@
             </div>
             
             <div class="voucher-card">
-                <div class="voucher-icon" style="background-color: #5C4033;">200</div>
+                <div class="voucher-icon">200</div>
                 <div class="voucher-details">
-                    <h4>Giảm 200.000 VNĐ</h4>
-                    <p>Dùng cho bữa tiệc lớn tại Buôn Làng</p>
+                    <h4>Voucher Tiệc Lớn 200.000 VNĐ</h4>
+                    <p>Đặc quyền dùng cho bữa tiệc lớn tại Buôn Làng</p>
                 </div>
                 <div class="voucher-cost">
                     200
