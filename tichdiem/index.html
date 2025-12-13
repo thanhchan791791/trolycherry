@@ -411,24 +411,11 @@
         
         <div class="voucher-list">
             
-            <div class="voucher-card" id="card-50">
+            <div class="voucher-card" id="card-100">
                 <div class="voucher-icon">50</div>
                 <div class="voucher-details">
                     <h4>Voucher Giảm 50.000 VNĐ</h4>
                     <p>Áp dụng cho mọi hóa đơn từ 500.000 VNĐ</p>
-                    <p class="voucher-diff-text" id="diff-50">Tra cứu để xem điểm cần tích thêm.</p>
-                </div>
-                <div class="voucher-cost">
-                    50
-                    <small>Điểm Êđê</small>
-                </div>
-            </div>
-
-            <div class="voucher-card" id="card-100">
-                <div class="voucher-icon">100</div> 
-                <div class="voucher-details">
-                    <h4>Voucher Giảm 100.000 VNĐ</h4>
-                    <p>Giảm trừ trực tiếp vào tổng hóa đơn của bạn</p>
                     <p class="voucher-diff-text" id="diff-100">Tra cứu để xem điểm cần tích thêm.</p>
                 </div>
                 <div class="voucher-cost">
@@ -436,29 +423,42 @@
                     <small>Điểm Êđê</small>
                 </div>
             </div>
-            
-            <div class="voucher-card" id="card-150">
-                <div class="voucher-icon">150</div>
-                <div class="voucher-details">
-                    <h4>Voucher Giảm 150.000 VNĐ</h4>
-                    <p>Áp dụng cho mọi hóa đơn, không giới hạn giá trị</p>
-                    <p class="voucher-diff-text" id="diff-150">Tra cứu để xem điểm cần tích thêm.</p>
-                </div>
-                <div class="voucher-cost">
-                    150
-                    <small>Điểm Êđê</small>
-                </div>
-            </div>
-            
+
             <div class="voucher-card" id="card-200">
-                <div class="voucher-icon">200</div>
+                <div class="voucher-icon">100</div> 
                 <div class="voucher-details">
-                    <h4>Voucher Tiệc Lớn 200.000 VNĐ</h4>
-                    <p>Đặc quyền dùng cho bữa tiệc lớn tại Buôn Làng</p>
+                    <h4>Voucher Giảm 100.000 VNĐ</h4>
+                    <p>Giảm trừ trực tiếp vào tổng hóa đơn của bạn</p>
                     <p class="voucher-diff-text" id="diff-200">Tra cứu để xem điểm cần tích thêm.</p>
                 </div>
                 <div class="voucher-cost">
                     200
+                    <small>Điểm Êđê</small>
+                </div>
+            </div>
+            
+            <div class="voucher-card" id="card-300">
+                <div class="voucher-icon">150</div>
+                <div class="voucher-details">
+                    <h4>Voucher Giảm 150.000 VNĐ</h4>
+                    <p>Áp dụng cho mọi hóa đơn, không giới hạn giá trị</p>
+                    <p class="voucher-diff-text" id="diff-300">Tra cứu để xem điểm cần tích thêm.</p>
+                </div>
+                <div class="voucher-cost">
+                    300
+                    <small>Điểm Êđê</small>
+                </div>
+            </div>
+            
+            <div class="voucher-card" id="card-400">
+                <div class="voucher-icon">200</div>
+                <div class="voucher-details">
+                    <h4>Voucher Tiệc Lớn 200.000 VNĐ</h4>
+                    <p>Đặc quyền dùng cho bữa tiệc lớn tại Buôn Làng</p>
+                    <p class="voucher-diff-text" id="diff-400">Tra cứu để xem điểm cần tích thêm.</p>
+                </div>
+                <div class="voucher-cost">
+                    400
                     <small>Điểm Êđê</small>
                 </div>
             </div>
@@ -488,7 +488,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Quy tắc tính điểm: 1,000,000 VNĐ = 100 điểm Êđê.
+  // Quy tắc tính điểm: 1,000,000 VNĐ = 100 điểm Êđê. (GIỮ NGUYÊN)
   const POINTS_PER_MILLION = 100; 
 
   /**
@@ -523,12 +523,12 @@
 
   // --- MODIFIED FUNCTION: Cập nhật thông tin điểm cần tích thêm trên Voucher ---
   function updateVoucherDifference(currentPoints) {
-        // Danh sách các voucher, điểm cần thiết VÀ ID THẺ CHA
+        // Danh sách các voucher, điểm cần thiết VÀ ID THẺ CHA (ĐÃ SỬA: Cập nhật Cost và ID)
         const vouchers = [
-            { id: 'diff-50', cost: 50, cardId: 'card-50' }, 
-            { id: 'diff-100', cost: 100, cardId: 'card-100' },
-            { id: 'diff-150', cost: 150, cardId: 'card-150' },
-            { id: 'diff-200', cost: 200, cardId: 'card-200' }
+            { id: 'diff-100', cost: 100, cardId: 'card-100' }, // 50k
+            { id: 'diff-200', cost: 200, cardId: 'card-200' }, // 100k
+            { id: 'diff-300', cost: 300, cardId: 'card-300' }, // 150k
+            { id: 'diff-400', cost: 400, cardId: 'card-400' }  // 200k
         ];
 
         vouchers.forEach(v => {
