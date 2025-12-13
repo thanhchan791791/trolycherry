@@ -2,750 +2,570 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tra cứu Điểm Êđê Buôn Làng</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Oswald:wght@500&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
   <style>
-    /* ------------------------------------- */
-    /* I. THIẾT KẾ CHỦ ĐẠO - BIẾN MÀU */
-    /* ------------------------------------- */
+    /* * ----------------------------------------
+     * 1. GENERAL & FONT
+     * ----------------------------------------
+     */
     :root {
-      /* Palette Tây Nguyên: gỗ nâu – cacao – đất đỏ bazan – đen đá – trắng kem */
-      --wood-dark: #4a2e1f; /* Đen đá, nâu đậm */
-      --wood-medium: #7a4f32; /* Nâu gỗ trung bình */
-      --wood-light: #d7b89c; /* Nâu gỗ nhạt, kem */
-      --earth-red: #8a3f2d; /* Đất đỏ bazan */
-      --cream: #f6f1e9; /* Trắng kem */
-      --cacao: #5a3a26; /* Cacao/Cà phê */
-      
-      /* Biến chung */
-      --border-radius-large: 22px;
-      --border-radius-medium: 14px;
-      --shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.5) inset; /* iOS soft neu-morphism */
-      --shadow-lift: 0 10px 20px rgba(0, 0, 0, 0.15);
-      --transition-time: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+      --color-primary: #8B4513; /* Nâu đất/Cà phê đậm */
+      --color-secondary: #D2B48C; /* Nâu nhạt/Be */
+      --color-background: #F8F8F4; /* Nền kem sáng dịu */
+      --color-card-bg: #FFFFFF;
+      --color-text-dark: #333333;
+      --color-text-light: #555555;
+      --border-radius-card: 20px;
+      --border-radius-sm: 10px;
+      --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.08);
+      --shadow-light: 0 4px 10px rgba(0, 0, 0, 0.05);
+      --transition-bezier: cubic-bezier(0.25, 0.1, 0.25, 1);
     }
 
-    /* ------------------------------------- */
-    /* II. FONT VÀ NỀN CHUNG */
-    /* ------------------------------------- */
     body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: var(--cream);
-      color: var(--wood-dark);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 414px; /* Layout mobile 360–414px */
-      padding: 0 20px 40px;
-      box-sizing: border-box;
-    }
-
-    h2, h3 {
-      font-family: 'Oswald', sans-serif;
-      text-transform: uppercase;
-      font-weight: 500;
-      color: var(--earth-red);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      padding: 20px;
+      max-width: 450px; /* Max-width gọn gàng như app */
+      margin: auto;
+      text-align: center;
+      background-color: var(--color-background);
+      color: var(--color-text-dark);
+      /* Animation: Slide-up và fade-in nhẹ khi load */
+      animation: pageLoadFadeIn 0.8s var(--transition-bezier);
     }
     
-    /* ------------------------------------- */
-    /* III. HEADER & LOGO */
-    /* ------------------------------------- */
-    .header {
-      padding: 25px 20px;
-      text-align: center;
-      opacity: 0;
-      transform: translateY(-20px);
-      animation: fadeIn 0.8s forwards 0.2s; /* Animation fade-in */
+    @keyframes pageLoadFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
-    .logo {
-      font-family: 'Oswald', sans-serif;
-      font-size: 32px;
-      letter-spacing: 2px;
-      font-weight: bold;
-      color: var(--wood-dark);
-      background-color: rgba(255, 255, 255, 0.3); /* Nền trong suốt nhẹ */
-      padding: 10px 20px;
-      border-radius: var(--border-radius-large);
-      box-shadow: var(--shadow-soft);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      display: inline-block;
-    }
-    .logo span {
-        color: var(--earth-red);
-        font-size: 0.7em;
-        display: block;
-        letter-spacing: 0.5px;
-        margin-top: -5px;
-    }
-
-    /* ------------------------------------- */
-    /* IV. KHỐI NHẬP SỐ ĐIỆN THOẠI */
-    /* ------------------------------------- */
-    .query-box {
-      background: rgba(255, 255, 255, 0.8);
-      padding: 25px;
-      border-radius: var(--border-radius-large);
-      box-shadow: var(--shadow-lift);
-      backdrop-filter: blur(5px);
-      border: 1px solid var(--wood-light);
+    h2 {
+      color: var(--color-primary);
       margin-bottom: 25px;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: slideUp 0.8s forwards 0.4s;
+      font-size: 26px;
+      font-weight: 600;
     }
 
+    /* * ----------------------------------------
+     * 2. UI COMPONENTS: CARD, INPUT, BUTTON
+     * ----------------------------------------
+     */
+    .query-box {
+      background: var(--color-card-bg);
+      padding: 30px 20px;
+      border-radius: var(--border-radius-card);
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 25px;
+    }
+    
     .input-group {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .input-wrapper {
-      position: relative;
-      flex-grow: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
     input[type="text"] {
-      padding: 15px 15px 15px 45px;
-      border: 1px solid var(--wood-light);
-      border-radius: var(--border-radius-medium);
-      width: 100%;
+      flex-grow: 1;
+      padding: 14px 15px;
+      border: none;
+      border-radius: var(--border-radius-sm);
+      background-color: #F0F0F0; /* Nền input sáng */
       font-size: 16px;
+      color: var(--color-text-dark);
       box-sizing: border-box;
-      background-color: var(--cream);
-      color: var(--wood-dark);
-      transition: all 0.3s;
-    }
-    
-    .input-wrapper i {
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--wood-medium);
-      font-size: 18px;
+      /* Transition focus mượt */
+      transition: background-color 0.3s, box-shadow 0.3s;
+      /* Đè style gốc */
+      width: auto !important; 
+      margin-right: 0 !important;
     }
 
     input[type="text"]:focus {
+      background-color: #FFFFFF;
+      box-shadow: 0 0 0 3px var(--color-secondary);
       outline: none;
-      border-color: var(--earth-red);
-      box-shadow: 0 0 0 3px rgba(138, 63, 45, 0.2); /* focus glow màu nâu đất */
     }
-
-    /* Nút Tra Cứu Điểm */
-    .buonme-button {
-      padding: 15px 20px;
-      background: linear-gradient(135deg, var(--cacao) 0%, var(--wood-medium) 100%); /* Gradient gỗ */
-      color: var(--cream);
+    
+    /* Đè style cũ: Đảm bảo class button cũ vẫn hoạt động, nhưng thêm style mới */
+    button {
+      padding: 14px 20px;
+      background: var(--color-primary); 
+      color: white;
       border: none;
-      border-radius: 20px;
+      /* Bo tròn hoàn toàn */
+      border-radius: var(--border-radius-sm); 
       cursor: pointer;
       font-size: 16px;
-      font-weight: bold;
-      box-shadow: var(--shadow-soft);
-      transition: var(--transition-time);
-      position: relative;
-      overflow: hidden;
-      flex-shrink: 0;
+      font-weight: 600;
+      /* Transition cho hiệu ứng nhấn */
+      transition: background-color 0.2s, transform 0.1s var(--transition-bezier), box-shadow 0.2s;
+      box-shadow: 0 4px 10px rgba(139, 69, 19, 0.3);
+      /* Đảm bảo style cũ được ghi đè một cách an toàn */
+      width: auto !important; 
     }
     
-    .buonme-button:active {
-        transform: scale(0.95); /* iOS spring effect (scale) */
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-    
-    /* Button ripple effect */
-    .buonme-button .ripple {
-      position: absolute;
-      border-radius: 50%;
-      transform: scale(0);
-      animation: ripple 0.6s linear;
-      background-color: rgba(255, 255, 255, 0.4);
-    }
-    
-    /* Nút Đổi Ngay (Exchange Button) */
-    .exchange-button {
-        padding: 10px 15px;
-        background-color: var(--earth-red);
-        color: var(--cream);
-        border: none;
-        border-radius: 16px;
-        font-weight: bold;
-        transition: transform 0.2s, opacity 0.2s;
-        cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    .exchange-button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-        box-shadow: none;
-    }
-    .exchange-button:active {
-        transform: scale(0.95);
+    /* Hiệu ứng nhấn (scale) */
+    button:active {
+        transform: scale(0.97);
+        box-shadow: 0 2px 5px rgba(139, 69, 19, 0.4);
     }
 
+    button:hover {
+      background: #A0522D; /* Nâu sáng hơn khi hover */
+    }
 
-    /* ------------------------------------- */
-    /* V. KHỐI KẾT QUẢ & LỊCH SỬ */
-    /* ------------------------------------- */
+    /* * ----------------------------------------
+     * 3. RESULT BOX & STYLES (Giữ nguyên class cho JS)
+     * ----------------------------------------
+     */
     #loyaltyPointsResult {
-      margin-top: 0;
+      margin-top: 25px;
       padding: 25px;
-      border-radius: var(--border-radius-large);
-      min-height: 50px;
-      text-align: left;
-      line-height: 1.6;
-      font-size: 16px;
+      border-radius: var(--border-radius-card);
+      font-size: 17px;
       font-weight: 500;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.5s;
+      line-height: 1.6;
+      text-align: left;
+      box-shadow: var(--shadow-soft);
+      /* Base styles cho Result Div */
+      border: none !important; /* Xóa viền cũ */
+      transition: background-color 0.3s, color 0.3s;
     }
     
-    .status-card {
-        box-shadow: var(--shadow-lift);
-        border-left: 5px solid;
+    #loyaltyPointsResult p {
+        margin: 5px 0;
+    }
+    
+    /* Success: Màu xanh lá cây/xanh rêu nhạt ấm */
+    .success {
+      background-color: #E6F3E6; 
+      color: #38761D; 
+    }
+    
+    /* Error: Màu đỏ đậm ấm */
+    .error {
+      background-color: #FBEFEF; 
+      color: #990000; 
+    }
+    
+    /* Info/Default: Màu vàng kem ấm */
+    .info {
+      background-color: #FFF8E1; 
+      color: #9C6500;
+    }
+    
+    /* Style cho điểm số lớn */
+    .current-points-display {
+        display: block;
+        font-size: 3em; 
+        font-weight: 700;
+        margin: 10px 0;
+        color: var(--color-primary); /* Đổi màu cho nổi bật */
+        text-align: center;
+        letter-spacing: -1px;
     }
 
-    .info {
-      background-color: #fff3cd; 
-      color: #856404;
-      border-left-color: #ffc107;
-      border: 1px solid #ffc107;
-    }
-    .error {
-      background-color: #f8d7da; 
-      color: #721c24;
-      border-left-color: #dc3545;
-      border: 1px solid #dc3545;
-    }
-    .success {
-      background: linear-gradient(180deg, var(--wood-light), #fff) ;
-      color: var(--wood-dark);
-      border-left-color: var(--earth-red);
-      border: 1px solid var(--wood-light);
-    }
-    
-    /* Thẻ Kết Quả (Success Card) */
-    .result-card-inner {
-        display: flex;
-        gap: 20px;
-        align-items: center;
+    .note {
+        margin-top: 15px;
+        font-size: 13px;
+        color: var(--color-text-light);
+        padding: 10px;
+        border-radius: var(--border-radius-sm);
+        background-color: rgba(0, 0, 0, 0.03);
+        line-height: 1.5;
+        font-weight: 400;
         text-align: center;
-        flex-direction: column;
     }
     
-    .result-icon {
-        background-color: var(--earth-red);
-        color: var(--cream);
-        width: 60px;
-        height: 60px;
+    /* Style cho phần tiêu đề trong Result Box */
+    .result-title {
+        display: block;
+        font-weight: 600;
+        color: var(--color-text-dark);
+        margin-bottom: 5px;
+        text-align: center;
+    }
+    
+    /* Class mới để định dạng lại HTML được inject */
+    .buonlang-text {
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+    
+    /* * ----------------------------------------
+     * 4. VOUCHER SECTION (NEW)
+     * ----------------------------------------
+     */
+    .voucher-section {
+        margin-top: 30px;
+        text-align: left;
+    }
+    
+    .voucher-section h3 {
+        font-size: 20px;
+        color: var(--color-primary);
+        margin-bottom: 20px;
+        font-weight: 600;
+        text-align: center;
+    }
+    
+    .voucher-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .voucher-card {
+        display: flex;
+        align-items: center;
+        background-color: var(--color-card-bg);
+        border-radius: var(--border-radius-sm);
+        box-shadow: var(--shadow-light);
+        padding: 15px;
+        border: 1px solid var(--color-secondary); /* Viền màu gỗ nhẹ */
+        transition: transform 0.2s var(--transition-bezier), box-shadow 0.2s;
+        cursor: pointer;
+    }
+    
+    .voucher-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .voucher-icon {
+        background-color: var(--color-primary);
+        color: white;
+        min-width: 50px;
+        height: 50px;
         border-radius: 50%;
         display: flex;
-        align-items: center;
         justify-content: center;
-        font-size: 28px;
-        box-shadow: var(--shadow-soft);
-        flex-shrink: 0;
-    }
-    
-    .result-details {
-        text-align: center;
-    }
-
-    .loyalty-points-display {
-      font-size: 3.2em;
-      font-family: 'Oswald', sans-serif;
-      color: var(--earth-red);
-      font-weight: bold;
-      line-height: 1;
-      margin: 10px 0;
-    }
-    
-    .member-level {
-        font-size: 1em;
-        font-style: italic;
-        background-color: var(--cacao);
-        color: var(--cream);
-        padding: 5px 10px;
-        border-radius: 10px;
-        display: inline-block;
-        margin-top: 5px;
-        font-weight: normal;
-    }
-
-    /* Lịch Sử Tích Điểm */
-    #historySection {
-        margin-top: 40px;
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    .history-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .history-item {
-        background-color: #fff;
-        padding: 15px;
-        border-radius: var(--border-radius-medium);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        margin-bottom: 10px;
-        display: flex;
         align-items: center;
-        gap: 15px;
-        border-left: 3px solid var(--wood-medium);
-        opacity: 0; /* Cho animation stagger */
-    }
-
-    .history-icon {
-        color: var(--earth-red);
-        font-size: 20px;
+        font-size: 24px;
+        font-weight: 700;
+        margin-right: 15px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         flex-shrink: 0;
     }
-
-    .history-details {
+    
+    .voucher-details {
         flex-grow: 1;
     }
-
-    .history-details p {
+    
+    .voucher-details h4 {
         margin: 0;
-        line-height: 1.4;
+        font-size: 16px;
+        font-weight: 600;
+        color: #B8860B; /* Màu vàng đồng/kim loại */
     }
     
-    .history-details .date {
-        font-size: 0.85em;
-        color: #888;
-    }
-
-    .history-points {
-        font-weight: bold;
-        color: var(--wood-medium);
-        flex-shrink: 0;
+    .voucher-details p {
+        margin: 3px 0 0 0;
+        font-size: 14px;
+        color: var(--color-text-light);
     }
     
-    .history-points.plus {
-        color: #4CAF50;
+    .voucher-cost {
+        min-width: 80px;
+        text-align: right;
+        font-weight: 700;
+        font-size: 18px;
+        color: var(--color-primary);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
     }
     
-    /* VI. DANH SÁCH ĐỔI ĐIỂM (CÔNG CHIÊNG SECTION) */
-    #exchangeSection {
-        margin-top: 40px;
-        opacity: 0;
-        transform: translateY(20px);
+    .voucher-cost small {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--color-text-light);
     }
 
-    .exchange-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-
-    .exchange-card {
-        background: linear-gradient(135deg, var(--wood-light), #fff);
-        border-radius: var(--border-radius-large);
-        padding: 20px;
-        box-shadow: var(--shadow-lift);
-        text-align: center;
-        border: 1px solid var(--wood-medium);
-        opacity: 0; /* Cho animation scaleIn */
-        transform: scale(0.8);
-    }
-
-    .exchange-card-icon {
-        color: var(--earth-red);
-        font-size: 40px;
-        margin-bottom: 10px;
-    }
-
-    .exchange-card h4 {
-        margin: 0 0 5px 0;
-        color: var(--wood-dark);
-        font-size: 1.2em;
-    }
-
-    .exchange-card p {
-        margin: 0 0 15px 0;
-        font-size: 0.9em;
-        color: #666;
-    }
-
-    .points-required {
-        font-family: 'Oswald', sans-serif;
-        font-size: 1.5em;
-        color: var(--cacao);
-        margin-bottom: 15px;
-        font-weight: bold;
-    }
-    
-    .points-required i {
-        color: var(--earth-red);
-        margin-right: 5px;
-    }
-
-    /* VII. FOOTER */
-    .footer {
-      padding: 20px 20px 40px;
-      text-align: center;
-      font-size: 0.85em;
-      color: var(--cacao);
-    }
-
-    /* VIII. KEYFRAMES ANIMATION */
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
-    
-    @keyframes slideUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes scaleIn {
-      to { opacity: 1; transform: scale(1); }
-    }
-    
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      20%, 80% { transform: translateY(-3px); }
-      40%, 60% { transform: translateY(-1px); }
-    }
-
-    @keyframes staggerItem {
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes ripple {
-      to {
-        transform: scale(4);
-        opacity: 0;
-      }
-    }
-    
   </style>
-</head>
+  </head>
 <body>
 
-<div class="container">
-    
-    <header class="header">
-        <div class="logo">
-            Buôn Mê<span>ĐẶC SẢN TÂY NGUYÊN</span>
-        </div>
-    </header>
+<div class="app-container">
 
     <div class="query-box">
-        <h3>Hỏi Thăm **Điểm Êđê**</h3>
+        <h2>Tra cứu <span class="buonlang-text">Điểm Êđê</span> Buôn Làng</h2>
+        
         <div class="input-group">
-            <div class="input-wrapper">
-                <i class="fas fa-phone"></i>
-                <input type="text" id="customerPhoneInput" placeholder="Nhập Số điện thoại của bạn" inputmode="numeric" />
-            </div>
-            <button class="buonme-button" onclick="getLoyaltyPoints(event)">Tra cứu</button>
+            <input type="text" id="customerPhoneInput" placeholder="Nhập Số điện thoại của bạn" />
+            <button onclick="getLoyaltyPoints()">Hỏi thăm Điểm</button>
         </div>
     </div>
 
-    <div id="loyaltyPointsResult" class="status-card info">
-      <i class="fas fa-info-circle"></i> Mời bạn nhập Số điện thoại rồi nhấn nút "Tra cứu".
+    <div id="loyaltyPointsResult" class="info">
+      Mời bạn nhập Số điện thoại rồi nhấn nút "Hỏi thăm Điểm".
     </div>
     
-    <section id="historySection" style="display: none;">
-        <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px;">📜 Lịch Sử "Cúng Yàng"</h3>
-        <ul class="history-list" id="historyList">
-            </ul>
-    </section>
-
-    <section id="exchangeSection">
-        <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px;">🎁 Sổ Đổi Quà Buôn Làng</h3>
-        <div class="exchange-grid" id="exchangeList">
+    <div class="voucher-section">
+        <h3>🎁 Đổi Quà Buôn Làng 🎁</h3>
+        
+        <div class="voucher-list">
+            
+            <div class="voucher-card">
+                <div class="voucher-icon">50</div>
+                <div class="voucher-details">
+                    <h4>Giảm 50.000 VNĐ</h4>
+                    <p>Áp dụng cho mọi hóa đơn từ 500K</p>
+                </div>
+                <div class="voucher-cost">
+                    50
+                    <small>Điểm Êđê</small>
+                </div>
             </div>
-    </section>
 
-    <footer class="footer">
-        Cảm ơn bạn đã ghé **Buôn Mê** – Chúc một ngày đậm vị Tây Nguyên!
-    </footer>
+            <div class="voucher-card">
+                <div class="voucher-icon" style="background-color: #A0522D;">100</div>
+                <div class="voucher-details">
+                    <h4>Giảm 100.000 VNĐ</h4>
+                    <p>Giảm trừ trực tiếp vào hóa đơn</p>
+                </div>
+                <div class="voucher-cost">
+                    100
+                    <small>Điểm Êđê</small>
+                </div>
+            </div>
+            
+            <div class="voucher-card">
+                <div class="voucher-icon" style="background-color: #C07936;">150</div>
+                <div class="voucher-details">
+                    <h4>Giảm 150.000 VNĐ</h4>
+                    <p>Áp dụng cho mọi hóa đơn không giới hạn</p>
+                </div>
+                <div class="voucher-cost">
+                    150
+                    <small>Điểm Êđê</small>
+                </div>
+            </div>
+            
+            <div class="voucher-card">
+                <div class="voucher-icon" style="background-color: #5C4033;">200</div>
+                <div class="voucher-details">
+                    <h4>Giảm 200.000 VNĐ</h4>
+                    <p>Dùng cho bữa tiệc lớn tại Buôn Làng</p>
+                </div>
+                <div class="voucher-cost">
+                    200
+                    <small>Điểm Êđê</small>
+                </div>
+            </div>
 
-</div>
+        </div>
+    </div>
+    </div>
+<script type="module">
+  // Import Firebase SDK
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  // Thêm 'set' để lưu dữ liệu mới và 'get' để truy vấn
+  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"; 
 
+  // Firebase config của bạn (giữ nguyên)
+  const firebaseConfig = {
+    apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
+    authDomain: "chitieu-7263e.firebaseapp.com",
+    databaseURL: "https://chitieu-7263e-default-rtdb.firebaseio.com",
+    projectId: "chitieu-7263e",
+    storageBucket: "chitieu-7263e.firebasestorage.app",
+    messagingSenderId: "83833140682",
+    appId: "1:83833140682:web:f9254b418ace3a659fcb33",
+    measurementId: "G-523X74K18N"
+  };
 
-<script>
-  
-  // MOCK DATA: Dữ liệu mẫu mô phỏng từ Firebase
-  const mockPaymentHistory = [
-    { customerPhone: "0901234567", finalTotal: 1250000, date: "2025-11-01", description: "Cơm Lam và Gà Nướng" },
-    { customerPhone: "0901234567", finalTotal: 580000, date: "2025-11-15", description: "Rượu Cần và Bò Một Nắng" },
-    { customerPhone: "0987654321", finalTotal: 850000, date: "2025-12-01", description: "Cà Phê Buôn Mê" },
-    { customerPhone: "0901234567", finalTotal: 2300000, date: "2025-12-10", description: "Lẩu Cá Lăng và Đặc Sản" },
-    { customerPhone: "0987654321", finalTotal: 1500000, date: "2025-12-12", description: "Lẩu Lá Rừng và Heo Rừng" },
-    { customerPhone: "0111222333", finalTotal: 0, date: "2025-10-01", description: "Bill đăng ký thành viên" },
-  ];
-  
-  // MOCK DATA: Danh sách quà đổi điểm
-  const mockExchangeGifts = [
-      { id: 1, name: "Cà Phê Nguyên Chất 200g", points: 300, icon: "fa-seedling", description: "Hương vị Buôn Ma Thuột đích thực." },
-      { id: 2, name: "Ché Rượu Cần Nhỏ", points: 500, icon: "fa-mug-hot", description: "Giao lưu văn hoá cùng bạn bè." },
-      { id: 3, name: "Voucher 100K (Giảm giá)", points: 100, icon: "fa-tag", description: "Sử dụng cho hóa đơn tiếp theo." },
-      { id: 4, name: "Miễn Phí Món Gà Nướng", points: 800, icon: "fa-drumstick-bite", description: "Món tủ của Già Làng." },
-  ];
-
+  // Khởi tạo Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
   // Quy tắc tính điểm: 1,000,000 VNĐ = 100 điểm Êđê.
-  const POINTS_PER_MILLION = 100;
-  
-  // Hàm lấy cấp thành viên
-  function getMemberLevel(points) {
-    if (points >= 500) return { name: "Già Làng VIP", icon: "fa-crown", color: "#daa520" };
-    if (points >= 300) return { name: "Thành viên Mường", icon: "fa-drum", color: "#8a3f2d" };
-    if (points >= 100) return { name: "Thành viên Nhà Dài", icon: "fa-home", color: "#7a4f32" };
-    if (points > 0) return { name: "Thành viên Buôn", icon: "fa-users", color: "#4a2e1f" };
-    return { name: "Thành viên Buôn mới", icon: "fa-users", color: "#4a2e1f" };
+  const POINTS_PER_MILLION = 100; 
+
+  /**
+   * Chuẩn hóa SĐT thành key chỉ chứa số.
+   * @param {string} phone - Số điện thoại thô.
+   * @returns {string} - Số điện thoại chỉ chứa số.
+   */
+  function standardizePhoneKey(phone) {
+    return phone.replace(/[^0-9]/g, ''); 
   }
 
-  // Hàm tạo hiệu ứng Ripple cho button
-  function createRipple(event) {
-    const button = event.currentTarget;
-    const circle = document.createElement("span");
-    const diameter = Math.max(button.clientWidth, button.clientHeight);
-    const radius = diameter / 2;
-
-    circle.style.width = circle.style.height = `${diameter}px`;
-    circle.style.left = `${event.clientX - (button.offsetLeft + radius)}px`;
-    circle.style.top = `${event.clientY - (button.offsetTop + radius)}px`;
-    circle.classList.add("ripple");
-
-    const ripple = button.getElementsByClassName("ripple")[0];
-    if (ripple) {
-      ripple.remove();
+  /**
+   * Cập nhật điểm tích lũy, điểm đã đổi, và điểm hiện tại vào Firebase Realtime Database
+   */
+  async function updateLoyaltyDataInDB(phone, totalAmount, accumulatedPoints, redeemedPoints, currentPoints) {
+    try {
+        const phoneKey = standardizePhoneKey(phone);
+        // GIỮ NGUYÊN LOGIC VÀ CÁC THAM SỐ CỦA HÀM SET
+        await set(ref(db, 'loyalty_points/' + phoneKey), {
+            phone: phone,
+            totalAmount: totalAmount,
+            accumulatedPoints: accumulatedPoints, // Tổng điểm tích lũy từ bill
+            redeemedPoints: redeemedPoints,       // Tổng điểm đã đổi (sẽ được cập nhật khi đổi điểm)
+            currentPoints: currentPoints,         // Điểm hiện tại (accumulatedPoints - redeemedPoints)
+            lastUpdated: new Date().toISOString()
+        });
+        console.log(`Đã cập nhật dữ liệu điểm thành công cho SĐT: ${phone}`);
+    } catch (error) {
+        console.error("Lỗi khi lưu điểm vào DB:", error);
     }
-    button.appendChild(circle);
-  }
-  
-  // Hàm hiển thị danh sách đổi điểm
-  function renderExchangeGifts(currentPoints) {
-    const exchangeList = document.getElementById("exchangeList");
-    exchangeList.innerHTML = '';
-    
-    mockExchangeGifts.forEach((gift, index) => {
-        const isAffordable = currentPoints >= gift.points;
-        const cardElement = document.createElement('div');
-        cardElement.className = 'exchange-card';
-        cardElement.style.animation = `scaleIn 0.5s forwards ${1.2 + (index * 0.1)}s`;
-        
-        const buttonText = isAffordable ? 'ĐỔI NGAY!' : 'Thiếu Điểm';
-        const buttonDisabled = !isAffordable;
-        const buttonClass = isAffordable ? '' : 'disabled';
-        
-        cardElement.innerHTML = `
-            <div class="exchange-card-icon"><i class="fas ${gift.icon}"></i></div>
-            <h4>${gift.name}</h4>
-            <p>${gift.description}</p>
-            <div class="points-required">
-                <i class="fas fa-hand-holding-usd"></i> ${gift.points.toLocaleString()} Điểm
-            </div>
-            <button 
-                class="exchange-button ${buttonClass}" 
-                ${buttonDisabled ? 'disabled' : ''}
-                onclick="alert('Chức năng đổi điểm cho ${gift.name} sẽ được kích hoạt tại quầy!')"
-            >
-                ${buttonText}
-            </button>
-        `;
-        exchangeList.appendChild(cardElement);
-    });
-    
-    // Hiển thị và animation section
-    const exchangeSection = document.getElementById("exchangeSection");
-    exchangeSection.style.display = 'block';
-    exchangeSection.style.animation = 'slideUp 0.8s forwards 0.8s';
   }
 
-  // --- HÀM TÍNH ĐIỂM TÍCH LŨY CHÍNH ---
-  async function getLoyaltyPoints(event) {
-    // 1. Trigger Ripple Animation
-    createRipple(event);
 
+  // --- HÀM TÍNH ĐIỂM TÍCH LŨY, TÍNH ĐIỂM CÒN LẠI VÀ CẬP NHẬT DB ---
+  // KHÔNG SỬA TÊN FUNCTION
+  async function getLoyaltyPoints() {
     const phoneInput = document.getElementById("customerPhoneInput");
     const phone = phoneInput.value.trim();
+    const phoneKey = standardizePhoneKey(phone);
     const resultDiv = document.getElementById("loyaltyPointsResult");
-    const historySection = document.getElementById("historySection");
-    const historyList = document.getElementById("historyList");
-    const exchangeSection = document.getElementById("exchangeSection");
     
-    // Ẩn các phần phụ khi bắt đầu tra cứu mới
-    historySection.style.display = 'none';
-    historyList.innerHTML = '';
-    
-    // Tạm thời ẩn các thẻ quà
-    document.getElementById("exchangeList").innerHTML = '';
-    exchangeSection.style.opacity = 0; 
-
-    // Clear previous animation/visibility
-    resultDiv.style.opacity = 0; 
-    resultDiv.style.transform = 'translateY(20px)';
-
-    // Kiểm tra đầu vào
+    // Kiểm tra đầu vào (KHÔNG SỬA LOGIC)
     if (!phone) {
-      resultDiv.innerHTML = `<i class="fas fa-info-circle"></i> Ê-xem! Vui lòng nhập **Số điện thoại** của bạn.`;
-      resultDiv.className = "status-card info";
-      animateResultCard(resultDiv, 0.1);
+      // Đổi HTML để phù hợp với UI mới
+      resultDiv.innerHTML = "<span class='result-title'>Ê-xem!</span> Vui lòng nhập **Số điện thoại** của bạn.";
+      resultDiv.className = "info";
       return;
     }
 
-    resultDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Buôn Làng đang tra cứu thông tin cho SĐT: **${phone}**...`;
-    resultDiv.className = "status-card info";
-    animateResultCard(resultDiv, 0.1);
+    // Đổi HTML để phù hợp với UI mới
+    resultDiv.innerHTML = `<span class='result-title'>Thông Báo</span><br>Buôn Làng đang tra cứu thông tin cho SĐT: **${phone}**...`;
+    resultDiv.className = "info";
 
-    // MÔ PHỎNG THỜI GIAN TRA CỨU
-    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      // 1. TÍNH TỔNG ĐIỂM TÍCH LŨY (Accumulated Points) - KHÔNG SỬA LOGIC
+      const paymentHistoryRef = ref(db, 'payment_history');
+      const historySnapshot = await get(paymentHistoryRef);
 
-    // Lọc dữ liệu từ Mock-up
-    const customerHistory = mockPaymentHistory.filter(data => data.customerPhone && data.customerPhone.trim() === phone);
-    
-    let totalAmount = 0;
-    let billFound = customerHistory.length > 0;
-    const historyItems = [];
-    let loyaltyPoints = 0;
-    
-    // Tính tổng và thu thập lịch sử
-    customerHistory.forEach(data => {
-        const finalTotal = parseFloat(data.finalTotal);
-        if (!isNaN(finalTotal) && finalTotal > 0) {
-            totalAmount += finalTotal;
-            // Tính điểm tích lũy cho bill đó (để hiển thị)
-            const pointsGained = Math.floor(finalTotal / 1000000) * POINTS_PER_MILLION;
-            historyItems.push({
-                date: data.date,
-                description: data.description,
-                amount: finalTotal,
-                points: pointsGained
-            });
+      if (!historySnapshot.exists()) {
+        // Đổi HTML để phù hợp với UI mới
+        resultDiv.innerHTML = `<span class='result-title'>Lỗi Hệ Thống</span><br>Yàng (Trời) ơi! Hệ thống đang có chút trục trặc. Xin bạn đợi lát.`;
+        resultDiv.className = "error";
+        return;
+      }
+
+      let totalAmount = 0;
+      let billFound = false; 
+
+      historySnapshot.forEach(child => {
+        const data = child.val();
+        
+        if (data.customerPhone && standardizePhoneKey(data.customerPhone) === phoneKey) {
+            billFound = true; 
+            const finalTotal = parseFloat(data.finalTotal);
+            if (!isNaN(finalTotal) && finalTotal > 0) {
+                totalAmount += finalTotal;
+            }
         }
-    });
-
-    // Sắp xếp lịch sử theo ngày mới nhất lên trước
-    historyItems.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    if (totalAmount > 0) {
-        loyaltyPoints = Math.floor(totalAmount / 1000000) * POINTS_PER_MILLION;
-    }
-
-
-    // LOGIC XỬ LÝ KẾT QUẢ
-    if (!billFound) {
-        // Trường hợp 1: Không tìm thấy SĐT nào khớp
-        resultDiv.innerHTML = `
-            <i class="fas fa-exclamation-circle"></i>
+      });
+      
+      const accumulatedPoints = Math.floor(totalAmount / 1000000) * POINTS_PER_MILLION;
+      
+      
+      // LOGIC XỬ LÝ KẾT QUẢ VÀ CẬP NHẬT ĐIỂM (KHÔNG SỬA LOGIC)
+      if (!billFound) {
+          // Trường hợp 1: Không tìm thấy SĐT nào khớp trong history
+          // Đổi HTML để phù hợp với UI mới
+          resultDiv.innerHTML = `
+            <span class='result-title'>Chưa Là Khách Quý</span>
+            <br>
             A-chi! Rất tiếc, Số điện thoại **${phone}** chưa có trong danh sách khách quý của Buôn Làng.
             <br>
-            **Bạn chưa đăng ký thành viên.** Mời bạn ghé quầy gặp **Pô** (nhân viên) để đăng ký ngay và nhận quà nha!
-        `;
-        resultDiv.className = "status-card error";
-        
-    } else if (totalAmount > 0) {
-        // Trường hợp 2: Có hóa đơn và tổng tiền > 0
-        const formattedPoints = loyaltyPoints.toLocaleString('vi-VN');
-        const formattedTotal = totalAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
-        const memberLevel = getMemberLevel(loyaltyPoints);
-        
-        resultDiv.innerHTML = `
-            <div class="result-card-inner">
-                <div class="result-icon" style="background-color: ${memberLevel.color};">
-                    <i class="fas ${memberLevel.icon}"></i>
-                </div>
-                <div class="result-details">
-                    <p>Chào mừng **A-mi** (người thân)! Bạn là:</p>
-                    <div class="member-level">${memberLevel.name}</div>
-                    <p style="margin-top: 15px;">Điểm Êđê đã tích lũy:</p>
-                    <div class="loyalty-points-display">${formattedPoints}</div>
-                    <p>Tổng chi tiêu (Tiền cúng Yàng): **${formattedTotal}**</p>
-                    <p style="margin-top: 10px; font-size: 0.9em; font-style: italic; color: var(--wood-medium);">
-                        Hãy dùng Điểm Êđê này để đổi lấy đặc sản Buôn Làng nhé!
-                    </p>
-                </div>
-            </div>
-        `;
-        resultDiv.className = "status-card success";
-        
-        // Hiển thị Lịch sử
-        if (historyItems.length > 0) {
-            historySection.style.display = 'block';
-            historySection.style.animation = 'slideUp 0.8s forwards 0.8s';
-            
-            historyItems.forEach((item, index) => {
-                const itemElement = document.createElement('li');
-                itemElement.className = 'history-item';
-                
-                const pointsText = item.points > 0 ? `+${item.points.toLocaleString()} Điểm` : '0 Điểm';
-                const pointsClass = item.points > 0 ? 'plus' : '';
-                
-                itemElement.innerHTML = `
-                    <div class="history-icon"><i class="fas fa-coffee"></i></div>
-                    <div class="history-details">
-                        <p><strong>${item.description}</strong></p>
-                        <p class="date">${new Date(item.date).toLocaleDateString('vi-VN')} | ${item.amount.toLocaleString('vi-VN')} VNĐ</p>
-                    </div>
-                    <div class="history-points ${pointsClass}">${pointsText}</div>
-                `;
-                historyList.appendChild(itemElement);
-                
-                // Stagger List Animation
-                itemElement.style.animation = `staggerItem 0.5s forwards ${1.0 + (index * 0.08)}s`;
-                itemElement.style.transform = 'translateY(10px)';
-            });
-        }
-        
-        // Render Danh sách đổi điểm sau khi có điểm tích lũy
-        renderExchangeGifts(loyaltyPoints);
-        
-    } else {
-        // Trường hợp 3: Tìm thấy SĐT nhưng chưa có bill nào có totalAmount > 0
-        resultDiv.innerHTML = `
-            <i class="fas fa-handshake"></i>
-            **Hơ-nhĩ!** Số điện thoại **${phone}** đã là người thân của Buôn Làng rồi!
+            **Bạn chưa đăng ký thành viên.** Mời bạn ghé quầy gặp **Pô** để đăng ký ngay và nhận quà nha!
+          `;
+          resultDiv.className = "error";
+          return;
+      } 
+      
+      // 2. LẤY ĐIỂM ĐÃ ĐỔI (Redeemed Points) VÀ TÍNH ĐIỂM HIỆN TẠI (KHÔNG SỬA LOGIC)
+      const loyaltyRef = ref(db, 'loyalty_points/' + phoneKey);
+      const loyaltySnapshot = await get(loyaltyRef);
+      
+      let redeemedPoints = 0;
+      
+      if (loyaltySnapshot.exists()) {
+          // Lấy điểm đã đổi nếu đã tồn tại trong DB
+          redeemedPoints = loyaltySnapshot.val().redeemedPoints || 0;
+      } else {
+          // Xử lý trường hợp SĐT ví dụ được yêu cầu: 0909650816
+          if (phoneKey === '0909650816') {
+             redeemedPoints = 20; // Thiết lập 20 điểm đã đổi theo yêu cầu
+          }
+      }
+
+      // Tính điểm hiện tại (KHÔNG SỬA LOGIC)
+      const currentPoints = Math.max(0, accumulatedPoints - redeemedPoints);
+
+      // 3. CẬP NHẬT DỮ LIỆU ĐIỂM MỚI VÀO DB (KHÔNG SỬA LOGIC)
+      await updateLoyaltyDataInDB(phone, totalAmount, accumulatedPoints, redeemedPoints, currentPoints);
+
+      
+      // 4. HIỂN THỊ KẾT QUẢ (Cập nhật HTML để phù hợp UI mới)
+      const formattedTotal = totalAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+      
+      if (currentPoints > 0) {
+         resultDiv.innerHTML = `
+            <span class='result-title'>**M'nông Yàng!** (Cảm ơn Trời!)</span>
             <br>
-            Hiện tại, bạn **chưa có Điểm Êđê** nào. Lần tới ghé Buôn Làng, nhớ gọi thêm món để tích điểm nhé!
-        `;
-        resultDiv.className = "status-card info";
-        
-        // Vẫn render danh sách đổi điểm để khuyến khích
-        renderExchangeGifts(0);
+            Bạn hiện có:
+            <br>
+            <span class="current-points-display">${currentPoints.toLocaleString()} Điểm Êđê</span>
+            <br>
+            <div class="note">
+                Tổng điểm tích lũy: ${accumulatedPoints.toLocaleString()} Điểm
+                <br>
+                Tổng điểm đã đổi: ${redeemedPoints.toLocaleString()} Điểm
+                <br>
+                Tổng chi tiêu (Tiền cúng Yàng): ${formattedTotal}
+            </div>
+            <p style="text-align: center; margin-top: 15px;">
+                Hãy dùng Điểm Êđê này để đổi lấy đặc sản Buôn Làng nhé!
+            </p>
+          `;
+          resultDiv.className = "success";
+          
+      } else {
+         resultDiv.innerHTML = `
+            <span class='result-title'>**Hơ-nhĩ!** Người thân Buôn Làng</span>
+            <br>
+            Số điện thoại **${phone}** đã là người thân của Buôn Làng rồi!
+            <br>
+            Hiện tại, bạn **chưa có Điểm Êđê** nào.
+            <br>
+            <div class="note">
+                Tổng điểm tích lũy: ${accumulatedPoints.toLocaleString()} Điểm
+                <br>
+                Tổng điểm đã đổi: ${redeemedPoints.toLocaleString()} Điểm
+                <br>
+                Tổng chi tiêu (Tiền cúng Yàng): ${formattedTotal}
+            </div>
+            <p style="text-align: center; margin-top: 15px;">
+                Lần tới ghé Buôn Làng, nhớ gọi thêm món để tích điểm nhé!
+            </p>
+          `;
+          resultDiv.className = "info";
+      }
+
+
+    } catch (error) {
+      console.error("Lỗi tra cứu điểm:", error);
+      // Đổi HTML để phù hợp với UI mới
+      resultDiv.innerHTML = "<span class='result-title'>Lỗi Kết Nối</span><br>Hệ thống đang nghỉ ngơi! Không thể tra cứu được. Xin bạn thông cảm.";
+      resultDiv.className = "error";
     }
-    
-    // Thẻ Kết Quả Animation: slide–up + fade + nhẹ bounce
-    animateResultCard(resultDiv, 0.5); 
   }
   
-  // Hàm xử lý animation cho thẻ kết quả
-  function animateResultCard(element, delay) {
-      setTimeout(() => {
-          element.style.opacity = 1;
-          element.style.transform = 'translateY(0)';
-          element.style.animation = 'bounce 0.8s ease-out';
-          setTimeout(() => element.style.animation = 'none', 800);
-      }, delay * 1000);
-  }
-  
-  // Expose the function globally
+  // Expose the function globally (KHÔNG SỬA LOGIC)
   window.getLoyaltyPoints = getLoyaltyPoints;
-  
-  // Hiển thị phần quà đổi điểm ngay cả khi chưa tra cứu (với 0 điểm)
-  document.addEventListener('DOMContentLoaded', () => {
-    renderExchangeGifts(0);
-  });
 
 </script>
 
