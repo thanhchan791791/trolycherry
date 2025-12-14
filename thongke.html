@@ -285,7 +285,13 @@
             </div>
         </section>
         
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.5">
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.5" id="hourlyStatsSection">
+            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">⏱️ Doanh thu theo Khung giờ Bán chạy (10:00 - 22:00)</h3>
+            <div class="chart-container">
+                <canvas id="hourlyRevenueChart"></canvas>
+            </div>
+        </section>
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.6">
             <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">📅 Thống kê theo khoảng thời gian</h3>
             <div class="date-filter space-y-4 md:flex md:gap-4 md:items-end">
                 <div class="flex-1">
@@ -323,7 +329,7 @@
             </div>
         </section>
 
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.6" id="dailyItemStatsSection">
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.7" id="dailyItemStatsSection">
             <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">📋 Số lượng Món bán theo Ngày</h3>
             <div class="date-filter space-y-4 md:flex md:gap-4 md:items-end mb-4">
                 <div class="flex-1 max-w-xs"> 
@@ -344,19 +350,19 @@
             </ul>
         </section>
         
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.7">
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.8">
             <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🔥 Top Món Ăn Bán Chạy</h3>
             <ul id="topSellingFoodsList" class="divide-y divide-gray-200/50">
                 </ul>
         </section>
 
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.8">
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.9">
             <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🥤 Top Đồ Uống Bán Chạy</h3>
             <ul id="topSellingDrinksList" class="divide-y divide-gray-200/50">
                 </ul>
         </section>
 
-        <section id="orderHistorySection" class="card-ios p-5 mb-8 animated-item" data-delay="0.9">
+        <section id="orderHistorySection" class="card-ios p-5 mb-8 animated-item" data-delay="1.0">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-semibold" style="color: var(--text-color);">🧾 Lịch sử Đơn hàng</h3>
                 <button id="showAllOrdersButton" 
@@ -474,6 +480,7 @@
         const dailyItemStatsListEl = document.getElementById('dailyItemStatsList');
 
         const revenueChartCanvas = document.getElementById('revenueChart');
+        const hourlyRevenueChartCanvas = document.getElementById('hourlyRevenueChart'); // THÊM MỚI
         const topSellingFoodsListEl = document.getElementById('topSellingFoodsList');
         const topSellingDrinksListEl = document.getElementById('topSellingDrinksList');
         const orderHistoryTableBody = document.getElementById('orderHistoryTableBody');
@@ -502,6 +509,7 @@
         const navButtons = document.querySelectorAll('.nav-btn');
 
         let revenueChartInstance = null;
+        let hourlyRevenueChartInstance = null; // THÊM MỚI
         let paymentsCache = []; // Cache dữ liệu thanh toán
 
         
@@ -555,8 +563,13 @@
             themeIcon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
             if (revenueChartInstance) {
                 // Cập nhật màu biểu đồ khi chuyển chế độ
-                updateChartColors();
+                updateChartColors(revenueChartInstance);
                 revenueChartInstance.update();
+            }
+            // THÊM MỚI: Cập nhật màu biểu đồ khung giờ
+            if (hourlyRevenueChartInstance) {
+                updateChartColors(hourlyRevenueChartInstance, true); // Thêm cờ isLineChart
+                hourlyRevenueChartInstance.update();
             }
         });
 
@@ -616,25 +629,49 @@
         
         // --- 4. DATA RENDERING FUNCTIONS (Cập nhật logic tính toán Tuần/Tháng) ---
 
-        function updateChartColors() {
+        // Thêm tham số isLineChart để xử lý màu cho Line Chart
+        function updateChartColors(chartInstance, isLineChart = false) {
             const isDark = document.body.classList.contains('dark');
             const chartColor = isDark ? 'rgba(10, 132, 255, 0.7)' : 'rgba(0, 122, 255, 0.7)'; // iOS Blue
+            const solidLineColor = isDark ? '#0A84FF' : '#007AFF';
             const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
             const labelColor = 'var(--text-color)'; 
             
-            if (revenueChartInstance) {
-                revenueChartInstance.data.datasets[0].backgroundColor = chartColor;
-                revenueChartInstance.data.datasets[0].borderColor = chartColor;
-                revenueChartInstance.options.scales.y.grid.color = gridColor;
-                revenueChartInstance.options.scales.x.grid.color = gridColor;
-                revenueChartInstance.options.scales.y.ticks.color = labelColor;
-                revenueChartInstance.options.scales.x.ticks.color = labelColor;
-                revenueChartInstance.options.plugins.legend.labels.color = labelColor;
+            if (chartInstance) {
+                if (isLineChart) {
+                    chartInstance.data.datasets[0].borderColor = solidLineColor;
+                    // Re-calculate gradient for fill if it's a line chart with fill
+                    chartInstance.data.datasets[0].backgroundColor = (context) => {
+                        const chart = context.chart;
+                        const {ctx, chartArea} = chart;
+                        if (!chartArea) {
+                            return;
+                        }
+                        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                        const startColor = isDark ? 'rgba(10, 132, 255, 0.5)' : 'rgba(0, 122, 255, 0.4)'; // Semi-transparent blue
+                        const endColor = isDark ? 'rgba(10, 132, 255, 0)' : 'rgba(0, 122, 255, 0)'; // Transparent
+                        gradient.addColorStop(0, endColor);
+                        gradient.addColorStop(1, startColor);
+                        return gradient;
+                    };
+                } else {
+                    // Bar Chart (30-day revenue chart)
+                    chartInstance.data.datasets[0].backgroundColor = chartColor;
+                    chartInstance.data.datasets[0].borderColor = chartColor;
+                }
+
+                chartInstance.options.scales.y.grid.color = gridColor;
+                chartInstance.options.scales.x.grid.color = gridColor;
+                chartInstance.options.scales.y.ticks.color = labelColor;
+                chartInstance.options.scales.x.ticks.color = labelColor;
+                chartInstance.options.plugins.tooltip.titleColor = labelColor;
+                chartInstance.options.plugins.tooltip.bodyColor = labelColor;
+                chartInstance.options.plugins.legend.labels.color = labelColor;
             }
         }
         
         async function update30DayChart() {
-            // ... (Giữ nguyên logic biểu đồ)
+            // ... (Giữ nguyên logic biểu đồ 30 ngày)
             const now = new Date();
             const today = now.toISOString().slice(0, 10);
             const daysAgo = (days) => {
@@ -704,6 +741,135 @@
                                     return label;
                                 }
                             }
+                        },
+                        legend: {
+                            display: false // Ẩn legend
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: gridColor,
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                color: labelColor,
+                                callback: (value) => value.toLocaleString('vi-VN') + '₫',
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                            },
+                            ticks: {
+                                color: labelColor,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // THAY ĐỔI: Hàm vẽ biểu đồ Doanh thu theo Khung giờ (Sử dụng Line Chart hiện đại)
+        async function updateHourlyRevenueChart() {
+            const payments = await fetchPayments();
+            
+            const revenueByHour = {};
+            
+            // KHỞI TẠO VÀ LỌC THEO YÊU CẦU MỚI: Chỉ hiển thị từ 10h đến 22h
+            const START_HOUR = 10;
+            const END_HOUR = 22; // Đến 22:00
+
+            // Khởi tạo chỉ các giờ từ 10 đến 22
+            for (let i = START_HOUR; i <= END_HOUR; i++) {
+                const hour = i.toString().padStart(2, '0');
+                revenueByHour[hour] = 0;
+            }
+
+            payments.forEach(payment => {
+                const dateObj = new Date(payment.timestamp);
+                const hourInt = dateObj.getHours(); // Lấy giờ dưới dạng số (0-23)
+                const total = payment.finalTotal || 0;
+
+                // Lọc dữ liệu: Chỉ tính những thanh toán xảy ra trong khung giờ từ 10:00 đến 22:59
+                if (hourInt >= START_HOUR && hourInt <= END_HOUR) {
+                    const hour = hourInt.toString().padStart(2, '0'); 
+                    if (revenueByHour.hasOwnProperty(hour)) {
+                        revenueByHour[hour] += total;
+                    }
+                }
+            });
+            
+            // Labels và Data chỉ chứa các giờ từ 10 đến 22
+            const labels = Object.keys(revenueByHour).map(h => `${h}:00`);
+            const data = Object.values(revenueByHour);
+            
+            if (hourlyRevenueChartInstance) {
+                hourlyRevenueChartInstance.destroy();
+            }
+            
+            const isDark = document.body.classList.contains('dark');
+            const solidLineColor = isDark ? '#0A84FF' : '#007AFF'; // Màu đường kẻ đậm
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const labelColor = 'var(--text-color)';
+
+            hourlyRevenueChartInstance = new Chart(hourlyRevenueChartCanvas, {
+                type: 'line', // Đổi sang Line Chart
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Doanh thu theo giờ',
+                        data: data,
+                        // Tạo gradient cho khu vực đổ bóng (fill)
+                        backgroundColor: (context) => {
+                            const chart = context.chart;
+                            const {ctx, chartArea} = chart;
+                            if (!chartArea) {
+                                return;
+                            }
+                            const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                            const startColor = isDark ? 'rgba(10, 132, 255, 0.5)' : 'rgba(0, 122, 255, 0.4)'; // Màu bắt đầu (bán trong suốt)
+                            const endColor = isDark ? 'rgba(10, 132, 255, 0)' : 'rgba(0, 122, 255, 0)'; // Màu kết thúc (trong suốt)
+                            gradient.addColorStop(0, endColor);
+                            gradient.addColorStop(1, startColor);
+                            return gradient;
+                        },
+                        borderColor: solidLineColor, // Màu đường kẻ
+                        borderWidth: 3,
+                        tension: 0.4, // Tạo đường cong mượt mà
+                        pointRadius: 4, 
+                        pointHoverRadius: 6,
+                        fill: true, // Đổ bóng khu vực dưới đường kẻ
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500, // Tăng thời gian animation
+                        easing: 'easeInOutCubic',
+                        delay: 0
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toLocaleString('vi-VN') + '₫';
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false // Ẩn legend
                         }
                     },
                     scales: {
@@ -1176,6 +1342,7 @@
             updateTotalRevenueDetails(); // GỌI HÀM MỚI BỔ SUNG
             updateSummaryStats();
             update30DayChart();
+            updateHourlyRevenueChart(); // THÊM MỚI: Gọi hàm vẽ biểu đồ khung giờ
             updateTopSellingItems();
             
             fetchPayments().then(() => {
