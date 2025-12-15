@@ -550,18 +550,21 @@
             font-weight: 700;
         }
         
-        .bill-details td.item-name {
-            width: 45%; /* Tên món chiếm nhiều diện tích hơn */
-        }
-        .bill-details th.item-qty, .bill-details td.item-qty {
-            width: 15%;
-            text-align: center; /* Số lượng trung tâm */
-        }
-        .bill-details th.item-price, .bill-details td.item-price, 
-        .bill-details th.item-total, .bill-details td.item-total {
-             width: 20%;
-             text-align: right; /* Giá tiền căn phải */
-        }
+       .bill-details td.item-name {
+    width: 40% !important; /* Tăng Tên món */
+}
+.bill-details th.item-qty, .bill-details td.item-qty {
+    width: 10% !important; /* Giảm Số lượng */
+    text-align: center !important; 
+}
+.bill-details th.item-price, .bill-details td.item-price {
+     width: 20% !important; /* Giữ nguyên Đơn giá */
+     text-align: right !important;
+}
+.bill-details th.item-total, .bill-details td.item-total {
+     width: 30% !important; /* Giữ nguyên Thành tiền */
+     text-align: right !important;
+}
         
         .bill-summary p {
             display: flex;
@@ -639,68 +642,85 @@
 
 
         /* Print styles - Giữ nguyên */
-        @media print {
-            @page { 
-                margin: 0;
-            }
-            body * {
-                visibility: hidden;
-            }
-            .modal-content, .modal-content * {
-                visibility: visible;
-                -webkit-print-color-adjust: exact; 
-                print-color-adjust: exact;
-                color: #000 !important;
-                font-weight: bold !important;
-            }
-            .modal-content {
-                position: absolute;
-                left: 50%;
-                top: 0;
-                transform: translateX(-50%);
-                width: 90%;
-                max-width: 450px;
-                padding: 10px;
-                box-shadow: none;
-                margin: 0 auto;
-            }
-            .close-button, .button-group-bill, .nav-buttons, #paymentMethodModal { 
-                display: none !important;
-            }
-            /* Chỉnh sửa thêm cho in ấn để đảm bảo căn chỉnh đều */
-             .bill-details table {
-                 table-layout: fixed; /* Giữ nguyên chiều rộng cột */
-             }
-             .bill-details th, .bill-details td {
-                 padding: 4px 0; 
-                 font-size: 1.1em !important; /* Giảm font size cho in nhiệt */
-                 font-weight: 500 !important;
-             }
-             .bill-details th {
-                 font-weight: 700 !important;
-             }
-             .bill-details td.item-price, .bill-details td.item-total {
-                 text-align: right !important;
-             }
-             .bill-details th.item-total {
-                 text-align: right !important;
-             }
-             .bill-details td.item-qty {
-                 text-align: center !important;
-             }
-             .bill-summary p span:last-child {
-                text-align: right;
-             }
-             .bill-total-price {
-                 font-size: 1.4em !important;
-             }
-             .bill-qr-container img {
-                 border: 2px solid #000;
-             }
-            .modal-content {
-                overflow: visible !important; 
-            }
-        }
+       @media print {
+    @page { 
+        margin: 0;
+    }
+    body * {
+        visibility: hidden;
+    }
+    .modal-content, .modal-content * {
+        visibility: visible;
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact;
+        color: #000 !important;
+        /* Giữ nguyên hoặc tăng thêm độ đậm tổng thể */
+        font-weight: 900 !important; 
+    }
+    .modal-content {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 450px;
+        padding: 10px;
+        box-shadow: none;
+        margin: 0 auto;
+    }
+    .close-button, .button-group-bill, .nav-buttons, #paymentMethodModal { 
+        display: none !important;
+    }
+    /* Chỉnh sửa cho in ấn để đảm bảo căn chỉnh đều và chữ to, đậm hơn */
+    .bill-details table {
+        table-layout: fixed; /* Giữ nguyên chiều rộng cột */
+        /* Tăng font-size cho toàn bộ bảng chi tiết */
+        font-size: 1.3em !important; 
+    }
+    .bill-details th, .bill-details td {
+        padding: 6px 0 !important; /* Tăng padding để giãn cách */
+        font-size: 1.1em !important; /* Điều chỉnh font size nhỏ hơn mức cho table */
+        font-weight: 700 !important; /* Đảm bảo độ đậm cao */
+    }
+    .bill-details th {
+        font-weight: 900 !important; /* Cột tiêu đề siêu đậm */
+    }
+    .bill-details td.item-price, .bill-details td.item-total {
+        text-align: right !important;
+    }
+    .bill-details th.item-total {
+        text-align: right !important;
+    }
+    .bill-details td.item-qty {
+        text-align: center !important;
+    }
+    /* Tăng font-size và độ đậm cho phần Tóm tắt hóa đơn */
+    .bill-summary p {
+        font-size: 1.25em !important;
+        font-weight: 900 !important;
+    }
+    .bill-summary p span:last-child {
+        text-align: right;
+    }
+    /* Tăng font-size cho TỔNG TIỀN thanh toán */
+    .bill-total-price {
+        font-size: 1.7em !important; 
+        font-weight: 900 !important; /* Rất đậm */
+    }
+    /* Tăng font-size và độ đậm cho các chi tiết khác (ví dụ: thông tin cửa hàng, lời cảm ơn) */
+    .modal-content > *:not(.bill-details, .bill-summary) {
+        font-size: 1.3em !important;
+        font-weight: 900 !important;
+    }
+    .bill-qr-container img {
+        border: 2px solid #000;
+        /* Có thể tăng kích thước QR nếu cần, ví dụ: */
+        /* width: 100px; height: 100px; */
+    }
+    .modal-content {
+        overflow: visible !important; 
+    }
+}
         /* END: UI nâng cấp */
         
         /* Thêm CSS ẩn các phần không mong muốn */
@@ -745,7 +765,16 @@
                     <input type="text" id="tableNameInput" placeholder="Tên bàn (ví dụ: Bàn 1, VIP 1)" style="flex-grow: 1;">
                     <button id="addTableButton" class="add-button">Thêm bàn</button>
                 </div>
-
+<div class="table-area" style="background-color: #ffe0b2; border-color: #ff9800;">
+                    <h2>📝 Ghi chú chung</h2>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="text" id="globalNoteInput" placeholder="Nhập số bàn cọc tiền bao nhiêu" style="flex-grow: 1;">
+                        <button id="addGlobalNoteButton" class="add-button" style="background-color: var(--ios-warning);">Thêm Ghi chú</button>
+                    </div>
+                    <div id="globalNotesDisplay" style="padding: 10px; background-color: #fff; border-radius: 8px; min-height: 40px; border: 1px solid var(--ios-separator);">
+                        <p style="margin: 0; color: #888;">Chưa có ghi chú nào.</p>
+                    </div>
+                </div>
                 <div class="table-area">
                     <h2>Bàn Bình Thường</h2>
                     <div id="normalTablesList" class="tables-list-container">
@@ -853,20 +882,21 @@
         </div>
     </div>
     
-    <div id="paymentMethodModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="closeMethodModal">&times;</span>
-            <h2>Chọn Hình thức Thanh toán</h2>
-            <div id="paymentMethodButtons" style="margin-top: 20px;">
-                <button class="payment-method-button cash-button" onclick="handlePaymentMethodSelection('Tiền mặt')">
-                    <i class="fas fa-money-bill-wave"></i> Tiền mặt
-                </button>
-                <button class="payment-method-button transfer-button" onclick="handlePaymentMethodSelection('Chuyển khoản')">
-                    <i class="fas fa-qrcode"></i> Chuyển khoản
-                </button>
-            </div>
+   <div id="paymentMethodModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="closeMethodModal">&times;</span>
+        <h2>Chọn Hình thức Thanh toán</h2>
+        <input type="text" id="customerPhoneInput" placeholder="Nhập SĐT khách hàng (tùy chọn)" style="margin-bottom: 20px;">
+        <div id="paymentMethodButtons" style="margin-top: 20px;">
+            <button class="payment-method-button cash-button" onclick="handlePaymentMethodSelection('Tiền mặt')">
+                <i class="fas fa-money-bill-wave"></i> Tiền mặt
+            </button>
+            <button class="payment-method-button transfer-button" onclick="handlePaymentMethodSelection('Chuyển khoản')">
+                <i class="fas fa-qrcode"></i> Chuyển khoản
+            </button>
         </div>
     </div>
+</div>
     
     <div class="nav-buttons">
         <button class="nav-button active" data-section="tables">
@@ -899,7 +929,7 @@
         const TELEGRAM_CHAT_ID = "-4954039835";
         
         // --- NEW CONFIGURATION ---
-        const OPEN_CASH_URL = "http://192.168.1.231:5000/opencash"; // Địa chỉ mở két tiền
+        const OPEN_CASH_URL = "http://192.168.1.231:5001/open-cash-usb"; // Địa chỉ mở két tiền
         // --- END NEW CONFIGURATION ---
 
         // DOM elements
@@ -955,10 +985,16 @@
         const vietQrCode = document.getElementById('vietQrCode');
 
         let currentTableId = null;
+
         let currentTableNameValue = '';
         let currentOrderItems = {}; // { menuId: { name, price, type, quantity } }
         let allMenuItems = [];
-
+// START: KHAI BÁO BIẾN DOM MỚI CHO GHI CHÚ
+      // START: KHỐI CODE GỘP CHO GHI CHÚ CHUNG (Biến + Logic)
+        const globalNoteInput = document.getElementById('globalNoteInput');
+        const addGlobalNoteButton = document.getElementById('addGlobalNoteButton');
+        const globalNotesDisplay = document.getElementById('globalNotesDisplay');
+        // END: KHAI BÁO BIẾN DOM MỚI CHO GHI CHÚ
         // >> START: CODE MỚI CHO REAL-TIME LISTENER
         let activeListeners = [];
 
@@ -1031,7 +1067,89 @@
                 });
             }
         });
+// START: CODE MỚI CHO GHI CHÚ CHUNG
+        
+       // Logic: Listener cho nút Thêm Ghi chú
+        addGlobalNoteButton.addEventListener('click', () => {
+            const noteContent = globalNoteInput.value.trim();
+            if (noteContent) {
+                const timestamp = Date.now();
+                
+                // *** THAY ĐỔI LỚN: Dùng 'globalNotes' và 'push()' để tạo danh sách ***
+                database.ref('globalNotes').push({
+                    content: noteContent,
+                    timestamp: timestamp
+                }).then(() => {
+                    globalNoteInput.value = '';
+                    sendTelegramMessage(`📌 <b>Ghi chú mới:</b> ${noteContent}`);
+                }).catch(error => {
+                    console.error("Lỗi khi thêm ghi chú:", error);
+                    alert("Lỗi khi thêm ghi chú: " + error.message);
+                });
+            }
+        });
+        // END: KHỐI CODE GỘP CHO GHI CHÚ CHUNG (Biến + Logic)
 
+       // Hàm hiển thị Ghi chú (Listener Firebase)
+        function setupGlobalNoteListener() {
+            // *** THAY ĐỔI LỚN: Listener trên node 'globalNotes' (số nhiều) ***
+            const notesRef = database.ref('globalNotes');
+            notesRef.on('value', (snapshot) => {
+                const notes = snapshot.val();
+                globalNotesDisplay.innerHTML = ''; // Xóa nội dung cũ
+                
+                if (notes) {
+                    // Lặp ngược để ghi chú mới nhất nằm trên cùng
+                    const noteKeys = Object.keys(notes).reverse();
+                    
+                    noteKeys.forEach(key => {
+                        const note = notes[key];
+                        const noteTime = new Date(note.timestamp).toLocaleTimeString('vi-VN');
+                        
+                        // Tạo và hiển thị từng ghi chú
+                        const noteElement = document.createElement('div');
+                        noteElement.style.borderBottom = '1px dashed var(--ios-separator)';
+                        noteElement.style.padding = '5px 0';
+                        noteElement.style.display = 'flex';
+                        noteElement.style.justifyContent = 'space-between';
+                        noteElement.style.alignItems = 'center';
+                        
+                        noteElement.innerHTML = `
+                            <div style="flex-grow: 1;">
+                                <p style="margin: 0; font-weight: 700; color: #333;">${note.content}</p>
+                                <p style="margin: 3px 0 0 0; font-size: 0.8em; color: var(--secondary-color);">Cập nhật lúc: ${noteTime}</p>
+                            </div>
+                            <button onclick="clearSpecificNote('${key}')" class="remove-button" style="padding: 3px 6px; font-size: 0.7em; background-color: var(--ios-red);">Xóa</button>
+                        `;
+                        globalNotesDisplay.appendChild(noteElement);
+                    });
+                    
+                    // Thêm nút xóa TẤT CẢ nếu có ghi chú
+                    const clearAllButton = document.createElement('button');
+                    clearAllButton.textContent = 'Xóa TẤT CẢ Ghi chú';
+                    clearAllButton.className = 'remove-button';
+                    clearAllButton.style.marginTop = '10px';
+                    clearAllButton.style.backgroundColor = '#990000';
+                    clearAllButton.onclick = clearAllGlobalNotes;
+                    globalNotesDisplay.appendChild(clearAllButton);
+
+                } else {
+                    globalNotesDisplay.innerHTML = '<p style="margin: 0; color: #888;">Chưa có ghi chú nào.</p>';
+                }
+            });
+        }
+       // Hàm xóa Ghi chú cụ thể (dựa vào key Firebase)
+        window.clearSpecificNote = function(noteKey) {
+            if (confirm('Bạn có chắc chắn muốn xóa ghi chú này?')) {
+                // *** THAY ĐỔI: Xóa node con trong 'globalNotes' ***
+                database.ref('globalNotes/' + noteKey).remove().then(() => {
+                    // Không cần alert vì listener sẽ tự động cập nhật UI
+                }).catch(error => {
+                    console.error("Lỗi khi xóa ghi chú:", error);
+                });
+            }
+        }
+        // END: CODE MỚI CHO GHI CHÚ CHUNG
        // BỎ LISTENER FIREBASE RA KHỎI HÀM NÀY ĐỂ TRÁNH LẶP LẠI (FIX LỖI HIỂN THỊ 2 LẦN)
        async function renderTables(snapshot) {
             // Xóa nội dung cũ
@@ -1653,22 +1771,38 @@ function openPaymentMethodModal() {
         alert("Không có món ăn nào đã hoàn thành để thanh toán.");
         return;
     }
+    
+    // START CHỈNH SỬA: Đặt giá trị ô SĐT về trống
+    // Đảm bảo element 'customerPhoneInput' đã được thêm vào Modal chọn hình thức thanh toán
+    const phoneInput = document.getElementById('customerPhoneInput');
+    if (phoneInput) {
+        phoneInput.value = ''; 
+    }
+    // END CHỈNH SỬA
+    
     // Đóng Modal hóa đơn và mở Modal chọn hình thức
     paymentModal.style.display = 'none';
     paymentMethodModal.style.display = 'flex';
-}
-        
+}   
 // >> HÀM MỚI: Xử lý lựa chọn hình thức thanh toán và gọi processPayment
 function handlePaymentMethodSelection(method) {
+    // START CHỈNH SỬA: Lấy giá trị SĐT
+    const customerPhone = document.getElementById('customerPhoneInput').value.trim();
+    // END CHỈNH SỬA
+    
     paymentMethodModal.style.display = 'none'; // Đóng modal chọn hình thức
-    // Gọi hàm thanh toán chính với hình thức đã chọn
+    // Gọi hàm thanh toán chính với hình thức và SĐT đã chọn
     const tableId = window.tempPaymentData.tableId;
     const tableName = window.tempPaymentData.tableName;
-    processPayment(tableId, tableName, method); // Truyền thêm method
-}
+    // START CHỈNH SỬA: Truyền thêm customerPhone
+    processPayment(tableId, tableName, method, customerPhone); 
+    // END CHỈNH SỬA
+}   
 
- // >> CODE SỬA HÀM confirmPayment (Đổi tên thành processPayment và nhận thêm paymentMethod - Đã bao gồm logic Phụ thu VIP)
-async function processPayment(tableId, tableName, paymentMethod) {
+// >> CODE SỬA HÀM processPayment (Đổi tên thành processPayment và nhận thêm paymentMethod - Đã bao gồm logic Phụ thu VIP)
+// START CHỈNH SỬA: Thêm tham số customerPhone
+async function processPayment(tableId, tableName, paymentMethod, customerPhone) {
+// END CHỈNH SỬA
     // 1. Lấy dữ liệu đã được tính toán trong showPaymentModal
     const paymentData = window.tempPaymentData;
 
@@ -1707,7 +1841,10 @@ async function processPayment(tableId, tableName, paymentMethod) {
         items: finalItemsForBill, // Đã được gom nhóm, tính toán và bao gồm Phụ thu VIP nếu có
         totalAmount: totalAmount, // Đã bao gồm Phụ thu VIP nếu có
         finalTotal: finalTotal, // Bằng totalAmount
-        paymentMethod: paymentMethod // << TRƯỜNG MỚI ĐÃ THÊM
+        paymentMethod: paymentMethod, // << TRƯỜNG MỚI ĐÃ THÊM
+        // START CHỈNH SỬA: Thêm trường SĐT
+        customerPhone: customerPhone || '' // << TRƯỜNG MỚI ĐÃ THÊM (Gán rỗng nếu không có SĐT)
+        // END CHỈNH SỬA
     };
 
     // 5. Cập nhật trạng thái bàn về 'available' sau khi đã thanh toán
@@ -1764,6 +1901,7 @@ async function processPayment(tableId, tableName, paymentMethod) {
         document.addEventListener('DOMContentLoaded', () => {
             // FIX: Thiết lập listener Firebase cho danh sách bàn chỉ 1 LẦN DUY NHẤT khi ứng dụng khởi động.
             database.ref('tables').on('value', renderTables);
+            setupGlobalNoteListener();
         });
     </script>
 </body>
