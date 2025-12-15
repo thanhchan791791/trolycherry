@@ -291,6 +291,14 @@
                 <canvas id="hourlyRevenueChart"></canvas>
             </div>
         </section>
+        
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.55" id="weeklyDayStatsSection">
+            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🗓️ Doanh thu theo Thứ trong Tuần (T2 - CN)</h3>
+            <div class="chart-container">
+                <canvas id="weeklyDayRevenueChart"></canvas>
+            </div>
+        </section>
+        
         <section class="card-ios p-5 mb-8 animated-item" data-delay="0.6">
             <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">📅 Thống kê theo khoảng thời gian</h3>
             <div class="date-filter space-y-4 md:flex md:gap-4 md:items-end">
@@ -481,6 +489,11 @@
 
         const revenueChartCanvas = document.getElementById('revenueChart');
         const hourlyRevenueChartCanvas = document.getElementById('hourlyRevenueChart'); // THÊM MỚI
+        
+        // THÊM MỚI: DOM elements cho Biểu đồ theo Thứ trong Tuần
+        const weeklyDayRevenueChartCanvas = document.getElementById('weeklyDayRevenueChart');
+        let weeklyDayRevenueChartInstance = null;
+        
         const topSellingFoodsListEl = document.getElementById('topSellingFoodsList');
         const topSellingDrinksListEl = document.getElementById('topSellingDrinksList');
         const orderHistoryTableBody = document.getElementById('orderHistoryTableBody');
@@ -571,6 +584,11 @@
                 updateChartColors(hourlyRevenueChartInstance, true); // Thêm cờ isLineChart
                 hourlyRevenueChartInstance.update();
             }
+            // THÊM MỚI: Cập nhật màu biểu đồ theo Thứ trong Tuần (Nếu có) - Không cần gọi updateChartColors vì màu được đặt cố định
+            if (weeklyDayRevenueChartInstance) {
+                // Chỉ cần gọi update để cập nhật màu label/grid (đã được định nghĩa trong options)
+                weeklyDayRevenueChartInstance.update(); 
+            }
         });
 
         // Scroll Animation Logic (Intersection Observer)
@@ -656,6 +674,8 @@
                     };
                 } else {
                     // Bar Chart (30-day revenue chart)
+                    // Note: This only applies to the 30-day chart which uses Primary iOS Blue.
+                    // The Weekly Day chart uses Secondary iOS Green, which is handled in its creation function.
                     chartInstance.data.datasets[0].backgroundColor = chartColor;
                     chartInstance.data.datasets[0].borderColor = chartColor;
                 }
@@ -892,6 +912,107 @@
                                 color: labelColor,
                                 maxRotation: 45,
                                 minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // THÊM MỚI: Hàm vẽ biểu đồ Doanh thu theo Thứ trong Tuần (T2 - CN)
+        async function updateWeeklyDayRevenueChart() {
+            const payments = await fetchPayments();
+            
+            // Khởi tạo doanh thu cho 7 ngày trong tuần
+            // Index 0=CN, 1=T2, ..., 6=T7
+            const revenueByDayIndex = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 0: 0 };
+            const dayLabels = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
+
+            payments.forEach(payment => {
+                const dateObj = new Date(payment.timestamp);
+                const dayIndex = dateObj.getDay(); // 0 (Sun) - 6 (Sat)
+                const total = payment.finalTotal || 0;
+                
+                // Cần đảm bảo timestamp hợp lệ, nếu không dayIndex sẽ là NaN
+                if (!isNaN(dayIndex) && revenueByDayIndex.hasOwnProperty(dayIndex)) {
+                    revenueByDayIndex[dayIndex] += total;
+                }
+            });
+            
+            // Sắp xếp lại dữ liệu theo thứ tự T2 -> CN
+            const sortedDayIndices = [1, 2, 3, 4, 5, 6, 0];
+            const data = sortedDayIndices.map(index => revenueByDayIndex[index]);
+            
+            if (weeklyDayRevenueChartInstance) {
+                weeklyDayRevenueChartInstance.destroy();
+            }
+            
+            const isDark = document.body.classList.contains('dark');
+            // Sử dụng màu Secondary iOS (Green) cho biểu đồ này
+            const chartColor = isDark ? 'rgba(48, 209, 88, 0.7)' : 'rgba(52, 199, 89, 0.7)'; // iOS Green
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const labelColor = 'var(--text-color)';
+
+            weeklyDayRevenueChartInstance = new Chart(weeklyDayRevenueChartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: dayLabels, // T2, T3, T4, T5, T6, T7, CN
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: data,
+                        backgroundColor: chartColor,
+                        borderColor: chartColor,
+                        borderRadius: 6,
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutCubic',
+                        delay: (context) => context.dataIndex * 50
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toLocaleString('vi-VN') + '₫';
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: gridColor,
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                color: labelColor,
+                                callback: (value) => value.toLocaleString('vi-VN') + '₫',
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                            },
+                            ticks: {
+                                color: labelColor,
+                                maxRotation: 0,
+                                minRotation: 0
                             }
                         }
                     }
@@ -1343,6 +1464,7 @@
             updateSummaryStats();
             update30DayChart();
             updateHourlyRevenueChart(); // THÊM MỚI: Gọi hàm vẽ biểu đồ khung giờ
+            updateWeeklyDayRevenueChart(); // THÊM MỚI: Gọi hàm vẽ biểu đồ theo Thứ trong Tuần
             updateTopSellingItems();
             
             fetchPayments().then(() => {
