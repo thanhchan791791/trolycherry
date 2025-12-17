@@ -319,7 +319,7 @@
        // --- Role-Based Access Control (RBAC) Setup - UPDATED PERMISSIONS ---
 const PERMISSIONS = {
     // 1. Cập nhật phân quyền cho Admin: Thêm 'order' và 'menu_management'
-    'admin': ['revenue_expense','viduytri', 'stats', 'inventory', 'personnel', 'menu_management','recipes','table_booking','lichnghi','order','kitchen_bar','lichnghi','sales'], // THÊM QUYỀN MỚI
+    'admin': ['revenue_expense','doidiem','viduytri', 'stats', 'inventory', 'personnel', 'menu_management','recipes','table_booking','lichnghi','order','kitchen_bar','lichnghi','sales'], // THÊM QUYỀN MỚI
     // 2. Cập nhật phân quyền cho Waiter: Chỉ có 'order'
     'waiter': ['order'], 
     'cashier': ['sales', 'kitchen_bar', 'revenue_expense', 'stats'], // THÊM QUYỀN MỚI
@@ -354,6 +354,13 @@ const PERMISSIONS = {
   color: '#34C759', // Xanh lá nhẹ (bạn có thể đổi)
   view: renderviduytri ,
   file: 'viduytri.html'
+},{
+  id: 'doidiem',
+  name: 'Đổi điểm',
+  icon: 'fa-sharp-duotone fa-regular fa-hand-point-up', // Icon lịch
+  color: '#FAF3E0', // Xanh lá nhẹ (bạn có thể đổi)
+  view: renderdoidiem ,
+  file: 'doidiem.html'
 },{
   id: 'recipes',
   name: 'công thức',
@@ -620,7 +627,9 @@ const PERMISSIONS = {
         function renderTableBookingView() {
             renderIframeView(getFile('table_booking'), getName('table_booking')); // reser-book.html
         }
-
+ function renderdoidiem() {
+            renderIframeView(getFile('doidiem'), getName('doidiem')); // reser-book.html
+        }
   function renderviduytri() {
             renderIframeView(getFile('viduytri'), getName('viduytri')); // reser-book.html
         }
