@@ -75,7 +75,7 @@
             background-color: rgba(0, 0, 0, 0.3); /* Nền tối nhẹ */
             display: flex;
             justify-content: center;
-            align-items: flex-end;
+            align-items: flex-end; /* Mặc định slide từ dưới lên */
             z-index: 1000;
             opacity: 0;
             pointer-events: none; /* Vô hiệu hóa tương tác khi ẩn */
@@ -84,6 +84,10 @@
         .modal-overlay.show {
             opacity: 1;
             pointer-events: auto;
+        }
+        /* Thay đổi cho modal tích điểm, slide từ giữa lên */
+        #phone-credit-modal-overlay {
+            align-items: center; /* Đưa modal vào giữa */
         }
         .modal-card {
             width: 100%;
@@ -99,6 +103,12 @@
             overflow-y: auto;
             transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* iOS bounce/slide up */
+        }
+        /* Điều chỉnh cho modal ở giữa */
+        #phone-credit-modal {
+            border-radius: 2rem; /* Làm tròn 4 góc cho modal ở giữa */
+            transform: translateY(20px); /* Bắt đầu hơi trượt xuống */
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .modal-overlay.show .modal-card {
             transform: translateY(0);
@@ -238,18 +248,6 @@
                     </button>
                 </div>
             </div>
-            <div id="discount-section" class="mb-6 p-4 bg-gray-50/50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-gray-700">
-                <h3 class="font-bold text-lg text-ios-text dark:text-ios-dark-text mb-3">🛠 Công cụ giảm giá</h3>
-                <div class="flex space-x-2">
-                    <input type="number" id="discount-percent-input" placeholder="% Giảm" min="0" max="100" 
-                        class="w-1/3 px-3 py-3 border-transparent rounded-xl focus:outline-none shadow-sm transition duration-150 ios-input text-center"
-                        value="10"
-                    >
-                    <button id="apply-discount-btn" class="flex-1 bg-ios-orange text-white font-bold py-3 rounded-full shadow-lg hover:bg-orange-600 active:scale-[0.97] transition duration-150 active:shadow-none disabled:bg-gray-400 disabled:cursor-not-allowed">
-                        ÁP DỤNG GIẢM GIÁ
-                    </button>
-                </div>
-            </div>
             
             <h3 class="font-bold text-lg text-ios-text dark:text-ios-dark-text mb-4">Các món đã mua:</h3>
             <div id="items-list" class="space-y-2 mb-8 p-3 bg-gray-50/50 dark:bg-white/5 rounded-xl">
@@ -259,6 +257,32 @@
                 VỀ 0 ĐỒNG
             </button>
             
+        </div>
+    </div>
+    
+    <div id="phone-credit-modal-overlay" class="modal-overlay">
+        <div id="phone-credit-modal" class="modal-card max-w-sm">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-ios-text dark:text-ios-dark-text">Tích điểm Khách hàng</h2>
+                <button id="close-phone-credit-modal" class="text-gray-400 hover:text-ios-accent dark:hover:text-ios-accent p-2 -mr-2 rounded-full active:scale-90 transition duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">Nhập số điện thoại để tích điểm cho hóa đơn:</p>
+            <p id="credit-invoice-id-display" class="font-bold mb-4 text-ios-accent text-lg"></p>
+
+            <div class="space-y-4">
+                <input type="tel" id="customer-phone-input" placeholder="Số điện thoại" 
+                    class="w-full px-4 py-3 border-transparent rounded-xl focus:outline-none shadow-sm transition duration-150 ios-input text-lg font-semibold"
+                    inputmode="numeric" pattern="[0-9]*"
+                >
+                <button id="submit-phone-credit-btn" class="w-full bg-green-500 text-white font-bold text-lg py-4 rounded-full shadow-lg hover:bg-green-600 active:scale-[0.97] transition duration-150 active:shadow-none disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    Xác nhận Tích điểm
+                </button>
+            </div>
         </div>
     </div>
 
@@ -313,14 +337,18 @@
         const notificationBox = document.getElementById('notification-box');
         const notificationMessage = document.getElementById('notification-message');
         
-        // Các phần tử mới
-        const applyDiscountButton = document.getElementById('apply-discount-btn');
-        const discountPercentInput = document.getElementById('discount-percent-input');
-        
-        // CÁC PHẦN TỬ MỚI THÊM VÀO
+        // CÁC PHẦN TỬ MỚI (chỉ giữ lại custom amount)
         const customAmountInput = document.getElementById('custom-amount-input');
         const setCustomAmountButton = document.getElementById('set-custom-amount-btn');
-        // KẾT THÚC CÁC PHẦN TỬ MỚI THÊM VÀO
+        
+        // NEW Phone Credit Modal Elements
+        const phoneCreditModalOverlay = document.getElementById('phone-credit-modal-overlay');
+        const closePhoneCreditModalButton = document.getElementById('close-phone-credit-modal');
+        const customerPhoneInput = document.getElementById('customer-phone-input');
+        const submitPhoneCreditButton = document.getElementById('submit-phone-credit-btn');
+        const creditInvoiceIdDisplay = document.getElementById('credit-invoice-id-display');
+        
+        let currentCreditInvoiceId = null; // Store ID for phone credit action
 
         // --- Custom Notification Function ---
         const showCustomMessage = (type, message) => {
@@ -354,6 +382,7 @@
         
         // Hàm định dạng số tiền có dấu chấm ngăn cách 000
         const formatNumber = (num) => {
+            if (typeof num !== 'number') return '';
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         };
 
@@ -366,8 +395,16 @@
 
         const formatTimestamp = (timestamp) => {
             if (!timestamp) return 'Không rõ';
-            const ms = String(timestamp).length === 10 ? timestamp * 1000 : timestamp;
-            const date = new Date(ms);
+            // Cố gắng parse timestamp dạng chuỗi ISO (VD: "2025-12-17T02:48:34.817Z")
+            let date;
+            if (typeof timestamp === 'string' && timestamp.includes('T') && timestamp.endsWith('Z')) {
+                date = new Date(timestamp);
+            } else {
+                // Xử lý timestamp dạng số
+                const ms = String(timestamp).length === 10 ? timestamp * 1000 : timestamp;
+                date = new Date(ms);
+            }
+            
             if (isNaN(date.getTime())) return 'Ngày không hợp lệ';
 
             const time = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -394,8 +431,11 @@
                 const totalNumber = String(displayAmount);
 
                 const priceMatch = totalVND.includes(query) || totalNumber.includes(query);
+                
+                // NEW: Search by phone number
+                const phoneMatch = receipt.customerPhone && receipt.customerPhone.includes(query);
 
-                return idMatch || priceMatch;
+                return idMatch || priceMatch || phoneMatch;
             });
 
             if (filtered.length === 0) {
@@ -406,28 +446,28 @@
         };
 
 
-        // --- Database Update Function (Cập nhật totalAmount và finalTotal) ---
-        const updateReceiptTotal = async (invoiceId, newTotalAmount) => {
+        // --- Database Update Function (Cập nhật trường bất kỳ) ---
+        const updateReceiptFields = async (invoiceId, fieldsToUpdate, successMessage) => {
             if (!db || !invoiceId) {
                 showCustomMessage('error', 'Lỗi: Không thể kết nối DB hoặc thiếu ID hóa đơn.');
                 return;
             }
             
-            // Đảm bảo là số nguyên và không âm
-            const amountToUpdate = Math.max(0, Math.round(newTotalAmount));
-
             try {
                 const receiptRef = ref(db, `payment_history/${invoiceId}`);
                 
-                await update(receiptRef, {
-                    totalAmount: amountToUpdate,
-                    finalTotal: amountToUpdate 
-                });
+                await update(receiptRef, fieldsToUpdate);
                 
-                showCustomMessage('success', `Hóa đơn ${invoiceId.substring(0, 5)}... đã được cập nhật thành ${formatVND(amountToUpdate)}!`);
+                showCustomMessage('success', successMessage);
                 
-                // Sau khi cập nhật, ẩn modal để tránh xung đột dữ liệu
-                setTimeout(() => modalOverlay.classList.remove('show'), 1000); 
+                // Sau khi cập nhật, ẩn modal/popup nếu đang hiển thị
+                if (phoneCreditModalOverlay.classList.contains('show')) {
+                     // Đợi 0.5s để người dùng kịp nhìn thấy thông báo
+                     setTimeout(() => phoneCreditModalOverlay.classList.remove('show'), 500); 
+                }
+                if (modalOverlay.classList.contains('show')) {
+                     setTimeout(() => modalOverlay.classList.remove('show'), 500); 
+                }
 
             } catch (error) {
                 console.error("Lỗi khi cập nhật DB:", error);
@@ -435,29 +475,19 @@
             }
         };
         
-        // --- Hàm xử lý Giảm giá ---
-        const applyDiscount = () => {
-            if (!currentInvoiceId || currentBaseTotalAmount === null) {
-                showCustomMessage('error', 'Lỗi: Không tìm thấy hóa đơn gốc.');
-                return;
-            }
-            
-            const discountPercent = parseFloat(discountPercentInput.value);
-
-            if (isNaN(discountPercent) || discountPercent < 0 || discountPercent > 100) {
-                showCustomMessage('error', 'Vui lòng nhập phần trăm giảm giá hợp lệ (0-100).');
-                return;
-            }
-            
-            // Tính toán số tiền mới
-            const discountFactor = 1 - (discountPercent / 100);
-            const newTotal = currentBaseTotalAmount * discountFactor;
-
-            // Gọi hàm cập nhật chung
-            updateReceiptTotal(currentInvoiceId, newTotal);
+        // Hàm cập nhật tổng tiền (đã chỉnh sửa để sử dụng updateReceiptFields)
+        const updateReceiptTotal = (invoiceId, newTotalAmount) => {
+            // Đảm bảo là số nguyên và không âm
+            const amountToUpdate = Math.max(0, Math.round(newTotalAmount)); 
+            const fields = {
+                totalAmount: amountToUpdate,
+                finalTotal: amountToUpdate 
+            };
+            const message = `Hóa đơn ${invoiceId.substring(0, 5)}... đã được cập nhật thành ${formatVND(amountToUpdate)}!`;
+            return updateReceiptFields(invoiceId, fields, message);
         };
-        
-        // --- Hàm xử lý Đặt lại tổng tiền theo giá trị nhập (MỚI) ---
+
+        // --- Hàm xử lý Đặt lại tổng tiền theo giá trị nhập ---
         const setCustomAmount = () => {
             if (!currentInvoiceId) {
                 showCustomMessage('error', 'Lỗi: Không tìm thấy ID hóa đơn.');
@@ -472,10 +502,42 @@
                 return;
             }
 
-            // Gọi hàm cập nhật chung
+            // Gọi hàm cập nhật tổng tiền
             updateReceiptTotal(currentInvoiceId, newAmount);
         };
-        // KẾT THÚC HÀM MỚI
+        
+        // --- Hàm mở modal nhập số điện thoại (Phải được gán vào window) ---
+        window.openPhoneCreditModal = (invoiceId) => {
+            currentCreditInvoiceId = invoiceId;
+            creditInvoiceIdDisplay.textContent = invoiceId;
+            customerPhoneInput.value = ''; // Clear previous input
+            phoneCreditModalOverlay.classList.add('show');
+            // Đảm bảo input được focus sau khi modal hiện
+            setTimeout(() => customerPhoneInput.focus(), 400); 
+        };
+        
+        // --- Hàm gửi số điện thoại tích điểm ---
+        const submitPhoneCredit = () => {
+            if (!currentCreditInvoiceId) {
+                showCustomMessage('error', 'Lỗi: Không tìm thấy ID hóa đơn.');
+                return;
+            }
+
+            const phone = customerPhoneInput.value.trim();
+
+            if (phone.length < 9 || phone.length > 15 || !/^\d+$/.test(phone)) { 
+                showCustomMessage('error', 'Vui lòng nhập số điện thoại hợp lệ (chỉ chứa số).');
+                return;
+            }
+
+            // Cập nhật DB
+            updateReceiptFields(
+                currentCreditInvoiceId, 
+                { customerPhone: phone },
+                `Đã tích điểm thành công SĐT ${phone} cho HĐ ${currentCreditInvoiceId.substring(0, 5)}...`
+            );
+        };
+
 
         // --- Renderer Functions ---
         const renderReceiptsList = (receipts, isFiltered = false) => {
@@ -497,7 +559,18 @@
 
             noDataMessage.classList.add('hidden');
 
-            receipts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            // SẮP XẾP: Sắp xếp theo timestamp giảm dần (bill gần đây nhất lên đầu)
+            receipts.sort((a, b) => {
+                // Chuyển đổi timestamp sang milliseconds
+                const timeA = typeof a.timestamp === 'string' ? new Date(a.timestamp).getTime() : a.timestamp * 1000;
+                const timeB = typeof b.timestamp === 'string' ? new Date(b.timestamp).getTime() : b.timestamp * 1000;
+                
+                // Xử lý trường hợp không có timestamp
+                const valA = timeA || 0;
+                const valB = timeB || 0;
+                
+                return valB - valA; // Sắp xếp giảm dần (Mới nhất -> Cũ nhất)
+            });
 
             receipts.forEach((receipt) => {
                 const card = document.createElement('div');
@@ -508,13 +581,24 @@
                 // Lấy tổng tiền, ưu tiên finalTotal nếu có, nếu không thì dùng totalAmount
                 const displayAmount = receipt.finalTotal !== undefined ? receipt.finalTotal : (receipt.totalAmount || 0);
 
+                // Status and Button logic
+                let customerStatusHTML = '';
+                if (receipt.customerPhone) {
+                    customerStatusHTML = `<span class="text-xs font-semibold text-green-600 dark:text-green-400">Đã tích điểm: ${receipt.customerPhone}</span>`;
+                } else {
+                    customerStatusHTML = `<span class="text-xs font-semibold text-ios-orange">Chưa tích điểm</span>
+                       <button class="ml-2 px-2 py-0.5 text-xs font-bold text-white bg-ios-accent rounded-full active:scale-95 transition duration-150" onclick="event.stopPropagation(); window.openPhoneCreditModal('${receipt.invoiceId}')">
+                           Tích điểm
+                       </button>`;
+                }
+
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-1">
                         <p class="text-xs font-medium text-ios-accent">Mã HĐ: ${receipt.invoiceId.substring(0, 10)}...</p>
                         <p class="text-lg font-extrabold ${displayAmount === 0 ? 'text-green-500' : 'text-red-600 dark:text-red-400'}">${formatVND(displayAmount)}</p>
                     </div>
                     <div class="flex justify-between items-end mt-1">
-                        <p class="text-sm text-gray-700 dark:text-gray-300">${receipt.paymentMethod || 'Không rõ'}</p>
+                        <div class="flex items-center text-sm">${customerStatusHTML}</div>
                         <p class="text-xs text-gray-500 dark:text-gray-400">${formatTimestamp(receipt.timestamp)}</p>
                     </div>
                 `;
@@ -524,7 +608,7 @@
 
         const renderReceiptDetail = (receipt) => {
             currentInvoiceId = receipt.invoiceId; 
-            // Lưu trữ totalAmount gốc làm mốc để tính toán giảm giá
+            // Lưu trữ totalAmount gốc làm mốc
             currentBaseTotalAmount = receipt.totalAmount || 0; 
             
             // Lấy tổng tiền để hiển thị, ưu tiên finalTotal nếu có
@@ -541,19 +625,14 @@
                 setToZeroButton.disabled = true;
                 setToZeroButton.classList.remove('bg-ios-accent', 'hover:bg-blue-600');
                 setToZeroButton.classList.add('bg-green-500', 'cursor-not-allowed');
-                applyDiscountButton.disabled = true;
                 setCustomAmountButton.disabled = true; // Vô hiệu hóa nút set custom
             } else {
                 setToZeroButton.textContent = "VỀ 0 ĐỒNG";
                 setToZeroButton.disabled = false;
                 setToZeroButton.classList.remove('bg-green-500', 'cursor-not-allowed');
                 setToZeroButton.classList.add('bg-ios-accent', 'hover:bg-blue-600');
-                applyDiscountButton.disabled = false;
                 setCustomAmountButton.disabled = false; // Kích hoạt nút set custom
             }
-            
-            // Reset input giảm giá về giá trị mặc định 10% mỗi lần mở modal
-            discountPercentInput.value = '10';
             
             // Cập nhật giá trị hiển thị cho input custom amount
             customAmountInput.value = formatNumber(displayAmount);
@@ -638,6 +717,14 @@
                                     modalOverlay.classList.remove('show'); 
                                 }
                             }
+                            
+                            // Nếu modal tích điểm đang mở, đóng nó nếu hóa đơn đã được cập nhật (ví dụ: đã tích điểm)
+                            if (phoneCreditModalOverlay.classList.contains('show')) {
+                                const updatedReceipt = masterReceipts.find(r => r.invoiceId === currentCreditInvoiceId);
+                                if (updatedReceipt && updatedReceipt.customerPhone) {
+                                    phoneCreditModalOverlay.classList.remove('show');
+                                }
+                            }
 
                         }, (err) => {
                             console.error("Firebase DB Error:", err);
@@ -669,22 +756,18 @@
         // --- Event Listeners and Initialization ---
 
         searchInput.addEventListener('input', filterReceipts);
-
-        // Xử lý sự kiện Giảm giá
-        applyDiscountButton.onclick = applyDiscount;
         
-        // Xử lý sự kiện Set Custom Amount (MỚI)
+        // Xử lý sự kiện Set Custom Amount
         setCustomAmountButton.onclick = setCustomAmount;
         
-        // Xử lý định dạng khi người dùng nhập vào input custom amount (MỚI)
+        // Xử lý định dạng khi người dùng nhập vào input custom amount
         customAmountInput.addEventListener('input', function(e) {
             // Lấy số tiền không dấu chấm
             const rawValue = parseNumber(e.target.value);
             // Định dạng lại và gán vào input
             e.target.value = formatNumber(rawValue);
         });
-        // KẾT THÚC XỬ LÝ SỰ KIỆN MỚI
-
+        
         // Xử lý sự kiện click nút "VỀ 0 ĐỒNG"
         setToZeroButton.onclick = () => {
             if (currentInvoiceId) {
@@ -704,6 +787,26 @@
                 modalOverlay.classList.remove('show');
             }
         };
+        
+        // NEW: Event Listeners for Phone Credit Modal
+        closePhoneCreditModalButton.onclick = () => phoneCreditModalOverlay.classList.remove('show');
+        
+        phoneCreditModalOverlay.onclick = (event) => {
+            if (event.target === phoneCreditModalOverlay) {
+                phoneCreditModalOverlay.classList.remove('show');
+            }
+        };
+        
+        submitPhoneCreditButton.onclick = submitPhoneCredit;
+        
+        // Phone input formatting (Removed maxlength="10")
+        customerPhoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Chỉ giữ lại số
+            e.target.value = value;
+        });
+        
+        // End of NEW Event Listeners
+        
 
         window.onload = function() {
             if (!firebaseConfig.databaseURL) {
