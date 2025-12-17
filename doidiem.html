@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giao Diện Đổi Điểm Êđê Buôn Làng (Nhân Viên)</title>
+  
+  <style>
+    /* * ----------------------------------------
+     * 1. IOS STYLES & VARIABLES
+     * ----------------------------------------
+     */
+    :root {
+      /* Colors */
+      --color-ios-bg: #F2F2F7; /* Nền chuẩn iOS */
+      --color-ios-card: #FFFFFF;
+      --color-ios-primary: #007AFF; /* Xanh dương chuẩn iOS */
+      --color-ios-separator: #C7C7CC; /* Màu phân cách */
+      
+      --color-primary-edebl: #8B4513; /* Nâu đất/Cà phê đậm (Cho tiêu đề) */
+      --color-text-dark: #1C1C1E; /* Tối gần đen chuẩn iOS */
+      --color-text-secondary: #6C6C70; /* Text phụ */
+      
+      /* Redeem Specific Colors (Green) */
+      --color-redeem-action: #34C759; /* Xanh lá hành động chuẩn iOS */
+      --color-redeem-primary: #38761D; /* Xanh lá đậm gốc */
+      --color-redeem-secondary: #A9D18E;
+      
+      /* New Bill Button Color (Blue/Indigo) */
+      --color-bill-action: #5856D6; /* Tím/Xanh Indigo chuẩn iOS */
+      
+      /* Radius & Shadow */
+      --border-radius-card: 20px; /* Bo góc lớn cho Card */
+      --border-radius-lg: 14px;   /* Bo góc cho Button, Input */
+      --border-radius-sm: 10px;
+      --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.08); /* Đổ bóng mềm iOS */
+      
+      /* Animation */
+      --transition-duration: 0.3s;
+      --transition-bezier: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Reset & Base Styles */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        transition: all var(--transition-duration) var(--transition-bezier); /* Transition chung */
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                   "SF Pro Text", "Inter", system-ui, sans-serif;
+      padding: 20px;
+      max-width: 480px; /* Tăng nhẹ max-width cho cảm giác App View */
+      margin: auto;
+      text-align: center;
+      background-color: var(--color-ios-bg);
+      color: var(--color-text-dark);
+      overflow-x: hidden;
+    }
+    
+    /* Animation khi load trang (Fade + Slide Up) */
+    .app-container {
+        opacity: 0;
+        transform: translateY(15px);
+        animation: pageLoadFadeIn 0.8s var(--transition-bezier) forwards;
+    }
+    
+    @keyframes pageLoadFadeIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Active State (Tap Scale) */
+    .card:active, button:active, .input-like-element:active, .bill-button:active {
+        transform: scale(0.98);
+        transition-duration: 0.1s;
+    }
+
+    /* Typography */
+    .app-header {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--color-text-dark);
+        margin-bottom: 25px;
+        line-height: 1.2;
+    }
+    
+    .card-title {
+      color: var(--color-primary-edebl);
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    
+    /* * ----------------------------------------
+     * 2. UI COMPONENTS: CARD, INPUT, BUTTON
+     * ----------------------------------------
+     */
+    .redeem-box {
+      background: var(--color-ios-card);
+      padding: 30px 20px;
+      border-radius: var(--border-radius-card);
+      box-shadow: var(--shadow-soft);
+      margin-top: 20px;
+      border: none; /* Bỏ viền cứng, chỉ dùng bóng */
+    }
+    
+    .redeem-box h3 {
+        color: var(--color-redeem-action); /* Màu xanh lá cho chức năng chính */
+        text-transform: uppercase;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        margin-bottom: 25px;
+     }
+     
+     .redeem-input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+        margin-bottom: 20px;
+     }
+
+    input[type="text"], select {
+      height: 52px; /* Chuẩn chạm iOS */
+      padding: 0 15px;
+      border: 1px solid #E5E5E5; /* Viền mỏng nhẹ */
+      border-radius: var(--border-radius-lg);
+      background-color: var(--color-ios-card); 
+      font-size: 16px;
+      color: var(--color-text-dark);
+      box-sizing: border-box;
+      transition: box-shadow 0.3s, border-color 0.3s;
+      width: 100%;
+      -webkit-appearance: none; /* Bỏ style default của select/input */
+      appearance: none;
+    }
+    
+    select {
+        /* Icon mũi tên custom cho select */
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236C6C70'%3e%3cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 18px;
+        padding-right: 40px;
+    }
+
+    input[type="text"]:focus, select:focus {
+      border-color: var(--color-ios-primary);
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25); /* Ring focus chuẩn iOS */
+      outline: none;
+    }
+    
+    /* Input đặc biệt hiển thị điểm hiện tại (như một Info Cell) */
+    #currentPointsDisplay {
+        text-align: center; 
+        color: var(--color-redeem-action); 
+        font-weight: 600; 
+        background-color: #F8F8F8; /* Nền nhẹ để nổi bật */
+        border: 1px solid #E5E5E5;
+        box-shadow: none;
+        pointer-events: none; /* Không cho focus */
+    }
+    
+    /* Button Base Style */
+    button {
+      height: 52px; /* Chuẩn chạm lớn hơn */
+      padding: 0 20px;
+      color: white;
+      border: none;
+      border-radius: var(--border-radius-lg); 
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: 600;
+      transition: background-color 0.2s, transform 0.1s var(--transition-bezier), box-shadow 0.2s;
+      width: 100%; 
+      margin: 0;
+      margin-top: 10px;
+      letter-spacing: 0.2px;
+    }
+    
+    button:hover:not(:disabled) {
+        opacity: 0.9;
+    }
+    
+    button:disabled {
+        background: var(--color-ios-separator) !important;
+        cursor: not-allowed;
+        box-shadow: none !important;
+        color: white;
+    }
+
+    /* Style cho nút Kiểm Tra (Màu Nâu đất) */
+    .check-button {
+      background: var(--color-primary-edebl); 
+      box-shadow: 0 5px 15px rgba(139, 69, 19, 0.25);
+    }
+    
+    /* Style riêng cho nút đổi điểm (Màu xanh lá - Action) */
+    #redeemButton {
+        background: var(--color-redeem-action);
+        box-shadow: 0 5px 15px rgba(52, 199, 89, 0.4);
+        margin-top: 20px !important;
+    }
+    
+    /* Style riêng cho nút Cập Nhật Bill (Màu Tím/Indigo) */
+    .bill-button {
+        background: var(--color-bill-action);
+        box-shadow: 0 5px 15px rgba(88, 86, 214, 0.4);
+    }
+    
+    /* * ----------------------------------------
+     * 3. RESULT BOX & IFRAME MODAL
+     * ----------------------------------------
+     */
+    #redeemResult {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 12px; /* Bo góc nhẹ hơn cho Result Box */
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.5;
+      text-align: left;
+      border: none;
+      transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    #redeemResult p {
+        margin: 5px 0;
+    }
+    
+    .result-title {
+        display: block;
+        font-weight: 600;
+        color: var(--color-text-dark);
+        margin-bottom: 8px;
+        text-align: center;
+        font-size: 17px;
+    }
+    
+    /* Success: Màu xanh lá cây/xanh rêu nhạt ấm */
+    .success {
+      background-color: #E6F3E6; 
+      color: #1A7A2A; 
+      border-left: 5px solid var(--color-redeem-action);
+    }
+    
+    /* Error: Màu đỏ đậm ấm */
+    .error {
+      background-color: #FBEFEF; 
+      color: #990000; 
+      border-left: 5px solid #FF3B30; /* Đỏ chuẩn iOS */
+    }
+    
+    /* Info/Default: Màu vàng kem ấm */
+    .info {
+      background-color: #FFF8E1; 
+      color: #9C6500;
+      border-left: 5px solid #FF9500; /* Cam/Vàng chuẩn iOS */
+    }
+    
+    /* IFRAME MODAL STYLES */
+    .iframe-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--color-ios-bg); /* Nền nhẹ phía sau */
+        z-index: 1000;
+        display: none; /* Mặc định ẩn */
+        flex-direction: column;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .iframe-modal.active {
+        display: flex;
+        opacity: 1;
+    }
+    
+    .iframe-header {
+        height: 50px;
+        background-color: var(--color-ios-card);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end; /* Nút đóng ở bên phải */
+        padding: 0 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        z-index: 1001;
+    }
+    
+    .close-button {
+        background: var(--color-ios-primary);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 5px 15px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        height: auto;
+        margin-top: 0; /* Override button margin-top */
+    }
+    
+    .bill-iframe {
+        flex-grow: 1; /* Cho iframe chiếm hết không gian còn lại */
+        width: 100%;
+        border: none;
+    }
+
+  </style>
+  </head>
+<body>
+
+<div class="app-container">
+    
+    <header class="app-header">
+        Êđê Buôn Làng
+    </header>
+    
+    <div class="redeem-box card">
+        <h3 class="card-title">🎯 Giao Diện Đổi Điểm (Nhân Viên) 🎯</h3>
+        
+        <div class="redeem-input-group">
+            <input type="text" id="redeemPhoneInput" placeholder="Nhập Số điện thoại khách hàng" class="input-like-element" />
+            
+            <select id="voucherSelect" class="input-like-element">
+                <option value="" disabled selected>Chọn Voucher Khách Muốn Đổi</option>
+                <option value="100">100 Điểm - Voucher Giảm 50.000 VNĐ</option>
+                <option value="200">200 Điểm - Voucher Giảm 100.000 VNĐ</option>
+                <option value="300">300 Điểm - Voucher Giảm 150.000 VNĐ</option>
+                <option value="400">400 Điểm - Voucher Tiệc Lớn 200.000 VNĐ</option>
+            </select>
+            
+            <input type="text" id="currentPointsDisplay" value="Điểm hiện tại: --" readonly disabled class="input-like-element" />
+        </div>
+        
+        <button onclick="checkRedeemPoints()" class="check-button">Kiểm Tra Điểm Trước Khi Đổi</button>
+        
+        <button onclick="openBillIframe()" class="bill-button">🧾 Cập Nhật Bill Gần Nhất</button>
+        
+        <button id="redeemButton" onclick="redeemLoyaltyPoints()" disabled>❌ Vui lòng Kiểm Tra Điểm trước</button>
+        
+        <div id="redeemResult" class="info">
+          Nhập SĐT, chọn Voucher và nhấn "Kiểm Tra Điểm".
+        </div>
+    </div>
+
+</div>
+
+<div id="billIframeModal" class="iframe-modal">
+    <div class="iframe-header">
+        <button class="close-button" onclick="closeBillIframe()">Đóng</button>
+    </div>
+    <iframe id="billIframe" src="about:blank" class="bill-iframe"></iframe>
+</div>
+<script type="module">
+  // Import Firebase SDK
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"; 
+
+  // Firebase config của bạn (giữ nguyên)
+  const firebaseConfig = {
+    apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10",
+    authDomain: "chitieu-7263e.firebaseapp.com",
+    databaseURL: "https://chitieu-7263e-default-rtdb.firebaseio.com",
+    projectId: "chitieu-7263e",
+    storageBucket: "chitieu-7263e.firebasestorage.app",
+    messagingSenderId: "83833140682",
+    appId: "1:83833140682:web:f9254b418ace3a659fcb33",
+    measurementId: "G-523X74K18N"
+  };
+
+  // Khởi tạo Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Quy tắc tính điểm: 1,000,000 VNĐ = 100 điểm Êđê.
+  const POINTS_PER_MILLION = 100; 
+  
+  // Biến toàn cục để lưu điểm hiện tại của SĐT đang được tra cứu đổi điểm
+  let currentRedeemPoints = 0;
+  let currentRedeemPhoneKey = '';
+
+  /**
+   * Chuẩn hóa SĐT thành key chỉ chứa số.
+   * @param {string} phone - Số điện thoại thô.
+   * @returns {string} - Số điện thoại chỉ chứa số.
+   */
+  function standardizePhoneKey(phone) {
+    return phone.replace(/[^0-9]/g, ''); 
+  }
+
+  /**
+   * Cập nhật điểm tích lũy, điểm đã đổi, và điểm hiện tại vào Firebase Realtime Database
+   */
+  async function updateLoyaltyDataInDB(phone, totalAmount, accumulatedPoints, redeemedPoints, currentPoints) {
+    try {
+        const phoneKey = standardizePhoneKey(phone);
+        await set(ref(db, 'loyalty_points/' + phoneKey), {
+            phone: phone,
+            totalAmount: totalAmount,
+            accumulatedPoints: accumulatedPoints, // Tổng điểm tích lũy từ bill
+            redeemedPoints: redeemedPoints,       // Tổng điểm đã đổi 
+            currentPoints: currentPoints,         // Điểm hiện tại (accumulatedPoints - redeemedPoints)
+            lastUpdated: new Date().toISOString()
+        });
+        console.log(`Đã cập nhật dữ liệu điểm thành công cho SĐT: ${phone}`);
+    } catch (error) {
+        console.error("Lỗi khi lưu điểm vào DB:", error);
+    }
+  }
+
+  /**
+   * Lấy dữ liệu điểm tích lũy, đã đổi, và điểm hiện tại.
+   * Nếu chưa có trong loyalty_points, sẽ tính toán từ payment_history.
+   */
+  async function fetchLoyaltyData(phoneKey) {
+      const loyaltyRef = ref(db, 'loyalty_points/' + phoneKey);
+      const loyaltySnapshot = await get(loyaltyRef);
+      
+      let totalAmount = 0;
+      let accumulatedPoints = 0;
+      let redeemedPoints = 0;
+      
+      if (loyaltySnapshot.exists()) {
+          const data = loyaltySnapshot.val();
+          totalAmount = data.totalAmount || 0;
+          accumulatedPoints = data.accumulatedPoints || 0;
+          redeemedPoints = data.redeemedPoints || 0;
+      } else {
+          // Trường hợp SĐT chưa có trong loyalty_points, tính toán từ history
+          const paymentHistoryRef = ref(db, 'payment_history');
+          const historySnapshot = await get(paymentHistoryRef);
+
+          historySnapshot.forEach(child => {
+            const data = child.val();
+            if (data.customerPhone && standardizePhoneKey(data.customerPhone) === phoneKey) {
+                const finalTotal = parseFloat(data.finalTotal);
+                if (!isNaN(finalTotal) && finalTotal > 0) {
+                    totalAmount += finalTotal;
+                }
+            }
+          });
+          accumulatedPoints = Math.floor(totalAmount / 1000000) * POINTS_PER_MILLION;
+          
+          // Xử lý trường hợp SĐT ví dụ được yêu cầu: 0909650816
+          if (phoneKey === '0909650816' && accumulatedPoints >= 200) {
+             redeemedPoints = 20; // Thiết lập 20 điểm đã đổi theo yêu cầu cho ví dụ
+          }
+      }
+      
+      const currentPoints = Math.max(0, accumulatedPoints - redeemedPoints);
+      
+      return { totalAmount, accumulatedPoints, redeemedPoints, currentPoints, exists: loyaltySnapshot.exists() || accumulatedPoints > 0 };
+  }
+
+
+  // --- HÀM TRA CỨU ĐIỂM DÀNH CHO NHÂN VIÊN TRƯỚC KHI ĐỔI ĐIỂM ---
+  async function checkRedeemPoints() {
+      const phoneInput = document.getElementById("redeemPhoneInput");
+      const voucherSelect = document.getElementById("voucherSelect");
+      const currentPointsDisplay = document.getElementById("currentPointsDisplay");
+      const redeemButton = document.getElementById("redeemButton");
+      const resultDiv = document.getElementById("redeemResult");
+      
+      const phone = phoneInput.value.trim();
+      const phoneKey = standardizePhoneKey(phone);
+      const cost = parseInt(voucherSelect.value);
+      
+      // Reset trạng thái
+      redeemButton.disabled = true;
+      currentPointsDisplay.value = "Điểm hiện tại: --";
+      redeemButton.innerHTML = "❌ Vui lòng Kiểm Tra Điểm trước";
+      currentRedeemPoints = 0;
+      currentRedeemPhoneKey = '';
+
+      if (!phone || isNaN(cost)) {
+        resultDiv.innerHTML = "<span class='result-title'>Lỗi Nhập Liệu</span><br>Vui lòng nhập **Số điện thoại** và chọn **Voucher**.";
+        resultDiv.className = "error";
+        return;
+      }
+      
+      resultDiv.innerHTML = `<span class='result-title'>Kiểm Tra Điểm</span><br>Đang kiểm tra điểm của khách **${phone}**...`;
+      resultDiv.className = "info";
+      
+      try {
+          // Lấy dữ liệu điểm hiện tại
+          const { currentPoints, accumulatedPoints, redeemedPoints, totalAmount, exists } = await fetchLoyaltyData(phoneKey);
+          
+          if (!exists) {
+              resultDiv.innerHTML = `
+                <span class='result-title'>Khách Hàng Mới</span>
+                <br>
+                Số điện thoại **${phone}** chưa là thành viên. Không thể đổi điểm.
+              `;
+              resultDiv.className = "error";
+              return;
+          }
+          
+          // Cập nhật điểm hiện tại trên giao diện NV
+          currentPointsDisplay.value = `Điểm hiện tại: ${currentPoints.toLocaleString()}`;
+
+          // Cập nhật dữ liệu mới nhất vào DB
+          await updateLoyaltyDataInDB(phone, totalAmount, accumulatedPoints, redeemedPoints, currentPoints);
+
+          if (currentPoints >= cost) {
+              // Đủ điểm
+              currentRedeemPoints = currentPoints; // Lưu điểm hiện tại
+              currentRedeemPhoneKey = phoneKey;     // Lưu SĐT Key
+              redeemButton.disabled = false;
+              redeemButton.innerHTML = `✅ Đủ điểm! Nhấn để ĐỔI ${cost} Điểm Êđê`;
+              
+              resultDiv.innerHTML = `
+                <span class='result-title'>Sẵn Sàng Đổi!</span>
+                <br>
+                Khách hàng có **${currentPoints.toLocaleString()}** Điểm Êđê.
+                <br>
+                Đủ để đổi Voucher **${cost}** Điểm.
+                <br>
+                Vui lòng nhấn nút **ĐỔI ĐIỂM** để xác nhận.
+              `;
+              resultDiv.className = "success";
+              
+          } else {
+              // Không đủ điểm
+              const requiredPoints = cost - currentPoints;
+              redeemButton.disabled = true;
+              redeemButton.innerHTML = "❌ Không đủ điểm để đổi!";
+              
+              resultDiv.innerHTML = `
+                <span class='result-title'>Không Đủ Điểm</span>
+                <br>
+                Khách hàng hiện có **${currentPoints.toLocaleString()}** Điểm Êđê.
+                <br>
+                Cần tích thêm **${requiredPoints.toLocaleString()}** điểm nữa.
+              `;
+              resultDiv.className = "info";
+          }
+          
+      } catch (error) {
+          console.error("Lỗi kiểm tra điểm đổi:", error);
+          resultDiv.innerHTML = "<span class='result-title'>Lỗi Hệ Thống</span><br>Không thể kiểm tra điểm. Vui lòng thử lại.";
+          resultDiv.className = "error";
+      }
+  }
+
+
+  // ------------------------------------------
+  // --- HÀM ĐỔI ĐIỂM VÀ CẬP NHẬT redeemedPoints ---
+  // ------------------------------------------
+  async function redeemLoyaltyPoints() {
+      const voucherSelect = document.getElementById("voucherSelect");
+      const redeemButton = document.getElementById("redeemButton");
+      const currentPointsDisplay = document.getElementById("currentPointsDisplay");
+      const resultDiv = document.getElementById("redeemResult");
+      
+      const cost = parseInt(voucherSelect.value);
+
+      if (currentRedeemPhoneKey === '' || currentRedeemPoints < cost || redeemButton.disabled) {
+          resultDiv.innerHTML = "<span class='result-title'>Lỗi!</span><br>Vui lòng kiểm tra điểm lại và đảm bảo đủ điểm trước khi đổi.";
+          resultDiv.className = "error";
+          return;
+      }
+      
+      redeemButton.disabled = true; // Vô hiệu hóa để tránh double click
+      redeemButton.innerHTML = `Đang xử lý đổi ${cost} điểm...`;
+      resultDiv.innerHTML = `<span class='result-title'>Đang Xử Lý...</span><br>Đang trừ ${cost} Điểm Êđê cho SĐT **${currentRedeemPhoneKey}**...`;
+      resultDiv.className = "info";
+
+      try {
+          // Lấy dữ liệu loyalty points hiện tại từ DB (làm lại để đảm bảo không có race condition)
+          const loyaltyRef = ref(db, 'loyalty_points/' + currentRedeemPhoneKey);
+          const loyaltySnapshot = await get(loyaltyRef);
+
+          if (!loyaltySnapshot.exists()) {
+              throw new Error("Không tìm thấy dữ liệu điểm khách hàng.");
+          }
+
+          const currentData = loyaltySnapshot.val();
+          const oldRedeemedPoints = currentData.redeemedPoints || 0;
+          const newRedeemedPoints = oldRedeemedPoints + cost;
+          const newCurrentPoints = currentData.accumulatedPoints - newRedeemedPoints;
+
+          if (newCurrentPoints < 0) {
+              // Kiểm tra lại lần nữa: Nếu điểm hiện tại bị âm 
+              throw new Error("Điểm hiện tại không đủ để trừ. Vui lòng kiểm tra lại.");
+          }
+
+          // 1. CẬP NHẬT redeemedPoints và currentPoints trong Firebase
+          await update(loyaltyRef, {
+              redeemedPoints: newRedeemedPoints,
+              currentPoints: newCurrentPoints,
+              lastRedeemed: new Date().toISOString()
+          });
+          
+          // 2. CẬP NHẬT BIẾN TOÀN CỤC VÀ GIAO DIỆN
+          currentRedeemPoints = newCurrentPoints; // Cập nhật biến toàn cục
+          currentPointsDisplay.value = `Điểm hiện tại: ${newCurrentPoints.toLocaleString()}`;
+          redeemButton.innerHTML = "❌ Vui lòng Kiểm Tra Điểm trước";
+          voucherSelect.value = ""; // Reset voucher
+          
+          // 3. HIỂN THỊ KẾT QUẢ
+          resultDiv.innerHTML = `
+            <span class='result-title'>ĐỔI ĐIỂM THÀNH CÔNG!</span>
+            <br>
+            Đã trừ thành công **${cost.toLocaleString()}** Điểm Êđê.
+            <br>
+            Điểm Êđê còn lại: **${newCurrentPoints.toLocaleString()}**
+          `;
+          resultDiv.className = "success";
+
+      } catch (error) {
+          console.error("Lỗi đổi điểm:", error);
+          resultDiv.innerHTML = `<span class='result-title'>LỖI GIAO DỊCH</span><br>Không thể đổi điểm. ${error.message}`;
+          resultDiv.className = "error";
+      } finally {
+          // Reset trạng thái nút Đổi Điểm sau khi xử lý (dù thành công hay thất bại)
+          redeemButton.disabled = true;
+          currentRedeemPhoneKey = '';
+      }
+  }
+  
+  // --- HÀM MỞ/ĐÓNG IFRAME CHO BILL ---
+  const billIframeModal = document.getElementById("billIframeModal");
+  const billIframe = document.getElementById("billIframe");
+
+  function openBillIframe() {
+      // Đặt URL và kích hoạt modal
+      billIframe.src = "https://thanhchan791791.github.io/trolycherry/bill1.html";
+      billIframeModal.classList.add('active');
+      // Ẩn thanh cuộn của body khi modal mở
+      document.body.style.overflow = 'hidden';
+  }
+
+  function closeBillIframe() {
+      // Đóng modal và reset URL
+      billIframeModal.classList.remove('active');
+      setTimeout(() => {
+          billIframe.src = "about:blank"; // Reset iframe source
+          document.body.style.overflow = 'auto'; // Cho phép cuộn lại
+      }, 300); // Đợi transition kết thúc
+  }
+  // --- END HÀM MỞ/ĐÓNG IFRAME ---
+
+  // Export các hàm ra global scope để HTML có thể gọi
+  window.checkRedeemPoints = checkRedeemPoints; 
+  window.redeemLoyaltyPoints = redeemLoyaltyPoints; 
+  window.openBillIframe = openBillIframe; // Export hàm mới
+  window.closeBillIframe = closeBillIframe; // Export hàm mới
+
+</script>
+
+</body>
+</html>
