@@ -16,20 +16,22 @@
       --color-accent: #D4A373;
       --color-gold: #B8860B;
       --color-bg: #FDFBF7;
-      --color-card: #FFFFFF;
+      /* Màu kính trong suốt */
+      --color-glass: rgba(255, 255, 255, 0.7);
       --color-text: #2D241E;
       --color-text-light: #6D5D51;
       --radius-lg: 20px;
       --radius-md: 12px;
-      --shadow: 0 6px 20px rgba(93, 58, 26, 0.06);
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow: 0 8px 32px rgba(93, 58, 26, 0.08);
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
 
     body {
       font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--color-bg);
+      background-image: radial-gradient(circle at 50% 50%, #ffffff 0%, #fdfbf7 100%);
       color: var(--color-text);
       margin: 0;
       padding: 15px 10px;
@@ -52,7 +54,7 @@
     }
 
     /* * ----------------------------------------
-     * 2. HEADER & NHẬP LIỆU
+     * 2. HEADER & NHẬP LIỆU (TRONG SUỐT)
      * ----------------------------------------
      */
     .header-section {
@@ -68,18 +70,14 @@
         font-weight: 800;
     }
 
-    .header-section p {
-        color: var(--color-text-light);
-        font-size: 14px;
-        margin: 0;
-    }
-
     .query-box {
-      background: var(--color-card);
+      background: var(--color-glass);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       padding: 15px;
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow);
-      border: 1px solid rgba(139, 90, 43, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.5);
       margin-bottom: 15px;
     }
     
@@ -92,9 +90,9 @@
     input[type="text"] {
       width: 100% !important;
       padding: 14px 15px;
-      border: 2px solid #F1EDE9;
+      border: 1px solid rgba(139, 90, 43, 0.1);
       border-radius: var(--radius-md);
-      background-color: #FAFAF8;
+      background-color: rgba(255, 255, 255, 0.5);
       font-size: 16px;
       color: var(--color-primary);
       outline: none;
@@ -119,134 +117,157 @@
       left: 0;
       width: auto !important;
       padding: 8px 12px;
-      background: #F1EDE9;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(5px);
       color: var(--color-primary);
       font-size: 12px;
       font-weight: 600;
       border-radius: 8px;
-      box-shadow: none;
-      border: 1px solid #E5E0DA;
+      border: 1px solid rgba(0,0,0,0.05);
     }
 
     /* * ----------------------------------------
-     * 3. KẾT QUẢ HIỂN THỊ
+     * 3. KẾT QUẢ HIỂN THỊ TRONG SUỐT
      * ----------------------------------------
      */
     #loyaltyPointsResult {
       margin-top: 5px;
-      padding: 15px;
+      padding: 25px 15px;
       border-radius: var(--radius-lg);
-      font-size: 14px;
       text-align: center;
-      min-height: 80px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       box-shadow: var(--shadow);
+      background: var(--color-glass);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
     }
     
-    .info { background: #F4F1EE; color: var(--color-primary); border: 1px dashed var(--color-accent); }
-    .success { background: linear-gradient(180deg, #FFFFFF, #FDFCF0); color: var(--color-primary); border: 1px solid var(--color-gold); }
-    .error { background: #FFF5F5; color: #A52A2A; border: 1px solid #FFDADA; }
+    .info { color: var(--color-primary); }
+    .success { border: 2px solid var(--color-gold); }
+    .error { background: rgba(255, 245, 245, 0.8) !important; color: #A52A2A; }
     
-    .current-points-display {
-        display: block;
-        font-size: 32px; 
-        font-weight: 850;
-        margin: 5px 0;
-        color: var(--color-primary);
+    .tier-badge {
+        display: inline-block;
+        padding: 6px 20px;
+        border-radius: 50px;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        color: white;
+        font-weight: 800;
+        font-size: 16px;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 10px rgba(93, 58, 26, 0.2);
     }
 
-    .note {
-        margin-top: 10px;
-        font-size: 12px;
-        color: var(--color-text-light);
-        padding: 8px;
+    .accumulated-box {
+        margin-top: 15px;
+        padding: 15px;
+        background: rgba(253, 244, 227, 0.6);
         border-radius: var(--radius-md);
-        background-color: rgba(93, 58, 26, 0.05);
+        border: 1px solid rgba(184, 134, 11, 0.3);
+    }
+
+    .accumulated-points-value {
+        font-size: 42px;
+        font-weight: 900;
+        color: var(--color-gold);
+        line-height: 1;
+    }
+
+    /* Bảng phân hạng TRONG SUỐT */
+    .tier-table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+    .tier-row {
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 10px;
+    }
+    .tier-row td { padding: 12px 10px; }
+    .tier-row td:first-child { border-radius: 10px 0 0 10px; text-align: left; }
+    .tier-row td:last-child { border-radius: 0 10px 10px 0; text-align: right; }
+
+    /* Phân cấp to dần */
+    .tier-1 { font-size: 13px; opacity: 0.8; }
+    .tier-2 { font-size: 16px; font-weight: 600; }
+    .tier-3 { font-size: 20px; font-weight: 700; color: var(--color-primary); }
+    .tier-4 { font-size: 24px; font-weight: 900; color: var(--color-gold); }
+
+    .tier-row.active-tier {
+        background: rgba(255, 253, 240, 0.9) !important;
+        outline: 2px solid var(--color-gold);
+        transform: scale(1.02);
+        box-shadow: 0 10px 20px rgba(184, 134, 11, 0.1);
     }
 
     /* * ----------------------------------------
-     * 4. VOUCHER SECTIONS
+     * 4. VOUCHER TRONG SUỐT & HIỆU ỨNG
      * ----------------------------------------
      */
-    .voucher-section {
-        margin-top: 25px;
+    .collapsible-header {
+        background: var(--color-glass);
+        backdrop-filter: blur(10px);
+        padding: 15px;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        transition: var(--transition);
+        margin-top: 15px;
+    }
+
+    .collapsible-header.active {
+        background: var(--color-primary);
+        color: white;
     }
     
-    .voucher-section h3 {
-        font-size: 18px;
-        color: var(--color-primary);
-        margin-bottom: 15px;
-        font-weight: 800;
-        text-align: center;
+    .collapsible-content {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: max-height 0.5s ease, opacity 0.4s ease, transform 0.5s var(--transition);
     }
-    
-    .voucher-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
+
+    .collapsible-header.active + .collapsible-content {
+        max-height: 1200px;
+        opacity: 1;
+        transform: scale(1);
+        padding: 20px 5px;
     }
 
     .voucher-card {
-        background: var(--color-card);
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
         border-radius: var(--radius-md);
-        box-shadow: var(--shadow);
         padding: 12px;
-        border: 1px solid #F1EDE9;
+        border: 1px solid rgba(255, 255, 255, 0.3);
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
-        position: relative;
+        box-shadow: var(--shadow);
     }
 
     .voucher-card.complete {
         border: 2px solid var(--color-gold);
-        background: #FFFDF5;
+        background: rgba(255, 253, 245, 0.8);
     }
 
     .voucher-icon {
-        background: #F8F3ED;
+        background: rgba(93, 58, 26, 0.1);
         color: var(--color-primary);
-        width: 45px;
-        height: 45px;
+        width: 45px; height: 45px;
         border-radius: 10px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 15px;
-        font-weight: 800;
-        margin-bottom: 8px;
+        display: flex; justify-content: center; align-items: center;
+        font-size: 15px; font-weight: 800; margin-bottom: 8px;
     }
 
-    .complete .voucher-icon {
-        background: var(--color-gold);
-        color: white;
-    }
+    .complete .voucher-icon { background: var(--color-gold); color: white; }
     
-    .voucher-details h4 { margin: 0; font-size: 14px; font-weight: 700; color: var(--color-primary); }
-    .voucher-details p { margin: 2px 0; font-size: 11px; color: var(--color-text-light); line-height: 1.2; }
-    
-    .voucher-diff-text {
-        margin-top: 5px; font-size: 10px; color: var(--color-secondary); font-weight: 600;
-    }
-
-    .voucher-cost {
-        margin-top: 8px;
-        padding-top: 8px;
-        width: 100%;
-        border-top: 1px dashed #EEE;
-        font-weight: 800;
-        font-size: 16px;
-        color: var(--color-primary);
-    }
-    
-    .voucher-cost small { font-size: 9px; display: block; color: var(--color-text-light); }
-
-    .group-voucher .voucher-card { border-top: 4px solid var(--color-accent); }
-
-    /* Controls */
     #loyaltyPointsResult { display: none; }
   </style>
 </head>
@@ -267,7 +288,7 @@
                 <button onclick="getLoyaltyPoints()">Vào Buôn Tra Cứu</button>
             </div>
         </div>
-        <div id="statusMessage" class="info" style="padding: 15px; border-radius: var(--radius-lg); text-align: center; border: 1px dashed var(--color-accent);">
+        <div id="statusMessage" class="query-box info" style="text-align: center;">
           Gõ số điện thoại để Buôn Mê đón chào bạn nhé!
         </div>
     </div>
@@ -275,78 +296,61 @@
     <div id="loyaltyPointsResult"></div>
 
     <div id="voucherContainer">
-        <div class="voucher-section">
-            <h3>🎁 Quà Buôn Làng 🎁</h3>
-            <div class="voucher-grid">
-                <div class="voucher-card" id="card-100">
-                    <div class="voucher-icon">50k</div>
-                    <div class="voucher-details">
-                        <h4>Phiếu 50k</h4>
-                        <p>Bill từ 500k</p>
-                        <p class="voucher-diff-text" id="diff-100">Cần thêm điểm...</p>
+        <div class="voucher-section" id="section-qua">
+            <div class="collapsible-header" onclick="toggleCollapsible(this, 'section-qua')">
+                <h3 style="margin:0; font-size:16px;">🎁 Quà Buôn Làng 🎁</h3>
+                <span class="arrow-icon">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="voucher-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="voucher-card" id="card-100">
+                        <div class="voucher-icon">50k</div>
+                        <div class="voucher-details"><h4>Phiếu 50k</h4><p style="font-size:11px; margin:2px 0;">Bill từ 500k</p><p class="voucher-diff-text" id="diff-100" style="font-size:10px; color:var(--color-secondary);">Cần thêm...</p></div>
+                        <div style="margin-top:8px; border-top:1px dashed #ccc; width:100%; padding-top:5px; font-weight:800;">100<small style="display:block; font-size:9px;">Điểm</small></div>
                     </div>
-                    <div class="voucher-cost">100<small>Điểm Ê Đê</small></div>
-                </div>
-
-                <div class="voucher-card" id="card-200">
-                    <div class="voucher-icon">100k</div> 
-                    <div class="voucher-details">
-                        <h4>Phiếu 100k</h4>
-                        <p>Trừ trực tiếp bill</p>
-                        <p class="voucher-diff-text" id="diff-200">Cần thêm điểm...</p>
+                    <div class="voucher-card" id="card-200">
+                        <div class="voucher-icon">100k</div>
+                        <div class="voucher-details"><h4>Phiếu 100k</h4><p style="font-size:11px; margin:2px 0;">Trực tiếp bill</p><p class="voucher-diff-text" id="diff-200" style="font-size:10px; color:var(--color-secondary);">Cần thêm...</p></div>
+                        <div style="margin-top:8px; border-top:1px dashed #ccc; width:100%; padding-top:5px; font-weight:800;">200<small style="display:block; font-size:9px;">Điểm</small></div>
                     </div>
-                    <div class="voucher-cost">200<small>Điểm Ê Đê</small></div>
-                </div>
-                
-                <div class="voucher-card" id="card-300">
-                    <div class="voucher-icon">150k</div>
-                    <div class="voucher-details">
-                        <h4>Phiếu 150k</h4>
-                        <p>Mọi hóa đơn</p>
-                        <p class="voucher-diff-text" id="diff-300">Cần thêm điểm...</p>
+                    <div class="voucher-card" id="card-300">
+                        <div class="voucher-icon">150k</div>
+                        <div class="voucher-details"><h4>Phiếu 150k</h4><p style="font-size:11px; margin:2px 0;">Mọi hóa đơn</p><p class="voucher-diff-text" id="diff-300" style="font-size:10px; color:var(--color-secondary);">Cần thêm...</p></div>
+                        <div style="margin-top:8px; border-top:1px dashed #ccc; width:100%; padding-top:5px; font-weight:800;">300<small style="display:block; font-size:9px;">Điểm</small></div>
                     </div>
-                    <div class="voucher-cost">300<small>Điểm Ê Đê</small></div>
-                </div>
-                
-                <div class="voucher-card" id="card-400">
-                    <div class="voucher-icon">200k</div>
-                    <div class="voucher-details">
-                        <h4>Tiệc Lớn 200k</h4>
-                        <p>Sum họp gia đình</p>
-                        <p class="voucher-diff-text" id="diff-400">Cần thêm điểm...</p>
+                    <div class="voucher-card" id="card-400">
+                        <div class="voucher-icon">200k</div>
+                        <div class="voucher-details"><h4>Tiệc 200k</h4><p style="font-size:11px; margin:2px 0;">Gia đình</p><p class="voucher-diff-text" id="diff-400" style="font-size:10px; color:var(--color-secondary);">Cần thêm...</p></div>
+                        <div style="margin-top:8px; border-top:1px dashed #ccc; width:100%; padding-top:5px; font-weight:800;">400<small style="display:block; font-size:9px;">Điểm</small></div>
                     </div>
-                    <div class="voucher-cost">400<small>Điểm Ê Đê</small></div>
-                </div>
-
-                <div class="voucher-card" id="card-1000" style="grid-column: span 2;">
-                    <div class="voucher-icon" style="width: 100px; margin: 0 auto 8px;">Tri Ân</div>
-                    <div class="voucher-details">
-                        <h4>Món Quà Cao Quý 500k</h4>
-                        <p>Khách hàng thân thiết nhất</p>
-                        <p class="voucher-diff-text" id="diff-1000">Cần thêm điểm...</p>
+                    <div class="voucher-card" id="card-1000" style="grid-column: span 2;">
+                        <div class="voucher-icon" style="width:100px;">Tri Ân</div>
+                        <div class="voucher-details"><h4>Món Quà 500k</h4><p style="font-size:11px; margin:2px 0;">Khách hàng thân thiết nhất</p><p id="diff-1000" style="font-size:10px; color:var(--color-secondary);">Cần thêm...</p></div>
+                        <div style="margin-top:8px; border-top:1px dashed #ccc; width:100%; padding-top:5px; font-weight:800;">1000<small style="display:block; font-size:9px;">Điểm</small></div>
                     </div>
-                    <div class="voucher-cost">1000<small>Điểm Ê Đê</small></div>
                 </div>
             </div>
         </div>
 
-        <div class="voucher-section group-voucher">
-            <h3>👥 Ưu Đãi Đi Nhóm 👥</h3>
-            <div class="voucher-grid">
-                <div class="voucher-card">
-                    <div class="voucher-icon">5%</div>
-                    <div class="voucher-details"><h4>Kết Thân</h4><p>Nhóm từ 4 người</p></div>
-                    <div class="voucher-cost">Nhóm 4</div>
-                </div>
-                <div class="voucher-card">
-                    <div class="voucher-icon">10%</div>
-                    <div class="voucher-details"><h4>Bản Làng</h4><p>Nhóm từ 8 người</p></div>
-                    <div class="voucher-cost">Nhóm 8</div>
-                </div>
-                <div class="voucher-card" style="grid-column: span 2;">
-                    <div class="voucher-icon" style="width: 120px; margin: 0 auto 8px;">Giảm 15%</div>
-                    <div class="voucher-details"><h4>Đại Gia Đình Sum Họp</h4><p>Ưu đãi 15% tổng bill (từ 15 người)</p></div>
-                    <div class="voucher-cost">Nhóm 15</div>
+        <div class="voucher-section" id="section-nhom">
+            <div class="collapsible-header" onclick="toggleCollapsible(this, 'section-nhom')">
+                <h3 style="margin:0; font-size:16px;">👥 Ưu Đãi Đi Nhóm 👥</h3>
+                <span class="arrow-icon">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="voucher-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="voucher-card">
+                        <div class="voucher-icon">5%</div>
+                        <div class="voucher-details"><h4>Kết Thân</h4><p style="font-size:11px;">Nhóm từ 4 người</p></div>
+                    </div>
+                    <div class="voucher-card">
+                        <div class="voucher-icon">10%</div>
+                        <div class="voucher-details"><h4>Bản Làng</h4><p style="font-size:11px;">Nhóm từ 8 người</p></div>
+                    </div>
+                    <div class="voucher-card" style="grid-column: span 2;">
+                        <div class="voucher-icon" style="width:80px;">15%</div>
+                        <div class="voucher-details"><h4>Đại Gia Đình</h4><p style="font-size:11px;">Nhóm đi trên 14 người</p></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -375,6 +379,18 @@
 
   function standardizePhoneKey(phone) { return phone.replace(/[^0-9]/g, ''); }
 
+  function toggleCollapsible(element, sectionId) {
+      const isOpening = !element.classList.contains("active");
+      element.classList.toggle("active");
+      if (isOpening) {
+          setTimeout(() => {
+              const section = document.getElementById(sectionId);
+              const offset = section.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 4);
+              window.scrollTo({ top: offset, behavior: 'smooth' });
+          }, 300);
+      }
+  }
+
   function showResultScreen() {
       document.getElementById("inputContainer").style.display = "none";
       document.getElementById("loyaltyPointsResult").style.display = "flex";
@@ -387,8 +403,14 @@
       document.getElementById("backBtn").style.display = "none";
       document.getElementById("customerPhoneInput").value = "";
       document.getElementById("statusMessage").innerHTML = "Gõ số điện thoại để Buôn Mê đón chào bạn nhé!";
-      document.getElementById("statusMessage").className = "info";
-      updateVoucherDifference(-9999); // Reset voucher state
+      updateVoucherDifference(-9999); 
+  }
+
+  function getCustomerTier(accumulatedPoints) {
+      if (accumulatedPoints >= 1000) return "Người Nhà Buôn";
+      if (accumulatedPoints >= 500) return "Thân Buôn";
+      if (accumulatedPoints >= 200) return "Quen Buôn";
+      return "Ghé Buôn";
   }
 
   async function updateLoyaltyDataInDB(phone, totalAmount, accumulatedPoints, redeemedPoints, currentPoints) {
@@ -399,65 +421,34 @@
             accumulatedPoints: accumulatedPoints, redeemedPoints: redeemedPoints,
             currentPoints: currentPoints, lastUpdated: new Date().toISOString()
         });
-    } catch (error) { console.error("Lỗi lưu DB:", error); }
+    } catch (error) {}
   }
 
   function updateVoucherDifference(currentPoints) {
-        const vouchers = [
-            { id: 'diff-100', cost: 100, cardId: 'card-100' },
-            { id: 'diff-200', cost: 200, cardId: 'card-200' },
-            { id: 'diff-300', cost: 300, cardId: 'card-300' },
-            { id: 'diff-400', cost: 400, cardId: 'card-400' },
-            { id: 'diff-1000', cost: 1000, cardId: 'card-1000' }
-        ];
-
+        const vouchers = [{id:'diff-100',cost:100,card:'card-100'},{id:'diff-200',cost:200,card:'card-200'},{id:'diff-300',cost:300,card:'card-300'},{id:'diff-400',cost:400,card:'card-400'},{id:'diff-1000',cost:1000,card:'card-1000'}];
         vouchers.forEach(v => {
-            const diffElement = document.getElementById(v.id);
-            const cardElement = document.getElementById(v.cardId);
-            if (diffElement && cardElement) {
-                const requiredPoints = v.cost - currentPoints;
-                if (requiredPoints <= 0) {
-                    diffElement.innerHTML = `🌟 Đủ điểm!`;
-                    diffElement.className = "voucher-diff-text complete";
-                    cardElement.classList.add('complete'); 
-                } else {
-                    const formatted = requiredPoints > 2000 ? v.cost : requiredPoints.toFixed(1).replace(/\.0$/, '');
-                    diffElement.innerHTML = `Thiếu ${formatted} điểm Ê Đê`;
-                    diffElement.className = "voucher-diff-text";
-                    cardElement.classList.remove('complete'); 
-                }
+            const d = document.getElementById(v.id);
+            const c = document.getElementById(v.card);
+            if (d && c) {
+                const diff = v.cost - currentPoints;
+                if (diff <= 0) { d.innerHTML = `🌟 Đủ điểm!`; c.classList.add('complete'); }
+                else { d.innerHTML = `Thiếu ${diff.toFixed(1).replace(/\.0$/, '')} điểm`; c.classList.remove('complete'); }
             }
         });
   }
 
   async function getLoyaltyPoints() {
-    const phoneInput = document.getElementById("customerPhoneInput");
-    const phone = phoneInput.value.trim();
+    const phone = document.getElementById("customerPhoneInput").value.trim();
     const phoneKey = standardizePhoneKey(phone);
     const resultDiv = document.getElementById("loyaltyPointsResult");
     const statusMsg = document.getElementById("statusMessage");
     
-    if (!phone) {
-      statusMsg.innerHTML = "Nhập số điện thoại khách quý nhé!";
-      statusMsg.className = "error";
-      return;
-    }
-
+    if (!phone) { statusMsg.innerHTML = "Nhập số điện thoại nhé!"; return; }
     statusMsg.innerHTML = `Đang tìm...`;
-    statusMsg.className = "info";
 
     try {
-      const paymentHistoryRef = ref(db, 'payment_history');
-      const historySnapshot = await get(paymentHistoryRef);
-
-      if (!historySnapshot.exists()) {
-        statusMsg.innerHTML = `Hệ thống bận.`;
-        statusMsg.className = "error";
-        return;
-      }
-
-      let totalAmount = 0;
-      let billFound = false; 
+      const historySnapshot = await get(ref(db, 'payment_history'));
+      let totalAmount = 0; let billFound = false; 
 
       historySnapshot.forEach(child => {
         const data = child.val();
@@ -468,44 +459,55 @@
         }
       });
       
-      if (!billFound) {
-          statusMsg.innerHTML = `SĐT **${phone}** chưa có điểm. Mời bạn ghé buôn chơi nhé!`;
-          statusMsg.className = "error";
-          return;
-      } 
+      if (!billFound) { statusMsg.innerHTML = `SĐT **${phone}** chưa có điểm.`; return; } 
       
       showResultScreen();
-
       const accumulatedPoints = (totalAmount / 1000000) * POINTS_PER_MILLION;
-      const loyaltyRef = ref(db, 'loyalty_points/' + phoneKey);
-      const loyaltySnapshot = await get(loyaltyRef);
+      const loyaltySnapshot = await get(ref(db, 'loyalty_points/' + phoneKey));
       let redeemedPoints = 0;
       if (loyaltySnapshot.exists()) redeemedPoints = loyaltySnapshot.val().redeemedPoints || 0;
 
       const currentPoints = Math.max(0, accumulatedPoints - redeemedPoints);
+      const tierName = getCustomerTier(accumulatedPoints);
+      
       updateVoucherDifference(currentPoints);
       await updateLoyaltyDataInDB(phone, totalAmount, accumulatedPoints, redeemedPoints, currentPoints);
 
-      const formattedCurrent = currentPoints.toFixed(1).replace(/\.0$/, '');
+      const tiers = [
+          { name: "Ghé Buôn", range: "0 – 199", cls: "tier-1" },
+          { name: "Quen Buôn", range: "200 – 499", cls: "tier-2" },
+          { name: "Thân Buôn", range: "500 – 999", cls: "tier-3" },
+          { name: "Người Nhà Buôn", range: "≥ 1000", cls: "tier-4" }
+      ];
+
+      let tierTableHTML = `<table class="tier-table"><tbody>`;
+      tiers.forEach(t => {
+          const isActive = (tierName === t.name) ? 'active-tier' : '';
+          tierTableHTML += `<tr class="tier-row ${isActive} ${t.cls}"><td>${t.name} ${isActive?'👑':''}</td><td>${t.range}</td></tr>`;
+      });
+      tierTableHTML += `</tbody></table>`;
 
       resultDiv.innerHTML = `
-        <span class='result-title'>Chào Khách Quý!</span>
-        <span class="current-points-display">${formattedCurrent} Điểm Ê Đê</span>
-        <div class="note">
-            Tích: ${accumulatedPoints.toFixed(1)} | Đã đổi: ${redeemedPoints} <br>
-            Tổng chi tiêu: ${totalAmount.toLocaleString('vi-VN')}đ
+        <div style="font-size:12px; font-weight:600; color:var(--color-text-light);">Thứ hạng của bạn</div>
+        <div class="tier-badge">${tierName}</div>
+        <div class="accumulated-box">
+            <span style="font-size:14px; font-weight:700; color:var(--color-secondary);">TỔNG TÍCH LŨY</span>
+            <div class="accumulated-points-value">${accumulatedPoints.toFixed(1).replace(/\.0$/, '')} <small style="font-size:16px;">Điểm</small></div>
+        </div>
+        ${tierTableHTML}
+        <div style="margin-top:15px; font-size:12px; color:var(--color-text-light); padding:10px; border-radius:12px; background:rgba(0,0,0,0.03);">
+            Điểm hiện có: <b>${currentPoints.toFixed(1).replace(/\.0$/, '')} Điểm</b> <br>
+            Chi tiêu: ${totalAmount.toLocaleString('vi-VN')}đ
         </div>
       `;
       resultDiv.className = "success";
 
-    } catch (error) {
-      statusMsg.innerHTML = "Lỗi kết nối!";
-      statusMsg.className = "error";
-    }
+    } catch (error) { statusMsg.innerHTML = "Lỗi kết nối!"; }
   }
   
   window.getLoyaltyPoints = getLoyaltyPoints;
   window.resetForm = resetForm;
+  window.toggleCollapsible = toggleCollapsible;
 </script>
 
 </body>
