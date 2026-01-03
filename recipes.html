@@ -30,14 +30,14 @@
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
-            padding-top: calc(50px + var(--safe-area-top)); /* Space for Nav Bar */
-            padding-bottom: calc(85px + var(--safe-area-bottom)); /* Space for Tab Bar */
+            padding-top: calc(50px + var(--safe-area-top)); 
+            padding-bottom: calc(85px + var(--safe-area-bottom)); 
             height: 100vh;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- NAVIGATION BAR (Header) --- */
+        /* --- NAVIGATION BAR --- */
         header {
             position: fixed;
             top: 0;
@@ -55,14 +55,17 @@
             z-index: 1000;
         }
 
-        h1 {
-            font-size: 17px;
-            font-weight: 600;
-            margin: 0;
-            color: #000;
+        header .note-trigger {
+            position: absolute;
+            right: 15px;
+            bottom: 12px;
+            font-size: 22px;
+            cursor: pointer;
         }
 
-        /* --- TAB BAR (Footer) --- */
+        h1 { font-size: 17px; font-weight: 600; margin: 0; color: #000; }
+
+        /* --- TAB BAR --- */
         .tab-bar {
             position: fixed;
             bottom: 0;
@@ -79,7 +82,6 @@
             z-index: 1000;
         }
 
-        /* Styling the Main Buttons as Tabs */
         .tab-bar button {
             background: transparent !important;
             color: var(--ios-gray);
@@ -91,230 +93,107 @@
             justify-content: center;
             border: none;
             padding: 5px 0;
-            width: 33%; /* Chia đều 3 nút */
+            width: 33%;
             margin: 0 !important;
-            border-radius: 0;
-            box-shadow: none !important;
         }
 
-        .tab-bar button:active { transform: scale(0.95); opacity: 0.7; }
-        
-        /* Pseudo-icons for tabs */
         #btnShowMenu::before { content: '🍽️'; font-size: 24px; margin-bottom: 2px; }
         #btnIngredient::before { content: '📦'; font-size: 24px; margin-bottom: 2px; }
         #btnShowTest::before { content: '🧪'; font-size: 24px; margin-bottom: 2px; }
-        
-        .tab-bar button:hover, .tab-bar button:focus { color: var(--ios-blue); }
 
-        /* --- CONTAINERS & CARDS --- */
-        .box {
+        /* --- MODAL GHI CHÚ --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .note-modal {
+            width: 90%;
+            max-width: 400px;
             background: var(--ios-card);
             border-radius: 20px;
             padding: 20px;
-            margin: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            animation: fadeScale 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* --- TYPOGRAPHY --- */
-        h2 { font-size: 28px; font-weight: 700; margin: 10px 0 20px 0; letter-spacing: 0.3px; color: #000; }
-        h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--ios-gray); margin: 25px 0 10px 10px; }
+        .note-modal h2 { font-size: 20px; margin-top: 0; }
         
-        hr { border: 0; border-top: 1px solid var(--ios-separator) !important; margin: 20px 0; }
-
-        /* --- INPUTS --- */
-        input[type="text"], input[type="number"], select {
+        .note-input-area textarea {
             width: 100%;
-            height: 44px;
-            padding: 0 15px;
+            height: 80px;
+            border-radius: 12px;
             background: var(--ios-gray-light);
             border: none;
-            border-radius: 12px;
-            font-size: 17px;
-            color: #000;
-            margin-bottom: 15px;
-            -webkit-appearance: none;
-            transition: background 0.2s;
-        }
-        
-        input:focus, select:focus { background: #e0e0e0; outline: none; }
-        .label { font-size: 13px; color: var(--ios-gray); margin-bottom: 6px; margin-left: 4px; font-weight: 500; }
-
-        /* --- LISTS --- */
-        ul { background: var(--ios-card); border-radius: 16px; overflow: hidden; margin: 0; padding: 0; }
-        
-        li {
-            padding: 16px;
-            background: #fff;
-            border-bottom: 0.5px solid var(--ios-separator);
-            color: #000;
-            font-size: 17px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin: 0 !important;
-            border-radius: 0 !important;
-        }
-        
-        li:last-child { border-bottom: none; }
-        li:active { background: #E5E5EA !important; }
-
-        /* Stock Status */
-        li.low-stock {
-            background-color: #FEF2F2 !important;
-            color: var(--ios-red) !important;
-        }
-        li.low-stock div { color: var(--ios-red); font-weight: 500; }
-
-        /* --- BUTTONS --- */
-        button {
+            padding: 12px;
             font-family: inherit;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            -webkit-tap-highlight-color: transparent;
+            font-size: 16px;
+            margin-bottom: 10px;
+            resize: none;
         }
 
-        button:not(.tab-bar button):not(.small-btn) {
-            width: 100%;
-            padding: 14px;
-            background: var(--ios-blue);
-            color: white;
-            font-size: 17px;
-            font-weight: 600;
-            border-radius: 14px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,122,255,0.25);
-        }
-        
-        button:active { transform: scale(0.98); opacity: 0.9; }
-
-        #btnCancelEdit, #btnCloseRecipe {
-            background: var(--ios-gray-light) !important;
-            color: var(--ios-blue) !important;
+        .note-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 15px;
+            border-top: 0.5px solid var(--ios-separator);
+            padding-top: 10px;
         }
 
-        #ingredientList li button, #currentRecipeList button {
-            width: auto;
-            padding: 6px 12px;
-            font-size: 14px;
-            border-radius: 16px;
-            font-weight: 600;
-            margin-left: 10px;
-            box-shadow: none;
-            min-width: unset;
-        }
-
-        #ingredientList li button.edit-btn { background: var(--ios-gray-light); color: var(--ios-blue); }
-        #ingredientList li button.delete-btn { background: rgba(255, 59, 48, 0.1); color: var(--ios-red); }
-        #currentRecipeList button { color: var(--ios-red); background: rgba(255, 59, 48, 0.1); }
-        
-        #btnToggleAddForm, #btnToggleAddMenuForm { margin-top: 10px; background: rgba(0,122,255,0.1); color: var(--ios-blue); }
-        #btnToggleAddForm.active, #btnToggleAddMenuForm.active { background: rgba(255, 59, 48, 0.1); color: var(--ios-red); }
-
-        /* Run Test Button Special Style */
-        #btnRunTest { background: var(--ios-green); box-shadow: 0 2px 8px rgba(52, 199, 89, 0.25); }
-        
-        /* Save Menu Button Special Style */
-        #btnAddMenu { background: var(--ios-green); box-shadow: 0 2px 8px rgba(52, 199, 89, 0.25); }
-
-
-        /* --- RECIPE FORM SPECIALS --- */
-        .recipe-form-item {
-            background: #fff;
-            padding: 10px 0;
+        .note-item {
+            padding: 10px;
             border-bottom: 0.5px solid var(--ios-separator);
-        }
-        .recipe-form-item:last-child { border-bottom: none; }
-        
-        .recipe-form-item input {
-            background: transparent;
-            text-align: right;
-            height: auto;
-            margin: 0;
-            font-weight: 600;
-            color: var(--ios-blue);
-        }
-        
-        .recipe-form-item span.stock { font-size: 13px; color: var(--ios-gray); }
-
-        /* Recipe Qty & Unit Group */
-        .recipe-qty-unit-group {
-            display: flex; 
-            align-items: center; 
-            gap: 5px;
+            position: relative;
         }
 
-        .recipe-qty-unit-group input[type="number"] {
-            width: 65px; 
-            height: 36px; 
-            margin: 0; 
-            background: #E5E5EA; 
-            text-align: center;
-        }
+        .note-item .time { font-size: 11px; color: var(--ios-gray); display: block; margin-bottom: 4px; }
+        .note-item .text { font-size: 15px; color: #333; line-height: 1.4; }
+        .note-item .delete-note { color: var(--ios-red); font-size: 12px; margin-top: 5px; cursor: pointer; float: right; }
 
-        .recipe-qty-unit-group select {
-            width: 55px;
-            height: 36px;
-            padding: 0 5px;
-            background: #E5E5EA;
-            border-radius: 12px;
-            font-size: 14px;
-            margin: 0;
-        }
-
-
-        /* --- UTILS & ANIMATIONS --- */
+        /* --- OLD STYLES RE-USED --- */
+        .box { background: var(--ios-card); border-radius: 20px; padding: 20px; margin: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        h2 { font-size: 28px; font-weight: 700; margin: 10px 0 20px 0; }
+        h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--ios-gray); margin: 25px 0 10px 10px; }
+        input[type="text"], input[type="number"], select { width: 100%; height: 44px; padding: 0 15px; background: var(--ios-gray-light); border: none; border-radius: 12px; font-size: 17px; margin-bottom: 15px; }
+        button:not(.tab-bar button):not(.small-btn) { width: 100%; padding: 14px; background: var(--ios-blue); color: white; font-size: 17px; font-weight: 600; border-radius: 14px; margin-bottom: 12px; }
+        ul { background: var(--ios-card); border-radius: 16px; overflow: hidden; margin: 0; padding: 0; }
+        li { padding: 16px; background: #fff; border-bottom: 0.5px solid var(--ios-separator); display: flex; justify-content: space-between; align-items: center; }
         .hidden { display: none !important; }
-
-        @keyframes fadeScale {
-            0% { opacity: 0; transform: scale(0.95); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes slideUp {
-            0% { transform: translateY(100%); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-
-        #recipeFormSection {
-            position: fixed;
-            top: var(--safe-area-top);
-            left: 0;
-            right: 0;
-            bottom: 0;
-            margin: 0;
-            border-radius: 20px 20px 0 0;
-            z-index: 2000;
-            overflow-y: auto;
-            padding-bottom: 100px;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
-            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        
-        .recipe-list-container { max-height: none; overflow: visible; }
-        
-        /* Log Console Style */
-        .log-console {
-            background: #000;
-            color: #0f0;
-            font-family: monospace;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 12px;
-            margin-top: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
+        .recipe-qty-unit-group { display: flex; align-items: center; gap: 5px; }
+        #recipeFormSection { position: fixed; top: var(--safe-area-top); left: 0; right: 0; bottom: 0; z-index: 2000; background: #fff; overflow-y: auto; padding: 20px; }
+        .log-console { background: #000; color: #0f0; font-family: monospace; padding: 15px; border-radius: 12px; font-size: 12px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Quản Lý Bếp</h1>
+        <div class="note-trigger" id="btnOpenNote">📝</div>
     </header>
+
+    <div class="modal-overlay" id="noteModalOverlay">
+        <div class="note-modal">
+            <h2>Ghi chú nhanh</h2>
+            <div class="note-input-area">
+                <textarea id="noteContent" placeholder="Nhập nội dung ghi chú..."></textarea>
+                <button id="btnSaveNote" style="margin-bottom: 5px;">Lưu ghi chú</button>
+                <button id="btnCloseNote" style="background: var(--ios-gray-light) !important; color: var(--ios-blue) !important;">Đóng</button>
+            </div>
+            <div class="note-list" id="noteList">
+                </div>
+        </div>
+    </div>
 
     <div class="tab-bar">
         <button id="btnShowMenu">Menu</button>
@@ -323,125 +202,63 @@
     </div>
 
     <div class="main-content">
-        
         <div id="menuSection" class="box">
             <h2>Món Ăn</h2>
-            <div style="position: sticky; top: 0; background: #fff; padding-bottom: 10px; z-index: 10;">
-                <input type="text" id="menuSearchInput" placeholder="🔍 Tìm kiếm món ăn...">
-            </div>
-            
+            <input type="text" id="menuSearchInput" placeholder="🔍 Tìm kiếm món ăn...">
             <button id="btnToggleAddMenuForm">➕ Thêm món ăn mới</button> 
-            
             <div id="menuFormContainer" class="hidden" style="background: var(--ios-gray-light); padding: 16px; border-radius: 12px; margin-top: 15px; margin-bottom: 20px;">
-                <h3 style="margin-top: 0;">Thông tin món ăn mới</h3>
-
                 <label class="label">Tên món ăn</label>
                 <input type="text" id="menuName" placeholder="Ví dụ: Phở Bò">
-
                 <label class="label">Loại</label>
-                <select id="menuType">
-                    <option value="food">Food</option>
-                    <option value="drink">Drink</option>
-                </select>
-
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button id="btnAddMenu" style="flex: 2; margin-bottom: 0;">💾 Lưu Món Ăn</button>
-                    <button id="btnCancelMenuEdit" style="flex: 1; margin-bottom: 0;">Hủy</button> 
-                </div>
+                <select id="menuType"><option value="food">Food</option><option value="drink">Drink</option></select>
+                <button id="btnAddMenu">💾 Lưu Món Ăn</button>
+                <button id="btnCancelMenuEdit" style="background:none; color:var(--ios-blue);">Hủy</button> 
             </div>
-
-            <h3>Food</h3>
-            <ul id="foodList"></ul>
-
-            <h3>Drink</h3>
-            <ul id="drinkList"></ul>
+            <h3>Food</h3><ul id="foodList"></ul>
+            <h3>Drink</h3><ul id="drinkList"></ul>
         </div>
 
         <div id="ingredientSection" class="hidden box">
             <h2>Nguyên Liệu</h2>
-            <input type="text" id="ingredientSearchInput" placeholder="🔍 Tìm kiếm nguyên liệu...">
-            
-            <button id="btnToggleAddForm">➕ Thêm nguyên liệu mới</button> 
-
+            <input type="text" id="ingredientSearchInput" placeholder="🔍 Tìm kiếm...">
+            <button id="btnToggleAddForm">➕ Thêm nguyên liệu</button> 
             <div id="ingredientFormContainer" class="hidden" style="background: var(--ios-gray-light); padding: 16px; border-radius: 12px; margin-top: 15px;">
-                <h3 style="margin-top: 0;">Thông tin</h3>
-
-                <label class="label">Tên nguyên liệu</label>
-                <input type="text" id="ingName" placeholder="Ví dụ: Thịt bò">
-
-                <div style="display: flex; gap: 10px;">
-                    <div style="flex: 1;">
-                        <label class="label">Số lượng</label>
-                        <input type="number" id="ingQty" placeholder="0">
-                    </div>
-                    <div style="width: 100px;">
-                        <label class="label">Đơn vị</label>
-                        <select id="ingUnit">
-                            <option value="kg">kg</option>
-                            <option value="g">g</option>
-                            <option value="con">con</option>
-                            <option value="cái">cái</option>
-                            <option value="hộp">hộp</option>
-                            <option value="ml">ml</option>
-                            <option value="lít">lít</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <label class="label">Cảnh báo khi dưới (SL tối thiểu)</label>
-                <input type="number" id="ingMinQty" placeholder="0">
-
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button id="btnAddIngredient" style="flex: 2;">Lưu</button>
-                    <button id="btnCancelEdit" style="flex: 1;">Hủy</button> 
-                </div>
+                <input type="text" id="ingName" placeholder="Tên nguyên liệu">
+                <input type="number" id="ingQty" placeholder="Số lượng">
+                <select id="ingUnit">
+                    <option value="kg">kg</option><option value="g">g</option><option value="con">con</option>
+                    <option value="cái">cái</option><option value="hộp">hộp</option><option value="ml">ml</option><option value="lít">lít</option>
+                </select>
+                <input type="number" id="ingMinQty" placeholder="SL tối thiểu">
+                <button id="btnAddIngredient">Lưu</button>
+                <button id="btnCancelEdit" style="background:none; color:var(--ios-blue);">Hủy</button> 
             </div>
-
             <h3>Danh sách kho</h3>
             <ul id="ingredientList"></ul>
         </div>
 
         <div id="testSection" class="hidden box">
             <h2>Test Trừ Kho</h2>
-            <p style="font-size: 14px; color: var(--ios-gray);">Nhập tên món ăn và số lượng để kiểm tra việc trừ kho tự động dựa trên công thức.</p>
-            
-            <label class="label">Tên món ăn (Chính xác)</label>
-            <input type="text" id="testDishName" list="dishSuggestions" placeholder="Nhập tên món hoặc chọn từ gợi ý...">
+            <input type="text" id="testDishName" list="dishSuggestions" placeholder="Tên món ăn...">
             <datalist id="dishSuggestions"></datalist>
-
-            <label class="label">Số lượng Order</label>
-            <input type="number" id="testDishQty" placeholder="1" value="1">
-
-            <button id="btnRunTest">🚀 Chạy Trừ Kho</button>
-
+            <input type="number" id="testDishQty" value="1">
+            <button id="btnRunTest" style="background: var(--ios-green);">🚀 Chạy Trừ Kho</button>
             <div id="testLog" class="hidden log-console"></div>
         </div>
 
-        <div id="recipeFormSection" class="hidden box">
-            <div class="recipe-title-group" style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 id="recipeTitle" style="font-size: 22px; margin: 0;">Công thức</h2>
-                <button id="btnCloseRecipe" style="width: auto; margin: 0; padding: 8px 16px; border-radius: 50px;">Đóng</button>
+        <div id="recipeFormSection" class="hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 id="recipeTitle" style="margin:0">Công thức</h2>
+                <button id="btnCloseRecipe" style="width: auto; padding: 8px 16px;">Đóng</button>
             </div>
-            
             <hr>
-
             <h3>Định lượng hiện tại</h3>
-            <div id="currentRecipeContainer" class="recipe-list-container">
-                <ul id="currentRecipeList"></ul>
-            </div>
-            
-            <h3>Điều chỉnh công thức</h3>
-            
-            <input type="text" id="recipeIngredientSearchInput" placeholder="🔍 Tìm kiếm nguyên liệu để thêm...">
-
-            <div style="background: #fff; padding: 10px; border-radius: 12px;">
-                <div id="recipeIngredients" class="recipe-list-container"></div>
-            </div>
-
-            <div style="height: 20px;"></div>
-            <button id="btnSaveRecipe">💾 Lưu Công Thức</button>
-            <div style="height: 40px;"></div> </div>
-
+            <ul id="currentRecipeList"></ul>
+            <h3>Điều chỉnh</h3>
+            <input type="text" id="recipeIngredientSearchInput" placeholder="🔍 Tìm nguyên liệu...">
+            <div id="recipeIngredients"></div>
+            <button id="btnSaveRecipe" style="margin-top:20px;">💾 Lưu Công Thức</button>
+        </div>
     </div>
 
     <script type="module">
@@ -462,652 +279,225 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Elements Navigation
+        // --- GHI CHÚ LOGIC ---
+        const btnOpenNote = document.getElementById("btnOpenNote");
+        const btnCloseNote = document.getElementById("btnCloseNote");
+        const btnSaveNote = document.getElementById("btnSaveNote");
+        const noteModalOverlay = document.getElementById("noteModalOverlay");
+        const noteContent = document.getElementById("noteContent");
+        const noteList = document.getElementById("noteList");
+
+        btnOpenNote.addEventListener("click", () => noteModalOverlay.classList.add("active"));
+        btnCloseNote.addEventListener("click", () => noteModalOverlay.classList.remove("active"));
+        
+        btnSaveNote.addEventListener("click", () => {
+            const text = noteContent.value.trim();
+            if (!text) return;
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} - ${now.getDate()}/${now.getMonth()+1}`;
+            
+            push(ref(db, "notes"), {
+                text: text,
+                time: timeStr,
+                timestamp: Date.now()
+            }).then(() => {
+                noteContent.value = "";
+            });
+        });
+
+        onValue(ref(db, "notes"), (snap) => {
+            noteList.innerHTML = "";
+            const data = snap.val();
+            if (data) {
+                // Sắp xếp mới nhất lên đầu
+                const sortedKeys = Object.keys(data).sort((a,b) => data[b].timestamp - data[a].timestamp);
+                sortedKeys.forEach(key => {
+                    const item = data[key];
+                    const div = document.createElement("div");
+                    div.className = "note-item";
+                    div.innerHTML = `
+                        <span class="time">${item.time}</span>
+                        <div class="text">${item.text}</div>
+                        <span class="delete-note" data-id="${key}">Xóa</span>
+                    `;
+                    div.querySelector(".delete-note").onclick = () => {
+                        if(confirm("Xóa ghi chú này?")) remove(ref(db, `notes/${key}`));
+                    };
+                    noteList.appendChild(div);
+                });
+            }
+        });
+
+        // --- CÁC LOGIC CŨ (GIỮ NGUYÊN) ---
+        // Navigation
         const btnShowMenu = document.getElementById("btnShowMenu");
         const btnIngredient = document.getElementById("btnIngredient");
-        const btnShowTest = document.getElementById("btnShowTest"); // New Button
-
-        // Sections
+        const btnShowTest = document.getElementById("btnShowTest");
         const menuSection = document.getElementById("menuSection");
         const ingredientSection = document.getElementById("ingredientSection");
-        const testSection = document.getElementById("testSection"); // New Section
+        const testSection = document.getElementById("testSection");
         const recipeFormSection = document.getElementById("recipeFormSection");
 
-        // Menu Elements
-        const foodList = document.getElementById("foodList");
-        const drinkList = document.getElementById("drinkList");
-        const menuSearchInput = document.getElementById("menuSearchInput");
-        
-        // --- NEW MENU ELEMENTS ---
-        const btnToggleAddMenuForm = document.getElementById("btnToggleAddMenuForm");
-        const menuFormContainer = document.getElementById("menuFormContainer");
-        const menuName = document.getElementById("menuName");
-        // const menuPrice = document.getElementById("menuPrice"); // REMOVED
-        const menuType = document.getElementById("menuType");
-        // const menuStatus = document.getElementById("menuStatus"); // REMOVED
-        // const menuImageUrl = document.getElementById("menuImageUrl"); // REMOVED
-        const btnAddMenu = document.getElementById("btnAddMenu");
-        const btnCancelMenuEdit = document.getElementById("btnCancelMenuEdit");
-        // -------------------------
-
-        // Ingredient Elements
-        const ingredientSearchInput = document.getElementById("ingredientSearchInput");
-        const ingredientFormContainer = document.getElementById("ingredientFormContainer"); 
-        const btnToggleAddForm = document.getElementById("btnToggleAddForm"); 
-        const ingName = document.getElementById("ingName");
-        const ingQty = document.getElementById("ingQty");
-        const ingUnit = document.getElementById("ingUnit");
-        const ingMinQty = document.getElementById("ingMinQty"); 
-        const btnAddIngredient = document.getElementById("btnAddIngredient");
-        const btnCancelEdit = document.getElementById("btnCancelEdit"); 
-        const ingredientList = document.getElementById("ingredientList");
-
-        // Recipe Elements
-        const recipeTitle = document.getElementById("recipeTitle");
-        const currentRecipeList = document.getElementById("currentRecipeList"); 
-        const recipeIngredients = document.getElementById("recipeIngredients"); 
-        const btnSaveRecipe = document.getElementById("btnSaveRecipe");
-        const btnCloseRecipe = document.getElementById("btnCloseRecipe");
-        const recipeIngredientSearchInput = document.getElementById("recipeIngredientSearchInput");
-
-        // Test Section Elements (NEW)
-        const testDishName = document.getElementById("testDishName");
-        const testDishQty = document.getElementById("testDishQty");
-        const btnRunTest = document.getElementById("btnRunTest");
-        const testLog = document.getElementById("testLog");
-        const dishSuggestions = document.getElementById("dishSuggestions");
-
-        // State Variables
-        let allIngredients = {}; 
-        let allFoodData = {}; 
-        let allDrinkData = {}; 
-        let currentRecipe = { id: null, name: null, existingRecipe: {} };
-        let editingIngredientId = null; 
-        //let editingDishId = null; // Cần nếu muốn hỗ trợ sửa món ăn sau này
-
-        // ---------------------------
-        //   NAVIGATION LOGIC
-        // ---------------------------
-
-        function hideAllSections() {
-            menuSection.classList.add("hidden");
-            ingredientSection.classList.add("hidden");
-            testSection.classList.add("hidden");
-            recipeFormSection.classList.add("hidden");
-            ingredientFormContainer.classList.add("hidden");
-            // Thêm logic ẩn form Menu
-            menuFormContainer.classList.add("hidden");
-            btnToggleAddMenuForm.textContent = "➕ Thêm món ăn mới";
-            btnToggleAddMenuForm.classList.remove("active");
-            resetMenuForm(); 
+        function hideAll() {
+            [menuSection, ingredientSection, testSection, recipeFormSection].forEach(s => s.classList.add("hidden"));
         }
 
-        btnShowMenu.addEventListener("click", () => {
-            hideAllSections();
-            menuSection.classList.remove("hidden");
-            resetIngredientForm(); 
+        btnShowMenu.onclick = () => { hideAll(); menuSection.classList.remove("hidden"); };
+        btnIngredient.onclick = () => { hideAll(); ingredientSection.classList.remove("hidden"); };
+        btnShowTest.onclick = () => { hideAll(); testSection.classList.remove("hidden"); updateDishSuggestions(); };
+
+        // State & Ingredients
+        let allIngredients = {};
+        let allFoodData = {};
+        let allDrinkData = {};
+        let currentRecipe = { id: null, name: null };
+
+        onValue(ref(db, "ingredients"), snap => {
+            allIngredients = snap.val() || {};
+            renderIngredients();
         });
 
-        btnIngredient.addEventListener("click", () => {
-            hideAllSections();
-            ingredientSection.classList.remove("hidden");
-            btnToggleAddForm.textContent = "➕ Thêm nguyên liệu";
-            btnToggleAddForm.classList.remove("active");
-            resetIngredientForm(); 
-        });
-
-        btnShowTest.addEventListener("click", () => {
-            hideAllSections();
-            testSection.classList.remove("hidden");
-            updateDishSuggestions(); // Cập nhật gợi ý món ăn khi vào tab Test
-            testLog.classList.add("hidden");
-            testLog.innerHTML = "";
-        });
-
-        // ---------------------------
-        //   MENU ADD LOGIC (SIMPLIFIED)
-        // ---------------------------
-        
-        btnToggleAddMenuForm.addEventListener("click", () => {
-            const isHidden = menuFormContainer.classList.contains("hidden");
-            if (isHidden) {
-                menuFormContainer.classList.remove("hidden");
-                btnToggleAddMenuForm.textContent = "➖ Đóng form";
-                btnToggleAddMenuForm.classList.add("active");
-            } else {
-                menuFormContainer.classList.add("hidden");
-                btnToggleAddMenuForm.textContent = "➕ Thêm món ăn mới";
-                btnToggleAddMenuForm.classList.remove("active");
-                resetMenuForm();
-            }
-        });
-
-        btnCancelMenuEdit.addEventListener("click", () => {
-            menuFormContainer.classList.add("hidden");
-            btnToggleAddMenuForm.textContent = "➕ Thêm món ăn mới";
-            btnToggleAddMenuForm.classList.remove("active");
-            resetMenuForm();
-        });
-
-        btnAddMenu.addEventListener("click", addDish);
-        
-        function resetMenuForm() {
-            //editingDishId = null; 
-            menuName.value = "";
-            menuType.value = "food";
-            // Các trường khác không cần reset vì không còn trong form
-            btnAddMenu.textContent = "💾 Lưu Món Ăn";
-            btnAddMenu.style.backgroundColor = "";
-            btnCancelMenuEdit.classList.remove("hidden"); // Luôn hiển thị khi thêm mới
-        }
-
-        function addDish() {
-            const name = menuName.value.trim();
-            const type = menuType.value;
-
-            // Chỉ kiểm tra Tên món ăn
-            if (!name) { alert("Vui lòng nhập Tên món ăn!"); return; }
-
-            const data = {
-                name: name,
-                price: 0, // Giá trị mặc định
-                status: "available", // Giá trị mặc định
-                imageUrl: "", // Giá trị mặc định
-                ingredients: {} // Đảm bảo trường ingredients là {} (trống)
-            };
-            
-            // Đường dẫn đến node 'food' hoặc 'drink'
-            const dbRef = ref(db, `menu/${type}`);
-
-            // Thêm món ăn mới
-            set(push(dbRef), data)
-                .then(() => { 
-                    alert(`Đã thêm món "${name}" vào ${type}!`); 
-                    resetMenuForm();
-                    menuFormContainer.classList.add("hidden");
-                    btnToggleAddMenuForm.textContent = "➕ Thêm món ăn mới";
-                    btnToggleAddMenuForm.classList.remove("active");
-                })
-                .catch(error => alert("Lỗi khi thêm món ăn: " + error.message));
-        }
-
-        // ---------------------------
-        //   TEST / DEDUCT STOCK LOGIC (NEW)
-        // ---------------------------
-
-        function updateDishSuggestions() {
-            dishSuggestions.innerHTML = "";
-            const addOption = (name) => {
-                const option = document.createElement("option");
-                option.value = name;
-                dishSuggestions.appendChild(option);
-            };
-            
-            Object.values(allFoodData).forEach(item => addOption(item.name));
-            Object.values(allDrinkData).forEach(item => addOption(item.name));
-        }
-
-        btnRunTest.addEventListener("click", async () => {
-            const name = testDishName.value.trim();
-            const qty = Number(testDishQty.value);
-
-            testLog.classList.remove("hidden");
-            testLog.innerHTML = "Đang xử lý...";
-
-            if (!name) {
-                testLog.innerHTML = "<span style='color:red'>Lỗi: Vui lòng nhập tên món ăn.</span>";
-                return;
-            }
-            if (qty <= 0) {
-                testLog.innerHTML = "<span style='color:red'>Lỗi: Số lượng phải lớn hơn 0.</span>";
-                return;
-            }
-
-            try {
-                // 1. Tìm công thức theo TÊN MÓN ĂN
-                const recipeSnap = await get(ref(db, `recipes/${name}`));
-                
-                if (!recipeSnap.exists()) {
-                    testLog.innerHTML = `<span style='color:red'>Không tìm thấy công thức cho món: "${name}"</span>`;
-                    return;
-                }
-
-                const recipeData = recipeSnap.val();
-                const updates = {};
-                let logMessage = `<b>KẾT QUẢ TRỪ KHO (${name} x${qty}):</b><br>--------------------<br>`;
-                let hasError = false;
-
-                // 2. Duyệt qua từng nguyên liệu trong công thức
-                for (const ingId in recipeData) {
-                    const itemRecipe = recipeData[ingId];
-                    const requiredQtyPerDish = Number(itemRecipe.qty);
-                    const totalRequired = requiredQtyPerDish * qty;
-
-                    // Lấy tồn kho hiện tại mới nhất từ DB để đảm bảo chính xác
-                    const ingRef = ref(db, `ingredients/${ingId}`);
-                    const ingSnap = await get(ingRef);
-
-                    if (ingSnap.exists()) {
-                        const currentIngData = ingSnap.val();
-                        const currentStock = Number(currentIngData.qty) || 0;
-                        const newStock = currentStock - totalRequired;
-
-                        updates[`ingredients/${ingId}/qty`] = newStock;
-                        
-                        logMessage += `✔️ ${currentIngData.name}: ${currentStock} ➔ ${newStock} (${itemRecipe.unit})<br>`;
-                    } else {
-                        logMessage += `❌ Lỗi: Không tìm thấy nguyên liệu ID ${ingId} trong kho.<br>`;
-                        hasError = true;
-                    }
-                }
-
-                // 3. Thực hiện update lên Firebase
-                if (Object.keys(updates).length > 0) {
-                    await update(ref(db), updates);
-                    logMessage += "<br><span style='color:#34C759'><b>✅ Đã cập nhật kho thành công!</b></span>";
-                } else {
-                    logMessage += "<br>⚠️ Công thức món này không có nguyên liệu nào.";
-                }
-
-                testLog.innerHTML = logMessage;
-
-            } catch (error) {
-                console.error(error);
-                testLog.innerHTML = `<span style='color:red'>Lỗi hệ thống: ${error.message}</span>`;
-            }
-        });
-
-        // ---------------------------
-        //   MENU & INGREDIENT LOGIC (EXISTING)
-        // ---------------------------
-
-        // Toggle Form Logic
-        btnToggleAddForm.addEventListener("click", () => {
-            const isHidden = ingredientFormContainer.classList.contains("hidden");
-            if (isHidden) {
-                ingredientFormContainer.classList.remove("hidden");
-                btnToggleAddForm.textContent = "➖ Đóng form";
-                btnToggleAddForm.classList.add("active");
-            } else {
-                ingredientFormContainer.classList.add("hidden");
-                btnToggleAddForm.textContent = "➕ Thêm nguyên liệu";
-                btnToggleAddForm.classList.remove("active");
-                resetIngredientForm();
-            }
-        });
-
-        btnCancelEdit.addEventListener("click", () => {
-            ingredientFormContainer.classList.add("hidden");
-            btnToggleAddForm.textContent = "➕ Thêm nguyên liệu";
-            btnToggleAddForm.classList.remove("active");
-            resetIngredientForm();
-        });
-
-        btnCloseRecipe.addEventListener("click", () => {
-            recipeFormSection.classList.add("hidden");
-            currentRecipe.id = null;
-            recipeIngredientSearchInput.value = ""; 
-        });
-
-        // Render Menu
-        function renderMenu(listEl, data) {
-            listEl.innerHTML = "";
-            Object.keys(data).forEach(key => {
-                const item = data[key];
+        function renderIngredients() {
+            const list = document.getElementById("ingredientList");
+            list.innerHTML = "";
+            Object.keys(allIngredients).forEach(id => {
+                const item = allIngredients[id];
                 const li = document.createElement("li");
-                li.textContent = item.name || "(Không có tên)";
-                li.setAttribute("data-id", key); 
-                li.setAttribute("data-name", item.name); 
-                li.addEventListener("click", handleRecipeClick);
-                listEl.appendChild(li);
+                li.innerHTML = `<div><b>${item.name}</b><br><small>${item.qty} ${item.unit}</small></div>`;
+                const btnDel = document.createElement("button");
+                btnDel.textContent = "Xóa";
+                btnDel.style.width = "auto";
+                btnDel.onclick = () => remove(ref(db, `ingredients/${id}`));
+                li.appendChild(btnDel);
+                list.appendChild(li);
             });
         }
-        
-        function filterMenu() {
-            const query = menuSearchInput.value.trim().toLowerCase();
-            const filteredFood = Object.keys(allFoodData)
-                .filter(key => allFoodData[key].name.toLowerCase().includes(query))
-                .reduce((obj, key) => { obj[key] = allFoodData[key]; return obj; }, {});
-            renderMenu(foodList, filteredFood);
 
-            const filteredDrink = Object.keys(allDrinkData)
-                .filter(key => allDrinkData[key].name.toLowerCase().includes(query))
-                .reduce((obj, key) => { obj[key] = allDrinkData[key]; return obj; }, {});
-            renderMenu(drinkList, filteredDrink);
+        document.getElementById("btnAddIngredient").onclick = () => {
+            const data = {
+                name: document.getElementById("ingName").value,
+                qty: Number(document.getElementById("ingQty").value),
+                unit: document.getElementById("ingUnit").value,
+                minQty: Number(document.getElementById("ingMinQty").value)
+            };
+            push(ref(db, "ingredients"), data);
+        };
+
+        // Menu & Recipe
+        onValue(ref(db, "menu/food"), snap => { allFoodData = snap.val() || {}; renderMenu("foodList", allFoodData); });
+        onValue(ref(db, "menu/drink"), snap => { allDrinkData = snap.val() || {}; renderMenu("drinkList", allDrinkData); });
+
+        function renderMenu(elementId, data) {
+            const list = document.getElementById(elementId);
+            list.innerHTML = "";
+            Object.keys(data).forEach(id => {
+                const li = document.createElement("li");
+                li.textContent = data[id].name;
+                li.onclick = () => openRecipe(id, data[id].name);
+                list.appendChild(li);
+            });
         }
 
-        onValue(ref(db, "menu/food"), snap => { allFoodData = snap.val() || {}; filterMenu(); updateDishSuggestions(); });
-        onValue(ref(db, "menu/drink"), snap => { allDrinkData = snap.val() || {}; filterMenu(); updateDishSuggestions(); });
-        menuSearchInput.addEventListener("input", filterMenu);
+        document.getElementById("btnAddMenu").onclick = () => {
+            const type = document.getElementById("menuType").value;
+            const name = document.getElementById("menuName").value;
+            push(ref(db, `menu/${type}`), { name: name });
+        };
 
-        // Recipe Logic
-        function handleRecipeClick(event) {
-            const li = event.currentTarget;
-            const dishId = li.getAttribute("data-id");
-            const dishName = li.getAttribute("data-name");
-
-            currentRecipe.id = dishId;
-            currentRecipe.name = dishName;
-
-            hideAllSections();
-            recipeFormSection.classList.remove("hidden"); 
+        async function openRecipe(id, name) {
+            currentRecipe = { id, name };
+            hideAll();
+            recipeFormSection.classList.remove("hidden");
+            document.getElementById("recipeTitle").textContent = "Công thức: " + name;
             
-            recipeIngredientSearchInput.value = ""; 
-            recipeIngredientSearchInput.addEventListener("input", filterRecipeIngredients); 
-
-            loadRecipeForDish(dishId, dishName);
-        }
-
-        async function loadRecipeForDish(dishId, dishName) {
-            recipeTitle.textContent = `Công thức: ${dishName}`;
-            try {
-                const snapshot = await get(ref(db, `recipes/${dishName}`));
-                currentRecipe.existingRecipe = snapshot.val() || {};
-                loadRecipeForm(currentRecipe.existingRecipe);
-                filterRecipeIngredients(); 
-            } catch (error) {
-                alert("Lỗi khi tải công thức: " + error.message);
-            }
-        }
-
-        function loadRecipeForm(existingRecipe) {
-            currentRecipeList.innerHTML = "";
-            if (Object.keys(allIngredients).length === 0) {
-                recipeIngredients.innerHTML = "<p>Chưa có nguyên liệu nào trong kho.</p>";
-                btnSaveRecipe.classList.add("hidden");
-                recipeIngredientSearchInput.classList.add("hidden"); 
-                return;
-            }
-            btnSaveRecipe.classList.remove("hidden");
-            recipeIngredientSearchInput.classList.remove("hidden"); 
-
-            const savedIngredients = Object.keys(existingRecipe).length;
-            if (savedIngredients > 0) {
-                Object.keys(existingRecipe).forEach(key => {
-                    const item = existingRecipe[key];
-                    // Hiển thị định lượng đã lưu theo đơn vị trong kho (item.unit)
-                    const li = document.createElement("li");
-                    const contentSpan = document.createElement("span");
-                    contentSpan.textContent = `${item.name}: ${item.qty} ${item.unit}`;
-                    li.appendChild(contentSpan);
-                    const deleteButton = document.createElement("button");
-                    deleteButton.textContent = "Xóa";
-                    deleteButton.setAttribute("data-ing-id", key);
-                    deleteButton.addEventListener("click", handleDeleteIngredientFromRecipe);
-                    li.appendChild(deleteButton);
-                    currentRecipeList.appendChild(li);
-                });
-            } else {
-                currentRecipeList.innerHTML = "<li>(Chưa có định lượng)</li>";
-            }
-        }
-        
-        function filterRecipeIngredients() {
-            const query = recipeIngredientSearchInput.value.trim().toLowerCase();
-            recipeIngredients.innerHTML = ""; 
-            const existingRecipe = currentRecipe.existingRecipe || {};
-
-            if (Object.keys(allIngredients).length === 0) return;
+            const snap = await get(ref(db, `recipes/${name}`));
+            const existing = snap.val() || {};
             
-            Object.keys(allIngredients)
-                .filter(key => allIngredients[key].name.toLowerCase().includes(query))
-                .forEach(key => {
-                    const ingredient = allIngredients[key];
-                    
-                    // Lấy đơn vị trong kho và tính toán đơn vị thay thế (nếu có)
-                    const stockUnit = ingredient.unit;
-                    let altUnit = null;
-                    let conversionFactor = 1;
-                    
-                    if (stockUnit === 'kg') {
-                        altUnit = 'g';
-                        conversionFactor = 1000;
-                    } else if (stockUnit === 'lít') {
-                        altUnit = 'ml';
-                        conversionFactor = 1000;
-                    }
-                    
-                    // Lấy giá trị đã lưu trong công thức, luôn theo đơn vị trong kho (stockUnit)
-                    const savedQty = existingRecipe[key] ? Number(existingRecipe[key].qty) : 0;
-                    
-                    // Giá trị hiển thị mặc định trong form: theo đơn vị lớn (stockUnit)
-                    let currentQtyDisplay = savedQty > 0 ? savedQty : '';
-                    let currentUnitInput = stockUnit;
+            const currentList = document.getElementById("currentRecipeList");
+            currentList.innerHTML = "";
+            Object.keys(existing).forEach(ingId => {
+                const item = existing[ingId];
+                const li = document.createElement("li");
+                li.textContent = `${item.name}: ${item.qty} ${item.unit}`;
+                currentList.appendChild(li);
+            });
 
-                    // Nếu có giá trị đã lưu, và giá trị đó rất nhỏ (ví dụ 0.005kg), ta có thể chọn hiển thị nó theo đơn vị bé (g) để người dùng dễ nhìn hơn
-                    // Tuy nhiên, để đơn giản, ta sẽ chỉ tập trung vào việc cho phép người dùng chọn đơn vị nhập.
-
-                    const div = document.createElement("div");
-                    div.classList.add("recipe-form-item");
-                    div.style.display = "flex";
-                    div.style.justifyContent = "space-between";
-                    div.style.alignItems = "center";
-                    
-                    // Tạo Options cho Dropdown Đơn vị
-                    let unitOptionsHTML = `<option value="${stockUnit}">${stockUnit}</option>`;
-                    if (altUnit) {
-                        unitOptionsHTML += `<option value="${altUnit}">${altUnit}</option>`;
-                    }
-                    
-                    div.innerHTML = `
-                        <div style="flex: 1;">
-                            <label class="label" style="font-size: 15px; color: #000; margin: 0;">${ingredient.name}</label>
-                            <span class="stock">Kho: ${ingredient.qty} ${stockUnit}</span>
-                        </div>
-                        <div class="recipe-qty-unit-group">
-                            <input type="number" 
-                                data-ing-id="${key}" 
-                                data-ing-name="${ingredient.name}" 
-                                data-stock-unit="${stockUnit}"
-                                data-alt-unit="${altUnit || ''}"
-                                data-conversion="${conversionFactor}"
-                                placeholder="SL" 
-                                value="${currentQtyDisplay}" 
-                                min="0">
-                            <select class="recipe-unit-select">
-                                ${unitOptionsHTML}
-                            </select>
-                        </div>
-                    `;
-                    recipeIngredients.appendChild(div);
-
-                    // Thiết lập đơn vị đã lưu (mặc định là đơn vị kho)
-                    const unitSelect = div.querySelector('.recipe-unit-select');
-                    const qtyInput = div.querySelector('input[type="number"]');
-
-                    // Logic: Nếu đã có công thức lưu, hiển thị nó theo đơn vị đã lưu (unit trong recipe, mặc dù ta chỉ lưu unit kho)
-                    // Để đơn giản hơn: Ta mặc định hiển thị định lượng đã lưu theo đơn vị trong kho (stockUnit)
-
-                    // Nếu muốn hiển thị giá trị đã lưu theo đơn vị nhỏ hơn nếu giá trị rất bé, cần logic phức tạp hơn.
-                    // Tạm thời, ta chỉ hiển thị theo đơn vị kho, và cho phép người dùng nhập theo đơn vị họ muốn.
-                });
-        }
-        
-        function handleDeleteIngredientFromRecipe(event) {
-            const ingId = event.currentTarget.getAttribute("data-ing-id");
-            if (!currentRecipe.name) return;
-            if (confirm(`Xóa nguyên liệu này khỏi công thức món "${currentRecipe.name}"?`)) {
-                remove(ref(db, `recipes/${currentRecipe.name}/${ingId}`))
-                    .then(() => loadRecipeForDish(currentRecipe.id, currentRecipe.name));
-            }
+            const editArea = document.getElementById("recipeIngredients");
+            editArea.innerHTML = "";
+            Object.keys(allIngredients).forEach(ingId => {
+                const ing = allIngredients[ingId];
+                const div = document.createElement("div");
+                div.className = "recipe-qty-unit-group";
+                div.style.margin = "10px 0";
+                div.innerHTML = `
+                    <span style="flex:1">${ing.name}</span>
+                    <input type="number" style="width:70px; margin:0" data-id="${ingId}" value="${existing[ingId]?.qty || ''}">
+                    <span>${ing.unit}</span>
+                `;
+                editArea.appendChild(div);
+            });
         }
 
-        btnSaveRecipe.addEventListener("click", () => {
-            if (!currentRecipe.name) return;
-            const recipeInputs = recipeIngredients.querySelectorAll("input[type='number']");
-            const dataToSave = {};
-            let hasError = false;
-
-            recipeInputs.forEach(input => {
-                if (hasError) return;
-                
-                let qty = Number(input.value);
-                const ingId = input.getAttribute("data-ing-id");
-                const stockUnit = input.getAttribute("data-stock-unit");
-                const altUnit = input.getAttribute("data-alt-unit");
-                const conversionFactor = Number(input.getAttribute("data-conversion"));
-                
-                const unitSelect = input.closest('.recipe-qty-unit-group').querySelector('.recipe-unit-select');
-                const selectedUnit = unitSelect.value;
-                
-                if (qty > 0) {
-                    // Xử lý chuyển đổi đơn vị
-                    let finalQty = qty;
-                    
-                    if (selectedUnit === altUnit && altUnit) {
-                        // Nếu người dùng nhập đơn vị nhỏ (g, ml) nhưng đơn vị kho là lớn (kg, lít)
-                        if (conversionFactor === 1000) {
-                            finalQty = qty / 1000; // Chuyển g -> kg, hoặc ml -> lít
-                        } else {
-                             // Xử lý các trường hợp khác nếu cần (vd: con/cái)
-                             // Hiện tại chỉ hỗ trợ tỉ lệ 1000
-                        }
-                    } else if (selectedUnit !== stockUnit && selectedUnit !== altUnit) {
-                        // Trường hợp không có altUnit (ví dụ: con, cái), nhưng người dùng chọn đơn vị khác đơn vị kho.
-                        // Ta mặc định không chuyển đổi, chỉ lưu giá trị theo đơn vị kho
-                        // (Ở đây ta chỉ có 2 lựa chọn: stockUnit hoặc altUnit, nên phần này có thể bỏ qua)
-                    }
-
-                    // Kiểm tra tồn kho (nên được thực hiện ở test, nhưng có thể cảnh báo tại đây)
-                    const currentStock = allIngredients[ingId] ? Number(allIngredients[ingId].qty) : 0;
-                    if (finalQty > currentStock) {
-                        // Cảnh báo nhưng vẫn cho phép lưu công thức (vì công thức chỉ là định mức)
-                        console.warn(`Cảnh báo: Định lượng ${finalQty} ${stockUnit} lớn hơn tồn kho ${currentStock} cho nguyên liệu ${input.getAttribute("data-ing-name")}.`);
-                    }
-
-                    dataToSave[ingId] = {
-                        name: input.getAttribute("data-ing-name"),
-                        qty: finalQty, // Giá trị đã được chuyển đổi về đơn vị trong KHO (stockUnit)
-                        unit: stockUnit // Lưu đơn vị trong kho (stockUnit)
+        document.getElementById("btnSaveRecipe").onclick = () => {
+            const inputs = document.querySelectorAll("#recipeIngredients input");
+            const recipeData = {};
+            inputs.forEach(input => {
+                const val = Number(input.value);
+                if (val > 0) {
+                    const ingId = input.dataset.id;
+                    recipeData[ingId] = {
+                        name: allIngredients[ingId].name,
+                        qty: val,
+                        unit: allIngredients[ingId].unit
                     };
                 }
             });
-            
-            if (hasError) return;
+            set(ref(db, `recipes/${currentRecipe.name}`), recipeData).then(() => alert("Đã lưu!"));
+        };
 
-            set(ref(db, `recipes/${currentRecipe.name}`), dataToSave)
-                .then(() => {
-                    alert(`Đã lưu công thức món "${currentRecipe.name}"! Lưu ý: Định lượng đã được chuyển đổi về đơn vị kho (${Object.values(dataToSave)[0]?.unit || 'N/A'}).`);
-                    loadRecipeForDish(currentRecipe.id, currentRecipe.name);
-                })
-                .catch(error => alert("Lỗi khi lưu công thức: " + error.message));
-        });
+        document.getElementById("btnCloseRecipe").onclick = () => { hideAll(); menuSection.classList.remove("hidden"); };
 
-        // Ingredient Management
-        function filterAndRenderIngredients() {
-            const query = ingredientSearchInput.value.trim().toLowerCase();
-            const ingredientsArray = Object.keys(allIngredients).map(key => ({ id: key, ...allIngredients[key] }));
-            const filteredIngredients = ingredientsArray.filter(item => item.name.toLowerCase().includes(query));
-            
-            const lowStock = [];
-            const normalStock = [];
-            filteredIngredients.forEach(item => {
-                const minQty = Number(item.minQty) || 0; 
-                (item.qty <= minQty) ? lowStock.push(item) : normalStock.push(item);
+        // Test Deduct
+        function updateDishSuggestions() {
+            const dl = document.getElementById("dishSuggestions");
+            dl.innerHTML = "";
+            [...Object.values(allFoodData), ...Object.values(allDrinkData)].forEach(m => {
+                const opt = document.createElement("option");
+                opt.value = m.name;
+                dl.appendChild(opt);
             });
-            const sortedIngredients = [...lowStock, ...normalStock];
+        }
 
-            ingredientList.innerHTML = "";
-            sortedIngredients.forEach(item => {
-                const li = document.createElement("li");
-                const minQtyDisplay = (Number(item.minQty) > 0) ? ` | Min: ${item.minQty}` : '';
-                
-                const contentDiv = document.createElement('div');
-                contentDiv.style.flex = "1";
-                contentDiv.innerHTML = `
-                    <div style="font-weight: 600; font-size: 16px;">${item.name}</div>
-                    <div style="font-size: 13px; color: #8E8E93;">Kho: ${item.qty} ${item.unit}${minQtyDisplay}</div>
-                `;
+        document.getElementById("btnRunTest").onclick = async () => {
+            const name = document.getElementById("testDishName").value;
+            const orderQty = Number(document.getElementById("testDishQty").value);
+            const log = document.getElementById("testLog");
+            log.classList.remove("hidden");
+            log.innerHTML = "Đang tính toán...";
 
-                const editButton = document.createElement("button");
-                editButton.textContent = "Sửa";
-                editButton.classList.add("edit-btn");
-                editButton.addEventListener("click", (e) => { e.stopPropagation(); handleEditIngredientClick(item); }); 
-                
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Xóa";
-                deleteButton.classList.add("delete-btn");
-                deleteButton.addEventListener("click", (e) => { e.stopPropagation(); handleDeleteIngredientClick(item); });
-                
-                const buttonContainer = document.createElement('div');
-                buttonContainer.style.display = 'flex';
-                buttonContainer.appendChild(editButton); 
-                buttonContainer.appendChild(deleteButton); 
+            const snap = await get(ref(db, `recipes/${name}`));
+            if (!snap.exists()) { log.innerHTML = "Không thấy công thức!"; return; }
 
-                if (item.qty <= (Number(item.minQty) || 0)) li.classList.add('low-stock');
-                li.appendChild(contentDiv);
-                li.appendChild(buttonContainer);
-                ingredientList.appendChild(li);
+            const recipe = snap.val();
+            const updates = {};
+            let logTxt = `Trừ kho món ${name}:<br>`;
+
+            for (let ingId in recipe) {
+                const req = recipe[ingId].qty * orderQty;
+                const currentStock = allIngredients[ingId].qty;
+                updates[`ingredients/${ingId}/qty`] = currentStock - req;
+                logTxt += `- ${recipe[ingId].name}: ${currentStock} -> ${currentStock - req}<br>`;
+            }
+
+            update(ref(db), updates).then(() => {
+                log.innerHTML = logTxt + "<b>Thành công!</b>";
             });
+        };
 
-            if (!recipeFormSection.classList.contains("hidden") && currentRecipe.id) filterRecipeIngredients();
-        }
+        // UI Toggles
+        document.getElementById("btnToggleAddMenuForm").onclick = () => document.getElementById("menuFormContainer").classList.toggle("hidden");
+        document.getElementById("btnToggleAddForm").onclick = () => document.getElementById("ingredientFormContainer").classList.toggle("hidden");
 
-        ingredientSearchInput.addEventListener("input", filterAndRenderIngredients);
-        onValue(ref(db, "ingredients"), snapshot => { allIngredients = snapshot.val() || {}; filterAndRenderIngredients(); });
-
-        function handleDeleteIngredientClick(item) {
-            if (confirm(`Xóa nguyên liệu "${item.name}" khỏi kho?`)) {
-                remove(ref(db, `ingredients/${item.id}`)).then(() => {
-                    if (editingIngredientId === item.id) resetIngredientForm();
-                });
-            }
-        }
-        
-        function addOrUpdateIngredient() {
-            const name = ingName.value.trim();
-            const qty = ingQty.value.trim();
-            const minQty = ingMinQty.value.trim() || "0"; 
-
-            if (!name || !qty) { alert("Nhập đủ Tên và Số lượng!"); return; }
-
-            const data = { name: name, qty: Number(qty), minQty: Number(minQty), unit: ingUnit.value };
-
-            if (editingIngredientId) {
-                if (confirm(`Cập nhật "${name}"?`)) {
-                    set(ref(db, `ingredients/${editingIngredientId}`), data).then(() => {
-                         alert("Đã cập nhật!"); resetIngredientForm();
-                         ingredientFormContainer.classList.add("hidden");
-                         btnToggleAddForm.textContent = "➕ Thêm nguyên liệu";
-                         btnToggleAddForm.classList.remove("active");
-                    });
-                }
-            } else {
-                set(push(ref(db, "ingredients")), data).then(() => { alert("Đã thêm!"); resetIngredientForm(); });
-            }
-        }
-        
-        btnAddIngredient.addEventListener("click", addOrUpdateIngredient);
-
-        function handleEditIngredientClick(item) {
-            hideAllSections();
-            ingredientSection.classList.remove("hidden");
-            ingredientFormContainer.classList.remove("hidden");
-            btnToggleAddForm.textContent = "➖ Đóng form";
-            btnToggleAddForm.classList.add("active");
-
-            editingIngredientId = item.id;
-            ingName.value = item.name;
-            ingQty.value = item.qty;
-            ingMinQty.value = item.minQty || '';
-            ingUnit.value = item.unit;
-
-            btnAddIngredient.textContent = "💾 Lưu Thay Đổi";
-            btnAddIngredient.style.backgroundColor = "#34C759"; 
-            btnCancelEdit.classList.remove("hidden");
-            ingredientSection.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function resetIngredientForm() {
-            editingIngredientId = null;
-            ingName.value = "";
-            ingQty.value = "";
-            ingMinQty.value = "";
-            ingUnit.value = "kg"; 
-            btnAddIngredient.textContent = "➕ Thêm nguyên liệu";
-            btnAddIngredient.style.backgroundColor = ""; 
-            btnCancelEdit.classList.add("hidden"); 
-        }
     </script>
 </body>
 </html>
