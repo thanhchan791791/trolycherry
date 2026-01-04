@@ -7,6 +7,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Quản lý Menu & Kho</title>
     
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
         :root {
             --ios-bg: #F2F2F7;
@@ -37,6 +39,13 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* --- ANIMATIONS --- */
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,122,255,0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,122,255,0.6); }
+            100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,122,255,0.4); }
+        }
+
         /* --- NAVIGATION BAR --- */
         header {
             position: fixed;
@@ -55,7 +64,7 @@
             z-index: 1000;
         }
 
-        /* Nút Ghi chú nổi ở góc dưới phải */
+        /* Nút Ghi chú nổi */
         .note-trigger {
             position: fixed;
             right: 20px;
@@ -67,15 +76,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            color: white;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             z-index: 1500;
             cursor: pointer;
-            transition: transform 0.2s active;
+            animation: pulse 3s infinite ease-in-out;
+            transition: transform 0.2s;
         }
         .note-trigger:active { transform: scale(0.9); }
 
-        h1 { font-size: 17px; font-weight: 600; margin: 0; color: #000; }
+        h1 { font-size: 17px; font-weight: 600; margin: 0; color: #000; display: flex; align-items: center; gap: 6px; }
 
         /* --- TAB BAR --- */
         .tab-bar {
@@ -107,11 +117,18 @@
             padding: 5px 0;
             width: 33%;
             margin: 0 !important;
+            transition: all 0.2s;
         }
 
-        #btnShowMenu::before { content: '🍽️'; font-size: 24px; margin-bottom: 2px; }
-        #btnIngredient::before { content: '📦'; font-size: 24px; margin-bottom: 2px; }
-        #btnShowTest::before { content: '🧪'; font-size: 24px; margin-bottom: 2px; }
+        .tab-bar button.active {
+            color: var(--ios-blue);
+        }
+
+        .tab-bar button i {
+            margin-bottom: 2px;
+            transition: transform 0.2s;
+        }
+        .tab-bar button:active i { transform: scale(1.2); }
 
         /* --- MODAL GHI CHÚ --- */
         .modal-overlay {
@@ -140,7 +157,7 @@
             flex-direction: column;
         }
 
-        .note-modal h2 { font-size: 20px; margin-top: 0; }
+        .note-modal h2 { font-size: 20px; margin-top: 0; display: flex; align-items: center; gap: 8px; }
         
         .note-input-area textarea {
             width: 100%;
@@ -171,14 +188,26 @@
 
         .note-item .time { font-size: 11px; color: var(--ios-gray); display: block; margin-bottom: 4px; }
         .note-item .text { font-size: 15px; color: #333; line-height: 1.4; }
-        .note-item .delete-note { color: var(--ios-red); font-size: 12px; margin-top: 5px; cursor: pointer; float: right; }
+        .note-item .delete-note { color: var(--ios-red); font-size: 12px; margin-top: 5px; cursor: pointer; float: right; display: flex; align-items: center; gap: 3px; }
 
         /* --- OLD STYLES RE-USED --- */
         .box { background: var(--ios-card); border-radius: 20px; padding: 20px; margin: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         h2 { font-size: 28px; font-weight: 700; margin: 10px 0 20px 0; }
         h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--ios-gray); margin: 25px 0 10px 10px; }
+        
+        .search-container { position: relative; width: 100%; margin-bottom: 15px; }
+        .search-container i { position: absolute; left: 12px; top: 12px; color: var(--ios-gray); width: 18px; height: 18px; }
+        .search-container input { padding-left: 40px !important; margin-bottom: 0 !important; }
+
         input[type="text"], input[type="number"], select { width: 100%; height: 44px; padding: 0 15px; background: var(--ios-gray-light); border: none; border-radius: 12px; font-size: 17px; margin-bottom: 15px; }
-        button:not(.tab-bar button):not(.small-btn) { width: 100%; padding: 14px; background: var(--ios-blue); color: white; font-size: 17px; font-weight: 600; border-radius: 14px; margin-bottom: 12px; }
+        
+        button:not(.tab-bar button):not(.small-btn):not(.btn-delete-item):not(.btn-edit-item) { 
+            width: 100%; padding: 14px; background: var(--ios-blue); color: white; font-size: 17px; font-weight: 600; 
+            border-radius: 14px; margin-bottom: 12px; border: none; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: opacity 0.2s;
+        }
+        button:active { opacity: 0.7; }
+
         ul { background: var(--ios-card); border-radius: 16px; overflow: hidden; margin: 0; padding: 0; }
         li { padding: 16px; background: #fff; border-bottom: 0.5px solid var(--ios-separator); display: flex; justify-content: space-between; align-items: center; }
         .hidden { display: none !important; }
@@ -189,19 +218,23 @@
         .btn-delete-item {
             background-color: var(--ios-red) !important;
             width: auto !important;
-            padding: 6px 12px !important;
+            padding: 6px 10px !important;
             font-size: 13px !important;
             margin: 0 !important;
             border-radius: 8px !important;
+            color: white; border: none;
+            display: flex; align-items: center; gap: 4px;
         }
 
         .btn-edit-item {
             background-color: var(--ios-blue) !important;
             width: auto !important;
-            padding: 6px 12px !important;
+            padding: 6px 10px !important;
             font-size: 13px !important;
             margin: 0 5px 0 0 !important;
             border-radius: 8px !important;
+            color: white; border: none;
+            display: flex; align-items: center; gap: 4px;
         }
 
         .action-group {
@@ -213,41 +246,58 @@
 <body>
 
     <header>
-        <h1>Quản Lý Bếp</h1>
+        <h1><i data-lucide="chef-hat" style="width: 20px;"></i> Quản Lý Bếp</h1>
     </header>
 
-    <div class="note-trigger" id="btnOpenNote">📝</div>
+    <div class="note-trigger" id="btnOpenNote">
+        <i data-lucide="pencil-line"></i>
+    </div>
 
     <div class="modal-overlay" id="noteModalOverlay">
         <div class="note-modal">
-            <h2>Ghi chú nhanh</h2>
+            <h2><i data-lucide="sticky-note"></i> Ghi chú nhanh</h2>
             <div class="note-input-area">
                 <textarea id="noteContent" placeholder="Nhập nội dung ghi chú..."></textarea>
-                <button id="btnSaveNote" style="margin-bottom: 5px;">Lưu ghi chú</button>
+                <button id="btnSaveNote" style="margin-bottom: 5px;">
+                    <i data-lucide="save" style="width: 18px;"></i> Lưu ghi chú
+                </button>
                 <button id="btnCloseNote" style="background: var(--ios-gray-light) !important; color: var(--ios-blue) !important;">Đóng</button>
             </div>
-            <div class="note-list" id="noteList">
-                </div>
+            <div class="note-list" id="noteList"></div>
         </div>
     </div>
 
     <div class="tab-bar">
-        <button id="btnShowMenu">Menu</button>
-        <button id="btnIngredient">Kho</button>
-        <button id="btnShowTest">Test</button>
+        <button id="btnShowMenu" class="active">
+            <i data-lucide="utensils-crossbars"></i>
+            <span>Menu</span>
+        </button>
+        <button id="btnIngredient">
+            <i data-lucide="package"></i>
+            <span>Kho</span>
+        </button>
+        <button id="btnShowTest">
+            <i data-lucide="flask-conical"></i>
+            <span>Test</span>
+        </button>
     </div>
 
     <div class="main-content">
         <div id="menuSection" class="box">
             <h2>Món Ăn</h2>
-            <input type="text" id="menuSearchInput" placeholder="🔍 Tìm kiếm món ăn...">
-            <button id="btnToggleAddMenuForm">➕ Thêm món ăn mới</button> 
+            <div class="search-container">
+                <i data-lucide="search"></i>
+                <input type="text" id="menuSearchInput" placeholder="Tìm kiếm món ăn...">
+            </div>
+            <button id="btnToggleAddMenuForm">
+                <i data-lucide="plus-circle"></i> Thêm món ăn mới
+            </button> 
             <div id="menuFormContainer" class="hidden" style="background: var(--ios-gray-light); padding: 16px; border-radius: 12px; margin-top: 15px; margin-bottom: 20px;">
                 <label class="label">Tên món ăn</label>
                 <input type="text" id="menuName" placeholder="Ví dụ: Phở Bò">
                 <label class="label">Loại</label>
                 <select id="menuType"><option value="food">Food</option><option value="drink">Drink</option></select>
-                <button id="btnAddMenu">💾 Lưu Món Ăn</button>
+                <button id="btnAddMenu"><i data-lucide="save" style="width:18px"></i> Lưu Món Ăn</button>
                 <button id="btnCancelMenuEdit" style="background:none; color:var(--ios-blue);">Hủy</button> 
             </div>
             <h3>Food</h3><ul id="foodList"></ul>
@@ -256,8 +306,13 @@
 
         <div id="ingredientSection" class="hidden box">
             <h2>Nguyên Liệu</h2>
-            <input type="text" id="ingredientSearchInput" placeholder="🔍 Tìm kiếm...">
-            <button id="btnToggleAddForm">➕ Thêm nguyên liệu</button> 
+            <div class="search-container">
+                <i data-lucide="search"></i>
+                <input type="text" id="ingredientSearchInput" placeholder="Tìm kiếm...">
+            </div>
+            <button id="btnToggleAddForm">
+                <i data-lucide="plus-circle"></i> Thêm nguyên liệu
+            </button> 
             <div id="ingredientFormContainer" class="hidden" style="background: var(--ios-gray-light); padding: 16px; border-radius: 12px; margin-top: 15px;">
                 <input type="text" id="ingName" placeholder="Tên nguyên liệu">
                 <input type="number" id="ingQty" placeholder="Số lượng">
@@ -267,7 +322,7 @@
                     <option value="can">can</option><option value="gói">gói</option>
                 </select>
                 <input type="number" id="ingMinQty" placeholder="SL tối thiểu">
-                <button id="btnAddIngredient">Lưu</button>
+                <button id="btnAddIngredient"><i data-lucide="save" style="width:18px"></i> Lưu</button>
                 <button id="btnCancelEdit" style="background:none; color:var(--ios-blue);">Hủy</button> 
             </div>
             <h3>Danh sách kho</h3>
@@ -279,7 +334,9 @@
             <input type="text" id="testDishName" list="dishSuggestions" placeholder="Tên món ăn...">
             <datalist id="dishSuggestions"></datalist>
             <input type="number" id="testDishQty" value="1">
-            <button id="btnRunTest" style="background: var(--ios-green);">🚀 Chạy Trừ Kho</button>
+            <button id="btnRunTest" style="background: var(--ios-green) !important;">
+                <i data-lucide="play-circle"></i> Chạy Trừ Kho
+            </button>
             <div id="testLog" class="hidden log-console"></div>
         </div>
 
@@ -292,9 +349,14 @@
             <h3>Định lượng hiện tại</h3>
             <ul id="currentRecipeList"></ul>
             <h3>Điều chỉnh</h3>
-            <input type="text" id="recipeIngredientSearchInput" placeholder="🔍 Tìm nguyên liệu...">
+            <div class="search-container">
+                <i data-lucide="search"></i>
+                <input type="text" id="recipeIngredientSearchInput" placeholder="Tìm nguyên liệu...">
+            </div>
             <div id="recipeIngredients"></div>
-            <button id="btnSaveRecipe" style="margin-top:20px;">💾 Lưu Công Thức</button>
+            <button id="btnSaveRecipe" style="margin-top:20px;">
+                <i data-lucide="save"></i> Lưu Công Thức
+            </button>
         </div>
     </div>
 
@@ -315,6 +377,9 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+
+        // Khởi tạo Lucide
+        lucide.createIcons();
 
         // --- GHI CHÚ LOGIC ---
         const btnOpenNote = document.getElementById("btnOpenNote");
@@ -354,32 +419,35 @@
                     div.innerHTML = `
                         <span class="time">${item.time}</span>
                         <div class="text">${item.text}</div>
-                        <span class="delete-note" data-id="${key}">Xóa</span>
+                        <span class="delete-note" data-id="${key}"><i data-lucide="trash-2" style="width:12px"></i> Xóa</span>
                     `;
                     div.querySelector(".delete-note").onclick = () => {
                         if(confirm("Xóa ghi chú này?")) remove(ref(db, `notes/${key}`));
                     };
                     noteList.appendChild(div);
                 });
+                lucide.createIcons();
             }
         });
 
         // --- NAVIGATION ---
-        const btnShowMenu = document.getElementById("btnShowMenu");
-        const btnIngredient = document.getElementById("btnIngredient");
-        const btnShowTest = document.getElementById("btnShowTest");
-        const menuSection = document.getElementById("menuSection");
-        const ingredientSection = document.getElementById("ingredientSection");
-        const testSection = document.getElementById("testSection");
-        const recipeFormSection = document.getElementById("recipeFormSection");
+        const tabs = document.querySelectorAll(".tab-bar button");
+        const sections = {
+            btnShowMenu: document.getElementById("menuSection"),
+            btnIngredient: document.getElementById("ingredientSection"),
+            btnShowTest: document.getElementById("testSection")
+        };
 
-        function hideAll() {
-            [menuSection, ingredientSection, testSection, recipeFormSection].forEach(s => s.classList.add("hidden"));
-        }
-
-        btnShowMenu.onclick = () => { hideAll(); menuSection.classList.remove("hidden"); };
-        btnIngredient.onclick = () => { hideAll(); ingredientSection.classList.remove("hidden"); };
-        btnShowTest.onclick = () => { hideAll(); testSection.classList.remove("hidden"); updateDishSuggestions(); };
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                tabs.forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+                Object.values(sections).forEach(s => s.classList.add("hidden"));
+                document.getElementById("recipeFormSection").classList.add("hidden");
+                sections[tab.id].classList.remove("hidden");
+                if(tab.id === "btnShowTest") updateDishSuggestions();
+            });
+        });
 
         // State & Ingredients
         let allIngredients = {};
@@ -412,14 +480,12 @@
                     actionGroup.className = "action-group";
 
                     const btnEdit = document.createElement("button");
-                    btnEdit.textContent = "Sửa";
+                    btnEdit.innerHTML = `<i data-lucide="edit-3" style="width:14px"></i> Sửa`;
                     btnEdit.className = "btn-edit-item";
-                    btnEdit.onclick = () => {
-                        editIngredient(id, item);
-                    };
+                    btnEdit.onclick = () => editIngredient(id, item);
 
                     const btnDel = document.createElement("button");
-                    btnDel.textContent = "Xóa";
+                    btnDel.innerHTML = `<i data-lucide="trash-2" style="width:14px"></i> Xóa`;
                     btnDel.className = "btn-delete-item";
                     btnDel.onclick = () => {
                         if(confirm(`Xóa nguyên liệu "${item.name}"?`)) remove(ref(db, `ingredients/${id}`));
@@ -431,6 +497,7 @@
                     list.appendChild(li);
                 }
             });
+            lucide.createIcons();
         }
 
         function editIngredient(id, data) {
@@ -440,9 +507,10 @@
             document.getElementById("ingUnit").value = data.unit;
             document.getElementById("ingMinQty").value = data.minQty || 0;
             
-            document.getElementById("btnAddIngredient").textContent = "Cập nhật";
+            document.getElementById("btnAddIngredient").innerHTML = `<i data-lucide="refresh-cw" style="width:18px"></i> Cập nhật`;
             document.getElementById("ingredientFormContainer").classList.remove("hidden");
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            lucide.createIcons();
         }
 
         function resetIngForm() {
@@ -450,8 +518,9 @@
             document.getElementById("ingName").value = "";
             document.getElementById("ingQty").value = "";
             document.getElementById("ingMinQty").value = "";
-            document.getElementById("btnAddIngredient").textContent = "Lưu";
+            document.getElementById("btnAddIngredient").innerHTML = `<i data-lucide="save" style="width:18px"></i> Lưu`;
             document.getElementById("ingredientFormContainer").classList.add("hidden");
+            lucide.createIcons();
         }
 
         document.getElementById("btnAddIngredient").onclick = () => {
@@ -503,7 +572,7 @@
                     nameSpan.onclick = () => openRecipe(id, item.name);
                     
                     const btnDel = document.createElement("button");
-                    btnDel.textContent = "Xóa";
+                    btnDel.innerHTML = `<i data-lucide="trash-2" style="width:14px"></i> Xóa`;
                     btnDel.className = "btn-delete-item";
                     btnDel.onclick = (e) => {
                         e.stopPropagation();
@@ -517,6 +586,7 @@
                     list.appendChild(li);
                 }
             });
+            lucide.createIcons();
         }
 
         document.getElementById("btnAddMenu").onclick = () => {
@@ -530,8 +600,9 @@
 
         async function openRecipe(id, name) {
             currentRecipe = { id, name };
-            hideAll();
-            recipeFormSection.classList.remove("hidden");
+            // Ẩn tất cả section
+            Object.values(sections).forEach(s => s.classList.add("hidden"));
+            document.getElementById("recipeFormSection").classList.remove("hidden");
             document.getElementById("recipeTitle").textContent = "Công thức: " + name;
             
             const snap = await get(ref(db, `recipes/${name}`));
@@ -560,6 +631,7 @@
                 `;
                 editArea.appendChild(div);
             });
+            lucide.createIcons();
         }
 
         document.getElementById("btnSaveRecipe").onclick = () => {
@@ -579,7 +651,10 @@
             set(ref(db, `recipes/${currentRecipe.name}`), recipeData).then(() => alert("Đã lưu!"));
         };
 
-        document.getElementById("btnCloseRecipe").onclick = () => { hideAll(); menuSection.classList.remove("hidden"); };
+        document.getElementById("btnCloseRecipe").onclick = () => { 
+            document.getElementById("recipeFormSection").classList.add("hidden"); 
+            document.getElementById("menuSection").classList.remove("hidden"); 
+        };
 
         function updateDishSuggestions() {
             const dl = document.getElementById("dishSuggestions");
