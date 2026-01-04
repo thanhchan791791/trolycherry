@@ -55,13 +55,25 @@
             z-index: 1000;
         }
 
-        header .note-trigger {
-            position: absolute;
-            right: 15px;
-            bottom: 12px;
-            font-size: 22px;
+        /* Nút Ghi chú nổi ở góc dưới phải */
+        .note-trigger {
+            position: fixed;
+            right: 20px;
+            bottom: calc(70px + var(--safe-area-bottom));
+            width: 56px;
+            height: 56px;
+            background: var(--ios-blue);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1500;
             cursor: pointer;
+            transition: transform 0.2s active;
         }
+        .note-trigger:active { transform: scale(0.9); }
 
         h1 { font-size: 17px; font-weight: 600; margin: 0; color: #000; }
 
@@ -182,14 +194,29 @@
             margin: 0 !important;
             border-radius: 8px !important;
         }
+
+        .btn-edit-item {
+            background-color: var(--ios-blue) !important;
+            width: auto !important;
+            padding: 6px 12px !important;
+            font-size: 13px !important;
+            margin: 0 5px 0 0 !important;
+            border-radius: 8px !important;
+        }
+
+        .action-group {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Quản Lý Bếp</h1>
-        <div class="note-trigger" id="btnOpenNote">📝</div>
     </header>
+
+    <div class="note-trigger" id="btnOpenNote">📝</div>
 
     <div class="modal-overlay" id="noteModalOverlay">
         <div class="note-modal">
@@ -358,8 +385,9 @@
         let allFoodData = {};
         let allDrinkData = {};
         let currentRecipe = { id: null, name: null };
+        let editingIngId = null;
 
-        // --- TÌM KIẾM NGUYÊN LIỆU (NHẬP TỚI ĐÂU LỌC TỚI ĐÓ) ---
+        // --- TÌM KIẾM NGUYÊN LIỆU ---
         const ingredientSearchInput = document.getElementById("ingredientSearchInput");
         ingredientSearchInput.oninput = () => renderIngredients();
 
@@ -378,16 +406,51 @@
                 if (item.name.toLowerCase().includes(searchTerm)) {
                     const li = document.createElement("li");
                     li.innerHTML = `<div><b>${item.name}</b><br><small>${item.qty} ${item.unit}</small></div>`;
+                    
+                    const actionGroup = document.createElement("div");
+                    actionGroup.className = "action-group";
+
+                    const btnEdit = document.createElement("button");
+                    btnEdit.textContent = "Sửa";
+                    btnEdit.className = "btn-edit-item";
+                    btnEdit.onclick = () => {
+                        editIngredient(id, item);
+                    };
+
                     const btnDel = document.createElement("button");
                     btnDel.textContent = "Xóa";
-                    btnDel.style.width = "auto";
+                    btnDel.className = "btn-delete-item";
                     btnDel.onclick = () => {
                         if(confirm(`Xóa nguyên liệu "${item.name}"?`)) remove(ref(db, `ingredients/${id}`));
                     }
-                    li.appendChild(btnDel);
+
+                    actionGroup.appendChild(btnEdit);
+                    actionGroup.appendChild(btnDel);
+                    li.appendChild(actionGroup);
                     list.appendChild(li);
                 }
             });
+        }
+
+        function editIngredient(id, data) {
+            editingIngId = id;
+            document.getElementById("ingName").value = data.name;
+            document.getElementById("ingQty").value = data.qty;
+            document.getElementById("ingUnit").value = data.unit;
+            document.getElementById("ingMinQty").value = data.minQty || 0;
+            
+            document.getElementById("btnAddIngredient").textContent = "Cập nhật";
+            document.getElementById("ingredientFormContainer").classList.remove("hidden");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetIngForm() {
+            editingIngId = null;
+            document.getElementById("ingName").value = "";
+            document.getElementById("ingQty").value = "";
+            document.getElementById("ingMinQty").value = "";
+            document.getElementById("btnAddIngredient").textContent = "Lưu";
+            document.getElementById("ingredientFormContainer").classList.add("hidden");
         }
 
         document.getElementById("btnAddIngredient").onclick = () => {
@@ -397,10 +460,22 @@
                 unit: document.getElementById("ingUnit").value,
                 minQty: Number(document.getElementById("ingMinQty").value)
             };
-            push(ref(db, "ingredients"), data);
+            
+            if (editingIngId) {
+                set(ref(db, `ingredients/${editingIngId}`), data).then(() => {
+                    alert("Đã cập nhật!");
+                    resetIngForm();
+                });
+            } else {
+                push(ref(db, "ingredients"), data).then(() => {
+                    resetIngForm();
+                });
+            }
         };
 
-        // --- TÌM KIẾM MENU (NHẬP TỚI ĐÂU LỌC TỚI ĐÓ) ---
+        document.getElementById("btnCancelEdit").onclick = () => resetIngForm();
+
+        // --- TÌM KIẾM MENU ---
         const menuSearchInput = document.getElementById("menuSearchInput");
         menuSearchInput.oninput = () => {
             renderMenu("foodList", allFoodData);
@@ -505,7 +580,6 @@
 
         document.getElementById("btnCloseRecipe").onclick = () => { hideAll(); menuSection.classList.remove("hidden"); };
 
-        // Test Deduct
         function updateDishSuggestions() {
             const dl = document.getElementById("dishSuggestions");
             dl.innerHTML = "";
@@ -544,9 +618,11 @@
 
         // UI Toggles
         document.getElementById("btnToggleAddMenuForm").onclick = () => document.getElementById("menuFormContainer").classList.toggle("hidden");
-        document.getElementById("btnToggleAddForm").onclick = () => document.getElementById("ingredientFormContainer").classList.toggle("hidden");
+        document.getElementById("btnToggleAddForm").onclick = () => {
+            resetIngForm();
+            document.getElementById("ingredientFormContainer").classList.toggle("hidden");
+        };
         document.getElementById("btnCancelMenuEdit").onclick = () => document.getElementById("menuFormContainer").classList.add("hidden");
-        document.getElementById("btnCancelEdit").onclick = () => document.getElementById("ingredientFormContainer").classList.add("hidden");
 
     </script>
 </body>
