@@ -176,19 +176,19 @@
         }
 
         /* Fix for input date height */
-        input[type="date"] {
+        input[type="date"], select {
             min-height: 44px; /* iOS-like touch target size */
         }
 
         /* Thêm style cho input tìm kiếm độc đáo */
-        #billSearchInput, #billDateFilterInput, #dailyItemDate, .date-filter input[type="date"] {
+        #billSearchInput, #billDateFilterInput, #dailyItemDate, .date-filter input[type="date"], #tableStatDate, #tableNameSelect {
             background-color: var(--bg-color);
             border: 2px solid transparent;
             transition: all 0.3s ease-in-out;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        #billSearchInput:focus, #billDateFilterInput:focus, #dailyItemDate:focus, .date-filter input[type="date"]:focus {
+        #billSearchInput:focus, #billDateFilterInput:focus, #dailyItemDate:focus, .date-filter input[type="date"]:focus, #tableStatDate:focus, #tableNameSelect:focus {
             background-color: var(--card-bg);
             border-color: var(--primary-ios);
             box-shadow: 0 0 0 3px rgba(var(--primary-ios-rgb), 0.2);
@@ -357,6 +357,50 @@
                 <li class="py-3 text-center text-gray-500">Vui lòng chọn ngày để xem thống kê.</li>
             </ul>
         </section>
+
+        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.75" id="tableStatsSection">
+            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);"><i class="fas fa-chair mr-2"></i> Thống kê theo Bàn</h3>
+            <div class="date-filter space-y-4 md:flex md:gap-4 md:items-end mb-4">
+                <div class="flex-1"> 
+                    <label for="tableNameSelect" class="text-sm font-medium opacity-70 block mb-1">Chọn bàn:</label>
+                    <select id="tableNameSelect" class="w-full p-2 card-ios border-none focus:ring-2 focus:ring-blue-500 transition duration-150" style="border-radius: 8px; background-color: var(--bg-color);">
+                        <option value="">-- Chọn bàn --</option>
+                    </select>
+                </div>
+                <div class="flex-1"> 
+                    <label for="tableStatDate" class="text-sm font-medium opacity-70 block mb-1">Chọn ngày:</label>
+                    <input type="date" id="tableStatDate" 
+                           class="w-full p-2 card-ios border-none focus:ring-2 focus:ring-blue-500 transition duration-150"
+                           style="border-radius: 8px; background-color: var(--bg-color);">
+                </div>
+                <button id="filterTableStatsButton" 
+                        class="btn-ios md:w-auto w-full px-6 py-3 font-semibold text-white rounded-xl shadow-lg hover:shadow-xl transition-all"
+                        style="background-color: var(--primary-ios);">
+                    <i class="fas fa-search mr-2"></i> Xem chi tiết
+                </button>
+            </div>
+            
+            <div id="tableResultBox" style="display: none;">
+                <div class="overflow-x-auto">
+                    <table class="w-full mb-4">
+                        <thead>
+                            <tr class="text-left text-sm font-medium opacity-70 border-b" style="border-color: rgba(var(--text-color-rgb), 0.1);">
+                                <th class="py-2 px-2">Tên món</th>
+                                <th class="py-2 px-2 text-center">Số lượng</th>
+                                <th class="py-2 px-2 text-right">Đơn giá</th>
+                                <th class="py-2 px-2 text-right">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableStatsBody"></tbody>
+                    </table>
+                </div>
+                <div class="border-t pt-3 flex justify-between items-center" style="border-color: rgba(var(--text-color-rgb), 0.1);">
+                    <span class="font-bold text-lg">Tổng tiền bàn:</span>
+                    <span id="tableTotalRevenue" class="text-2xl font-extrabold" style="color: var(--secondary-ios);">0₫</span>
+                </div>
+            </div>
+            <p id="noTableData" class="py-4 text-center text-gray-500">Vui lòng chọn bàn và ngày.</p>
+        </section>
         
         <section class="card-ios p-5 mb-8 animated-item" data-delay="0.8">
             <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🔥 Top Món Ăn Bán Chạy</h3>
@@ -486,6 +530,15 @@
         const dailyItemDateInput = document.getElementById('dailyItemDate'); // Thay dailyItemStartDate bằng dailyItemDate
         const filterItemStatsButton = document.getElementById('filterItemStatsButton');
         const dailyItemStatsListEl = document.getElementById('dailyItemStatsList');
+
+        // DOM elements PHẦN THÊM MỚI (THỐNG KÊ THEO BÀN)
+        const tableNameSelect = document.getElementById('tableNameSelect');
+        const tableStatDate = document.getElementById('tableStatDate');
+        const filterTableStatsButton = document.getElementById('filterTableStatsButton');
+        const tableStatsBody = document.getElementById('tableStatsBody');
+        const tableTotalRevenueEl = document.getElementById('tableTotalRevenue');
+        const tableResultBox = document.getElementById('tableResultBox');
+        const noTableData = document.getElementById('noTableData');
 
         const revenueChartCanvas = document.getElementById('revenueChart');
         const hourlyRevenueChartCanvas = document.getElementById('hourlyRevenueChart'); // THÊM MỚI
@@ -1255,6 +1308,76 @@
                 });
             }
         }
+
+        // PHẦN THÊM MỚI: HÀM THỐNG KÊ THEO BÀN
+        async function updateTableStats() {
+            const selectedTable = tableNameSelect.value;
+            const selectedDate = tableStatDate.value;
+
+            if (!selectedTable || !selectedDate) {
+                showCustomAlert('Vui lòng chọn cả bàn và ngày.');
+                return;
+            }
+
+            const payments = await fetchPayments();
+            const filteredPayments = payments.filter(p => p.tableName === selectedTable && p.date === selectedDate);
+
+            tableStatsBody.innerHTML = '';
+            let totalRevenue = 0;
+            const itemSummary = {};
+
+            if (filteredPayments.length === 0) {
+                tableResultBox.style.display = 'none';
+                noTableData.style.display = 'block';
+                noTableData.textContent = `Không tìm thấy dữ liệu cho ${selectedTable} vào ngày ${selectedDate}.`;
+                return;
+            }
+
+            filteredPayments.forEach(payment => {
+                totalRevenue += (payment.finalTotal || 0);
+                if (payment.items) {
+                    Object.values(payment.items).forEach(item => {
+                        const name = item.name.trim();
+                        if (itemSummary[name]) {
+                            itemSummary[name].quantity += item.quantity;
+                        } else {
+                            itemSummary[name] = {
+                                quantity: item.quantity,
+                                price: item.price
+                            };
+                        }
+                    });
+                }
+            });
+
+            Object.entries(itemSummary).forEach(([name, info]) => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-100 dark:border-gray-800';
+                row.innerHTML = `
+                    <td class="py-2 px-2 text-sm">${name}</td>
+                    <td class="py-2 px-2 text-sm text-center font-semibold">${info.quantity}</td>
+                    <td class="py-2 px-2 text-sm text-right">${info.price.toLocaleString('vi-VN')}₫</td>
+                    <td class="py-2 px-2 text-sm text-right font-bold" style="color: var(--primary-ios);">${(info.price * info.quantity).toLocaleString('vi-VN')}₫</td>
+                `;
+                tableStatsBody.appendChild(row);
+            });
+
+            tableTotalRevenueEl.textContent = totalRevenue.toLocaleString('vi-VN') + '₫';
+            tableResultBox.style.display = 'block';
+            noTableData.style.display = 'none';
+        }
+
+       // Chỉ hiển thị bàn GRAB và bàn S
+function populateTableDropdown() {
+    tableNameSelect.innerHTML = '<option value="">-- Chọn bàn --</option>';
+    const fixedTables = ['GRAB', 'S']; // Chỉ định đích danh 2 bàn này
+    fixedTables.forEach(tableName => {
+        const option = document.createElement('option');
+        option.value = tableName;
+        option.textContent = tableName;
+        tableNameSelect.appendChild(option);
+    });
+}
         
         // Hàm render/filter hóa đơn
         function renderOrderRows(paymentsToRender) {
@@ -1454,21 +1577,40 @@
         
         // PHẦN ĐIỀU CHỈNH: Event listener cho nút thống kê món bán (Chỉ dùng một input)
         filterItemStatsButton.addEventListener('click', updateDailyItemStats);
+
+        // EVENT LISTENER PHẦN THÊM MỚI
+        filterTableStatsButton.addEventListener('click', updateTableStats);
         
         // --- 6. INITIAL LOAD ---
         
+       // --- 6. INITIAL LOAD ---
         document.addEventListener('DOMContentLoaded', () => {
             loadTheme();
-            updateTotalRevenueAllTime(); // GỌI HÀM CŨ
-            updateTotalRevenueDetails(); // GỌI HÀM MỚI BỔ SUNG
+            updateTotalRevenueAllTime(); 
+            updateTotalRevenueDetails(); 
             updateSummaryStats();
             update30DayChart();
-            updateHourlyRevenueChart(); // THÊM MỚI: Gọi hàm vẽ biểu đồ khung giờ
-            updateWeeklyDayRevenueChart(); // THÊM MỚI: Gọi hàm vẽ biểu đồ theo Thứ trong Tuần
+            updateHourlyRevenueChart(); 
+            updateWeeklyDayRevenueChart(); 
             updateTopSellingItems();
             
             fetchPayments().then(() => {
+                // 1. Mặc định ngày hiện tại cho lịch sử đơn hàng
                 updateOrderHistory(TODAY); 
+
+                // 2. Thiết lập mặc định ngày hiện tại cho ô nhập ngày thống kê bàn
+                if(tableStatDate) tableStatDate.value = TODAY;
+
+                // 3. Xóa các bàn khác, chỉ giữ lại GRAB và S trong dropdown
+                if(tableNameSelect) {
+                    tableNameSelect.innerHTML = `
+                        <option value="GRAB">GRAB</option>
+                        <option value="S">Bàn S</option>
+                    `;
+                    // 4. Tự động chọn sẵn bàn GRAB và hiển thị dữ liệu ngay lập tức
+                    tableNameSelect.value = "GRAB";
+                    updateTableStats(); 
+                }
             });
             
             setupScrollAnimations();
