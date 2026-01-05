@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -751,7 +752,7 @@
                     ${items.map(i => `
                         <li class="flex justify-between items-center py-3">
                             <div class="flex items-center">
-                                ${type === 'food' ? `<button onclick="showItemEditModal('${okey}','${i.itemKey}','${i.itemName}',${i.quantity})" class="edit-item-btn"><i class="fas fa-edit"></i></button>` : ''}
+                                <button onclick="showItemEditModal('${okey}','${i.itemKey}','${i.itemName}',${i.quantity})" class="edit-item-btn"><i class="fas fa-edit"></i></button>
                                 <span class="font-medium">${i.itemName}</span>
                             </div>
                             <span class="text-xl font-bold">${i.quantity}</span>
