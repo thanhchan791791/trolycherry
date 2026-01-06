@@ -269,8 +269,7 @@
 
     <div class="tab-bar">
         <button id="btnShowMenu" class="active">
-            <i data-lucide="utensils-crossbars"></i>
-            <span>Menu</span>
+<i data-lucide="utensils-crossed"></i>            <span>Menu</span>
         </button>
         <button id="btnIngredient">
             <i data-lucide="package"></i>
@@ -466,7 +465,7 @@
         let currentRecipe = { id: null, name: null };
         let editingIngId = null;
 
-        // --- TÌM KIẾM NGUYÊN LIỆU TRONG KHO (oninput & case-insensitive) ---
+        // --- TÌM KIẾM NGUYÊN LIỆU ---
         const ingredientSearchInput = document.getElementById("ingredientSearchInput");
         ingredientSearchInput.oninput = () => renderIngredients();
 
@@ -480,14 +479,13 @@
             const searchTerm = ingredientSearchInput.value.toLowerCase();
             list.innerHTML = "";
             
-            // Sắp xếp A-Z
-            const sortedIds = Object.keys(allIngredients).sort((a, b) => 
-                allIngredients[a].name.localeCompare(allIngredients[b].name)
-            );
-
-            sortedIds.forEach(id => {
+            // Đảm bảo lấy tất cả keys từ object dữ liệu
+            const keys = Object.keys(allIngredients);
+            
+            keys.forEach(id => {
                 const item = allIngredients[id];
-                if (item.name.toLowerCase().includes(searchTerm)) {
+                // Kiểm tra item tồn tại và lọc theo tìm kiếm
+                if (item && item.name && item.name.toLowerCase().includes(searchTerm)) {
                     const li = document.createElement("li");
                     li.innerHTML = `<div><b>${item.name}</b><br><small>${item.qty} ${item.unit}</small></div>`;
                     
@@ -560,7 +558,7 @@
 
         document.getElementById("btnCancelEdit").onclick = () => resetIngForm();
 
-        // --- TÌM KIẾM MENU (oninput & case-insensitive) ---
+        // --- TÌM KIẾM MENU ---
         const menuSearchInput = document.getElementById("menuSearchInput");
         menuSearchInput.oninput = () => {
             renderMenu("foodList", allFoodData);
@@ -576,12 +574,7 @@
             list.innerHTML = "";
             const type = elementId === "foodList" ? "food" : "drink";
 
-            // Sắp xếp A-Z
-            const sortedIds = Object.keys(data).sort((a, b) => 
-                data[a].name.localeCompare(data[b].name)
-            );
-
-            sortedIds.forEach(id => {
+            Object.keys(data).forEach(id => {
                 const item = data[id];
                 if (item.name.toLowerCase().includes(searchTerm)) {
                     const li = document.createElement("li");
@@ -618,71 +611,54 @@
             document.getElementById("menuFormContainer").classList.add("hidden");
         };
 
-        // --- TÌM KIẾM TRONG CÔNG THỨC (oninput & case-insensitive) ---
-        const recipeIngredientSearchInput = document.getElementById("recipeIngredientSearchInput");
-        recipeIngredientSearchInput.oninput = () => {
-            const searchTerm = recipeIngredientSearchInput.value.toLowerCase();
-            const groups = document.querySelectorAll(".recipe-qty-unit-group");
-            groups.forEach(group => {
-                const ingName = group.querySelector("span").textContent.toLowerCase();
-                if (ingName.includes(searchTerm)) {
-                    group.classList.remove("hidden");
-                } else {
-                    group.classList.add("hidden");
-                }
-            });
-        };
-
-        async function openRecipe(id, name) {
+       async function openRecipe(id, name) {
             currentRecipe = { id, name };
-            // Reset thanh tìm kiếm khi mở công thức
-            recipeIngredientSearchInput.value = "";
-            
+            // Ẩn tất cả các section hiện tại
             Object.values(sections).forEach(s => s.classList.add("hidden"));
             document.getElementById("recipeFormSection").classList.remove("hidden");
             document.getElementById("recipeTitle").textContent = "Công thức: " + name;
             
+            // Lấy dữ liệu định lượng đã lưu cho món ăn này
             const snap = await get(ref(db, `recipes/${name}`));
             const existing = snap.val() || {};
             
+            // 1. Hiển thị danh sách định lượng hiện tại
             const currentList = document.getElementById("currentRecipeList");
             currentList.innerHTML = "";
-            
-            // Định lượng hiện tại cũng sắp xếp A-Z
-            const sortedExistingKeys = Object.keys(existing).sort((a, b) => 
-                existing[a].name.localeCompare(existing[b].name)
-            );
-
-            sortedExistingKeys.forEach(ingId => {
+            Object.keys(existing).forEach(ingId => {
                 const item = existing[ingId];
-                const li = document.createElement("li");
-                li.textContent = `${item.name}: ${item.qty} ${item.unit}`;
-                currentList.appendChild(li);
+                if (item && item.name) {
+                    const li = document.createElement("li");
+                    li.textContent = `${item.name}: ${item.qty} ${item.unit}`;
+                    currentList.appendChild(li);
+                }
             });
 
+            // 2. Hiển thị khu vực điều chỉnh định lượng (tất cả nguyên liệu trong kho)
             const editArea = document.getElementById("recipeIngredients");
             editArea.innerHTML = "";
-
-            // Danh sách chọn nguyên liệu sắp xếp A-Z
-            const sortedIngIds = Object.keys(allIngredients).sort((a, b) => 
-                allIngredients[a].name.localeCompare(allIngredients[b].name)
-            );
-
-            sortedIngIds.forEach(ingId => {
+            Object.keys(allIngredients).forEach(ingId => {
                 const ing = allIngredients[ingId];
-                const div = document.createElement("div");
-                div.className = "recipe-qty-unit-group";
-                div.style.margin = "10px 0";
-                div.innerHTML = `
-                    <span style="flex:1">${ing.name}</span>
-                    <input type="number" style="width:70px; margin:0" data-id="${ingId}" value="${existing[ingId]?.qty || ''}">
-                    <span>${ing.unit}</span>
-                `;
-                editArea.appendChild(div);
+                
+                if (ing && ing.name) {
+                    const div = document.createElement("div");
+                    div.className = "recipe-qty-unit-group";
+                    div.style.margin = "10px 0";
+                    div.innerHTML = `
+                        <span style="flex:1">${ing.name}</span>
+                        <input type="number" 
+                               style="width:70px; margin:0" 
+                               data-id="${ingId}" 
+                               value="${existing[ingId]?.qty || ''}"
+                               placeholder="0">
+                        <span style="width:40px; text-align:right">${ing.unit}</span>
+                    `;
+                    editArea.appendChild(div);
+                }
             });
+            
             lucide.createIcons();
         }
-
         document.getElementById("btnSaveRecipe").onclick = () => {
             const inputs = document.querySelectorAll("#recipeIngredients input");
             const recipeData = {};
@@ -708,11 +684,7 @@
         function updateDishSuggestions() {
             const dl = document.getElementById("dishSuggestions");
             dl.innerHTML = "";
-            // Sắp xếp danh sách gợi ý A-Z
-            const combinedMenu = [...Object.values(allFoodData), ...Object.values(allDrinkData)]
-                .sort((a, b) => a.name.localeCompare(b.name));
-
-            combinedMenu.forEach(m => {
+            [...Object.values(allFoodData), ...Object.values(allDrinkData)].forEach(m => {
                 const opt = document.createElement("option");
                 opt.value = m.name;
                 dl.appendChild(opt);
