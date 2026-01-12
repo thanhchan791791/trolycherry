@@ -14,6 +14,7 @@
             --ios-bg: #F2F2F7;
             --ios-card: #FFFFFF;
             --ios-blue: #007AFF;
+            --ios-indigo: #5856D6; /* Màu tím iOS cho Lịch sử */
             --ios-red: #FF3B30;
             --ios-green: #34C759;
             --ios-gray: #8E8E93;
@@ -85,6 +86,26 @@
         }
         .note-trigger:active { transform: scale(0.9); }
 
+        /* Nút Lịch sử nổi (Nằm trên Ghi chú) */
+        .history-trigger-float {
+            position: fixed;
+            right: 20px;
+            bottom: calc(136px + var(--safe-area-bottom)); /* 70px + 56px (nút cũ) + 10px gap */
+            width: 56px;
+            height: 56px;
+            background: var(--ios-indigo);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .history-trigger-float:active { transform: scale(0.9); }
+
         h1 { font-size: 17px; font-weight: 600; margin: 0; color: #000; display: flex; align-items: center; gap: 6px; }
 
         /* --- TAB BAR --- */
@@ -115,7 +136,7 @@
             justify-content: center;
             border: none;
             padding: 5px 0;
-            width: 33%;
+            width: 33.33%; /* Chia 3 cho 3 nút còn lại */
             margin: 0 !important;
             transition: all 0.2s;
         }
@@ -130,7 +151,7 @@
         }
         .tab-bar button:active i { transform: scale(1.2); }
 
-        /* --- MODAL GHI CHÚ --- */
+        /* --- MODAL CHUNG --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -172,7 +193,7 @@
             resize: none;
         }
 
-        .note-list {
+        .note-list, .history-list {
             flex: 1;
             overflow-y: auto;
             margin-top: 15px;
@@ -180,14 +201,14 @@
             padding-top: 10px;
         }
 
-        .note-item {
+        .note-item, .history-item {
             padding: 10px;
             border-bottom: 0.5px solid var(--ios-separator);
             position: relative;
         }
 
-        .note-item .time { font-size: 11px; color: var(--ios-gray); display: block; margin-bottom: 4px; }
-        .note-item .text { font-size: 15px; color: #333; line-height: 1.4; }
+        .note-item .time, .history-item .time { font-size: 11px; color: var(--ios-gray); display: block; margin-bottom: 4px; }
+        .note-item .text, .history-item .text { font-size: 14px; color: #333; line-height: 1.4; }
         .note-item .delete-note { color: var(--ios-red); font-size: 12px; margin-top: 5px; cursor: pointer; float: right; display: flex; align-items: center; gap: 3px; }
 
         /* --- OLD STYLES RE-USED --- */
@@ -249,6 +270,10 @@
         <h1><i data-lucide="chef-hat" style="width: 20px;"></i> Quản Lý Bếp</h1>
     </header>
 
+    <div class="history-trigger-float" id="btnShowHistory">
+        <i data-lucide="clock"></i>
+    </div>
+
     <div class="note-trigger" id="btnOpenNote">
         <i data-lucide="pencil-line"></i>
     </div>
@@ -267,17 +292,23 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="historyModalOverlay">
+        <div class="note-modal">
+            <h2><i data-lucide="history"></i> Lịch sử hoạt động</h2>
+            <div class="history-list" id="historyList"></div>
+            <button id="btnCloseHistory" style="background: var(--ios-gray-light) !important; color: var(--ios-blue) !important; margin-top: 10px;">Đóng</button>
+        </div>
+    </div>
+
     <div class="tab-bar">
         <button id="btnShowMenu" class="active">
-<i data-lucide="utensils-crossed"></i>            <span>Menu</span>
+            <i data-lucide="utensils-crossed"></i><span>Menu</span>
         </button>
         <button id="btnIngredient">
-            <i data-lucide="package"></i>
-            <span>Kho</span>
+            <i data-lucide="package"></i><span>Kho</span>
         </button>
         <button id="btnShowTest">
-            <i data-lucide="flask-conical"></i>
-            <span>Test</span>
+            <i data-lucide="flask-conical"></i><span>Test</span>
         </button>
     </div>
 
@@ -390,6 +421,47 @@
         // Khởi tạo Lucide
         lucide.createIcons();
 
+        // --- HÀM LƯU LỊCH SỬ CHUNG ---
+        function saveHistory(action, detail) {
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} - ${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+            push(ref(db, "system_logs"), {
+                action: action,
+                detail: detail,
+                time: timeStr,
+                timestamp: Date.now()
+            });
+        }
+
+        // --- LỊCH SỬ UI LOGIC ---
+        const btnShowHistory = document.getElementById("btnShowHistory");
+        const btnCloseHistory = document.getElementById("btnCloseHistory");
+        const historyModalOverlay = document.getElementById("historyModalOverlay");
+        const historyList = document.getElementById("historyList");
+
+        btnShowHistory.addEventListener("click", () => historyModalOverlay.classList.add("active"));
+        btnCloseHistory.addEventListener("click", () => historyModalOverlay.classList.remove("active"));
+
+        onValue(ref(db, "system_logs"), (snap) => {
+            historyList.innerHTML = "";
+            const data = snap.val();
+            if (data) {
+                const sortedKeys = Object.keys(data).sort((a,b) => data[b].timestamp - data[a].timestamp);
+                sortedKeys.slice(0, 50).forEach(key => { // Hiển thị 50 log gần nhất
+                    const item = data[key];
+                    const div = document.createElement("div");
+                    div.className = "history-item";
+                    div.innerHTML = `
+                        <span class="time">${item.time}</span>
+                        <div class="text"><b>[${item.action}]</b> ${item.detail}</div>
+                    `;
+                    historyList.appendChild(div);
+                });
+            } else {
+                historyList.innerHTML = "<p style='text-align:center; color:gray;'>Chưa có lịch sử.</p>";
+            }
+        });
+
         // --- GHI CHÚ LOGIC ---
         const btnOpenNote = document.getElementById("btnOpenNote");
         const btnCloseNote = document.getElementById("btnCloseNote");
@@ -412,6 +484,7 @@
                 time: timeStr,
                 timestamp: Date.now()
             }).then(() => {
+                saveHistory("Ghi chú", "Thêm ghi chú mới: " + text.substring(0, 30) + "...");
                 noteContent.value = "";
             });
         });
@@ -431,7 +504,10 @@
                         <span class="delete-note" data-id="${key}"><i data-lucide="trash-2" style="width:12px"></i> Xóa</span>
                     `;
                     div.querySelector(".delete-note").onclick = () => {
-                        if(confirm("Xóa ghi chú này?")) remove(ref(db, `notes/${key}`));
+                        if(confirm("Xóa ghi chú này?")) {
+                            saveHistory("Ghi chú", "Đã xóa 1 ghi chú");
+                            remove(ref(db, `notes/${key}`));
+                        }
                     };
                     noteList.appendChild(div);
                 });
@@ -465,7 +541,7 @@
         let currentRecipe = { id: null, name: null };
         let editingIngId = null;
 
-        // --- TÌM KIẾM NGUYÊN LIỆU ---
+        // --- NGUYÊN LIỆU LOGIC ---
         const ingredientSearchInput = document.getElementById("ingredientSearchInput");
         ingredientSearchInput.oninput = () => renderIngredients();
 
@@ -479,12 +555,9 @@
             const searchTerm = ingredientSearchInput.value.toLowerCase();
             list.innerHTML = "";
             
-            // Đảm bảo lấy tất cả keys từ object dữ liệu
             const keys = Object.keys(allIngredients);
-            
             keys.forEach(id => {
                 const item = allIngredients[id];
-                // Kiểm tra item tồn tại và lọc theo tìm kiếm
                 if (item && item.name && item.name.toLowerCase().includes(searchTerm)) {
                     const li = document.createElement("li");
                     li.innerHTML = `<div><b>${item.name}</b><br><small>${item.qty} ${item.unit}</small></div>`;
@@ -501,7 +574,10 @@
                     btnDel.innerHTML = `<i data-lucide="trash-2" style="width:14px"></i> Xóa`;
                     btnDel.className = "btn-delete-item";
                     btnDel.onclick = () => {
-                        if(confirm(`Xóa nguyên liệu "${item.name}"?`)) remove(ref(db, `ingredients/${id}`));
+                        if(confirm(`Xóa nguyên liệu "${item.name}"?`)) {
+                            saveHistory("Kho", "Đã xóa nguyên liệu: " + item.name);
+                            remove(ref(db, `ingredients/${id}`));
+                        }
                     }
 
                     actionGroup.appendChild(btnEdit);
@@ -546,11 +622,13 @@
             
             if (editingIngId) {
                 set(ref(db, `ingredients/${editingIngId}`), data).then(() => {
+                    saveHistory("Kho", `Cập nhật: ${data.name} (${data.qty} ${data.unit})`);
                     alert("Đã cập nhật!");
                     resetIngForm();
                 });
             } else {
                 push(ref(db, "ingredients"), data).then(() => {
+                    saveHistory("Kho", `Thêm mới: ${data.name} (${data.qty} ${data.unit})`);
                     resetIngForm();
                 });
             }
@@ -558,7 +636,7 @@
 
         document.getElementById("btnCancelEdit").onclick = () => resetIngForm();
 
-        // --- TÌM KIẾM MENU ---
+        // --- MENU LOGIC ---
         const menuSearchInput = document.getElementById("menuSearchInput");
         menuSearchInput.oninput = () => {
             renderMenu("foodList", allFoodData);
@@ -590,6 +668,7 @@
                     btnDel.onclick = (e) => {
                         e.stopPropagation();
                         if(confirm(`Xóa món "${item.name}" khỏi menu?`)) {
+                            saveHistory("Menu", `Xóa món: ${item.name} (${type})`);
                             remove(ref(db, `menu/${type}/${id}`));
                         }
                     };
@@ -606,23 +685,22 @@
             const type = document.getElementById("menuType").value;
             const name = document.getElementById("menuName").value;
             if(!name) return;
-            push(ref(db, `menu/${type}`), { name: name });
+            push(ref(db, `menu/${type}`), { name: name }).then(() => {
+                saveHistory("Menu", `Thêm món mới: ${name} (${type})`);
+            });
             document.getElementById("menuName").value = "";
             document.getElementById("menuFormContainer").classList.add("hidden");
         };
 
        async function openRecipe(id, name) {
             currentRecipe = { id, name };
-            // Ẩn tất cả các section hiện tại
             Object.values(sections).forEach(s => s.classList.add("hidden"));
             document.getElementById("recipeFormSection").classList.remove("hidden");
             document.getElementById("recipeTitle").textContent = "Công thức: " + name;
             
-            // Lấy dữ liệu định lượng đã lưu cho món ăn này
             const snap = await get(ref(db, `recipes/${name}`));
             const existing = snap.val() || {};
             
-            // 1. Hiển thị danh sách định lượng hiện tại
             const currentList = document.getElementById("currentRecipeList");
             currentList.innerHTML = "";
             Object.keys(existing).forEach(ingId => {
@@ -634,12 +712,10 @@
                 }
             });
 
-            // 2. Hiển thị khu vực điều chỉnh định lượng (tất cả nguyên liệu trong kho)
             const editArea = document.getElementById("recipeIngredients");
             editArea.innerHTML = "";
             Object.keys(allIngredients).forEach(ingId => {
                 const ing = allIngredients[ingId];
-                
                 if (ing && ing.name) {
                     const div = document.createElement("div");
                     div.className = "recipe-qty-unit-group";
@@ -656,24 +732,30 @@
                     editArea.appendChild(div);
                 }
             });
-            
             lucide.createIcons();
         }
+
         document.getElementById("btnSaveRecipe").onclick = () => {
             const inputs = document.querySelectorAll("#recipeIngredients input");
             const recipeData = {};
+            let details = "";
             inputs.forEach(input => {
                 const val = Number(input.value);
                 if (val > 0) {
                     const ingId = input.dataset.id;
+                    const iName = allIngredients[ingId].name;
                     recipeData[ingId] = {
-                        name: allIngredients[ingId].name,
+                        name: iName,
                         qty: val,
                         unit: allIngredients[ingId].unit
                     };
+                    details += `${iName}(${val}), `;
                 }
             });
-            set(ref(db, `recipes/${currentRecipe.name}`), recipeData).then(() => alert("Đã lưu!"));
+            set(ref(db, `recipes/${currentRecipe.name}`), recipeData).then(() => {
+                saveHistory("Công thức", `Cập nhật món ${currentRecipe.name}: ${details}`);
+                alert("Đã lưu!");
+            });
         };
 
         document.getElementById("btnCloseRecipe").onclick = () => { 
@@ -713,6 +795,7 @@
             }
 
             update(ref(db), updates).then(() => {
+                saveHistory("Hệ thống", `Chạy trừ kho món ${name} (SL: ${orderQty})`);
                 log.innerHTML = logTxt + "<b>Thành công!</b>";
             });
         };
