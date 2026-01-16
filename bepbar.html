@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -517,29 +516,43 @@
         
         function isHighPriority(ts) { return (Date.now() - ts) > (15 * 60 * 1000); }
 
-        // --- Core Logic ---
+        // --- CORE LOGIC: TRỪ KHO ---
         async function updateInventory(completedItems) {
             if (!database) return;
             try {
-                const recipesSnap = await database.ref(RECIPES_REF).once('value');
+                // Lấy danh sách công thức và tồn kho hiện tại
+                const [recipesSnap, invSnap] = await Promise.all([
+                    database.ref(RECIPES_REF).once('value'),
+                    database.ref(INVENTORY_REF).once('value')
+                ]);
+                
                 const recipes = recipesSnap.val() || {};
-                const invSnap = await database.ref(INVENTORY_REF).once('value');
                 const inventory = invSnap.val() || {};
                 const updates = {};
 
+                // Duyệt qua từng món vừa hoàn thành
                 completedItems.forEach(item => {
                     const recipe = recipes[item.itemName];
                     if (recipe) {
+                        // Duyệt qua từng nguyên liệu trong công thức của món đó
                         Object.entries(recipe).forEach(([ingId, ing]) => {
                             const currentStock = inventory[ingId]?.qty || 0;
                             const amountToSub = item.quantity * (ing.qty || 0);
+                            
+                            // Tính toán số lượng mới (không để âm nếu cần, nhưng ở đây cứ trừ thẳng)
                             updates[`${ingId}/qty`] = currentStock - amountToSub;
                         });
                     }
                 });
 
-                if (Object.keys(updates).length > 0) await database.ref(INVENTORY_REF).update(updates);
-            } catch (e) { console.error("Lỗi tồn kho:", e); }
+                // Cập nhật lên Firebase hàng loạt
+                if (Object.keys(updates).length > 0) {
+                    await database.ref(INVENTORY_REF).update(updates);
+                    console.log("Đã cập nhật kho thành công:", updates);
+                }
+            } catch (e) { 
+                console.error("Lỗi khi trừ tồn kho:", e); 
+            }
         }
 
         async function completeOrder(orderKey, type) {
@@ -552,37 +565,39 @@
                 
                 const updates = {};
                 const toInv = [];
-                const logUpdates = {}; // Dùng để lưu vào node thống kê riêng
+                const logUpdates = {};
 
                 Object.entries(items).forEach(([k, it]) => {
                     if (it.status === 'pending' && it.type === type) {
                         const now = firebase.database.ServerValue.TIMESTAMP;
                         
-                        // Cập nhật trạng thái trong đơn hàng gốc
                         updates[`${k}/status`] = 'completed';
                         updates[`${k}/completedAt`] = now;
                         
-                        // Chuẩn bị dữ liệu cho node thống kê độc lập
                         const logKey = database.ref(COMPLETED_LOG_REF).push().key;
                         logUpdates[logKey] = {
                             itemName: it.itemName,
                             quantity: it.quantity,
                             type: it.type,
-                            completedAt: now, // Server sẽ tự điền timestamp
+                            completedAt: now,
                             orderRef: orderKey
                         };
 
-                        if(type === 'food') toInv.push({ itemName: it.itemName, quantity: it.quantity });
+                        // Gom tất cả món cần trừ kho (bao gồm cả Food và Drink nếu có công thức)
+                        toInv.push({ itemName: it.itemName, quantity: it.quantity });
                     }
                 });
 
                 if (Object.keys(updates).length > 0) {
                     await ref.update(updates);
-                    // Đẩy dữ liệu vào node thống kê
                     await database.ref(COMPLETED_LOG_REF).update(logUpdates);
                     
-                    if(toInv.length > 0) await updateInventory(toInv);
-                    customAlert('Đã hoàn thành các món.', 'Thành công');
+                    // Thực hiện trừ kho
+                    if(toInv.length > 0) {
+                        await updateInventory(toInv);
+                    }
+                    
+                    customAlert('Đã hoàn thành các món và cập nhật tồn kho.', 'Thành công');
                 }
             } catch (e) { 
                 console.error(e);
@@ -611,7 +626,6 @@
             dishesSoldEl.innerHTML = '<p class="p-4 text-center text-gray-500 italic">Đang tải...</p>';
             
             try {
-                // Đọc dữ liệu từ node thống kê riêng biệt COMPLETED_LOG_REF
                 const [logSnap, recipesSnap, invSnap] = await Promise.all([
                     database.ref(COMPLETED_LOG_REF).once('value'),
                     database.ref(RECIPES_REF).once('value'),
@@ -632,18 +646,15 @@
                     
                     if (compDate === today) {
                         totalItemsCount += item.quantity;
-                        
-                        // 1. Thống kê món bán ra
                         dishesSold[item.itemName] = (dishesSold[item.itemName] || 0) + item.quantity;
 
-                        // 2. Thống kê nguyên liệu tiêu hao
                         const recipe = recipes[item.itemName];
                         if (recipe) {
                             Object.entries(recipe).forEach(([ingId, ing]) => {
                                 if (!stats[ingId]) {
                                     const unit = inventory[ingId]?.unit || ing.unit || '';
                                     stats[ingId] = { 
-                                        name: ing.name || inventory[ingId]?.name || ingId, 
+                                        name: inventory[ingId]?.name || ing.name || ingId, 
                                         total: 0, 
                                         unit: unit,
                                         dishes: {} 
@@ -659,7 +670,6 @@
 
                 totalEl.textContent = totalItemsCount;
 
-                // Render danh sách món bán ra
                 if (Object.keys(dishesSold).length === 0) {
                     dishesSoldEl.innerHTML = '<p class="p-4 text-center text-gray-500">Chưa bán món nào.</p>';
                 } else {
@@ -671,7 +681,6 @@
                     `).join('');
                 }
 
-                // Render danh sách nguyên liệu
                 if (Object.keys(stats).length === 0) {
                     listEl.innerHTML = '<p class="p-8 text-center text-gray-500">Chưa có nguyên liệu tiêu hao.</p>';
                     return;
@@ -717,17 +726,15 @@
                     return;
                 }
 
-                const pending = [];
-                const completed = [];
                 Object.entries(orders).forEach(([key, o]) => {
                     const items = Object.entries(o.items || {}).map(([ik, iv]) => ({ itemKey: ik, ...iv }));
                     const food = items.filter(i => i.status === 'pending' && i.type === 'food');
                     const bar = items.filter(i => i.status === 'pending' && i.type === 'drink');
                     const done = items.filter(i => i.status === 'completed');
 
-                    if (food.length > 0) kList.appendChild(createOrderCard(key, o.tableName, food, 'food', o.createdAt, pending.length));
-                    if (bar.length > 0) bList.appendChild(createOrderCard(key, o.tableName, bar, 'drink', o.createdAt, pending.length));
-                    if (done.length > 0) hList.appendChild(createHistoryCard(key, o.tableName, done, o.createdAt, completed.length));
+                    if (food.length > 0) kList.appendChild(createOrderCard(key, o.tableName, food, 'food', o.createdAt));
+                    if (bar.length > 0) bList.appendChild(createOrderCard(key, o.tableName, bar, 'drink', o.createdAt));
+                    if (done.length > 0) hList.appendChild(createHistoryCard(key, o.tableName, done, o.createdAt));
                 });
 
                 document.getElementById('kitchen-empty').classList.toggle('hidden', kList.children.length > 1);
@@ -737,7 +744,7 @@
             });
         }
 
-        function createOrderCard(okey, tname, items, type, cat, idx) {
+        function createOrderCard(okey, tname, items, type, cat) {
             const card = document.createElement('div');
             card.className = `order-card p-4 flex flex-col shadow-md border border-gray-200 ${cat && isHighPriority(cat) ? 'priority-high' : ''}`;
             const color = type === 'food' ? 'order-header-food' : 'order-header-drink';
@@ -767,7 +774,7 @@
             return card;
         }
 
-        function createHistoryCard(okey, tname, items, cat, idx) {
+        function createHistoryCard(okey, tname, items, cat) {
             const card = document.createElement('div');
             card.className = 'order-card p-4 shadow-md';
             items.sort((a,b) => (b.completedAt||0) - (a.completedAt||0));
