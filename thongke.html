@@ -12,14 +12,15 @@
         :root { --bg: #0f172a; --card-bg: rgba(30, 41, 59, 0.7); --accent: #38bdf8; --success: #4ade80; --warning: #fbbf24; --danger: #f87171; --text-main: #f8fafc; --text-dim: #94a3b8; --glass-border: rgba(255, 255, 255, 0.1); --radius-lg: 24px; --radius-md: 16px; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top right, #1e293b, #0f172a); color: var(--text-main); margin: 0; padding: 20px 16px; min-height: 100vh; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Hiệu ứng cuộn mượt mà */
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
         @keyframes slideInUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
         .container { max-width: 600px; margin: 0 auto; padding-bottom: 60px; }
-        .reveal { animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
         h2.page-title { font-size: 28px; font-weight: 800; margin-bottom: 24px; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; }
         .quick-nav { display: flex; gap: 10px; margin-bottom: 24px; overflow-x: auto; padding: 4px; scrollbar-width: none; }
         .nav-btn { background: var(--card-bg); border: 1px solid var(--glass-border); padding: 12px 20px; border-radius: var(--radius-md); font-size: 14px; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 8px; white-space: nowrap; backdrop-filter: blur(10px); text-decoration: none; transition: 0.3s; }
@@ -55,12 +56,12 @@
 <body>
 <div class="container">
     <h2 class="page-title reveal">Báo cáo doanh thu</h2>
-    <div class="quick-nav reveal delay-1">
+    <div class="quick-nav reveal">
         <a href="#tableStatsSection" class="nav-btn"><i class="ph-duotone ph-rocket-launch"></i> Grab & S</a>
         <a href="#historySection" class="nav-btn"><i class="ph-duotone ph-receipt"></i> Lịch sử đơn</a>
     </div>
-    <div class="stats-container reveal delay-2">
-        <div class="card-main">
+    <div class="stats-container">
+        <div class="card-main reveal">
             <h3><i class="ph-duotone ph-wallet"></i> Tổng Doanh Thu</h3>
             <div class="value counter" id="a-all" data-target="0">0đ</div>
             <div class="sub">
@@ -69,21 +70,21 @@
             </div>
         </div>
         <div class="grid-mini-vertical">
-            <div class="card-mini-row">
+            <div class="card-mini-row reveal">
                 <div class="info-left"><h3>Tháng Này</h3><div class="value counter" id="m-all">0đ</div></div>
                 <div class="sub-right"><span>TM: <b id="m-cash">0</b></span><span>CK: <b id="m-bank">0</b></span></div>
             </div>
-            <div class="card-mini-row">
+            <div class="card-mini-row reveal">
                 <div class="info-left"><h3>Tuần Này</h3><div class="value counter" id="w-all">0đ</div></div>
                 <div class="sub-right"><span>TM: <b id="w-cash">0</b></span><span>CK: <b id="w-bank">0</b></span></div>
             </div>
-            <div class="card-mini-row">
+            <div class="card-mini-row reveal">
                 <div class="info-left"><h3>Hôm Nay</h3><div class="value counter" id="t-all">0đ</div></div>
                 <div class="sub-right"><span>TM: <b id="t-cash">0</b></span><span>CK: <b id="t-bank">0</b></span></div>
             </div>
         </div>
     </div>
-    <div class="section reveal delay-3">
+    <div class="section reveal">
         <h3><i class="ph-duotone ph-chart-line-up"></i> Biểu Đồ Doanh Thu</h3>
         <div class="filter-group">
             <div class="date-input-wrapper"><i class="ph ph-calendar"></i><input type="date" id="startDate"></div>
@@ -92,7 +93,7 @@
         </div>
         <canvas id="dailyChart" style="max-height: 250px;"></canvas>
     </div>
-    <div class="section reveal delay-3">
+    <div class="section reveal">
         <h3><i class="ph-duotone ph-clock"></i> Khung Giờ Cao Điểm</h3>
         <canvas id="hourChart" style="max-height: 250px;"></canvas>
     </div>
@@ -143,6 +144,19 @@
     let chartObj = null, hourChartObj = null, weekdayChartObj = null, allData = {}, rawDailyData = {};
     Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = "'Plus Jakarta Sans'"; Chart.defaults.animation = { duration: 2000, easing: 'easeOutQuart' };
     
+    // Xử lý Reveal hiệu ứng cuộn
+    const reveal = () => {
+        const items = document.querySelectorAll(".reveal");
+        items.forEach(item => {
+            const windowHeight = window.innerHeight;
+            const elementTop = item.getBoundingClientRect().top;
+            const elementVisible = 100;
+            if (elementTop < windowHeight - elementVisible) item.classList.add("active");
+        });
+    };
+    window.addEventListener("scroll", reveal);
+    window.addEventListener("load", reveal);
+
     function formatValue(v) {
         if (v >= 1000000) return (v / 1000000).toFixed(1).replace(/\.0$/, '') + 'tr';
         if (v >= 1000) return (v / 1000).toFixed(0) + 'k';
@@ -193,7 +207,8 @@
         });
         Object.keys(rawDailyData).forEach(iso => { const d = new Date(iso); weekdayData[d.getDay()].push(rawDailyData[iso]); });
         const setA = (id, val) => {
-            const current = parseInt(document.getElementById(id).innerText.replace(/[^0-9]/g, '')) || 0;
+            const currentElement = document.getElementById(id);
+            const current = parseInt(currentElement.innerText.replace(/[^0-9]/g, '')) || 0;
             animateValue(id, current, val, 1500);
         };
         setA('t-all', s.t); setA('t-cash', s.tc); setA('t-bank', s.tk); 
@@ -205,6 +220,7 @@
         renderExtraCharts(hourRevenue, weekdayData);
         updateHistory(document.getElementById('historyDate').value);
         updateTableStats(document.getElementById('tableStatDate').value);
+        setTimeout(reveal, 100);
     });
 
     function renderExtraCharts(hours, weekdays) {
