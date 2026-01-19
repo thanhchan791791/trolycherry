@@ -2,1619 +2,275 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thống Kê Doanh Thu & Món Bán Chạy (iOS Style)</title>
-
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Thống Kê Doanh Thu Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        /* --- Cấu hình Tailwind và Biến CSS Tùy chỉnh (iOS Inspired) --- */
-        :root {
-            /* Light Mode Colors */
-            --bg-color: #F8F8F8; /* Light Grey/White iOS background */
-            --card-bg: #FFFFFF;
-            --text-color: #1C1C1E; /* iOS System Black */
-            --primary-ios: #007AFF; /* iOS Blue */
-            --secondary-ios: #34C759; /* iOS Green */
-            --danger-ios: #FF3B30; /* iOS Red */
-            --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.04);
-            --shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
-            --header-gradient: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
-        }
-
-        /* Dark Mode Colors */
-        .dark {
-            --bg-color: #121212; /* Deep Dark Background */
-            --card-bg: #1C1C1E;
-            --text-color: #F2F2F7;
-            --primary-ios: #0A84FF; /* Dark Mode Blue */
-            --secondary-ios: #30D158;
-            --danger-ios: #FF453A;
-            --shadow-subtle: 0 1px 3px rgba(255, 255, 255, 0.05), 0 4px 10px rgba(255, 255, 255, 0.02);
-            --shadow-hover: 0 4px 8px rgba(255, 255, 255, 0.1), 0 10px 20px rgba(255, 255, 255, 0.06);
-            --header-gradient: linear-gradient(135deg, #0A84FF 0%, #409CFF 100%);
-        }
-
-        /* Base styles */
-        body {
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
-            min-height: 100vh;
-            scroll-behavior: smooth; /* Thêm cuộn mượt mà */
-        }
-
-        /* Điều chỉnh header để không bị trùng padding-top */
-        header {
-            top: 0;
-        }
-
-        /* Thêm style cho thanh nav cố định */
-        #fixedNav {
-            position: sticky;
-            top: 76px; /* Cố định ngay dưới header */
-            z-index: 10;
-            background: var(--card-bg);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            padding: 8px 0;
-            box-shadow: var(--shadow-subtle);
-        }
-        
-        /* Cần thiết để Chart.js hoạt động Responsive tốt trong mọi container */
-        .chart-container {
-            position: relative;
-            height: 40vh; /* Chiều cao cố định cho mobile/tablet */
-            width: 100%;
-        }
-        
-        /* Ẩn scrollbar trên iOS-like Apps */
-        body::-webkit-scrollbar {
-            display: none;
-        }
-        body {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-
-        /* --- Transitions và Animations kiểu iOS --- */
-        
-        /* 1. Card / Item Load Animation (Slide-up + Fade-in) */
-        .animated-item {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1.0), 
-                        transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1.0),
-                        box-shadow 0.3s ease-in-out,
-                        transform 0.15s ease-in-out;
-            /* Animation timing */
-            animation: fadeInSlideUp 0.6s cubic-bezier(0.25, 0.1, 0.25, 1.0) forwards;
-            animation-delay: var(--animation-delay, 0s);
-        }
-        
-        .animated-item.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* 2. Hover/Active Effects cho Card và Button */
-
-        /* iOS Card Style */
-        .card-ios {
-            background-color: var(--card-bg);
-            border-radius: 16px; /* Bo tròn mềm mại */
-            box-shadow: var(--shadow-subtle);
-            transition: all 0.3s ease-in-out;
-            will-change: transform, box-shadow;
-        }
-
-        .card-ios:hover:not(.no-hover-effect) {
-            transform: scale(1.01); /* Scale nhẹ 1.02x */
-            box-shadow: var(--shadow-hover);
-            /* Gradient nhẹ khi hover, dùng filter để blend với background */
-            filter: brightness(1.05); 
-        }
-
-        /* Button Active (Press Down) Effect */
-        .btn-ios:active, .list-row:active, .nav-btn:active {
-            transform: scale(0.98); /* Scale xuống 0.95x */
-            transition: transform 0.15s ease-out;
-        }
-        
-        .btn-ios {
-            transition: transform 0.15s ease-in-out, background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            will-change: transform, box-shadow;
-        }
-
-        /* 3. Modal iOS-like Slide-up */
-        .modal {
-            background-color: rgba(0, 0, 0, 0.2); /* Subtle dimming */
-            backdrop-filter: blur(5px);
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        .modal-content-ios {
-            transition: transform 0.4s cubic-bezier(0.3, 0.5, 0.4, 1), opacity 0.4s ease-out;
-            transform: translateY(100%);
-        }
-
-        .modal.open .modal-content-ios {
-            transform: translateY(0);
-        }
-        
-        /* 4. Table Row Style */
-        .list-row {
-            transition: background-color 0.3s ease, transform 0.15s ease-out;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(var(--text-color-rgb), 0.1);
-        }
-
-        .list-row:hover {
-            background-color: rgba(var(--primary-ios-rgb), 0.05);
-        }
-        
-        /* Color Helper for dynamic RGB values */
-        .dark {
-            --text-color-rgb: 242, 242, 247;
-            --primary-ios-rgb: 10, 132, 255;
-            --cash-color: #30D158; /* Green for Cash in Dark Mode */
-            --transfer-color: #FF9F0A; /* Orange for Transfer in Dark Mode */
-        }
-        :root {
-            --text-color-rgb: 28, 28, 30;
-            --primary-ios-rgb: 0, 122, 255;
-            --cash-color: #34C759; /* Green for Cash in Light Mode */
-            --transfer-color: #FF9500; /* Orange for Transfer in Light Mode */
-        }
-
-        /* Fix for input date height */
-        input[type="date"], select {
-            min-height: 44px; /* iOS-like touch target size */
-        }
-
-        /* Thêm style cho input tìm kiếm độc đáo */
-        #billSearchInput, #billDateFilterInput, #dailyItemDate, .date-filter input[type="date"], #tableStatDate, #tableNameSelect {
-            background-color: var(--bg-color);
-            border: 2px solid transparent;
-            transition: all 0.3s ease-in-out;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        #billSearchInput:focus, #billDateFilterInput:focus, #dailyItemDate:focus, .date-filter input[type="date"]:focus, #tableStatDate:focus, #tableNameSelect:focus {
-            background-color: var(--card-bg);
-            border-color: var(--primary-ios);
-            box-shadow: 0 0 0 3px rgba(var(--primary-ios-rgb), 0.2);
-        }
-        
+        :root { --bg: #0f172a; --card-bg: rgba(30, 41, 59, 0.7); --accent: #38bdf8; --success: #4ade80; --warning: #fbbf24; --danger: #f87171; --text-main: #f8fafc; --text-dim: #94a3b8; --glass-border: rgba(255, 255, 255, 0.1); --radius-lg: 24px; --radius-md: 16px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top right, #1e293b, #0f172a); color: var(--text-main); margin: 0; padding: 20px 16px; min-height: 100vh; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .container { max-width: 600px; margin: 0 auto; padding-bottom: 60px; }
+        .reveal { animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        h2.page-title { font-size: 28px; font-weight: 800; margin-bottom: 24px; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; }
+        .quick-nav { display: flex; gap: 10px; margin-bottom: 24px; overflow-x: auto; padding: 4px; scrollbar-width: none; }
+        .nav-btn { background: var(--card-bg); border: 1px solid var(--glass-border); padding: 12px 20px; border-radius: var(--radius-md); font-size: 14px; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 8px; white-space: nowrap; backdrop-filter: blur(10px); text-decoration: none; transition: 0.3s; }
+        .nav-btn:active { transform: scale(0.95); background: var(--accent); color: var(--bg); }
+        .card-main { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); padding: 24px; border-radius: var(--radius-lg); box-shadow: 0 20px 40px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.2); position: relative; overflow: hidden; margin-bottom: 12px; }
+        .card-main::after { content: ''; position: absolute; top: -50%; right: -20%; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(40px); }
+        .card-main h3 { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 8px; }
+        .card-main .value { font-size: 36px; font-weight: 800; margin: 16px 0; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .card-main .sub { display: flex; gap: 20px; font-size: 13px; font-weight: 600; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.15); }
+        .grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+        .card-mini { background: var(--card-bg); backdrop-filter: blur(15px); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--glass-border); transition: 0.3s; }
+        .card-mini h3 { margin: 0; font-size: 11px; color: var(--text-dim); text-transform: uppercase; }
+        .card-mini .value { font-size: 16px; font-weight: 700; margin: 8px 0; color: var(--text-main); }
+        .card-mini .sub { font-size: 10px; color: var(--text-dim); margin-top: 8px; display: flex; flex-direction: column; gap: 2px; }
+        .section { background: var(--card-bg); backdrop-filter: blur(15px); padding: 24px; border-radius: var(--radius-lg); margin-bottom: 20px; border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .section h3 { font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--accent); }
+        .filter-group { display: flex; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 16px; gap: 6px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
+        .date-input-wrapper { flex: 1; display: flex; align-items: center; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 0 12px; }
+        .date-input-wrapper i { color: var(--accent); font-size: 16px; }
+        input[type="date"] { border: none; background: transparent; padding: 10px 4px; font-size: 12px; font-weight: 600; color: #fff; width: 100%; outline: none; font-family: inherit; color-scheme: dark; }
+        .reset-mini { background: transparent; border: none; padding: 8px; color: var(--text-dim); transition: 0.3s; }
+        .reset-mini:hover { color: var(--danger); }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 11px; color: var(--text-dim); text-transform: uppercase; padding-bottom: 12px; }
+        td { padding: 14px 0; font-size: 14px; border-top: 1px solid var(--glass-border); transition: 0.2s; }
+        tr:active td { background: rgba(255,255,255,0.05); }
+        .btn-detail { background: rgba(56, 189, 248, 0.15); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.3); padding: 8px; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+        .btn-detail:active { transform: scale(0.9); }
+        .table-stat-card { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 18px; margin-bottom: 12px; border: 1px solid var(--glass-border); animation: scaleIn 0.4s ease both; }
+        #modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); justify-content: center; align-items: flex-end; z-index: 1000; transition: opacity 0.3s ease; }
+        .modal-content { background: #1e293b; padding: 30px; border-radius: 32px 32px 0 0; width: 100%; max-width: 500px; max-height: 85vh; border: 1px solid var(--glass-border); animation: slideInUp 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.1); overflow-y: auto; }
+        .close-bar { width: 50px; height: 4px; background: var(--text-dim); border-radius: 10px; margin: -10px auto 25px; opacity: 0.3; cursor: pointer; }
+        canvas { margin-top: 10px; transition: opacity 1s ease; }
+        .collapsible-content { display: none; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <header class="sticky top-0 z-20 w-full p-4 shadow-xl backdrop-blur-md transition-colors duration-500"
-            style="background: var(--card-bg); border-bottom: 1px solid rgba(0,0,0,0.05);">
-        <div class="max-w-4xl mx-auto flex items-center justify-between">
-            <h1 class="text-2xl font-bold tracking-tight" style="color: var(--primary-ios);">
-                <i class="fas fa-chart-line mr-2"></i> Thống Kê
-            </h1>
-            <button id="themeToggle" class="btn-ios p-2 rounded-full text-xl" 
-                    style="color: var(--primary-ios); background: rgba(var(--primary-ios-rgb), 0.1);" 
-                    aria-label="Toggle Dark Mode">
-                <i class="fas fa-moon" id="themeIcon"></i>
-            </button>
-        </div>
-    </header>
-
-    <nav id="fixedNav" class="w-full">
-        <div class="max-w-4xl mx-auto px-4">
-            <div class="flex justify-between md:justify-around space-x-2">
-                <button class="nav-btn w-full text-center py-2 px-1 text-sm font-medium rounded-xl transition-colors duration-200"
-                        data-target="dailyStatsSection"
-                        style="color: var(--primary-ios); background: rgba(var(--primary-ios-rgb), 0.05);">
-                    <i class="fas fa-calendar-day mr-1 hidden sm:inline"></i> Doanh Thu Ngày
-                </button>
-                <button class="nav-btn w-full text-center py-2 px-1 text-sm font-medium rounded-xl transition-colors duration-200"
-                        data-target="dailyItemStatsSection"
-                        style="color: var(--primary-ios); background: rgba(var(--primary-ios-rgb), 0.05);">
-                    <i class="fas fa-cubes mr-1 hidden sm:inline"></i> Món Bán Ngày
-                </button>
-                <button class="nav-btn w-full text-center py-2 px-1 text-sm font-medium rounded-xl transition-colors duration-200"
-                        data-target="orderHistorySection"
-                        style="color: var(--primary-ios); background: rgba(var(--primary-ios-rgb), 0.05);">
-                    <i class="fas fa-receipt mr-1 hidden sm:inline"></i> Lịch Sử ĐH
-                </button>
+<body>
+<div class="container">
+    <h2 class="page-title reveal">Báo cáo doanh thu</h2>
+    <div class="quick-nav reveal delay-1">
+        <a href="#tableStatsSection" class="nav-btn"><i class="ph-duotone ph-rocket-launch"></i> Grab & S</a>
+        <a href="#historySection" class="nav-btn"><i class="ph-duotone ph-receipt"></i> Lịch sử đơn</a>
+    </div>
+    <div class="stats-container reveal delay-2">
+        <div class="card-main">
+            <h3><i class="ph-duotone ph-wallet"></i> Tổng Doanh Thu</h3>
+            <div class="value counter" id="a-all" data-target="0">0đ</div>
+            <div class="sub">
+                <span><i class="ph ph-money"></i> TM: <b id="a-cash">0</b></span>
+                <span><i class="ph ph-credit-card"></i> CK: <b id="a-bank">0</b></span>
             </div>
         </div>
-    </nav>
-
-    <div class="container mx-auto p-4 max-w-4xl pt-8">
-        
-        <section class="mb-8 animated-item pt-1" data-delay="0.0">
-            <div class="card-ios p-5 text-center bg-gradient-to-r from-green-400 to-blue-500 dark:from-green-600 dark:to-blue-700" style="background: var(--header-gradient);">
-                <h3 class="text-lg font-medium text-white opacity-90">TỔNG DOANH THU</h3>
-                <p id="totalRevenueAllTime" class="text-4xl md:text-5xl font-extrabold mt-2 text-white">0₫</p>
-                <div class="mt-4 pt-3 border-t border-white border-opacity-30 text-xs opacity-90 flex justify-center space-x-6 text-white">
-                    <span class="flex items-center">
-                        <i class="fas fa-money-bill-wave mr-1" style="color: var(--cash-color);"></i>
-                        Tiền mặt: <strong id="totalCash" class="ml-1 text-sm">0₫</strong>
-                    </span>
-                    <span class="flex items-center">
-                        <i class="fas fa-exchange-alt mr-1" style="color: var(--transfer-color);"></i>
-                        C.Khoản: <strong id="totalTransfer" class="ml-1 text-sm">0₫</strong>
-                    </span>
-                </div>
-                </div>
-        </section>
-        <section id="dailyStatsSection" class="mb-8 space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-4 pt-1">
-            <div class="card-ios p-4 text-center animated-item" data-delay="0.1">
-                <h4 class="text-sm font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu hôm nay</h4>
-                <p id="dailyRevenue" class="text-xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
-                <div class="mt-2 text-xs opacity-70 flex justify-between">
-                    <span style="color: var(--cash-color);">Tiền mặt: <strong id="dailyCash">0₫</strong></span>
-                    <span style="color: var(--transfer-color);">C.Khoản: <strong id="dailyTransfer">0₫</strong></span>
-                </div>
-            </div>
-            <div class="card-ios p-4 text-center animated-item" data-delay="0.2">
-                <h4 class="text-sm font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu tuần này</h4>
-                <p id="weeklyRevenue" class="text-xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
-                <div class="mt-2 text-xs opacity-70 flex justify-between">
-                    <span style="color: var(--cash-color);">Tiền mặt: <strong id="weeklyCash">0₫</strong></span>
-                    <span style="color: var(--transfer-color);">C.Khoản: <strong id="weeklyTransfer">0₫</strong></span>
-                </div>
-            </div>
-            <div class="card-ios p-4 text-center animated-item" data-delay="0.3">
-                <h4 class="text-sm font-medium opacity-80" style="color: var(--primary-ios);">Doanh thu tháng này</h4>
-                <p id="monthlyRevenue" class="text-xl font-bold mt-1" style="color: var(--secondary-ios);">0₫</p>
-                <div class="mt-2 text-xs opacity-70 flex justify-between">
-                    <span style="color: var(--cash-color);">Tiền mặt: <strong id="monthlyCash">0₫</strong></span>
-                    <span style="color: var(--transfer-color);">C.Khoản: <strong id="monthlyTransfer">0₫</strong></span>
-                </div>
-            </div>
-        </section>
-
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.4" id="chartSection">
-            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">📈 Biểu đồ Doanh thu 30 ngày gần nhất</h3>
-            <div class="chart-container">
-                <canvas id="revenueChart"></canvas>
-            </div>
-        </section>
-        
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.5" id="hourlyStatsSection">
-            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">⏱️ Doanh thu theo Khung giờ Bán chạy (10:00 - 22:00)</h3>
-            <div class="chart-container">
-                <canvas id="hourlyRevenueChart"></canvas>
-            </div>
-        </section>
-        
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.55" id="weeklyDayStatsSection">
-            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🗓️ Doanh thu theo Thứ trong Tuần (T2 - CN)</h3>
-            <div class="chart-container">
-                <canvas id="weeklyDayRevenueChart"></canvas>
-            </div>
-        </section>
-        
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.6">
-            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">📅 Thống kê theo khoảng thời gian</h3>
-            <div class="date-filter space-y-4 md:flex md:gap-4 md:items-end">
-                <div class="flex-1">
-                    <label for="startDate" class="text-sm font-medium opacity-70 block mb-1">Từ ngày:</label>
-                    <input type="date" id="startDate" 
-                           class="w-full p-2 card-ios border-none focus:ring-2 focus:ring-blue-500 transition duration-150"
-                           style="border-radius: 8px; background-color: var(--bg-color);">
-                </div>
-                <div class="flex-1">
-                    <label for="endDate" class="text-sm font-medium opacity-70 block mb-1">Đến ngày:</label>
-                    <input type="date" id="endDate" 
-                           class="w-full p-2 card-ios border-none focus:ring-2 focus:ring-blue-500 transition duration-150"
-                           style="border-radius: 8px; background-color: var(--bg-color);">
-                </div>
-                <button id="filterStatsButton" 
-                        class="btn-ios md:w-auto w-full px-6 py-3 font-semibold text-white rounded-xl shadow-lg hover:shadow-xl transition-all"
-                        style="background-color: var(--primary-ios);">
-                    <i class="fas fa-search mr-2"></i> Xem thống kê
-                </button>
-            </div>
-            
-            <div id="filteredRevenueBox" class="card-ios mt-4 p-4 transition-all duration-300" style="display: none;">
-                <h4 class="text-base font-medium text-center opacity-80" style="color: var(--primary-ios);">Doanh thu đã lọc</h4>
-                <p id="filteredRevenue" class="text-2xl font-bold text-center mt-1 mb-3" style="color: var(--secondary-ios);">0₫</p>
-                <div class="text-sm opacity-90 flex justify-around border-t pt-3" style="border-color: rgba(var(--text-color-rgb), 0.1);">
-                    <div class="text-center">
-                        <span class="font-medium block" style="color: var(--cash-color);">Tiền mặt</span>
-                        <strong id="filteredCash" class="font-bold text-lg">0₫</strong>
-                    </div>
-                    <div class="text-center">
-                        <span class="font-medium block" style="color: var(--transfer-color);">Chuyển khoản</span>
-                        <strong id="filteredTransfer" class="font-bold text-lg">0₫</strong>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.7" id="dailyItemStatsSection">
-            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">📋 Số lượng Món bán theo Ngày</h3>
-            <div class="date-filter space-y-4 md:flex md:gap-4 md:items-end mb-4">
-                <div class="flex-1 max-w-xs"> 
-                    <label for="dailyItemDate" class="text-sm font-medium opacity-70 block mb-1">Chọn ngày:</label>
-                    <input type="date" id="dailyItemDate" 
-                           class="w-full p-2 card-ios border-none focus:ring-2 focus:ring-blue-500 transition duration-150"
-                           style="border-radius: 8px; background-color: var(--bg-color);">
-                </div>
-                <button id="filterItemStatsButton" 
-                        class="btn-ios md:w-auto w-full px-6 py-3 font-semibold text-white rounded-xl shadow-lg hover:shadow-xl transition-all"
-                        style="background-color: var(--primary-ios);">
-                    <i class="fas fa-cubes mr-2"></i> Xem thống kê món bán
-                </button>
-            </div>
-            
-            <ul id="dailyItemStatsList" class="divide-y divide-gray-200/50">
-                <li class="py-3 text-center text-gray-500">Vui lòng chọn ngày để xem thống kê.</li>
-            </ul>
-        </section>
-
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.75" id="tableStatsSection">
-            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);"><i class="fas fa-chair mr-2"></i> Thống kê theo Bàn</h3>
-            <div class="date-filter space-y-4 md:flex md:gap-4 md:items-end mb-4">
-                <div class="flex-1"> 
-                    <label for="tableNameSelect" class="text-sm font-medium opacity-70 block mb-1">Chọn bàn:</label>
-                    <select id="tableNameSelect" class="w-full p-2 card-ios border-none focus:ring-2 focus:ring-blue-500 transition duration-150" style="border-radius: 8px; background-color: var(--bg-color);">
-                        <option value="">-- Chọn bàn --</option>
-                    </select>
-                </div>
-                <div class="flex-1"> 
-                    <label for="tableStatDate" class="text-sm font-medium opacity-70 block mb-1">Chọn ngày:</label>
-                    <input type="date" id="tableStatDate" 
-                           class="w-full p-2 card-ios border-none focus:ring-2 focus:ring-blue-500 transition duration-150"
-                           style="border-radius: 8px; background-color: var(--bg-color);">
-                </div>
-                <button id="filterTableStatsButton" 
-                        class="btn-ios md:w-auto w-full px-6 py-3 font-semibold text-white rounded-xl shadow-lg hover:shadow-xl transition-all"
-                        style="background-color: var(--primary-ios);">
-                    <i class="fas fa-search mr-2"></i> Xem chi tiết
-                </button>
-            </div>
-            
-            <div id="tableResultBox" style="display: none;">
-                <div class="overflow-x-auto">
-                    <table class="w-full mb-4">
-                        <thead>
-                            <tr class="text-left text-sm font-medium opacity-70 border-b" style="border-color: rgba(var(--text-color-rgb), 0.1);">
-                                <th class="py-2 px-2">Tên món</th>
-                                <th class="py-2 px-2 text-center">Số lượng</th>
-                                <th class="py-2 px-2 text-right">Đơn giá</th>
-                                <th class="py-2 px-2 text-right">Thành tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableStatsBody"></tbody>
-                    </table>
-                </div>
-                <div class="border-t pt-3 flex justify-between items-center" style="border-color: rgba(var(--text-color-rgb), 0.1);">
-                    <span class="font-bold text-lg">Tổng tiền bàn:</span>
-                    <span id="tableTotalRevenue" class="text-2xl font-extrabold" style="color: var(--secondary-ios);">0₫</span>
-                </div>
-            </div>
-            <p id="noTableData" class="py-4 text-center text-gray-500">Vui lòng chọn bàn và ngày.</p>
-        </section>
-        
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.8">
-            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🔥 Top Món Ăn Bán Chạy</h3>
-            <ul id="topSellingFoodsList" class="divide-y divide-gray-200/50">
-                </ul>
-        </section>
-
-        <section class="card-ios p-5 mb-8 animated-item" data-delay="0.9">
-            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-color);">🥤 Top Đồ Uống Bán Chạy</h3>
-            <ul id="topSellingDrinksList" class="divide-y divide-gray-200/50">
-                </ul>
-        </section>
-
-        <section id="orderHistorySection" class="card-ios p-5 mb-8 animated-item" data-delay="1.0">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold" style="color: var(--text-color);">🧾 Lịch sử Đơn hàng</h3>
-                <button id="showAllOrdersButton" 
-                        class="btn-ios text-sm font-semibold px-3 py-1 rounded-full text-white"
-                        style="background-color: var(--primary-ios);">
-                    <i class="fas fa-list-ul mr-1"></i> Xem tất cả
-                </button>
-            </div>
-            
-            <div class="mb-5 space-y-3">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-calendar-alt text-lg" style="color: var(--primary-ios);"></i>
-                    <input type="date" id="billDateFilterInput" 
-                           class="flex-1 px-4 py-2 rounded-xl text-lg outline-none"
-                           style="border-radius: 12px; height: 50px; background-color: var(--bg-color);">
-                </div>
-                
-                <div class="relative">
-                    <i class="fas fa-receipt absolute left-4 top-1/2 -translate-y-1/2 text-lg" style="color: var(--primary-ios);"></i>
-                    <input type="text" id="billSearchInput" 
-                           placeholder="Tìm hóa đơn theo Mã HĐ..." 
-                           class="w-full pl-12 pr-4 py-3 rounded-xl text-lg outline-none"
-                           style="border-radius: 12px; height: 50px;">
-                    <i id="clearSearchButton" class="fas fa-times-circle absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hidden"></i>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="text-left text-sm font-medium opacity-70 border-b" style="border-color: rgba(var(--text-color-rgb), 0.1);">
-                            <th class="py-3 px-2 md:px-4">Mã HĐ</th>
-                            <th class="py-3 px-2 md:px-4 hidden sm:table-cell">Ngày & Giờ</th>
-                            <th class="py-3 px-2 md:px-4">Hình thức</th> <th class="py-3 px-2 md:px-4">Tổng tiền</th>
-                            <th class="py-3 px-2 md:px-4"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="orderHistoryTableBody">
-                        </tbody>
-                </table>
-                <p id="noOrderData" class="py-4 text-center text-gray-500" style="display: none;">Không có dữ liệu hóa đơn</p>
-                <p id="noFilteredData" class="py-4 text-center text-gray-500" style="display: none;">Không tìm thấy hóa đơn nào trùng khớp.</p>
-            </div>
-        </section>
-    </div>
-    
-    <div id="orderModal" class="modal fixed inset-0 flex items-end justify-center z-50 opacity-0 pointer-events-none">
-        <div class="modal-content-ios card-ios w-full max-w-lg p-5 rounded-t-3xl shadow-2xl">
-            <div class="flex justify-between items-center mb-4">
-                <h4 class="text-xl font-bold">Chi tiết Hóa đơn</h4>
-                <button class="close-button text-2xl font-light text-gray-500 hover:text-gray-800 transition duration-150 p-1 rounded-full btn-ios">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div id="modalContentDetails" class="space-y-3 pb-4">
-                <p class="text-sm opacity-70"><strong>Mã HĐ:</strong> <span id="modalBillId" class="font-semibold" style="color: var(--primary-ios);"></span></p>
-                <p class="text-sm opacity-70"><strong>Ngày:</strong> <span id="modalDate" class="font-semibold"></span></p>
-                <p class="text-sm opacity-70"><strong>Hình thức:</strong> <span id="modalPaymentMethod" class="font-semibold"></span></p> <p class="text-sm opacity-70"><strong>Tổng tiền:</strong> <span id="modalTotal" class="font-bold text-lg" style="color: var(--danger-ios);"></span></p>
-                <p class="text-sm font-semibold mt-4">Các món đã mua:</p>
-                <ul id="modalItemsList" class="divide-y" style="border-color: rgba(var(--text-color-rgb), 0.05);"></ul>
-            </div>
+        <div class="grid-mini">
+            <div class="card-mini"><h3>Tháng</h3><div class="value counter" id="m-all">0đ</div><div class="sub"><span>TM: <b id="m-cash">0</b></span><span>CK: <b id="m-bank">0</b></span></div></div>
+            <div class="card-mini"><h3>Tuần</h3><div class="value counter" id="w-all">0đ</div><div class="sub"><span>TM: <b id="w-cash">0</b></span><span>CK: <b id="w-bank">0</b></span></div></div>
+            <div class="card-mini"><h3>Hôm Nay</h3><div class="value counter" id="t-all">0đ</div><div class="sub"><span>TM: <b id="t-cash">0</b></span><span>CK: <b id="t-bank">0</b></span></div></div>
         </div>
     </div>
-    
-    <div id="customAlert" class="fixed top-5 left-1/2 -translate-x-1/2 p-3 rounded-xl shadow-xl z-50 transition-all duration-300 opacity-0 pointer-events-none"
-         style="background: var(--card-bg); color: var(--text-color); border: 1px solid rgba(var(--text-color-rgb), 0.1);">
-        <p id="alertMessage" class="text-sm font-medium"></p>
+    <div class="section reveal delay-3">
+        <h3><i class="ph-duotone ph-chart-line-up"></i> Biểu Đồ Doanh Thu</h3>
+        <div class="filter-group">
+            <div class="date-input-wrapper"><i class="ph ph-calendar"></i><input type="date" id="startDate"></div>
+            <div class="date-input-wrapper"><i class="ph ph-calendar"></i><input type="date" id="endDate"></div>
+            <button class="reset-mini" id="btnReset"><i class="ph-bold ph-arrow-counter-clockwise"></i></button>
+        </div>
+        <canvas id="dailyChart" style="max-height: 250px;"></canvas>
     </div>
-
-    <script>
-        // --- 1. CONFIG & INITIALIZATION (Giữ nguyên cấu hình Firebase của bạn) ---
-        
-        // Cấu hình Firebase của bạn
-        const firebaseConfig = {
-            apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQyO5y10",
-            authDomain: "chitieu-7263e.firebaseapp.com",
-            databaseURL: "https://chitieu-7263e-default-rtdb.firebaseio.com",
-            projectId: "chitieu-7263e",
-            storageBucket: "chitieu-7263e.firebasestorage.app",
-            messagingSenderId: "83833140682",
-            appId: "1:83833140682:web:f9254b418ace3a659fcb33",
-            measurementId: "G-523X74K18N"
+    <div class="section reveal delay-3">
+        <h3><i class="ph-duotone ph-clock"></i> Khung Giờ Cao Điểm</h3>
+        <canvas id="hourChart" style="max-height: 250px;"></canvas>
+    </div>
+    <div class="section reveal">
+        <h3><i class="ph-duotone ph-calendar"></i> Doanh Thu Theo Thứ</h3>
+        <canvas id="weekdayChart" style="max-height: 200px;"></canvas>
+    </div>
+    <div class="section reveal">
+        <h3 onclick="toggleCollapsible(this)" style="cursor:pointer"><i class="ph-duotone ph-fire"></i> Top 10 Bán Chạy <i class="ph ph-caret-down"></i></h3>
+        <div class="collapsible-content">
+            <h4 style="font-size:12px; color:var(--text-dim); margin-top:10px">MÓN ĂN</h4>
+            <table id="topFood"><tbody></tbody></table>
+            <h4 style="font-size:12px; color:var(--text-dim); margin-top:20px">THỨC UỐNG</h4>
+            <table id="topDrink"><tbody></tbody></table>
+        </div>
+    </div>
+    <div class="section reveal">
+        <h3 onclick="toggleCollapsible(this)" style="cursor:pointer"><i class="ph-duotone ph-trend-down"></i> Danh Sách Bán Chậm <i class="ph ph-caret-down"></i></h3>
+        <div class="collapsible-content">
+            <table id="bottomSales"><tbody></tbody></table>
+        </div>
+    </div>
+    <div id="tableStatsSection" class="section reveal">
+        <h3><i class="ph-duotone ph-shopping-bag"></i> Grab & S Stats</h3>
+        <div class="filter-group">
+            <div class="date-input-wrapper" style="width:100%"><i class="ph ph-calendar-check"></i><input type="date" id="tableStatDate"></div>
+        </div>
+        <div id="tableStatsContainer"></div>
+    </div>
+    <div id="historySection" class="section reveal">
+        <h3><i class="ph-duotone ph-list-checks"></i> Lịch Sử Giao Dịch</h3>
+        <div class="filter-group">
+            <div class="date-input-wrapper" style="width:100%"><i class="ph ph-calendar-plus"></i><input type="date" id="historyDate"></div>
+        </div>
+        <table id="orderTable">
+            <thead><tr><th>Bàn & Giờ</th><th>PTTT</th><th>Tổng</th><th></th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+<div id="modal" onclick="closeModal(event)"><div class="modal-content" onclick="event.stopPropagation()"><div class="close-bar" onclick="closeModal()"></div><h3 style="margin-top:0; color:var(--accent)">Order Details</h3><div id="modal-body"></div></div></div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    const firebaseConfig = { apiKey: "AIzaSyB8uLkLJFlzmCodcawJhs2dRckHQzO5y10", authDomain: "chitieu-7263e.firebaseapp.com", databaseURL: "https://chitieu-7263e-default-rtdb.firebaseio.com", projectId: "chitieu-7263e", storageBucket: "chitieu-7263e.firebasestorage.app", messagingSenderId: "83833140682", appId: "1:83833140682:web:f9254b418ace3a659fcb33", measurementId: "G-523X74K18N" };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    let chartObj = null, hourChartObj = null, weekdayChartObj = null, allData = {}, rawDailyData = {};
+    Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = "'Plus Jakarta Sans'"; Chart.defaults.animation = { duration: 2000, easing: 'easeOutQuart' };
+    function animateValue(id, start, end, duration) {
+        const obj = document.getElementById(id);
+        if (start === end) { obj.innerText = end.toLocaleString() + (id.includes('all') ? 'đ' : ''); return; }
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const current = Math.floor(progress * (end - start) + start);
+            obj.innerText = current.toLocaleString() + (id.includes('all') ? 'đ' : '');
+            if (progress < 1) window.requestAnimationFrame(step);
         };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // DOM elements
-        const totalRevenueAllTimeEl = document.getElementById('totalRevenueAllTime'); // Thẻ Tổng Doanh Thu MỚI
-        // BỔ SUNG: DOM elements cho Tổng Tiền mặt & Tổng Chuyển khoản
-        const totalCashEl = document.getElementById('totalCash');
-        const totalTransferEl = document.getElementById('totalTransfer');
-        
-        const dailyRevenueEl = document.getElementById('dailyRevenue');
-        const dailyCashEl = document.getElementById('dailyCash');
-        const dailyTransferEl = document.getElementById('dailyTransfer');
-        const weeklyRevenueEl = document.getElementById('weeklyRevenue');
-        const weeklyCashEl = document.getElementById('weeklyCash');
-        const weeklyTransferEl = document.getElementById('weeklyTransfer');
-        const monthlyRevenueEl = document.getElementById('monthlyRevenue');
-        const monthlyCashEl = document.getElementById('monthlyCash');
-        const monthlyTransferEl = document.getElementById('monthlyTransfer');
-
-        const startDateInput = document.getElementById('startDate');
-        const endDateInput = document.getElementById('endDate');
-        const filterStatsButton = document.getElementById('filterStatsButton');
-        const filteredRevenueBox = document.getElementById('filteredRevenueBox');
-        const filteredRevenueEl = document.getElementById('filteredRevenue');
-        const filteredCashEl = document.getElementById('filteredCash'); // New
-        const filteredTransferEl = document.getElementById('filteredTransfer'); // New
-        
-        // DOM elements MỚI cho thống kê món bán theo ngày (ĐÃ ĐIỀU CHỈNH)
-        const dailyItemDateInput = document.getElementById('dailyItemDate'); // Thay dailyItemStartDate bằng dailyItemDate
-        const filterItemStatsButton = document.getElementById('filterItemStatsButton');
-        const dailyItemStatsListEl = document.getElementById('dailyItemStatsList');
-
-        // DOM elements PHẦN THÊM MỚI (THỐNG KÊ THEO BÀN)
-        const tableNameSelect = document.getElementById('tableNameSelect');
-        const tableStatDate = document.getElementById('tableStatDate');
-        const filterTableStatsButton = document.getElementById('filterTableStatsButton');
-        const tableStatsBody = document.getElementById('tableStatsBody');
-        const tableTotalRevenueEl = document.getElementById('tableTotalRevenue');
-        const tableResultBox = document.getElementById('tableResultBox');
-        const noTableData = document.getElementById('noTableData');
-
-        const revenueChartCanvas = document.getElementById('revenueChart');
-        const hourlyRevenueChartCanvas = document.getElementById('hourlyRevenueChart'); // THÊM MỚI
-        
-        // THÊM MỚI: DOM elements cho Biểu đồ theo Thứ trong Tuần
-        const weeklyDayRevenueChartCanvas = document.getElementById('weeklyDayRevenueChart');
-        let weeklyDayRevenueChartInstance = null;
-        
-        const topSellingFoodsListEl = document.getElementById('topSellingFoodsList');
-        const topSellingDrinksListEl = document.getElementById('topSellingDrinksList');
-        const orderHistoryTableBody = document.getElementById('orderHistoryTableBody');
-        const orderModal = document.getElementById('orderModal');
-        const closeModalButton = orderModal.querySelector('.close-button');
-        const modalBillIdEl = document.getElementById('modalBillId');
-        const modalDateEl = document.getElementById('modalDate');
-        const modalPaymentMethodEl = document.getElementById('modalPaymentMethod'); // New
-        const modalTotalEl = document.getElementById('modalTotal');
-        const modalItemsListEl = document.getElementById('modalItemsList');
-        const noOrderData = document.getElementById('noOrderData');
-        const noFilteredData = document.getElementById('noFilteredData');
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const customAlert = document.getElementById('customAlert');
-        const alertMessageEl = document.getElementById('alertMessage');
-        const billSearchInput = document.getElementById('billSearchInput');
-        const clearSearchButton = document.getElementById('clearSearchButton');
-        
-        const showAllOrdersButton = document.getElementById('showAllOrdersButton');
-        const billDateFilterInput = document.getElementById('billDateFilterInput');
-        // Sử dụng ngày giờ hiện tại của hệ thống
-        const TODAY = new Date().toISOString().slice(0, 10);
-        
-        // Thêm DOM elements cho Navigation Buttons MỚI
-        const navButtons = document.querySelectorAll('.nav-btn');
-
-        let revenueChartInstance = null;
-        let hourlyRevenueChartInstance = null; // THÊM MỚI
-        let paymentsCache = []; // Cache dữ liệu thanh toán
-
-        
-        // --- 2. CORE UTILITIES (Animations, Dark Mode, Alerts) ---
-        
-        // Hàm cuộn mượt mà đến phần tử
-        function scrollToSection(elementId) {
-            const targetElement = document.getElementById(elementId);
-            if (targetElement) {
-                const headerOffset = 100; // Chiều cao của header + fixedNav
-                const elementPosition = targetElement.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: "smooth"
-                });
-            }
-        }
-        
-        // Thêm event listener cho các nút điều hướng
-        navButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const targetId = e.currentTarget.dataset.target;
-                scrollToSection(targetId);
-            });
+        window.requestAnimationFrame(step);
+    }
+    window.toggleCollapsible = (header) => {
+        const content = header.nextElementSibling;
+        const isOpen = content.style.display === "block";
+        content.style.display = isOpen ? "none" : "block";
+        const icon = header.querySelector('.ph-caret-down');
+        if(icon) icon.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
+    };
+    onValue(ref(db, 'payment_history'), (snap) => {
+        const data = snap.val(); if (!data) return;
+        allData = data;
+        const now = new Date(), todayStr = now.toLocaleDateString('en-GB');
+        const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(now.getDate() - 7);
+        let s = { t:0, tc:0, tk:0, w:0, wc:0, wk:0, m:0, mc:0, mk:0, a:0, ac:0, ak:0 };
+        rawDailyData = {}; let itemCounts = {};
+        let hourRevenue = Array(24).fill(0);
+        let weekdayData = { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[], 6:[] };
+        Object.keys(data).forEach(key => {
+            const o = data[key], amt = o.finalTotal || 0, meth = o.paymentMethod === "Chuyển khoản" ? 'K' : 'C';
+            const d = new Date(o.timestamp), dStr = d.toLocaleDateString('en-GB'), isoStr = d.toISOString().split('T')[0];
+            s.a += amt; meth==='C' ? s.ac += amt : s.ak += amt;
+            if(dStr === todayStr) { s.t += amt; meth==='C' ? s.tc += amt : s.tk += amt; }
+            if(d >= sevenDaysAgo) { s.w += amt; meth==='C' ? s.wc += amt : s.wk += amt; }
+            if(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) { s.m += amt; meth==='C' ? s.mc += amt : s.mk += amt; }
+            rawDailyData[isoStr] = (rawDailyData[isoStr] || 0) + amt;
+            hourRevenue[d.getHours()] += amt;
+            if(o.items) o.items.forEach(i => { if(i) itemCounts[i.name] = (itemCounts[i.name] || 0) + (i.quantity || 1); });
         });
-
-        // Custom Alert/Toast instead of window.alert()
-        function showCustomAlert(message) {
-            alertMessageEl.textContent = message;
-            customAlert.classList.remove('opacity-0', 'pointer-events-none');
-            customAlert.classList.add('opacity-100');
-            setTimeout(() => {
-                customAlert.classList.add('opacity-0', 'pointer-events-none');
-                customAlert.classList.remove('opacity-100');
-            }, 3000);
-        }
-        
-        // Dark Mode Toggle Logic
-        function loadTheme() {
-            const isDarkMode = localStorage.getItem('theme') === 'dark';
-            document.body.classList.toggle('dark', isDarkMode);
-            themeIcon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
-        }
-
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark');
-            const isDarkMode = document.body.classList.contains('dark');
-            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-            themeIcon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
-            if (revenueChartInstance) {
-                // Cập nhật màu biểu đồ khi chuyển chế độ
-                updateChartColors(revenueChartInstance);
-                revenueChartInstance.update();
-            }
-            // THÊM MỚI: Cập nhật màu biểu đồ khung giờ
-            if (hourlyRevenueChartInstance) {
-                updateChartColors(hourlyRevenueChartInstance, true); // Thêm cờ isLineChart
-                hourlyRevenueChartInstance.update();
-            }
-            // THÊM MỚI: Cập nhật màu biểu đồ theo Thứ trong Tuần (Nếu có) - Không cần gọi updateChartColors vì màu được đặt cố định
-            if (weeklyDayRevenueChartInstance) {
-                // Chỉ cần gọi update để cập nhật màu label/grid (đã được định nghĩa trong options)
-                weeklyDayRevenueChartInstance.update(); 
-            }
-        });
-
-        // Scroll Animation Logic (Intersection Observer)
-        function setupScrollAnimations() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const delay = parseFloat(entry.target.dataset.delay || 0);
-                        setTimeout(() => {
-                            entry.target.classList.add('active');
-                            observer.unobserve(entry.target);
-                        }, delay * 1000);
-                    }
-                });
-            }, { 
-                rootMargin: '0px', 
-                threshold: 0.1 // Bắt đầu load khi 10% element xuất hiện
-            });
-
-            document.querySelectorAll('.animated-item').forEach(item => {
-                observer.observe(item);
-            });
-        }
-        
-        // --- 3. FIREBASE DATA FETCHING (Cập nhật để chuẩn hóa paymentMethod) ---
-
-        function fetchPayments() {
-            return new Promise((resolve, reject) => {
-                if (paymentsCache.length > 0) {
-                    return resolve(paymentsCache);
-                }
-                
-                database.ref('payment_history').once('value', (snapshot) => {
-                    const payments = [];
-                    snapshot.forEach(childSnapshot => {
-                        const payment = childSnapshot.val();
-                        // Chuẩn hóa billId (chỉ lấy 6 ký tự đầu nếu không có billId)
-                        const billId = payment.billId || childSnapshot.key.substring(1, 7).toUpperCase(); 
-                        // Chuẩn hóa paymentMethod: lấy giá trị, nếu null/undefined thì dùng 'Tiền mặt', sau đó viết hoa chữ cái đầu và chuyển phần còn lại sang chữ thường.
-                        const paymentMethod = (payment.paymentMethod || 'Tiền mặt').charAt(0).toUpperCase() + (payment.paymentMethod || 'Tiền mặt').slice(1).toLowerCase();
-                        
-                        payments.push({
-                            key: childSnapshot.key,
-                            billId: billId, 
-                            ...payment,
-                            paymentMethod: paymentMethod, 
-                            date: new Date(payment.timestamp).toISOString().slice(0, 10)
-                        });
-                    });
-                    
-                    paymentsCache = payments; // Lưu cache
-                    resolve(payments);
-                }).catch(reject);
-            });
-        }
-        
-        // --- 4. DATA RENDERING FUNCTIONS (Cập nhật logic tính toán Tuần/Tháng) ---
-
-        // Thêm tham số isLineChart để xử lý màu cho Line Chart
-        function updateChartColors(chartInstance, isLineChart = false) {
-            const isDark = document.body.classList.contains('dark');
-            const chartColor = isDark ? 'rgba(10, 132, 255, 0.7)' : 'rgba(0, 122, 255, 0.7)'; // iOS Blue
-            const solidLineColor = isDark ? '#0A84FF' : '#007AFF';
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const labelColor = 'var(--text-color)'; 
-            
-            if (chartInstance) {
-                if (isLineChart) {
-                    chartInstance.data.datasets[0].borderColor = solidLineColor;
-                    // Re-calculate gradient for fill if it's a line chart with fill
-                    chartInstance.data.datasets[0].backgroundColor = (context) => {
-                        const chart = context.chart;
-                        const {ctx, chartArea} = chart;
-                        if (!chartArea) {
-                            return;
-                        }
-                        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                        const startColor = isDark ? 'rgba(10, 132, 255, 0.5)' : 'rgba(0, 122, 255, 0.4)'; // Semi-transparent blue
-                        const endColor = isDark ? 'rgba(10, 132, 255, 0)' : 'rgba(0, 122, 255, 0)'; // Transparent
-                        gradient.addColorStop(0, endColor);
-                        gradient.addColorStop(1, startColor);
-                        return gradient;
-                    };
-                } else {
-                    // Bar Chart (30-day revenue chart)
-                    // Note: This only applies to the 30-day chart which uses Primary iOS Blue.
-                    // The Weekly Day chart uses Secondary iOS Green, which is handled in its creation function.
-                    chartInstance.data.datasets[0].backgroundColor = chartColor;
-                    chartInstance.data.datasets[0].borderColor = chartColor;
-                }
-
-                chartInstance.options.scales.y.grid.color = gridColor;
-                chartInstance.options.scales.x.grid.color = gridColor;
-                chartInstance.options.scales.y.ticks.color = labelColor;
-                chartInstance.options.scales.x.ticks.color = labelColor;
-                chartInstance.options.plugins.tooltip.titleColor = labelColor;
-                chartInstance.options.plugins.tooltip.bodyColor = labelColor;
-                chartInstance.options.plugins.legend.labels.color = labelColor;
-            }
-        }
-        
-        async function update30DayChart() {
-            // ... (Giữ nguyên logic biểu đồ 30 ngày)
-            const now = new Date();
-            const today = now.toISOString().slice(0, 10);
-            const daysAgo = (days) => {
-              const date = new Date();
-              date.setDate(date.getDate() - days);
-              return date.toISOString().slice(0, 10);
-            };
-            const startOfLast30Days = daysAgo(30);
-
-            const payments = await fetchPayments();
-            const filteredPayments = payments.filter(p => p.date >= startOfLast30Days && p.date <= today);
-
-            const revenueByDay = {};
-            filteredPayments.forEach(payment => {
-                const date = payment.date;
-                if (!revenueByDay[date]) {
-                    revenueByDay[date] = 0;
-                }
-                revenueByDay[date] += (payment.finalTotal || 0);
-            });
-            
-            // Tạo mảng ngày đầy đủ cho 30 ngày (tùy chọn) hoặc chỉ hiển thị ngày có dữ liệu
-            const sortedDates = Object.keys(revenueByDay).sort();
-            const data = sortedDates.map(date => revenueByDay[date]);
-            
-            if (revenueChartInstance) {
-                revenueChartInstance.destroy();
-            }
-            
-            const isDark = document.body.classList.contains('dark');
-            const chartColor = isDark ? 'rgba(10, 132, 255, 0.7)' : 'rgba(0, 122, 255, 0.7)';
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const labelColor = 'var(--text-color)';
-
-            revenueChartInstance = new Chart(revenueChartCanvas, {
-                type: 'bar',
-                data: {
-                    labels: sortedDates,
-                    datasets: [{
-                        label: 'Doanh thu',
-                        data: data,
-                        backgroundColor: chartColor,
-                        borderColor: chartColor,
-                        borderRadius: 6,
-                        borderWidth: 1,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1000,
-                        easing: 'easeInOutCubic',
-                        delay: (context) => context.dataIndex * 50
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y.toLocaleString('vi-VN') + '₫';
-                                    }
-                                    return label;
-                                }
-                            }
-                        },
-                        legend: {
-                            display: false // Ẩn legend
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: gridColor,
-                                drawBorder: false,
-                            },
-                            ticks: {
-                                color: labelColor,
-                                callback: (value) => value.toLocaleString('vi-VN') + '₫',
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false,
-                            },
-                            ticks: {
-                                color: labelColor,
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // THAY ĐỔI: Hàm vẽ biểu đồ Doanh thu theo Khung giờ (Sử dụng Line Chart hiện đại)
-        async function updateHourlyRevenueChart() {
-            const payments = await fetchPayments();
-            
-            const revenueByHour = {};
-            
-            // KHỞI TẠO VÀ LỌC THEO YÊU CẦU MỚI: Chỉ hiển thị từ 10h đến 22h
-            const START_HOUR = 10;
-            const END_HOUR = 22; // Đến 22:00
-
-            // Khởi tạo chỉ các giờ từ 10 đến 22
-            for (let i = START_HOUR; i <= END_HOUR; i++) {
-                const hour = i.toString().padStart(2, '0');
-                revenueByHour[hour] = 0;
-            }
-
-            payments.forEach(payment => {
-                const dateObj = new Date(payment.timestamp);
-                const hourInt = dateObj.getHours(); // Lấy giờ dưới dạng số (0-23)
-                const total = payment.finalTotal || 0;
-
-                // Lọc dữ liệu: Chỉ tính những thanh toán xảy ra trong khung giờ từ 10:00 đến 22:59
-                if (hourInt >= START_HOUR && hourInt <= END_HOUR) {
-                    const hour = hourInt.toString().padStart(2, '0'); 
-                    if (revenueByHour.hasOwnProperty(hour)) {
-                        revenueByHour[hour] += total;
-                    }
-                }
-            });
-            
-            // Labels và Data chỉ chứa các giờ từ 10 đến 22
-            const labels = Object.keys(revenueByHour).map(h => `${h}:00`);
-            const data = Object.values(revenueByHour);
-            
-            if (hourlyRevenueChartInstance) {
-                hourlyRevenueChartInstance.destroy();
-            }
-            
-            const isDark = document.body.classList.contains('dark');
-            const solidLineColor = isDark ? '#0A84FF' : '#007AFF'; // Màu đường kẻ đậm
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const labelColor = 'var(--text-color)';
-
-            hourlyRevenueChartInstance = new Chart(hourlyRevenueChartCanvas, {
-                type: 'line', // Đổi sang Line Chart
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Doanh thu theo giờ',
-                        data: data,
-                        // Tạo gradient cho khu vực đổ bóng (fill)
-                        backgroundColor: (context) => {
-                            const chart = context.chart;
-                            const {ctx, chartArea} = chart;
-                            if (!chartArea) {
-                                return;
-                            }
-                            const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                            const startColor = isDark ? 'rgba(10, 132, 255, 0.5)' : 'rgba(0, 122, 255, 0.4)'; // Màu bắt đầu (bán trong suốt)
-                            const endColor = isDark ? 'rgba(10, 132, 255, 0)' : 'rgba(0, 122, 255, 0)'; // Màu kết thúc (trong suốt)
-                            gradient.addColorStop(0, endColor);
-                            gradient.addColorStop(1, startColor);
-                            return gradient;
-                        },
-                        borderColor: solidLineColor, // Màu đường kẻ
-                        borderWidth: 3,
-                        tension: 0.4, // Tạo đường cong mượt mà
-                        pointRadius: 4, 
-                        pointHoverRadius: 6,
-                        fill: true, // Đổ bóng khu vực dưới đường kẻ
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1500, // Tăng thời gian animation
-                        easing: 'easeInOutCubic',
-                        delay: 0
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y.toLocaleString('vi-VN') + '₫';
-                                    }
-                                    return label;
-                                }
-                            }
-                        },
-                        legend: {
-                            display: false // Ẩn legend
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: gridColor,
-                                drawBorder: false,
-                            },
-                            ticks: {
-                                color: labelColor,
-                                callback: (value) => value.toLocaleString('vi-VN') + '₫',
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false,
-                            },
-                            ticks: {
-                                color: labelColor,
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // THÊM MỚI: Hàm vẽ biểu đồ Doanh thu theo Thứ trong Tuần (T2 - CN)
-        async function updateWeeklyDayRevenueChart() {
-            const payments = await fetchPayments();
-            
-            // Khởi tạo doanh thu cho 7 ngày trong tuần
-            // Index 0=CN, 1=T2, ..., 6=T7
-            const revenueByDayIndex = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 0: 0 };
-            const dayLabels = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
-
-            payments.forEach(payment => {
-                const dateObj = new Date(payment.timestamp);
-                const dayIndex = dateObj.getDay(); // 0 (Sun) - 6 (Sat)
-                const total = payment.finalTotal || 0;
-                
-                // Cần đảm bảo timestamp hợp lệ, nếu không dayIndex sẽ là NaN
-                if (!isNaN(dayIndex) && revenueByDayIndex.hasOwnProperty(dayIndex)) {
-                    revenueByDayIndex[dayIndex] += total;
-                }
-            });
-            
-            // Sắp xếp lại dữ liệu theo thứ tự T2 -> CN
-            const sortedDayIndices = [1, 2, 3, 4, 5, 6, 0];
-            const data = sortedDayIndices.map(index => revenueByDayIndex[index]);
-            
-            if (weeklyDayRevenueChartInstance) {
-                weeklyDayRevenueChartInstance.destroy();
-            }
-            
-            const isDark = document.body.classList.contains('dark');
-            // Sử dụng màu Secondary iOS (Green) cho biểu đồ này
-            const chartColor = isDark ? 'rgba(48, 209, 88, 0.7)' : 'rgba(52, 199, 89, 0.7)'; // iOS Green
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const labelColor = 'var(--text-color)';
-
-            weeklyDayRevenueChartInstance = new Chart(weeklyDayRevenueChartCanvas, {
-                type: 'bar',
-                data: {
-                    labels: dayLabels, // T2, T3, T4, T5, T6, T7, CN
-                    datasets: [{
-                        label: 'Doanh thu',
-                        data: data,
-                        backgroundColor: chartColor,
-                        borderColor: chartColor,
-                        borderRadius: 6,
-                        borderWidth: 1,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1000,
-                        easing: 'easeInOutCubic',
-                        delay: (context) => context.dataIndex * 50
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y.toLocaleString('vi-VN') + '₫';
-                                    }
-                                    return label;
-                                }
-                            }
-                        },
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: gridColor,
-                                drawBorder: false,
-                            },
-                            ticks: {
-                                color: labelColor,
-                                callback: (value) => value.toLocaleString('vi-VN') + '₫',
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false,
-                            },
-                            ticks: {
-                                color: labelColor,
-                                maxRotation: 0,
-                                minRotation: 0
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Hàm tính toán Cash và Transfer từ một mảng payments
-        function calculateRevenueByMethod(payments) {
-            const result = payments.reduce((acc, p) => {
-                const total = p.finalTotal || 0;
-                
-                // Chuẩn hóa paymentMethod để tính toán
-                const method = (p.paymentMethod || 'Tiền mặt'); // Đã được chuẩn hóa ở fetchPayments
-
-                if (method === 'Tiền mặt') {
-                    acc.cash += total;
-                } else if (method === 'Chuyển khoản') {
-                    acc.transfer += total;
-                } else {
-                    // Nếu paymentMethod không rõ, gộp vào tiền mặt (theo logic đã chuẩn hóa)
-                    acc.cash += total;
-                }
-                
-                acc.total = acc.cash + acc.transfer;
-                return acc;
-            }, { total: 0, cash: 0, transfer: 0 });
-            
-            return result;
-        }
-
-        async function updateTotalRevenueAllTime() {
-            const payments = await fetchPayments();
-            const totalRevenue = payments.reduce((sum, p) => sum + (p.finalTotal || 0), 0);
-            totalRevenueAllTimeEl.textContent = totalRevenue.toLocaleString('vi-VN') + '₫';
-        }
-        
-        // BỔ SUNG: Hàm tính và hiển thị Tổng Tiền mặt & Tổng Chuyển khoản
-        async function updateTotalRevenueDetails() {
-             const payments = await fetchPayments();
-             const totalStats = calculateRevenueByMethod(payments); // Tính toán tổng tiền mặt và chuyển khoản từ tất cả payments
-
-             totalCashEl.textContent = totalStats.cash.toLocaleString('vi-VN') + '₫';
-             totalTransferEl.textContent = totalStats.transfer.toLocaleString('vi-VN') + '₫';
-        }
-
-
-        async function updateSummaryStats() {
-            const now = new Date();
-            const today = now.toISOString().slice(0, 10);
-            
-          // --- LOGIC THỐNG KÊ 7 NGÀY GẦN NHẤT ---
-        const startOfLast7Days = new Date(now);
-        startOfLast7Days.setDate(now.getDate() - 6); // Lùi lại 6 ngày để tính tổng cộng 7 ngày (bao gồm hôm nay)
-        startOfLast7Days.setHours(0, 0, 0, 0); // Đặt giờ về 00:00:00
-        
-        // Ngày kết thúc là 23:59:59 của hôm nay
-        const endOfToday = new Date(now);
-        endOfToday.setHours(23, 59, 59, 999);
-
-            // --- LOGIC THỐNG KÊ THÁNG (Từ ngày 1 đến ngày cuối tháng) ---
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth();
-            
-            // Ngày 1 của tháng hiện tại
-            const startOfMonth = new Date(currentYear, currentMonth, 1);
-            startOfMonth.setHours(0, 0, 0, 0); 
-            const startOfMonthTimestamp = startOfMonth.getTime();
-            
-            // Ngày cuối cùng của tháng hiện tại
-            const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0); // Lấy ngày 0 của tháng tiếp theo (tức là ngày cuối tháng này)
-            lastDayOfMonth.setHours(23, 59, 59, 999);
-            const endOfMonthTimestamp = lastDayOfMonth.getTime();
-
-            
-            const payments = await fetchPayments();
-
-            // Lọc và tính toán cho Ngày (từ 00:00:00 hôm nay đến 23:59:59 hôm nay)
-            const dailyPayments = payments.filter(p => p.date === today);
-            const dailyStats = calculateRevenueByMethod(dailyPayments);
-
-           // Lọc và tính toán cho 7 ngày gần nhất
-        const weeklyPayments = payments.filter(p => {
-            const pTimestamp = new Date(p.timestamp).getTime();
-            // So sánh với mốc thời gian mới (startOfLast7Days và endOfToday)
-            return pTimestamp >= startOfLast7Days.getTime() && pTimestamp <= endOfToday.getTime();
-        });
-        const weeklyStats = calculateRevenueByMethod(weeklyPayments);
-
-            // Lọc và tính toán cho Tháng (từ ngày 1 đến ngày cuối tháng)
-            const monthlyPayments = payments.filter(p => {
-                const pTimestamp = new Date(p.timestamp).getTime();
-                return pTimestamp >= startOfMonthTimestamp && pTimestamp <= endOfMonthTimestamp;
-            });
-            const monthlyStats = calculateRevenueByMethod(monthlyPayments);
-
-
-            // Cập nhật DOM - Tổng cộng
-            dailyRevenueEl.textContent = dailyStats.total.toLocaleString('vi-VN') + '₫';
-            weeklyRevenueEl.textContent = weeklyStats.total.toLocaleString('vi-VN') + '₫';
-            monthlyRevenueEl.textContent = monthlyStats.total.toLocaleString('vi-VN') + '₫';
-            
-            // Cập nhật DOM - Chi tiết
-            dailyCashEl.textContent = dailyStats.cash.toLocaleString('vi-VN') + '₫';
-            dailyTransferEl.textContent = dailyStats.transfer.toLocaleString('vi-VN') + '₫';
-            weeklyCashEl.textContent = weeklyStats.cash.toLocaleString('vi-VN') + '₫';
-            weeklyTransferEl.textContent = weeklyStats.transfer.toLocaleString('vi-VN') + '₫';
-            monthlyCashEl.textContent = monthlyStats.cash.toLocaleString('vi-VN') + '₫';
-            monthlyTransferEl.textContent = monthlyStats.transfer.toLocaleString('vi-VN') + '₫';
-        }
-
-        async function updateTopSellingItems() {
-            const payments = await fetchPayments();
-            
-            const foodSales = {};
-            const drinkSales = {};
-            
-            // ĐÃ CHỈNH SỬA: Thêm các từ khóa liên quan đến đồ uống, khăn lạnh (vì không phải món ăn) để phân loại đúng
-            const drinksList = [
-                "coca", "trà đào", "nước cam", "bia sài gòn", "7 up", "pepsi", "trà sữa","nước ép dưa hấu", "nước suối", 
-                "chanh dây mật ong", "soda chanh", "bia heineken", "tiger bạc", "khăn lạnh", "heineken bạc", 
-                "bia", "nước ngọt", "sữa", "cam vắt", "trà tắc", "sting", "number one" // Bổ sung các từ khóa chung
-            ]; 
-
-            payments.forEach(payment => {
-                if (payment.items) {
-                    // Object.values(payment.items) để lấy mảng các item
-                    Object.values(payment.items).forEach(item => {
-                        const itemName = item.name.toLowerCase().trim();
-                        const quantity = item.quantity;
-                        
-                        let isDrink = false;
-                        
-                        // Cập nhật logic: Kiểm tra nếu tên món có chứa bất kỳ từ khóa đồ uống nào
-                        if (drinksList.some(drink => itemName.includes(drink))) {
-                            isDrink = true;
-                        }
-                        
-                        if (isDrink) {
-                            // Là đồ uống
-                            if (drinkSales[itemName]) {
-                                drinkSales[itemName] += quantity;
-                            } else {
-                                drinkSales[itemName] = quantity;
-                            }
-                        } else {
-                            // Là món ăn (hoặc không phải đồ uống, khăn lạnh, v.v.)
-                            if (foodSales[itemName]) {
-                                foodSales[itemName] += quantity;
-                            } else {
-                                foodSales[itemName] = quantity;
-                            }
-                        }
-                    });
-                }
-            });
-            
-            const sortedFoods = Object.entries(foodSales).sort(([, a], [, b]) => b - a).slice(0, 10);
-            const sortedDrinks = Object.entries(drinkSales).sort(([, a], [, b]) => b - a).slice(0, 10);
-
-            function renderTopList(listEl, data) {
-                listEl.innerHTML = '';
-                if (data.length === 0) {
-                    listEl.innerHTML = '<li class="py-3 text-center text-gray-500">Không có dữ liệu bán chạy</li>';
-                } else {
-                    data.forEach(([name, quantity], index) => {
-                        const li = document.createElement('li');
-                        li.className = 'flex justify-between items-center py-3 list-row';
-                        li.innerHTML = `
-                            <span class="font-medium flex-1 truncate">
-                                <span class="text-sm font-bold w-6 inline-block" style="color: var(--primary-ios);">${index + 1}.</span> 
-                                ${name.charAt(0).toUpperCase() + name.slice(1)}
-                            </span>
-                            <span class="text-sm font-semibold" style="color: var(--secondary-ios);">
-                                ${quantity.toLocaleString('vi-VN')} <span class="opacity-70">món</span>
-                            </span>
-                        `;
-                        listEl.appendChild(li);
-                    });
-                }
-            }
-
-            renderTopList(topSellingFoodsListEl, sortedFoods);
-            renderTopList(topSellingDrinksListEl, sortedDrinks);
-        }
-        
-        // Hàm tính và hiển thị số lượng món bán theo một ngày
-        async function updateDailyItemStats() {
-            const selectedDate = dailyItemDateInput.value;
-            
-            if (!selectedDate) {
-                showCustomAlert('Vui lòng chọn ngày để thống kê món bán.');
-                dailyItemStatsListEl.innerHTML = '<li class="py-3 text-center text-gray-500">Vui lòng chọn ngày để xem thống kê.</li>';
-                return;
-            }
-            
-            const payments = await fetchPayments();
-            // Lọc chỉ những thanh toán có ngày trùng với ngày đã chọn
-            const filteredPayments = payments.filter(p => p.date === selectedDate);
-            
-            const itemSales = {};
-            
-            filteredPayments.forEach(payment => {
-                if (payment.items) {
-                    Object.values(payment.items).forEach(item => {
-                        const itemName = item.name.trim();
-                        const quantity = item.quantity;
-                        
-                        // Thống kê số lượng bán ra
-                        if (itemSales[itemName]) {
-                            itemSales[itemName] += quantity;
-                        } else {
-                            itemSales[itemName] = quantity;
-                        }
-                    });
-                }
-            });
-            
-            // Chuyển thành mảng và sắp xếp giảm dần theo số lượng
-            const sortedItems = Object.entries(itemSales).sort(([, a], [, b]) => b - a);
-
-            dailyItemStatsListEl.innerHTML = '';
-            
-            if (sortedItems.length === 0) {
-                dailyItemStatsListEl.innerHTML = `<li class="py-3 text-center text-gray-500">Không có món nào được bán vào ngày ${new Date(selectedDate).toLocaleDateString('vi-VN')}.</li>`;
-            } else {
-                sortedItems.forEach(([name, quantity], index) => {
-                    const li = document.createElement('li');
-                    li.className = 'flex justify-between items-center py-3 list-row no-hover-effect';
-                    li.innerHTML = `
-                        <span class="font-medium flex-1 truncate">
-                            <span class="text-sm font-bold w-6 inline-block" style="color: var(--primary-ios);">${index + 1}.</span> 
-                            ${name.charAt(0).toUpperCase() + name.slice(1)}
-                        </span>
-                        <span class="text-sm font-semibold" style="color: var(--secondary-ios);">
-                            ${quantity.toLocaleString('vi-VN')} <span class="opacity-70">món</span>
-                        </span>
-                    `;
-                    dailyItemStatsListEl.appendChild(li);
-                });
-            }
-        }
-
-        // PHẦN THÊM MỚI: HÀM THỐNG KÊ THEO BÀN
-        async function updateTableStats() {
-            const selectedTable = tableNameSelect.value;
-            const selectedDate = tableStatDate.value;
-
-            if (!selectedTable || !selectedDate) {
-                showCustomAlert('Vui lòng chọn cả bàn và ngày.');
-                return;
-            }
-
-            const payments = await fetchPayments();
-            const filteredPayments = payments.filter(p => p.tableName === selectedTable && p.date === selectedDate);
-
-            tableStatsBody.innerHTML = '';
-            let totalRevenue = 0;
-            const itemSummary = {};
-
-            if (filteredPayments.length === 0) {
-                tableResultBox.style.display = 'none';
-                noTableData.style.display = 'block';
-                noTableData.textContent = `Không tìm thấy dữ liệu cho ${selectedTable} vào ngày ${selectedDate}.`;
-                return;
-            }
-
-            filteredPayments.forEach(payment => {
-                totalRevenue += (payment.finalTotal || 0);
-                if (payment.items) {
-                    Object.values(payment.items).forEach(item => {
-                        const name = item.name.trim();
-                        if (itemSummary[name]) {
-                            itemSummary[name].quantity += item.quantity;
-                        } else {
-                            itemSummary[name] = {
-                                quantity: item.quantity,
-                                price: item.price
-                            };
-                        }
-                    });
-                }
-            });
-
-            Object.entries(itemSummary).forEach(([name, info]) => {
-                const row = document.createElement('tr');
-                row.className = 'border-b border-gray-100 dark:border-gray-800';
-                row.innerHTML = `
-                    <td class="py-2 px-2 text-sm">${name}</td>
-                    <td class="py-2 px-2 text-sm text-center font-semibold">${info.quantity}</td>
-                    <td class="py-2 px-2 text-sm text-right">${info.price.toLocaleString('vi-VN')}₫</td>
-                    <td class="py-2 px-2 text-sm text-right font-bold" style="color: var(--primary-ios);">${(info.price * info.quantity).toLocaleString('vi-VN')}₫</td>
-                `;
-                tableStatsBody.appendChild(row);
-            });
-
-            tableTotalRevenueEl.textContent = totalRevenue.toLocaleString('vi-VN') + '₫';
-            tableResultBox.style.display = 'block';
-            noTableData.style.display = 'none';
-        }
-
-       // Chỉ hiển thị bàn GRAB và bàn S
-function populateTableDropdown() {
-    tableNameSelect.innerHTML = '<option value="">-- Chọn bàn --</option>';
-    const fixedTables = ['GRAB', 'S']; // Chỉ định đích danh 2 bàn này
-    fixedTables.forEach(tableName => {
-        const option = document.createElement('option');
-        option.value = tableName;
-        option.textContent = tableName;
-        tableNameSelect.appendChild(option);
+        Object.keys(rawDailyData).forEach(iso => { const d = new Date(iso); weekdayData[d.getDay()].push(rawDailyData[iso]); });
+        const setA = (id, val) => {
+            const current = parseInt(document.getElementById(id).innerText.replace(/[^0-9]/g, '')) || 0;
+            animateValue(id, current, val, 1500);
+        };
+        setA('t-all', s.t); setA('t-cash', s.tc); setA('t-bank', s.tk); 
+        setA('w-all', s.w); setA('w-cash', s.wc); setA('w-bank', s.wk); 
+        setA('m-all', s.m); setA('m-cash', s.mc); setA('m-bank', s.mk); 
+        setA('a-all', s.a); setA('a-cash', s.ac); setA('a-bank', s.ak);
+        renderStats(itemCounts);
+        updateChart();
+        renderExtraCharts(hourRevenue, weekdayData);
+        updateHistory(document.getElementById('historyDate').value);
+        updateTableStats(document.getElementById('tableStatDate').value);
     });
-}
-        
-        // Hàm render/filter hóa đơn
-        function renderOrderRows(paymentsToRender) {
-            orderHistoryTableBody.innerHTML = '';
-            
-            if (paymentsToRender.length === 0) {
-                if (billSearchInput.value.trim() !== '' || billDateFilterInput.value.trim() !== '') {
-                    noFilteredData.style.display = 'block';
-                    noOrderData.style.display = 'none';
-                } else {
-                    noOrderData.style.display = 'block';
-                    noFilteredData.style.display = 'none';
-                }
-                return;
-            }
-            
-            noOrderData.style.display = 'none';
-            noFilteredData.style.display = 'none';
-
-            paymentsToRender.forEach(payment => {
-                const row = document.createElement('tr');
-                const dateObj = new Date(payment.timestamp);
-                // Định dạng ngày giờ: 20/10/2025 18:17
-                const formattedDate = dateObj.toLocaleDateString('vi-VN') + ' ' + dateObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
-                const formattedTotal = (payment.finalTotal || 0).toLocaleString('vi-VN') + '₫';
-                
-                // Xác định màu cho hình thức thanh toán (đã được chuẩn hóa ở fetchPayments)
-                let methodColor = 'var(--text-color)';
-                if (payment.paymentMethod === 'Tiền mặt') {
-                    methodColor = 'var(--cash-color)';
-                } else if (payment.paymentMethod === 'Chuyển khoản') {
-                    methodColor = 'var(--transfer-color)';
-                }
-
-                row.className = 'list-row';
-                row.innerHTML = `
-                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-medium" style="color: var(--primary-ios);">${payment.billId}</td>
-                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm hidden sm:table-cell opacity-70">${formattedDate}</td>
-                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-semibold" style="color: ${methodColor};">${payment.paymentMethod}</td> 
-                    <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-semibold" style="color: var(--danger-ios);">${formattedTotal}</td>
-                    <td class="py-3 px-2 md:px-4 text-right">
-                        <button class="view-details-btn btn-ios text-sm font-semibold px-3 py-1 rounded-full text-white" 
-                                data-key="${payment.key}"
-                                style="background-color: var(--primary-ios);">
-                            Xem
-                        </button>
-                    </td>
-                `;
-                orderHistoryTableBody.appendChild(row);
-            });
-        }
-        
-        async function updateOrderHistory(targetDate = TODAY) {
-            const payments = await fetchPayments();
-            
-            let paymentsToDisplay = payments;
-
-            if (targetDate) {
-                paymentsToDisplay = payments.filter(p => p.date === targetDate);
-            }
-            
-            // Sắp xếp giảm dần theo timestamp (mới nhất lên trên)
-            const sortedPayments = paymentsToDisplay.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            renderOrderRows(sortedPayments);
-            
-            if (targetDate) {
-                billDateFilterInput.value = targetDate;
-            } else {
-                billDateFilterInput.value = '';
-            }
-            
-            billSearchInput.value = '';
-            clearSearchButton.classList.add('hidden');
-        }
-        
-        function showAllOrders() {
-            billDateFilterInput.value = '';
-            billSearchInput.value = '';
-            clearSearchButton.classList.add('hidden');
-            
-            const sortedPayments = paymentsCache.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            renderOrderRows(sortedPayments);
-        }
-
-        function filterOrders() {
-            const searchTerm = billSearchInput.value.trim().toLowerCase();
-            const filterDate = billDateFilterInput.value;
-            
-            clearSearchButton.classList.toggle('hidden', searchTerm === '');
-
-            let filtered = paymentsCache;
-
-            if (filterDate) {
-                filtered = filtered.filter(payment => payment.date === filterDate);
-            }
-            
-            if (searchTerm !== '') {
-                filtered = filtered.filter(payment => 
-                    (payment.billId && payment.billId.toLowerCase().includes(searchTerm))
-                );
-            }
-
-            const sortedFiltered = filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            renderOrderRows(sortedFiltered);
-        }
-        
-        // --- 5. EVENT HANDLERS & MODALS (Cập nhật modal và lọc theo khoảng thời gian) ---
-        
-        billSearchInput.addEventListener('input', filterOrders);
-        
-        clearSearchButton.addEventListener('click', () => {
-            billSearchInput.value = '';
-            filterOrders();
-            billSearchInput.focus();
+    function renderExtraCharts(hours, weekdays) {
+        if(hourChartObj) hourChartObj.destroy();
+        if(weekdayChartObj) weekdayChartObj.destroy();
+        const ctxH = document.getElementById('hourChart').getContext('2d');
+        const gradH = ctxH.createLinearGradient(0, 0, 0, 300); gradH.addColorStop(0, 'rgba(56, 189, 248, 0.4)'); gradH.addColorStop(1, 'rgba(56, 189, 248, 0)');
+        const hLabels = Array.from({length: 13}, (_, i) => (i + 10) + 'h');
+        const hData = hours.slice(10, 23);
+        const maxVal = Math.max(...hData), minVal = Math.min(...hData.filter(v => v > 0) || [0]);
+        hourChartObj = new Chart(ctxH, {
+            type: 'line',
+            data: { labels: hLabels, datasets: [{ data: hData, borderColor: '#38bdf8', backgroundColor: gradH, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#38bdf8' }] },
+            plugins: [ChartDataLabels],
+            options: { layout: { padding: { top: 25 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#fff', font: { weight: '800', size: 10 }, formatter: (v) => (v === maxVal || v === minVal) ? (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v) : null } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
         });
-
-        billDateFilterInput.addEventListener('change', filterOrders);
-        
-        showAllOrdersButton.addEventListener('click', showAllOrders);
-
-        orderHistoryTableBody.addEventListener('click', async (event) => {
-            if (event.target.classList.contains('view-details-btn')) {
-                const orderKey = event.target.dataset.key;
-                const selectedPayment = paymentsCache.find(p => p.key === orderKey);
-                
-                if (selectedPayment) {
-                    showOrderDetails(selectedPayment);
-                } else {
-                    showCustomAlert('Lỗi: Không tìm thấy chi tiết hóa đơn này trong bộ nhớ cache.');
-                }
+        const wLabels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        const wData = [0,1,2,3,4,5,6].map(i => weekdays[i].length ? (weekdays[i].reduce((a,b)=>a+b,0)/weekdays[i].length) : 0);
+        weekdayChartObj = new Chart(document.getElementById('weekdayChart'), {
+            type: 'bar',
+            data: { labels: wLabels, datasets: [{ data: wData, backgroundColor: '#4ade80', borderRadius: 6 }] },
+            plugins: [ChartDataLabels],
+            options: { plugins: { legend: { display: false }, datalabels: { formatter: v => v > 0 ? (v/1000).toFixed(0)+'k' : '', color: '#fff', font: {size: 10, weight:'bold'}, align: 'top' } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+        });
+    }
+    function renderStats(counts) {
+        const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+        const foodKeywords = ['cơm', 'bún', 'phở', 'mì', 'lẩu', 'gà', 'bò', 'heo', 'vịt', 'mẹt', 'nem', 'khoai', 'ngô', 'salad', 'bánh', 'trứng'];
+        let food = sorted.filter(item => foodKeywords.some(k => item[0].toLowerCase().includes(k)));
+        let drink = sorted.filter(item => !foodKeywords.some(k => item[0].toLowerCase().includes(k)));
+        const fill = (id, arr) => document.querySelector(`#${id} tbody`).innerHTML = arr.map(x => `<tr style="animation: scaleIn 0.3s ease forwards"><td style="color:var(--text-main)">${x[0]}</td><td style="text-align:right; font-weight:800; color:var(--success)">${x[1]}</td></tr>`).join('');
+        fill('topFood', food.slice(0, 10)); fill('topDrink', drink.slice(0, 10));
+        document.querySelector(`#bottomSales tbody`).innerHTML = sorted.slice(-10).reverse().map(x => `<tr style="animation: scaleIn 0.3s ease forwards"><td style="color:var(--text-main)">${x[0]}</td><td style="text-align:right; font-weight:800; color:var(--danger)">${x[1]}</td></tr>`).join('');
+    }
+    function updateChart(start = null, end = null) {
+        let filteredKeys = Object.keys(rawDailyData).sort();
+        if (start && end) filteredKeys = filteredKeys.filter(k => k >= start && k <= end);
+        else { const limit = new Date(); limit.setDate(limit.getDate() - 7); filteredKeys = filteredKeys.filter(k => k >= limit.toISOString().split('T')[0]); }
+        if(chartObj) chartObj.destroy();
+        const ctx = document.getElementById('dailyChart').getContext('2d');
+        const grad = ctx.createLinearGradient(0, 0, 0, 300); grad.addColorStop(0, 'rgba(56, 189, 248, 0.4)'); grad.addColorStop(1, 'rgba(15, 23, 42, 0)');
+        chartObj = new Chart(ctx, {
+            type: 'line',
+            data: { labels: filteredKeys.map(k => k.split('-').reverse().join('/')), datasets: [{ data: filteredKeys.map(k => rawDailyData[k]), borderColor: '#38bdf8', backgroundColor: grad, fill: true, tension: 0.4, pointRadius: 5, pointHoverRadius: 8 }] },
+            plugins: [ChartDataLabels],
+            options: { layout: { padding: { top: 25 } }, plugins: { datalabels: { anchor: 'end', align: 'top', color: '#38bdf8', font: { weight: 'bold' }, formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v }, legend: { display: false } }, scales: { y: { display: false }, x: { grid: { color: 'rgba(255,255,255,0.05)' } } } }
+        });
+    }
+    function updateHistory(targetDate) {
+        const tbody = document.querySelector("#orderTable tbody"); tbody.innerHTML = "";
+        Object.keys(allData).sort((a,b)=>allData[b].timestamp - allData[a].timestamp).forEach(key => {
+            const o = allData[key], d = new Date(o.timestamp);
+            if(d.toISOString().split('T')[0] === targetDate) {
+                tbody.innerHTML += `<tr style="animation: scaleIn 0.3s ease both"><td><b style="color:var(--text-main)">Bàn ${o.tableName||'--'}</b><br><small style="color:var(--text-dim)">${d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}</small></td><td style="color:var(--text-dim)">${o.paymentMethod||'TM'}</td><td style="font-weight:800; color:var(--accent)">${(o.finalTotal||0).toLocaleString()}</td><td><button class="btn-detail" onclick="showDetail('${key}')"><i class="ph ph-eye"></i></button></td></tr>`;
             }
         });
-
-        function showOrderDetails(payment) {
-            modalBillIdEl.textContent = payment.billId;
-            // Định dạng ngày giờ: 20/10/2025 18:17:35
-            modalDateEl.textContent = new Date(payment.timestamp).toLocaleString('vi-VN'); 
-            modalPaymentMethodEl.textContent = payment.paymentMethod; // Thêm trường mới
-            modalTotalEl.textContent = (payment.finalTotal || 0).toLocaleString('vi-VN') + '₫';
-            
-            modalItemsListEl.innerHTML = '';
-            if (payment.items) {
-                // Sắp xếp items theo thứ tự trong object hoặc key nếu cần
-                Object.values(payment.items).forEach(item => {
-                    const li = document.createElement('li');
-                    li.className = 'flex justify-between py-2 text-sm';
-                    li.innerHTML = `
-                        <span class="opacity-80">${item.name} x <span class="font-bold" style="color: var(--primary-ios);">${item.quantity}</span></span>
-                        <span class="font-medium">${(item.price * item.quantity).toLocaleString('vi-VN')}₫</span>
-                    `;
-                    modalItemsListEl.appendChild(li);
-                });
-            }
-            
-            orderModal.classList.add('open', 'opacity-100', 'pointer-events-auto');
-            orderModal.classList.remove('opacity-0', 'pointer-events-none');
-        }
-        
-        function hideModal() {
-            orderModal.classList.add('opacity-0', 'pointer-events-none');
-            orderModal.classList.remove('open', 'opacity-100', 'pointer-events-auto');
-        }
-        
-        closeModalButton.addEventListener('click', hideModal);
-
-        window.addEventListener('click', (event) => {
-            if (event.target === orderModal) {
-                hideModal();
+    }
+    function updateTableStats(targetDate) {
+        const container = document.getElementById('tableStatsContainer'); container.innerHTML = "";
+        let tableData = {}; const targets = ["S", "GRAB"];
+        Object.values(allData).forEach(o => {
+            if(new Date(o.timestamp).toISOString().split('T')[0] === targetDate && targets.includes((o.tableName||"").toUpperCase())) {
+                const t = o.tableName.toUpperCase(); if(!tableData[t]) tableData[t] = { total: 0, items: {} };
+                tableData[t].total += o.finalTotal; if(o.items) o.items.forEach(i => i && (tableData[t].items[i.name] = (tableData[t].items[i.name] || 0) + i.quantity));
             }
         });
-
-        // Cập nhật logic lọc theo khoảng thời gian (Doanh thu)
-        filterStatsButton.addEventListener('click', async () => {
-            const startDate = startDateInput.value;
-            const endDate = endDateInput.value;
-            
-            if (startDate && endDate) {
-                const payments = await fetchPayments(); 
-                // Lọc bao gồm cả ngày bắt đầu và ngày kết thúc
-                const filteredPayments = payments.filter(p => p.date >= startDate && p.date <= endDate);
-                
-                const stats = calculateRevenueByMethod(filteredPayments);
-
-                filteredRevenueEl.textContent = stats.total.toLocaleString('vi-VN') + '₫';
-                filteredCashEl.textContent = stats.cash.toLocaleString('vi-VN') + '₫'; // Cập nhật tiền mặt
-                filteredTransferEl.textContent = stats.transfer.toLocaleString('vi-VN') + '₫'; // Cập nhật chuyển khoản
-                
-                filteredRevenueBox.style.display = 'block';
-                filteredRevenueBox.classList.add('active'); 
-                
-            } else {
-                showCustomAlert('Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.'); 
-            }
-        });
-        
-        // PHẦN ĐIỀU CHỈNH: Event listener cho nút thống kê món bán (Chỉ dùng một input)
-        filterItemStatsButton.addEventListener('click', updateDailyItemStats);
-
-        // EVENT LISTENER PHẦN THÊM MỚI
-        filterTableStatsButton.addEventListener('click', updateTableStats);
-        
-        // --- 6. INITIAL LOAD ---
-        
-       // --- 6. INITIAL LOAD ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadTheme();
-            updateTotalRevenueAllTime(); 
-            updateTotalRevenueDetails(); 
-            updateSummaryStats();
-            update30DayChart();
-            updateHourlyRevenueChart(); 
-            updateWeeklyDayRevenueChart(); 
-            updateTopSellingItems();
-            
-            fetchPayments().then(() => {
-                // 1. Mặc định ngày hiện tại cho lịch sử đơn hàng
-                updateOrderHistory(TODAY); 
-
-                // 2. Thiết lập mặc định ngày hiện tại cho ô nhập ngày thống kê bàn
-                if(tableStatDate) tableStatDate.value = TODAY;
-
-                // 3. Xóa các bàn khác, chỉ giữ lại GRAB và S trong dropdown
-                if(tableNameSelect) {
-                    tableNameSelect.innerHTML = `
-                        <option value="GRAB">GRAB</option>
-                        <option value="S">Bàn S</option>
-                    `;
-                    // 4. Tự động chọn sẵn bàn GRAB và hiển thị dữ liệu ngay lập tức
-                    tableNameSelect.value = "GRAB";
-                    updateTableStats(); 
-                }
-            });
-            
-            setupScrollAnimations();
-        });
-    </script>
+        targets.forEach(t => { if(tableData[t]) { let items = Object.entries(tableData[t].items).map(x => `<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-dim);margin:4px 0;"><span>${x[0]}</span><b style="color:var(--text-main)">x${x[1]}</b></div>`).join(''); container.innerHTML += `<div class="table-stat-card"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><b style="font-size:16px;">Bàn ${t}</b><b style="color:var(--success); font-size:16px;">${tableData[t].total.toLocaleString()}đ</b></div><div style="border-top:1px solid var(--glass-border);padding-top:12px">${items}</div></div>`; } });
+    }
+    document.getElementById('startDate').onchange = () => { if(document.getElementById('startDate').value && document.getElementById('endDate').value) updateChart(document.getElementById('startDate').value, document.getElementById('endDate').value); };
+    document.getElementById('endDate').onchange = () => { if(document.getElementById('startDate').value && document.getElementById('endDate').value) updateChart(document.getElementById('startDate').value, document.getElementById('endDate').value); };
+    document.getElementById('btnReset').onclick = () => { document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; updateChart(); };
+    document.getElementById('historyDate').onchange = (e) => updateHistory(e.target.value);
+    document.getElementById('tableStatDate').onchange = (e) => updateTableStats(e.target.value);
+    window.showDetail = (id) => {
+        const o = allData[id]; let h = `<div style="background:rgba(255,255,255,0.03); border-radius:20px; padding:20px; margin-top:10px; border:1px solid var(--glass-border);"><p style="font-size:18px; font-weight:800;">Bàn: ${o.tableName}</p>`;
+        if(o.items) o.items.forEach(i => i && (h += `<div style="display:flex; justify-content:space-between; margin:10px 0; color:var(--text-dim)"><span>${i.name} x${i.quantity}</span><b style="color:var(--text-main)">${(i.price*i.quantity).toLocaleString()}đ</b></div>`));
+        document.getElementById('modal-body').innerHTML = h + `<hr style="border:0; border-top:1px solid var(--glass-border); margin:20px 0;"><div style="text-align:right; font-weight:800; font-size:22px; color:var(--success);">Tổng: ${o.finalTotal.toLocaleString()}đ</div></div>`;
+        const modal = document.getElementById('modal'); modal.style.display = 'flex'; modal.style.opacity = '1';
+    };
+    window.closeModal = (e) => { const modal = document.getElementById('modal'); modal.style.opacity = '0'; setTimeout(() => { modal.style.display = 'none'; }, 300); };
+    const tday = new Date().toISOString().split('T')[0]; document.getElementById('historyDate').value = tday; document.getElementById('tableStatDate').value = tday;
+</script>
 </body>
 </html>
